@@ -31,13 +31,14 @@
 | Q5 | In every C4F6/Ar mixture Ar+ was dominant. CF+ was the largest fluorocarbon ion, followed by CF2+; SiFx+/COFx+ etch-byproduct ions were also substantial. | Directly invalidates a single-projectile aggregate-ion closure and gives a target for a C4F6 reactor model. The byproduct-ion signal also proves two-way plasma/surface coupling in this apparatus. |
 | Q6 | CF+ and CF2+ rose nearly proportionally from 25% to 75% C4F6 and then leveled, whereas CF3+ continued to rise; the total ion current decreased slowly with C4F6 fraction. | Ion composition is nonlinear in feed fraction. A feed-ratio interpolation is not a species-resolved boundary model. |
 | Q7 | The measured IEDs were double peaked and mass dependent. C4F6 concentration increased the inferred plasma-potential oscillation amplitude. | Species identity, energy distribution, electronegativity, and sheath dynamics are coupled; one species-independent IEAD is not fundamental. |
-| Q8 | The submillimeter diagnostic found the CF2 density to be approximately ten times CF, while COF2 was comparable to CF. It reports relative radical densities, not an absolute stable-C4F6 parent flux. | This is a quantitative neutral-composition constraint for the direct-plus-secondary ion-source model. It still does not supply the stable-parent wafer flux or C4F6/ion surface co-incidence law needed for Krüger depth. |
+| Q8 | The submillimeter diagnostic found CF2 substantially above CF and COF2 comparable to CF. At 5 sccm and 1.33 Pa, Figure 14(a) shows CF2/CF rising with C4F6 fraction; the authors warn that the cooler outside-plasma path and surface-produced CF2 probably make this line-of-sight ratio larger than the local in-plasma ratio. | This is a condition-dependent neutral-composition constraint, not a universal ratio or absolute stable-C4F6 parent flux. It still does not supply the stable-parent wafer flux or C4F6/ion surface co-incidence law needed for Krüger depth. |
 | Q9 | The checksum-bound Figure-9 digitization gives total positive-ion current `0.2644, 0.2164, 0.2012, 0.1557 mA/cm2` at `25, 50, 75, 100%` C4F6. CF+ rises `0.01319 -> 0.03153`, CF2+ rises `0.006133 -> 0.01752`, and CF3+ rises `0.002390 -> 0.008994 mA/cm2`; Ar+ falls `0.2067 -> 0.06973 mA/cm2` through 75% and is not plotted at 100%. | `BENCK-2003-C4F6-FIG9-ION-CURRENT-R1`; quantitative held-out target for a C4F6 reactor provider, retaining 10.1% digitization and 20% transmission uncertainties separately. |
 | Q10 | The checksum-bound Figure-10 digitization gives total current `0.2343, 0.2159, 0.1747 mA/cm2` at `0.67, 1.33, 2.66 Pa` for 50/50 C4F6/Ar and 200 W. Ar+ falls `0.1302 -> 0.07983`, CF+ falls `0.03192 -> 0.01410`, and CF2+ falls `0.01797 -> 0.007320 mA/cm2`; CF3+ is nonmonotonic (`0.005593, 0.004765, 0.005475`). The independently drawn 1.33-Pa points agree with the Figure-9 50%-C4F6 column within 3.53% across all five retained series. | `BENCK-2003-C4F6-FIG10-PRESSURE-ION-CURRENT-R1`; held-out pressure-response target and independent-panel digitization cross-check. The 3.53% agreement does not create a second experiment. |
+| Q11 | The checksum-bound 5 sccm Figure-14(a) digitization gives CF2/CF `10.88, 13.74, 15.32, 17.00` at `25, 50, 75, 100%` C4F6. The source says the ratio rises approximately 10 to 16 and that increasing flow raises it. Its plotted fit bars are not true statistical uncertainty. | `BENCK-2003-C4F6-FIG14A-CF2-CF-R1`; co-conditioned neutral-ratio input for a model-form audit. It is not an exact local-density gate and the 10 sccm series is not mixed into the 5 sccm ion board. |
 
 ## Vision audit and use
 
-Figures 9 and 10 were inspected at the original 600 dpi render. The log
+Figures 9, 10, and 14(a) were inspected at the original 600 dpi render. The log
 ordinate is positive-ion current density in `mA/cm2`. Checksum-bound 19-point
 and 15-point tables retain the unambiguous total, Ar+, CF+, CF2+, and CF3+
 glyph centers. The major log-axis ticks and all full-page marker pixels replay
@@ -45,6 +46,9 @@ through `scripts/digitize_benck_2003_figure9.py` and
 `scripts/digitize_benck_2003_figure10.py`. Both original-resolution color
 overlays were visually reconciled. Overlapping C/F/Cx and SiFx/COFx glyphs
 are excluded rather than guessed, and source pixels are not redistributed.
+Figure 14(a)'s four filled markers replay through
+`scripts/digitize_benck_2003_figure14.py`; its 2D affine axis calibration
+removes the visible scan rotation rather than misreading it as a density trend.
 
 The Figure-10 pressure board adds a genuinely independent response axis for a
 future reactor model. Its same-condition reconciliation with Figure 9 is

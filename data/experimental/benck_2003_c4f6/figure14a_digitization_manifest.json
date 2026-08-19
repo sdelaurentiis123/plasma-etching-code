@@ -1,0 +1,102 @@
+{
+  "manifest_id": "BENCK-2003-C4F6-FIG14A-CF2-CF-R1",
+  "source": {
+    "citation": "E. C. Benck, A. Goyette, and Y. Wang, Journal of Applied Physics 94, 1382-1389 (2003)",
+    "doi": "10.1063/1.1586978",
+    "pdf_sha256": "96ef064afb0f804d3d853adcc275a63cd52507b0ea7e39f921d6cf6209e86d08",
+    "pdf_page": 8,
+    "print_page": 1389,
+    "figure": "Figure 14(a)",
+    "render_dpi": 600,
+    "rendered_page_sha256": "cba82d310e6da875d397839fb489405900338fb2f691bce6227f49d2805bddee",
+    "rendered_page_size_px": [
+      5192,
+      6745
+    ],
+    "redistribution": "source pixels are not committed; the scan carries an AIP redistribution notice"
+  },
+  "experiment": {
+    "reactor": "modified inductively coupled GEC reference cell",
+    "pressure_Pa": 1.33,
+    "power_W": 200.0,
+    "flow_sccm": 5.0,
+    "series": "filled circles",
+    "observable": "line-of-sight neutral CF2/CF density ratio",
+    "paper_caution": "the diagnostic overweights cooler outside-plasma path and surface-produced CF2; the in-plasma ratio is probably lower"
+  },
+  "pixel_calibration": {
+    "full_page_left_x_px": 925.5,
+    "full_page_right_x_px": 2429.5,
+    "full_page_left_y_major_tick_px": [
+      1729.5,
+      1545.5,
+      1361.5,
+      1177.5,
+      993.5,
+      813.5
+    ],
+    "full_page_right_y_major_tick_px": [
+      1719.5,
+      1537.5,
+      1353.5,
+      1169.5,
+      985.5,
+      805.5
+    ],
+    "CF2_CF_at_major_ticks": [
+      0.0,
+      4.0,
+      8.0,
+      12.0,
+      16.0,
+      20.0
+    ],
+    "ratio_intercept": 37.83148923245478,
+    "ratio_per_vertical_pixel": -0.021823575471639253,
+    "ratio_per_horizontal_pixel_scan_tilt": -0.00012091963359729097,
+    "left_major_tick_replay": [
+      -0.024295666639604252,
+      3.991242220142018,
+      8.00678010692364,
+      12.022317993705263,
+      16.03785588048689,
+      19.966099465381955
+    ],
+    "right_major_tick_replay": [
+      0.012076959146466115,
+      3.9839676949848095,
+      7.999505581766432,
+      12.015043468548054,
+      16.030581355329677,
+      19.95882494022474
+    ],
+    "axis_fit": "least-squares 2D affine fit to twelve linear-axis ticks; horizontal term removes scan rotation"
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy dark-pixel axis and filled-marker localization; original-resolution visual audit",
+    "retained_series": "5 sccm filled circles",
+    "excluded_series": "10 sccm open circles retained as qualitative flow sensitivity and not mixed with the 5 sccm ion board",
+    "vertical_pixel_allowance": 12.0,
+    "digitization_absolute_bound": 0.27,
+    "plotted_error_bars_are_statistical_uncertainty": false,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "derived_checks": {
+    "point_count": 4,
+    "ratio_increases_from_25_to_100_percent": true,
+    "source_text_approximate_endpoint_range": "10 to 16"
+  },
+  "claim_boundary": {
+    "valid": "condition-resolved neutral-ratio constraint for the same Benck 5 sccm feed board",
+    "not_valid": [
+      "an absolute CF or CF2 density",
+      "a stable C4F6 parent density",
+      "a volume-local in-plasma ratio without line-of-sight bias",
+      "a Krueger boundary or feature-depth coefficient"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/benck_2003_c4f6/figure14a_cf2_cf_feed_ratio.csv",
+    "sha256": "1cf6e8afa49c050d1957ce2fc43d33df1cf3977293558f8a4793fe2ef7815270"
+  }
+}

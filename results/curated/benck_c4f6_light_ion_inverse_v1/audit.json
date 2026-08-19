@@ -1,0 +1,436 @@
+{
+  "calibration_firewall": {
+    "absolute_current_scale_used": false,
+    "feature_depth_used": false,
+    "krueger_825_nm_used": false,
+    "reaction_parameter_fitted": false
+  },
+  "certification": {
+    "identifies_unique_missing_operator": false,
+    "supports_absolute_reactor_flux": false,
+    "supports_common_loss_falsification": true,
+    "supports_feature_depth": false,
+    "supports_krueger_boundary": false,
+    "supports_steady_reactor_composition": false
+  },
+  "conditions": [
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 25.0,
+      "half_line_of_sight_CF2_CF_ratio_sensitivity": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 8.504581996303015e-15,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 82.52964518502405,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -3.1687023435419865,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 5.998324887389441e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 58.976492481717386,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": -3.057900468278124,
+          "ratio_replay_absolute_error": 2.7755575615628914e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.6178053468214737e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 46.627882934343866,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": -2.689888814030648,
+          "ratio_replay_absolute_error": 0.0
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 2.9719388034438206e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 38.99878186189,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": -2.339734911673352,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 4.4998915507754737e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 33.80633172302431,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": -2.036147635205593,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        }
+      ],
+      "inversions": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.7465008788322987e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 169.48287159559382,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -6.756418346987311,
+          "ratio_replay_absolute_error": 0.0
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.2333540421104809e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 121.26534783860558,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": -6.61717973214058,
+          "ratio_replay_absolute_error": 0.0
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 3.3298417024535054e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 95.9716627200836,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": -5.927271988888031,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 6.120392251307764e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 80.31384833407971,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": -5.259639537459733,
+          "ratio_replay_absolute_error": 0.0
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 9.269459930078135e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 69.63866434414408,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": -4.67956567779602,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        }
+      ],
+      "measured_CF2+_to_CF+": 0.46497158643402575,
+      "measured_CF3+_to_CF+": 0.181228030361552,
+      "neutral_nCF2_to_nCF": 10.8767752,
+      "nonnegative_solution_exists_on_declared_temperature_grid": false,
+      "nonnegative_solution_exists_when_CF2_CF_ratio_is_halved": false,
+      "pressure_Pa": 1.33
+    },
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 50.0,
+      "half_line_of_sight_CF2_CF_ratio_sensitivity": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 8.908388596020339e-15,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 86.44824052722062,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -2.034395306875618,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 6.394430238432109e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 62.87106383227037,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": -1.75659725461178,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.754930281527066e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 50.58005518757198,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": -1.331397559437944,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 3.269248689868105e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 42.90018231892776,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": -0.9332975497659695,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 5.004663860878801e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 37.598534261107616,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": -0.5738155432727,
+          "ratio_replay_absolute_error": 0.0
+        }
+      ],
+      "inversions": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.825985964785518e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 177.1962147605747,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -4.4742184963362455,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.3123843557193114e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 129.03573504483685,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": -4.0112111057288,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 3.605536097152189e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 103.91764088545528,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": -3.2204901166915687,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 6.720732179941916e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 88.1917110587953,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": -2.4702162023587473,
+          "ratio_replay_absolute_error": 2.7755575615628914e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.0291425266922948e-12,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 77.31638252845325,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": -1.7906784644747773,
+          "ratio_replay_absolute_error": 0.0
+        }
+      ],
+      "measured_CF2+_to_CF+": 0.541970792831304,
+      "measured_CF3+_to_CF+": 0.21977430785128338,
+      "neutral_nCF2_to_nCF": 13.7357134,
+      "nonnegative_solution_exists_on_declared_temperature_grid": false,
+      "nonnegative_solution_exists_when_CF2_CF_ratio_is_halved": false,
+      "pressure_Pa": 1.33
+    },
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 75.0,
+      "half_line_of_sight_CF2_CF_ratio_sensitivity": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 9.914096146842488e-15,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 96.20776631759249,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -2.2274106773112536,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 7.122778052151483e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 70.03229637074176,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": -1.9187320733310331,
+          "ratio_replay_absolute_error": 2.7755575615628914e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.9565415385100594e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 56.390832180810776,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": -1.4499340609487141,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 3.6472954721993345e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 47.861039514453026,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": -1.0105730054702953,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 5.586244066669286e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 41.967771416858554,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": -0.6130555001096081,
+          "ratio_replay_absolute_error": 2.7755575615628914e-17
+        }
+      ],
+      "inversions": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 2.0270829021380485e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 196.71094093372926,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -4.859726543955194,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.4580471665356902e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 143.35753626143747,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": -4.335347813296836,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 4.008810241097885e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 115.5406829351628,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": -3.4579771231146204,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 7.477031227468052e-13,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 98.11612186518508,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": -2.6257401178468442,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.14550324623117e-12,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 86.0582133923173,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": -1.8706702728532525,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        }
+      ],
+      "measured_CF2+_to_CF+": 0.5452331559194098,
+      "measured_CF3+_to_CF+": 0.22162862259811805,
+      "neutral_nCF2_to_nCF": 15.3246888,
+      "nonnegative_solution_exists_on_declared_temperature_grid": false,
+      "nonnegative_solution_exists_when_CF2_CF_ratio_is_halved": false,
+      "pressure_Pa": 1.33
+    },
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 100.0,
+      "half_line_of_sight_CF2_CF_ratio_sensitivity": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.0914356455310149e-14,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 105.91443131140218,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": 0.01338275580248663,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 8.054861921851221e-14,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 79.19669449283161,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": 0.6901737737743876,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 2.274170048870468e-13,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 65.54542239575429,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": 1.3224216605162211,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 4.344581506515478e-13,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 57.01106168722677,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": 1.8934285564573479,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 6.800324347147231e-13,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 51.08879138747244,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": 2.4264702005642116,
+          "ratio_replay_absolute_error": 0.0
+        }
+      ],
+      "inversions": [
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 2.227066429677839e-14,
+          "all_inferred_densities_nonnegative": false,
+          "conditional_nC4F6_to_nCF": 216.117620271859,
+          "electron_temperature_eV": 2.0,
+          "inferred_nCF3_to_nCF": -0.36479532381674107,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.6444783090248774e-13,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 161.68774524442696,
+          "electron_temperature_eV": 3.0,
+          "inferred_nCF3_to_nCF": 0.8859522156435912,
+          "ratio_replay_absolute_error": 0.0
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 4.64371738678609e-13,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 133.83977937559195,
+          "electron_temperature_eV": 4.0,
+          "inferred_nCF3_to_nCF": 2.07556316080658,
+          "ratio_replay_absolute_error": 0.0
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 8.86916252457668e-13,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 116.38413758480138,
+          "electron_temperature_eV": 5.0,
+          "inferred_nCF3_to_nCF": 3.155354445814517,
+          "ratio_replay_absolute_error": 1.1102230246251565e-16
+        },
+        {
+          "aggregate_parent_source_per_ne_nCF_m3_s": 1.3875479164277584e-12,
+          "all_inferred_densities_nonnegative": true,
+          "conditional_nC4F6_to_nCF": 104.24230143116293,
+          "electron_temperature_eV": 6.0,
+          "inferred_nCF3_to_nCF": 4.165666833747529,
+          "ratio_replay_absolute_error": 5.551115123125783e-17
+        }
+      ],
+      "measured_CF2+_to_CF+": 0.5555829402976316,
+      "measured_CF3+_to_CF+": 0.28527742154141345,
+      "neutral_nCF2_to_nCF": 16.9968719,
+      "nonnegative_solution_exists_on_declared_temperature_grid": true,
+      "nonnegative_solution_exists_when_CF2_CF_ratio_is_halved": true,
+      "pressure_Pa": 1.33
+    }
+  ],
+  "declared_assumptions": {
+    "direct_parent_branching": "NIST 70 eV EI branching prior",
+    "electron_temperature_grid_eV": [
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0
+    ],
+    "neutral_nCF2_to_nCF": "condition-resolved 5 sccm Figure-14a filled-circle series",
+    "neutral_ratio_evidence": "Benck et al. submillimeter diagnostic; line-of-sight ratio increases with C4F6 feed and probably exceeds the local in-plasma ratio",
+    "parent_ionization_rate": "Lan--Jeon aggregate Qi replay",
+    "secondary_ionization": "NIST measured CF/CF2/CF3 curves",
+    "wall_current_mapping": "common linear transport/loss factor for CF+, CF2+, CF3+"
+  },
+  "diagnostics": {
+    "ar_containing_condition_count": 3,
+    "ar_containing_conditions_with_nonnegative_solution": 0,
+    "ar_containing_conditions_with_nonnegative_solution_when_CF2_CF_ratio_is_halved": 0,
+    "condition_count": 4,
+    "maximum_ratio_replay_absolute_error": 1.1102230246251565e-16
+  },
+  "physics_decision": {
+    "common_loss_source_only_closure_is_adequate": false,
+    "interpretation": "All three Ar-containing feed conditions have no nonnegative solution anywhere on the declared Te grid under the tested common-loss closure, and this remains true when every line-of-sight CF2/CF ratio is halved. The closure is rejected on the co-conditioned ion and neutral feed board.",
+    "negative_density_is_accepted_as_physical": false,
+    "negative_density_is_clipped": false,
+    "required_next_operators": [
+      "species- and mass-dependent Bohm/wall/exhaust loss",
+      "ion-neutral conversion and charge exchange",
+      "heavy-primary fragmentation cascades",
+      "surface-product return and byproduct-ion formation"
+    ]
+  },
+  "question": "Can direct C4F6 branching plus measured CFx secondary ionization map to Benck light-ion currents through one common loss operator?",
+  "schema": "petch.benck-c4f6-light-ion-inverse.v1",
+  "sources": {
+    "benck_feed_csv_sha256": "40ae5a1355eb12cd6cdb72961e7719a5a4b30b73a994ba669f80f7de4e747d25",
+    "benck_neutral_ratio_csv_sha256": "1cf6e8afa49c050d1957ce2fc43d33df1cf3977293558f8a4793fe2ef7815270",
+    "benck_neutral_ratio_manifest_sha256": "a820548f2268b6772219d62a344e081ada436703ca80ff094cfa5a501bcbd243",
+    "nist_direct_spectrum_sha256": "2115e1a887f53fcc99423ab81fee94fde461f00c2e0da30ac188e95748c7a665"
+  }
+}

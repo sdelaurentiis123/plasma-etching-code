@@ -1,7 +1,8 @@
 # Benck 2003 C4F6/Ar mass-resolved ion-current board
 
 This directory digitizes the five unambiguous reactor-boundary series in
-Figures 9 and 10 of Benck, Goyette, and Wang, *Journal of Applied Physics*
+Figures 9 and 10 and the 5 sccm CF2/CF neutral-ratio series in Figure 14(a) of
+Benck, Goyette, and Wang, *Journal of Applied Physics*
 **94**, 1382–1389 (2003), DOI `10.1063/1.1586978`: total positive-ion current
 and the Ar+, CF+, CF2+, and CF3+ components. Figure 9 sweeps 25–100% C4F6 at
 1.33 Pa; Figure 10 sweeps 0.67–2.66 Pa at 50% C4F6.
@@ -25,6 +26,12 @@ python scripts/digitize_benck_2003_figure10.py \
   --source-pdf /path/to/benck_2003_c4f6.pdf \
   --render /tmp/benck_page6.png \
   --overlay /tmp/benck_figure10_overlay.png
+pdftoppm -f 8 -l 8 -singlefile -png -r 600 \
+  /path/to/benck_2003_c4f6.pdf /tmp/benck_page8
+python scripts/digitize_benck_2003_figure14.py \
+  --source-pdf /path/to/benck_2003_c4f6.pdf \
+  --render /tmp/benck_page8.png \
+  --overlay /tmp/benck_figure14_overlay.png
 ```
 
 Both overlays were inspected at original resolution. Overlapping C/F/Cx and
@@ -39,6 +46,14 @@ represent the same condition. Their five retained currents reconcile within
 3.53%, below either panel's conservative 10.2% digitization bound. This checks
 the pixel extraction, not a second physical experiment, so it is not counted
 as an independent validation case.
+
+Figure 14(a)'s filled 5 sccm series gives CF2/CF = 10.88, 13.74, 15.32,
+and 17.00 at 25, 50, 75, and 100% C4F6 after a scan-tilt-corrected 2D pixel
+calibration. These are line-of-sight ratios, not volume-local plasma
+densities: the paper explicitly warns that the cooler outside-plasma path and
+surface-produced CF2 probably make the in-plasma ratio smaller. The plotted
+fit bars are also not true statistical uncertainties. Those boundaries are
+retained rather than treating the ratios as exact local state measurements.
 
 Together these are the strongest quantitative ion-side targets in the library
 for a C4F6 reactor provider. It is not transplanted into Krüger: Benck used a
