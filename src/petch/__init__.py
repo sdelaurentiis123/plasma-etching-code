@@ -14,8 +14,10 @@ from .metrics import ours_profile, depth_centre, center_depth
 from .surface_kinetics import (
     EnergeticFlux, EnergeticYield, FaceResolvedEnergeticFlux,
     LowEnergyActivationYield, ParameterEvidence,
-    ReducedSiO2FluorocarbonMechanism, ReducedSiO2FluorocarbonParameters,
-    SiO2SurfaceState, SteinbruchelYield, SurfaceFluxes,
+    FluorinatedOxideSurfaceState, ReducedFluorinatedOxideMechanism,
+    ReducedFluorinatedOxideParameters, ReducedSiO2FluorocarbonMechanism,
+    ReducedSiO2FluorocarbonParameters, SiO2SurfaceState, SteinbruchelYield,
+    SurfaceFluxes,
 )
 from .fluorocarbon_lamagna import (
     LaMagnaFluorocarbonParameters, LaMagnaFluorocarbonState,
@@ -330,8 +332,9 @@ __all__ = [
     "SteinbruchelYield",
     "LaMagnaFluorocarbonParameters", "LaMagnaFluorocarbonState",
     "LaMagnaFluorocarbonStepResult", "LaMagnaGarozzoFluorocarbonMechanism",
-    "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
-    "SiO2SurfaceState", "SurfaceFluxes",
+    "FluorinatedOxideSurfaceState", "ReducedFluorinatedOxideMechanism",
+    "ReducedFluorinatedOxideParameters", "ReducedSiO2FluorocarbonMechanism",
+    "ReducedSiO2FluorocarbonParameters", "SiO2SurfaceState", "SurfaceFluxes",
     "BoundaryTransport3DResult", "ChargedSurfaceReimpactPopulation3D",
     "average_boundary_transport_results_3d",
     "merge_boundary_transport_results_3d", "trace_charged_surface_events_field_3d",

@@ -544,6 +544,8 @@ class ReducedSiO2FluorocarbonParameters:
     bare_sio2_yield: EnergeticYield
     complex_sio2_yield: EnergeticYield
     polymer_sputter_yield: EnergeticYield
+    material_name: str = "SiO2"
+    material_inventory_name: str = "SiO2_formula_unit"
     complex_removal_reaction_order: int = 1
     oxygen_half_saturation_flux_m2_s: float | None = None
     activated_polymer_deposition_probability_on_substrate: Mapping[str, float] = field(
@@ -566,6 +568,8 @@ class ReducedSiO2FluorocarbonParameters:
     )
 
     def __post_init__(self):
+        if not self.material_name or not self.material_inventory_name:
+            raise ValueError("oxide material and inventory names must be nonempty")
         for name, value in (
                 ("site_density_m2", self.site_density_m2),
                 ("bulk_formula_density_m3", self.bulk_formula_density_m3),
@@ -978,6 +982,10 @@ class ReducedSiO2FluorocarbonMechanism:
 
         self.provenance = MappingProxyType({
             "model": "reduced-sio2-fluorocarbon-common-engine-v1",
+            "material": {
+                "name": par.material_name,
+                "inventory_name": par.material_inventory_name,
+            },
             "parameters": {
                 "site_density_m2": float(par.site_density_m2),
                 "bulk_formula_density_m3": float(par.bulk_formula_density_m3),
@@ -1669,12 +1677,13 @@ class ReducedSiO2FluorocarbonMechanism:
         removed_sio2 = removed_complex + removed_bare
         exchange = unresolved_surface_exchange(
             removed_units_m2={
-                "SiO2_formula_unit": removed_sio2,
+                self.parameters.material_inventory_name: removed_sio2,
                 "fluorocarbon_film_unit": removed_polymer,
             },
             deposited_units_m2={"fluorocarbon_film_unit": deposited_polymer},
             limitations=(
-                "reactive SiO2 and fluorocarbon product identities and branching are unresolved",
+                f"reactive {self.parameters.material_name} and fluorocarbon product "
+                "identities and branching are unresolved",
                 "unresolved removed material is not eligible for redeposition transport",
             ))
         return SurfaceStepResult(
@@ -1687,3 +1696,13 @@ class ReducedSiO2FluorocarbonMechanism:
             removed_polymer_units_m2=removed_polymer,
             material_exchange=exchange,
             validity=validity)
+
+
+# The conservative state equations are oxide-generic; the historical names
+# remain canonical for backward compatibility.  Material-specific parameter
+# evidence and inventory labels decide whether a particular oxide use is
+# predictive.  These aliases let new oxide decks use the generic contract
+# without pretending that the published SiO2 coefficients transfer.
+FluorinatedOxideSurfaceState = SiO2SurfaceState
+ReducedFluorinatedOxideParameters = ReducedSiO2FluorocarbonParameters
+ReducedFluorinatedOxideMechanism = ReducedSiO2FluorocarbonMechanism

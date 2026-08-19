@@ -20,6 +20,12 @@ angular quadrature supplies species/energy/angle-resolved flux; analytic
 bounded reaction updates and conservative level-set remapping evolve TiO2,
 Cr, and the overlayer. No Monte Carlo operator is required.
 
+The common surface kernel now exposes this as a material-labelled
+`ReducedFluorinatedOxideMechanism` contract. Existing SiO2 decks are unchanged;
+a future TiO2 deck must supply its own evidence-bearing density, adsorption,
+activation, passivation, and energetic-yield parameters. Merely relabelling a
+SiO2 deck remains nonpredictive and is tested as such.
+
 These cross-process boards identify model topology and response signs, not the
 Oxford coefficients. Absolute profile prediction still needs same-condition
 self-bias/waveform, blanket TiO2 loss, Cr loss, target GDS/radius, and the SEM
