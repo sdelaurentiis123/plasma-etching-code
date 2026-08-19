@@ -97,12 +97,16 @@ def build_receipt(state_path: Path = DEFAULT_STATE) -> dict:
     state = _load_input(state_path)
     resolutions = []
     central_result = None
+    fine_result = None
     for radial, axial in ((24, 8), (48, 16), (96, 32)):
         result, row = _run_resolution(state, radial, axial)
         resolutions.append(row)
         if (radial, axial) == (48, 16):
             central_result = result
+        if (radial, axial) == (96, 32):
+            fine_result = result
     assert central_result is not None
+    assert fine_result is not None
     coarse, central, fine = resolutions
     full_grid_change = abs(
         fine["full_electrode_average_flux_m2_s"]
@@ -111,6 +115,15 @@ def build_receipt(state_path: Path = DEFAULT_STATE) -> dict:
         fine["central_3mm_optic_average_flux_m2_s"]
         / central["central_3mm_optic_average_flux_m2_s"] - 1.0)
     profile = central_result.total_lower_endcap_flux_m2_s
+    fine_profile = fine_result.total_lower_endcap_flux_m2_s
+    # At 96 radial cells, the 1.5 mm-radius optic intersects the first two
+    # finite-volume annuli (centres 0.625 and 1.875 mm).  Their ratio is a
+    # conservative, discretization-explicit measure of the resolved smooth
+    # radial variation within the optic.  It is distinct from comparing the
+    # optic-average flux with the full 240 mm electrode average.
+    optic_intersecting_annulus_ratio = float(
+        fine_profile[0] / fine_profile[1]
+    )
     return {
         "schema": "petch.zhu-npg80-axisymmetric-ccp-audit.v1",
         "condition_id": state.condition_id,
@@ -172,6 +185,29 @@ def build_receipt(state_path: Path = DEFAULT_STATE) -> dict:
             "passed_0p1_percent": max(
                 full_grid_change, optic_grid_change) < 1.0e-3,
         },
+        "central_3mm_smooth_radial_resolution": {
+            "radial_cell_count": 96,
+            "radial_cell_width_m": float(
+                fine_result.radial_center_m[1]
+                - fine_result.radial_center_m[0]
+            ),
+            "optic_radius_m": fine_result.optic_radius_m,
+            "intersecting_annulus_center_m": (
+                fine_result.radial_center_m[:2].tolist()
+            ),
+            "intersecting_annulus_flux_m2_s": fine_profile[:2].tolist(),
+            "center_to_next_annulus_flux_ratio": (
+                optic_intersecting_annulus_ratio
+            ),
+            "resolved_flux_change_percent": (
+                100.0 * (optic_intersecting_annulus_ratio - 1.0)
+            ),
+            "interpretation": (
+                "This is the model-resolved smooth radial variation within "
+                "the central optic. It is not a measured Oxford flux map and "
+                "does not represent layout-scale microloading."
+            ),
+        },
         "central_48x16_result": {
             "radial_center_m": central_result.radial_center_m.tolist(),
             "total_lower_endcap_flux_m2_s": profile.tolist(),
@@ -201,10 +237,15 @@ def build_receipt(state_path: Path = DEFAULT_STATE) -> dict:
             "zero_fit_to_sem_or_depth": True,
             "global_flux_reproduced_within_1_percent": abs(
                 central_result.global_to_spatial_relative_residual) < 0.01,
-            "central_3mm_flux_nonuniformity_vs_full_electrode_percent": (
+            "central_3mm_average_enhancement_vs_full_electrode_percent": (
                 100.0 * (
                     central_result.optic_to_full_electrode_flux_ratio - 1.0
                 )
+            ),
+            "legacy_field_name_correction": (
+                "The optic-average/full-electrode difference is not an "
+                "intra-optic nonuniformity. The latter is reported by "
+                "central_3mm_smooth_radial_resolution."
             ),
             "conditioned_radial_partition_supported": True,
             "absolute_target_wafer_flux_supported": False,

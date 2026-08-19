@@ -57,10 +57,21 @@ def test_axisymmetric_ccp_grid_convergence_and_particle_ledger():
 
 
 def test_committed_radial_profile_is_center_high_and_smooth():
-    central = build_receipt()["central_48x16_result"]
+    receipt = build_receipt()
+    central = receipt["central_48x16_result"]
     radius = np.asarray(central["radial_center_m"])
     flux = np.asarray(central["total_lower_endcap_flux_m2_s"])
     assert np.all(np.diff(radius) > 0.0)
     assert np.all(np.diff(flux) < 0.0)
     assert np.max(np.abs(np.diff(flux, n=2))) / np.mean(flux) < 2.0e-4
     assert np.isclose(sum(central["species_flux_fraction"].values()), 1.0)
+    local = receipt["central_3mm_smooth_radial_resolution"]
+    assert local["center_to_next_annulus_flux_ratio"] > 1.0
+    assert local["resolved_flux_change_percent"] < 0.001
+    certification = receipt["certification"]
+    assert (
+        certification[
+            "central_3mm_average_enhancement_vs_full_electrode_percent"
+        ]
+        > local["resolved_flux_change_percent"]
+    )

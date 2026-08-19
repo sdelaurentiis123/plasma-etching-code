@@ -17,7 +17,10 @@ per positive ion before feature attenuation.
 The deterministic axisymmetric lift reproduces the coupled global flux within
 0.358%, changes by only 0.0025% on the final grid refinement, and predicts the
 centered 3 mm optic receives 0.740% more ion flux than the full-electrode
-average. The resulting central-optic clearance requirement is
+average. That number compares two different spatial averages; it is not the
+variation across the optic. On the 96-cell radial grid, the two finite-volume
+annuli intersecting the optic differ by only 0.00031%. The resulting
+central-optic clearance requirement is
 0.981--1.252 formula units per ion. This smooth radial response is too weak to
 explain strongly clustered pillar failures within one small write field by
 itself; wafer position, local loading, CD/mask variation, undercut, adhesion,

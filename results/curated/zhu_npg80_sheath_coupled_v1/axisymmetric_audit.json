@@ -1,4 +1,20 @@
 {
+  "central_3mm_smooth_radial_resolution": {
+    "center_to_next_annulus_flux_ratio": 1.0000030893512422,
+    "interpretation": "This is the model-resolved smooth radial variation within the central optic. It is not a measured Oxford flux map and does not represent layout-scale microloading.",
+    "intersecting_annulus_center_m": [
+      0.000625,
+      0.001875
+    ],
+    "intersecting_annulus_flux_m2_s": [
+      1.4572624101187189e+19,
+      1.4572579081371902e+19
+    ],
+    "optic_radius_m": 0.0015,
+    "radial_cell_count": 96,
+    "radial_cell_width_m": 0.0012499999999999998,
+    "resolved_flux_change_percent": 0.0003089351242158145
+  },
   "central_48x16_result": {
     "central_3mm_optic_average_flux_m2_s": 1.4572248811804377e+19,
     "central_3mm_to_full_electrode_flux_ratio": 1.007398707714177,
@@ -131,11 +147,12 @@
   },
   "certification": {
     "absolute_target_wafer_flux_supported": false,
-    "central_3mm_flux_nonuniformity_vs_full_electrode_percent": 0.7398707714177055,
+    "central_3mm_average_enhancement_vs_full_electrode_percent": 0.7398707714177055,
     "conditioned_radial_partition_supported": true,
     "conserved_spatial_solve": true,
     "differentiable_fixed_topology_operator": true,
     "global_flux_reproduced_within_1_percent": true,
+    "legacy_field_name_correction": "The optic-average/full-electrode difference is not an intra-optic nonuniformity. The latter is reported by central_3mm_smooth_radial_resolution.",
     "reason_absolute_is_not_yet_supported": "The 30 mm active height, 50 Td CHF2+ mobility transfer, uniform target-gas source moment, and 0-D absorbed power remain physics sensitivities rather than measurements on the target serial tool.",
     "zero_fit_to_sem_or_depth": true
   },

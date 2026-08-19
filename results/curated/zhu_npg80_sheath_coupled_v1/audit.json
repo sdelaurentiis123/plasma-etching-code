@@ -6,7 +6,7 @@
     "central_to_fine_optic_flux_relative_change": 2.480971419083211e-05,
     "first_to_last_annulus_flux_ratio": 1.0148198152207704,
     "path": "results/curated/zhu_npg80_sheath_coupled_v1/axisymmetric_audit.json",
-    "sha256": "4300b82ce9fd20b27268a8829f72a157884dfc70854eb58710b9a679a7d2df03"
+    "sha256": "063f4335a493d2418b8ba6ca786a252e2bc9bfe403a9bb52f80fd52e70b5aa08"
   },
   "boundary_evidence": {
     "anchor_is_target_measurement": false,
