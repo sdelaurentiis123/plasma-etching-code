@@ -228,6 +228,19 @@ def test_guo_tml_router_reuses_transport_and_mask_but_carries_transfer_limits():
     assert cf3_endpoint.provenance["materials"]["1"]["evidence"]["model"][
         "ion_species_mapping"] == {"ions": "CF3"}
 
+    measured_mixture_sensitivity = build_krueger_2024_material_router_3d(
+        surface_model="guo_tml",
+        guo_aggregate_ion_mixture={"CF": 0.1, "CF2": 0.05},
+    )
+    assert measured_mixture_sensitivity.mechanisms[
+        1].ion_species_mapping["ions"] == {"CF": 0.1, "CF2": 0.05}
+    with pytest.raises(ValueError, match="not both"):
+        build_krueger_2024_material_router_3d(
+            surface_model="guo_tml",
+            guo_aggregate_ion_formula="CF3",
+            guo_aggregate_ion_mixture={"CF": 0.1},
+        )
+
     finite_layer = build_krueger_2024_material_router_3d(
         surface_model="guo_tml",
         guo_translating_layer_thickness_nm=1.2,

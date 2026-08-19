@@ -231,6 +231,37 @@ def test_krueger_aggregate_ion_identity_is_an_explicit_sensitivity_endpoint():
     ).parameter_evidence_supports_prediction
 
 
+def test_krueger_aggregate_ion_mixture_preserves_total_measure_and_atom_fractions():
+    mechanism = GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
+        aggregate_ion_mixture={"CF+": 0.25, "CF2": 0.5})
+    fluxes = SurfaceFluxes(
+        {},
+        (EnergeticFlux(
+            "ions", 2.0e20, [1000.0], [1.0], [1.0]),),
+    )
+
+    total, _energy, _cosine, _measure, formula_flux = (
+        mechanism._face_ion_measure(fluxes, ()))
+
+    assert total[0] == pytest.approx(2.0e20)
+    assert formula_flux[0] == pytest.approx({"CF": 0.5e20, "CF2": 1.0e20})
+    assert mechanism.ion_species_mapping["ions"] == {
+        "CF": 0.25, "CF2": 0.5}
+    assert mechanism.provenance["ion_species_mapping"]["ions"] == {
+        "CF": 0.25, "CF2": 0.5}
+    validity = mechanism.validity(mechanism.initial_state(), fluxes)
+    assert any("declared mixture closure" in reason for reason in validity.reasons)
+    assert not validity.parameter_evidence_supports_prediction
+
+    with pytest.raises(ValueError, match="sum to at most one|invalid"):
+        GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
+            aggregate_ion_mixture={"CF": 0.6, "CF2": 0.5})
+    with pytest.raises(ValueError, match="not both"):
+        GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
+            aggregate_ion_formula="CF3",
+            aggregate_ion_mixture={"CF": 0.25})
+
+
 def test_feature_adapter_resolves_source_deposition_complementarity_face():
     mechanism = GuoC4F8ArSiO2FeatureMechanism(
         neutral_species=("C3F4", "C2F3", "CF", "CF2", "CF3", "O"),

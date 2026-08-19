@@ -195,7 +195,9 @@ class GuoC4F8ArSiO2FeatureMechanism:
         neutral_species=(
             "C3F4", "C2F3", "CF", "CF2", "CF3", "O",
         ),
-        ion_species_mapping: Mapping[str, str | None] | None = None,
+        ion_species_mapping: Mapping[
+            str, str | None | Mapping[str, float]
+        ] | None = None,
         bulk_sio2_formula_density_m3: float = 2.2e28,
         deposited_film_atom_density_m3: float = 7.5e28,
         translating_layer_thickness_nm: float = 2.5,
@@ -217,7 +219,22 @@ class GuoC4F8ArSiO2FeatureMechanism:
             population = str(population)
             if not population:
                 raise ValueError("empty Guo energetic population name")
-            if formula is not None:
+            if isinstance(formula, Mapping):
+                mixture = {}
+                for component, fraction in formula.items():
+                    component = str(component).removesuffix("+")
+                    fraction = float(fraction)
+                    formula_atoms(component)
+                    if (not component or not np.isfinite(fraction)
+                            or fraction < 0.0):
+                        raise ValueError("invalid Guo ion-mixture closure")
+                    mixture[component] = (
+                        mixture.get(component, 0.0) + fraction)
+                if (not mixture
+                        or sum(mixture.values()) > 1.0 + 1.0e-12):
+                    raise ValueError("invalid Guo ion-mixture closure")
+                formula = MappingProxyType(mixture)
+            elif formula is not None:
                 formula = str(formula).removesuffix("+")
                 formula_atoms(formula)
             normalized_mapping[population] = formula
@@ -289,7 +306,11 @@ class GuoC4F8ArSiO2FeatureMechanism:
             ),
             "neutral_species": list(neutral),
             "ion_species_mapping": {
-                name: formula for name, formula in normalized_mapping.items()
+                name: (
+                    dict(formula)
+                    if isinstance(formula, Mapping) else formula
+                )
+                for name, formula in normalized_mapping.items()
             },
             "bulk_sio2_formula_density_m3": density,
             "deposited_film_atom_density_m3": film_density,
@@ -308,16 +329,27 @@ class GuoC4F8ArSiO2FeatureMechanism:
     @classmethod
     def krueger_2024_transfer_audit(
         cls, *, aggregate_ion_formula: str | None = None,
+        aggregate_ion_mixture: Mapping[str, float] | None = None,
         translating_layer_thickness_nm: float = 2.5,
     ):
         """Declare one endpoint for Krüger's unresolved aggregate ion row.
 
         ``None`` is the nominal non-incorporating endpoint used when no ion
-        identity is assumed.  A formula requests an explicit all-that-species
-        sensitivity, not an inferred mixture or a predictive boundary.
+        identity is assumed. A formula requests an explicit all-that-species
+        sensitivity. ``aggregate_ion_mixture`` supplies formula fractions of
+        the same aggregate population and leaves any remainder inert. Neither
+        closure is an inferred composition or a predictive boundary.
         """
+        if (aggregate_ion_formula is not None
+                and aggregate_ion_mixture is not None):
+            raise ValueError(
+                "choose an aggregate ion formula or mixture, not both")
+        closure = (
+            aggregate_ion_mixture
+            if aggregate_ion_mixture is not None else aggregate_ion_formula
+        )
         return cls(
-            ion_species_mapping={"ions": aggregate_ion_formula},
+            ion_species_mapping={"ions": closure},
             translating_layer_thickness_nm=translating_layer_thickness_nm,
             allow_out_of_board_transfer_audit=True,
         )
@@ -407,6 +439,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
         below_defined_threshold = False
         off_normal_uses_inferred_polynomial = False
         aggregate_ion_composition = False
+        declared_aggregate_mixture = False
         for population in fluxes.energetic_fluxes:
             if population.name not in self.ion_species_mapping:
                 continue
@@ -418,9 +451,11 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 < GuoC4F8ArSiO2Mechanism.maximum_printed_threshold_eV))
             off_normal_uses_inferred_polynomial |= bool(
                 np.any(cosine < 1.0 - 1.0e-12))
+            closure = self.ion_species_mapping[population.name]
             aggregate_ion_composition |= bool(
-                energy.size
-                and self.ion_species_mapping[population.name] is None)
+                energy.size and closure is None)
+            declared_aggregate_mixture |= bool(
+                energy.size and isinstance(closure, Mapping))
         reasons = []
         if unsupported_neutral or unsupported_energetic:
             reasons.append("positive incident flux has no declared Guo channel")
@@ -441,6 +476,10 @@ class GuoC4F8ArSiO2FeatureMechanism:
         if aggregate_ion_composition:
             reasons.append(
                 "aggregate ion population has no species-resolved composition")
+        if declared_aggregate_mixture:
+            reasons.append(
+                "aggregate ion population uses a declared mixture closure; "
+                "species-resolved IEADs remain unpublished")
         return MechanismValidity(
             within_declared_scope=not reasons,
             reasons=tuple(reasons),
@@ -525,6 +564,12 @@ class GuoC4F8ArSiO2FeatureMechanism:
             if population.name not in self.ion_species_mapping:
                 continue
             formula = self.ion_species_mapping[population.name]
+            if isinstance(formula, Mapping):
+                formula_fraction = formula
+            elif formula is None:
+                formula_fraction = {}
+            else:
+                formula_fraction = {formula: 1.0}
             if isinstance(population, FaceResolvedEnergeticFlux):
                 if shape != (population.face_count,):
                     raise ValueError(
@@ -540,10 +585,10 @@ class GuoC4F8ArSiO2FeatureMechanism:
                         float(population.event_cosine_incidence[event]))
                     measures[face].append(contribution)
                     total_flux[face] += contribution
-                    if formula is not None:
-                        formula_flux[face][formula] = (
-                            formula_flux[face].get(formula, 0.0)
-                            + contribution
+                    for component, fraction in formula_fraction.items():
+                        formula_flux[face][component] = (
+                            formula_flux[face].get(component, 0.0)
+                            + fraction * contribution
                         )
             elif isinstance(population, EnergeticFlux):
                 face_flux = self._broadcast_flux(
@@ -559,10 +604,10 @@ class GuoC4F8ArSiO2FeatureMechanism:
                         population.cosine_incidence[positive].tolist())
                     measures[face].extend(contribution[positive].tolist())
                     total_flux[face] += float(supplied)
-                    if formula is not None:
-                        formula_flux[face][formula] = (
-                            formula_flux[face].get(formula, 0.0)
-                            + float(supplied)
+                    for component, fraction in formula_fraction.items():
+                        formula_flux[face][component] = (
+                            formula_flux[face].get(component, 0.0)
+                            + fraction * float(supplied)
                         )
             else:  # pragma: no cover - SurfaceFluxes validates.
                 raise TypeError(type(population).__name__)

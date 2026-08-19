@@ -71,6 +71,28 @@ def _jsonable(value):
     return str(value)
 
 
+def _parse_guo_aggregate_ion_mixture(value):
+    """Parse one explicit aggregate-ion composition without using a depth target."""
+    if value is None:
+        return None
+    try:
+        supplied = json.loads(str(value))
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "--guo-aggregate-ion-mixture-json must be a JSON object"
+        ) from error
+    if not isinstance(supplied, dict) or not supplied:
+        raise ValueError(
+            "--guo-aggregate-ion-mixture-json must be a nonempty JSON object")
+    mixture = {str(name): float(fraction) for name, fraction in supplied.items()}
+    if (any(not name or not np.isfinite(fraction) or fraction < 0.0
+            for name, fraction in mixture.items())
+            or sum(mixture.values()) > 1.0 + 1.0e-12):
+        raise ValueError(
+            "Guo aggregate-ion fractions must be nonnegative and sum to at most one")
+    return mixture
+
+
 def _linear_zero(a, fa, b, fb):
     denominator = float(fa) - float(fb)
     if denominator == 0.0:
@@ -620,6 +642,16 @@ def _configuration(args):
     if str(args.guo_aggregate_ion_formula) != "unresolved":
         configuration["guo_aggregate_ion_formula"] = str(
             args.guo_aggregate_ion_formula)
+    guo_mixture = _parse_guo_aggregate_ion_mixture(
+        getattr(args, "guo_aggregate_ion_mixture_json", None))
+    if guo_mixture is not None:
+        if str(args.guo_aggregate_ion_formula) != "unresolved":
+            raise ValueError(
+                "choose --guo-aggregate-ion-formula or mixture JSON, not both")
+        if str(args.surface_model) != "guo_tml":
+            raise ValueError(
+                "--guo-aggregate-ion-mixture-json requires --surface-model guo_tml")
+        configuration["guo_aggregate_ion_mixture"] = guo_mixture
     if str(args.surface_model) == "guo_tml":
         configuration["guo_translating_layer_thickness_nm"] = float(
             args.guo_translating_layer_thickness_nm)
@@ -926,6 +958,8 @@ def run(args):
             mixed_layer_volatilization_yield=float(
                 args.mixed_layer_volatilization_yield))
     elif str(args.surface_model) == "guo_tml":
+        guo_mixture = _parse_guo_aggregate_ion_mixture(
+            getattr(args, "guo_aggregate_ion_mixture_json", None))
         mechanism = build_krueger_2024_material_router_3d(
             surface_model="guo_tml",
             guo_aggregate_ion_formula=(
@@ -933,6 +967,7 @@ def run(args):
                 if str(args.guo_aggregate_ion_formula) == "unresolved"
                 else str(args.guo_aggregate_ion_formula)
             ),
+            guo_aggregate_ion_mixture=guo_mixture,
             guo_translating_layer_thickness_nm=float(
                 args.guo_translating_layer_thickness_nm),
             effective_mask_crosslinked_growth_fraction=float(
@@ -1349,6 +1384,15 @@ def parse_args():
             "explicit all-one-species sensitivity for Krueger's unpublished "
             "aggregate positive-ion row; unresolved is the nominal "
             "non-incorporating endpoint and no choice is a fitted mixture"
+        ),
+    )
+    parser.add_argument(
+        "--guo-aggregate-ion-mixture-json",
+        help=(
+            "explicit formula-to-fraction JSON closure for Krueger's "
+            "aggregate ion row, for example '{\"CF\":0.1,\"CF2\":0.05}'. "
+            "Fractions sum to at most one and the remainder is inert; this "
+            "is a declared sensitivity, never an inferred prediction"
         ),
     )
     parser.add_argument(

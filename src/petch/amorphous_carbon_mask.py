@@ -628,6 +628,7 @@ def build_krueger_2024_material_router_3d(
         surface_model="reduced",
         mixed_layer_volatilization_yield=1.0,
         guo_aggregate_ion_formula=None,
+        guo_aggregate_ion_mixture=None,
         guo_translating_layer_thickness_nm=2.5):
     """Build one material router for the reduced Krüger oxide/mask development replay.
 
@@ -646,7 +647,8 @@ def build_krueger_2024_material_router_3d(
         if (float(oxide_etch_yield_scale) != 1.0
                 or float(effective_mask_crosslinked_growth_fraction) != 0.0
                 or oxygen_half_saturation_flux_m2_s is not None
-                or guo_aggregate_ion_formula is not None):
+                or guo_aggregate_ion_formula is not None
+                or guo_aggregate_ion_mixture is not None):
             raise ValueError(
                 "mixed_layer surface model has no yield-scale/crosslink/"
                 "oxygen-saturation knobs; do not pass them")
@@ -679,6 +681,7 @@ def build_krueger_2024_material_router_3d(
         )
         oxide = GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
             aggregate_ion_formula=guo_aggregate_ion_formula,
+            aggregate_ion_mixture=guo_aggregate_ion_mixture,
             translating_layer_thickness_nm=(
                 guo_translating_layer_thickness_nm))
         mask = AmorphousCarbonMaskMechanism(
@@ -707,9 +710,10 @@ def build_krueger_2024_material_router_3d(
             })
     if surface_model != "reduced":
         raise ValueError(f"unknown surface_model: {surface_model!r}")
-    if guo_aggregate_ion_formula is not None:
+    if (guo_aggregate_ion_formula is not None
+            or guo_aggregate_ion_mixture is not None):
         raise ValueError(
-            "guo_aggregate_ion_formula applies only to surface_model='guo_tml'")
+            "Guo ion closures apply only to surface_model='guo_tml'")
     if float(guo_translating_layer_thickness_nm) != 2.5:
         raise ValueError(
             "guo_translating_layer_thickness_nm applies only to "

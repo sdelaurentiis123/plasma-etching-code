@@ -1,0 +1,337 @@
+{
+  "audit_id": "KRUEGER-ION-MIXTURE-INVERSE-R1",
+  "calibration_firewall": {
+    "feature_depth_used_to_choose_mixture": false,
+    "optimization_against_825_nm_performed": false,
+    "target_constructed_only_after_all_surface_solves": true
+  },
+  "cross_reactor_measured_composition_sensitivities": {
+    "boards": {
+      "50": {
+        "ar_feed_percent": 50,
+        "c4f6_feed_percent": 50,
+        "resolved_fraction_of_total_positive_current": {
+          "Ar+": 0.6001838079062995,
+          "CF+": 0.09677700785465429,
+          "CF2+": 0.05245031167482832,
+          "CF3+": 0.021269099917174863
+        },
+        "resolved_plus_unresolved_closure": 1.0,
+        "unresolved_positive_ion_fraction": 0.22931977264704306
+      },
+      "75": {
+        "ar_feed_percent": 25,
+        "c4f6_feed_percent": 75,
+        "resolved_fraction_of_total_positive_current": {
+          "Ar+": 0.3465085736799248,
+          "CF+": 0.14683461450075816,
+          "CF2+": 0.0800591002624583,
+          "CF3+": 0.03254275336152868
+        },
+        "resolved_plus_unresolved_closure": 1.0,
+        "unresolved_positive_ion_fraction": 0.39405495819533
+      }
+    },
+    "source": "Benck, Goyette and Wang 2003, C4F6/Ar ICP, 10 mTorr, 200 W, no O2, grounded sampling surface",
+    "surface_propagation": {
+      "50": {
+        "unresolved_as_C3F3": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.6001838079062995,
+          "ion_fraction": {
+            "C3F3": 0.22931977264704306,
+            "CF": 0.09677700785465429,
+            "CF2": 0.05245031167482832,
+            "CF3": 0.021269099917174863
+          },
+          "movement_atoms_per_wafer_ion": 8.655166006816767,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.14448476123196907,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.885055335605589,
+          "steady_state_residual": 1.1102230246251565e-15,
+          "surface_state": {
+            "C": 0.17732149112855408,
+            "F": 0.15344834179680983,
+            "O": 0.3104196838920745,
+            "Si": 0.35881048318256165,
+            "V": 0.04119301767089344
+          }
+        },
+        "unresolved_as_CF": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.6001838079062995,
+          "ion_fraction": {
+            "CF": 0.3260967805016973,
+            "CF2": 0.05245031167482832,
+            "CF3": 0.021269099917174863
+          },
+          "movement_atoms_per_wafer_ion": 8.33328170343998,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.1019215475623112,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.7777605678133264,
+          "steady_state_residual": 1.7763568394002505e-15,
+          "surface_state": {
+            "C": 0.14576712204536296,
+            "F": 0.1407023451813345,
+            "O": 0.3400690590989098,
+            "Si": 0.37346147367439264,
+            "V": 0.04513987903854689
+          }
+        },
+        "unresolved_as_CF2": {
+          "atom_ledger_residual": -8.881784197001252e-16,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.6001838079062994,
+          "ion_fraction": {
+            "CF": 0.09677700785465429,
+            "CF2": 0.2817700843218714,
+            "CF3": 0.021269099917174863
+          },
+          "movement_atoms_per_wafer_ion": 8.62722214722453,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.14078970541811953,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.8757407157415096,
+          "steady_state_residual": 3.552713678800501e-15,
+          "surface_state": {
+            "C": 0.14009404498567357,
+            "F": 0.14826876820808965,
+            "O": 0.35085799283815344,
+            "Si": 0.3607791939680833,
+            "V": 0.04551949208321047
+          }
+        },
+        "unresolved_as_CF3": {
+          "atom_ledger_residual": -8.881784197001252e-16,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.6001838079062995,
+          "ion_fraction": {
+            "CF": 0.09677700785465429,
+            "CF2": 0.05245031167482832,
+            "CF3": 0.2505888725642179
+          },
+          "movement_atoms_per_wafer_ion": 8.916708274061929,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.17906886268587474,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.972236091353976,
+          "steady_state_residual": 1.7763568394002505e-15,
+          "surface_state": {
+            "C": 0.1350176813600344,
+            "F": 0.15616423872751806,
+            "O": 0.3608897536055839,
+            "Si": 0.3479283263068636,
+            "V": 0.045831449358190654
+          }
+        },
+        "unresolved_as_inert": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.8295035805533426,
+          "ion_fraction": {
+            "CF": 0.09677700785465429,
+            "CF2": 0.05245031167482832,
+            "CF3": 0.021269099917174863
+          },
+          "movement_atoms_per_wafer_ion": 8.128219770313603,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.07480592004146791,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.709406590104534,
+          "steady_state_residual": 2.6645352591003757e-15,
+          "surface_state": {
+            "C": 0.13181706484730568,
+            "F": 0.1343376288418486,
+            "O": 0.35331982871876794,
+            "Si": 0.3805254775920777,
+            "V": 0.0470979656649225
+          }
+        }
+      },
+      "75": {
+        "unresolved_as_C3F3": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.34650857367992494,
+          "ion_fraction": {
+            "C3F3": 0.39405495819533,
+            "CF": 0.14683461450075816,
+            "CF2": 0.0800591002624583,
+            "CF3": 0.03254275336152868
+          },
+          "movement_atoms_per_wafer_ion": 8.83043895108215,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.16766134890342488,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.943479650360717,
+          "steady_state_residual": 5.329070518200751e-15,
+          "surface_state": {
+            "C": 0.22833904647306105,
+            "F": 0.1722141442341733,
+            "O": 0.265764527091749,
+            "Si": 0.3336822822010166,
+            "V": 0.03595549277003476
+          }
+        },
+        "unresolved_as_CF": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.3465085736799248,
+          "ion_fraction": {
+            "CF": 0.5408895726960882,
+            "CF2": 0.0800591002624583,
+            "CF3": 0.03254275336152868
+          },
+          "movement_atoms_per_wafer_ion": 8.594402098139453,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.13644986421678706,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.8648006993798174,
+          "steady_state_residual": 8.881784197001252e-16,
+          "surface_state": {
+            "C": 0.16082010492260007,
+            "F": 0.14931303129802567,
+            "O": 0.32691811562649725,
+            "Si": 0.36294874815287703,
+            "V": 0.0430916841476808
+          }
+        },
+        "unresolved_as_CF2": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.3465085736799248,
+          "ion_fraction": {
+            "CF": 0.14683461450075816,
+            "CF2": 0.4741140584577883,
+            "CF3": 0.03254275336152868
+          },
+          "movement_atoms_per_wafer_ion": 9.100477727102666,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.20336895564993918,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 3.0334925757008886,
+          "steady_state_residual": 1.7763568394002505e-15,
+          "surface_state": {
+            "C": 0.14941987145807664,
+            "F": 0.16244056596690376,
+            "O": 0.3460574885378848,
+            "Si": 0.34208207403713486,
+            "V": 0.043884715641259314
+          }
+        },
+        "unresolved_as_CF3": {
+          "atom_ledger_residual": 0.0,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.34650857367992494,
+          "ion_fraction": {
+            "CF": 0.14683461450075816,
+            "CF2": 0.0800591002624583,
+            "CF3": 0.42659771155685866
+          },
+          "movement_atoms_per_wafer_ion": 9.58715532758719,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.2677230185239259,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 3.1957184425290635,
+          "steady_state_residual": 1.3322676295501878e-15,
+          "surface_state": {
+            "C": 0.14003853520632484,
+            "F": 0.17679057585711946,
+            "O": 0.362734990758745,
+            "Si": 0.32043589817781076,
+            "V": 0.0444623278968525
+          }
+        },
+        "unresolved_as_inert": {
+          "atom_ledger_residual": 8.881784197001252e-16,
+          "feature_depth_used": false,
+          "inert_remainder_fraction": 0.7405635318752548,
+          "ion_fraction": {
+            "CF": 0.14683461450075816,
+            "CF2": 0.0800591002624583,
+            "CF3": 0.03254275336152868
+          },
+          "movement_atoms_per_wafer_ion": 8.27496857134777,
+          "score_only_after_solve": {
+            "signed_relative_error": 0.09421072017821741,
+            "target_sio2_per_wafer_ion": 2.5208333333333335
+          },
+          "sio2_yield_per_wafer_ion": 2.7583228571159233,
+          "steady_state_residual": 8.881784197001252e-16,
+          "surface_state": {
+            "C": 0.13598276224068745,
+            "F": 0.13845799830518932,
+            "O": 0.35061470974523873,
+            "Si": 0.37494452970888453,
+            "V": 0.04641084604406923
+          }
+        }
+      }
+    },
+    "transfer_to_krueger_is_predictive": false
+  },
+  "figure_resolution_gate": {
+    "declared_energy_compression_bin_eV": 250.0,
+    "mass_shift_per_digitization_bin": 0.24,
+    "same_author_condition_is_not_krueger_base_process": true,
+    "same_author_different_condition_Oplus_to_CF3plus_mean_shift_eV": 60.0,
+    "verdict": "The apparent approximately 250 eV ladder in the committed digitization is the binning operator, not a species comb."
+  },
+  "published_inverse_problem": {
+    "aggregate_operator_rank": 1,
+    "candidate_positive_ions_from_thesis_surface_deck": [
+      "Ar+",
+      "O+",
+      "CF+",
+      "CF2+",
+      "CF3+",
+      "C2F3+",
+      "C2F4+",
+      "C2F5+",
+      "C3F5+",
+      "C3F6+",
+      "C3F7+"
+    ],
+    "composition_contrast_rank": 0,
+    "composition_nullity": 10,
+    "meaning": "Every candidate column is the same combined IEAD under the published evidence. The power sweep changes that aggregate with sheath power but does not label any species column.",
+    "power_nodes_kw": [
+      0.0,
+      4.0,
+      6.0,
+      8.0
+    ],
+    "published_channels_per_power": 1,
+    "species_resolved_iead_kernels_published": false
+  },
+  "question": "Can Krueger's combined positive-ion IEAD and power sweep identify the species mixture without using feature depth?",
+  "scientific_verdict": {
+    "clean_closure": "Obtain the original species-resolved HPEM PCMCM output or mass-resolved wafer ion measurements.",
+    "code_can_propagate_any_declared_mixture": true,
+    "next_non_target_fit_test": "Run the Benck-conditioned mixture bands through the 0.25 s feature prefix, then the full 60 s profile ensemble. Those are cross-reactor sensitivities, not a Krueger boundary claim.",
+    "published_plot_can_support_exact_species_inversion": false,
+    "unique_krueger_mixture_recovered": false
+  },
+  "sources": {
+    "benck_figure9_csv_sha256": "40ae5a1355eb12cd6cdb72961e7719a5a4b30b73a994ba669f80f7de4e747d25",
+    "benck_manifest_sha256": "8760ab6999f292ba3fe1e7bc367795687a65f0ac21a0b4db6961bc7440baaa0a",
+    "krueger_base_iead_sha256": "913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3",
+    "krueger_figure16_iead_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+    "krueger_figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+    "krueger_thesis_text_sha256": "b41bbf75eb5d3b3ee033a07ccb7fb175a51f3740e977f0d18adaf3821e007b26"
+  },
+  "status": "structurally_nonidentifiable_from_published_iead"
+}

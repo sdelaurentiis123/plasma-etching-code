@@ -1,0 +1,62 @@
+{
+  "audit_id": "KRUEGER-ION-MIXTURE-FEATURE-PREFIX-R1",
+  "status": "measured_cross_reactor_prior_does_not_close_prefix_rate",
+  "duration_s": 0.25,
+  "grid_spacing_nm": 10.0,
+  "published_krueger_run_average_rate_nm_s": 13.75,
+  "feature_depth_used_to_choose_mixture": false,
+  "ion_flux_normalization": 1.0,
+  "surface_model": "guo_tml",
+  "surface_state_remap_backend": "common_refinement",
+  "cases": {
+    "benck_50pct_resolved_unresolved_inert": {
+      "mixture": {
+        "CF": 0.09677700785465429,
+        "CF2": 0.05245031167482832,
+        "CF3": 0.021269099917174863
+      },
+      "inert_remainder_fraction": 0.8295035806003426,
+      "depth_nm": 2.9534836515872076,
+      "prefix_rate_nm_s": 11.81393460634883,
+      "signed_relative_error_to_run_average_scale": -0.14080475590190322,
+      "mask_opening_nm": 86.83195473668836,
+      "config_sha256": "de58608fd60baf8edaaf0cda2ff2ef7e15fb670d91c264e9772af1945c5bd71c",
+      "local_audit_sha256": "dfa1de2d0d972c9f8e2e8673c255fce7ec38626c01cb26892f2871db2f777f61"
+    },
+    "benck_50pct_unresolved_all_CF3": {
+      "mixture": {
+        "CF": 0.09677700785465429,
+        "CF2": 0.05245031167482832,
+        "CF3": 0.2505888725642179
+      },
+      "inert_remainder_fraction": 0.6001838079062995,
+      "depth_nm": 3.036309567160389,
+      "prefix_rate_nm_s": 12.145238268641556,
+      "signed_relative_error_to_run_average_scale": -0.11670994409879587,
+      "mask_opening_nm": 86.83195473668836,
+      "config_sha256": "a52caea87b108bc1c4266c49a26913114310fa3eb0fb08aa95bc7bd51d4e4401",
+      "local_audit_sha256": "4d9579e10e6d869e81c4866fa9db4c063d0c441626918e3bca758b79d6c7764e"
+    },
+    "benck_75pct_unresolved_all_CF3": {
+      "mixture": {
+        "CF": 0.14683461450075816,
+        "CF2": 0.0800591002624583,
+        "CF3": 0.4265977115568587
+      },
+      "inert_remainder_fraction": 0.3465085736799248,
+      "depth_nm": 3.1354960490619366,
+      "prefix_rate_nm_s": 12.541984196247746,
+      "signed_relative_error_to_run_average_scale": -0.08785569481834576,
+      "mask_opening_nm": 86.83195473668836,
+      "config_sha256": "093d31b37eed9e945b3cbd998dbb2febc111885198376e50628ec56d4ede0b3d",
+      "local_audit_sha256": "76b5829953b8db196068fafa0f347d237fc7dc92f2a2e3bdf5d876ef51a3d7f5"
+    }
+  },
+  "interpretation": {
+    "measured_prior_source": "Benck et al. 2003 C4F6/Ar ICP, 10 mTorr, 200 W, grounded diagnostic surface, no O2",
+    "same_reactor_as_krueger": false,
+    "upper_closures_are_physical_claims": false,
+    "target_bracketed_by_these_source_conditioned_cases": false,
+    "meaning": "The source-conditioned C4F6 mixture band raises the Krueger feature-prefix rate, but even the deliberately F-rich 75-percent-C4F6 endpoint remains 8.79 percent below the experimental run-average scale. Pure-CF2/CF3 endpoints can bracket the scale, but those endpoints are not supported as Krueger compositions."
+  }
+}
