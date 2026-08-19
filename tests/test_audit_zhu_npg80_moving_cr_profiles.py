@@ -107,3 +107,42 @@ def test_oxford_thin_cr_first_steps_do_not_create_subcell_material_island():
         item["terminal_reason"] == "requested_duration"
         for item in profiles
     )
+
+
+def test_interior_minimum_thickness_ends_trajectory_before_mesh_degeneracy():
+    """The v3 mask-exhaustion guard: the trajectory must end as a declared
+    physical event when the Cr mask thins below one vertical cell anywhere
+    inside the footprint interior, never by feeding marching cubes a
+    degenerate sliver (the second production-board failure, w80/low/tail0)."""
+    from scripts.audit_zhu_npg80_moving_cr_profiles import (
+        MASK_MATERIAL,
+        _geometry,
+        _mask_interior_minimum_thickness_nm,
+    )
+    preregistration = _load(PREREGISTRATION)
+    geometry, pitch_nm = _geometry(
+        width_nm=80.0, dx_nm=10.0, preregistration=preregistration)
+
+    initial = _mask_interior_minimum_thickness_nm(
+        geometry, pitch_nm=pitch_nm, width_nm=80.0)
+    # full 45 nm mask everywhere in the interior at t=0
+    assert initial == pytest.approx(45.0, abs=2.0)
+
+    # carve one interior column of the Cr level set to a sub-cell sliver
+    mask = np.array(geometry.material_levelsets[MASK_MATERIAL], dtype=float)
+    dx = float(geometry.dx)
+    coordinate = np.arange(mask.shape[0]) * dx
+    center = 0.5 * pitch_nm * 1.0e-3
+    middle = int(np.argmin(np.abs(coordinate - center)))
+    column = mask[middle + 1, middle + 1, :]
+    z = np.arange(len(column)) * dx
+    bottom = float(np.min(z[column >= 0.0]))
+    mask[middle + 1, middle + 1, :] = np.minimum(
+        column, (bottom + 0.5 * dx) - z)
+    carved_geometry = SimpleNamespace(
+        material_levelsets={MASK_MATERIAL: mask}, dx=dx)
+
+    carved = _mask_interior_minimum_thickness_nm(
+        carved_geometry, pitch_nm=pitch_nm, width_nm=80.0)
+    assert carved < 10.0
+    assert carved < initial

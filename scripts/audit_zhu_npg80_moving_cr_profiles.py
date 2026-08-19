@@ -69,7 +69,13 @@ OUTPUT = (
     / "audit.json"
 )
 CACHE_DIR = OUTPUT.parent / "trajectories"
-MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v2"
+# v3: trajectories end as a declared physical event when the Cr mask thins
+# below one vertical cell anywhere over the footprint interior.  v2 checked
+# only the centre column; the mask thins non-uniformly, so edge columns went
+# geometrically degenerate first and the marching-cubes topology certifier
+# correctly refused the mesh ("unmatched interior edges").  The certifier is
+# untouched; the trajectory now stops before the mesh can degenerate.
+MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v3"
 PRODUCTION_MESH_SPACING_NM = 10.0
 CHROMIUM_MOLAR_MASS_KG_MOL = 51.9961e-3
 CHROMIUM_REFERENCE_DENSITY_KG_M3 = 7190.0
@@ -223,6 +229,42 @@ def _mask_metrics(geometry, *, pitch_nm):
     }
 
 
+def _mask_interior_minimum_thickness_nm(geometry, *, pitch_nm, width_nm):
+    """Minimum remaining Cr thickness over the original mask footprint
+    interior (eroded by one cell so corner rounding is excluded).
+
+    Sub-cell thickness anywhere inside the footprint means the next level-set
+    motion can produce a non-manifold extracted surface; the trajectory must
+    end as a declared mask-exhaustion event before that happens.
+    """
+    mask = np.asarray(geometry.material_levelsets[MASK_MATERIAL], dtype=float)
+    dx = float(geometry.dx)
+    coordinate = np.arange(mask.shape[0]) * dx
+    center = 0.5 * float(pitch_nm) * 1.0e-3
+    half = 0.5 * float(width_nm) * 1.0e-3 - dx
+    if half <= 0.0:
+        selected = np.zeros(mask.shape[0], dtype=bool)
+        selected[int(np.argmin(np.abs(coordinate - center)))] = True
+    else:
+        selected = np.abs(coordinate - center) <= half + 1.0e-12
+    columns = mask[np.ix_(selected, selected)]
+    positive = columns >= 0.0
+    a = columns[:, :, :-1]
+    b = columns[:, :, 1:]
+    both = positive[:, :, :-1] & positive[:, :, 1:]
+    change = positive[:, :, :-1] ^ positive[:, :, 1:]
+    denominator = np.where(change, np.abs(a - b), 1.0)
+    segment = np.where(
+        both, 1.0,
+        np.where(
+            change,
+            np.maximum(a, b) / np.maximum(denominator, 1.0e-300),
+            0.0,
+        ),
+    )
+    return float(np.min(segment.sum(axis=2)) * dx * 1.0e3)
+
+
 def _snapshot(
         geometry, *, width_nm, dx_nm, pitch_nm, scenario, rate_nm_min,
         selectivity, requested_duration_s, reference_rate_nm_min,
@@ -249,6 +291,9 @@ def _snapshot(
             nominal_width_um=float(width_nm) * 1.0e-3,
         ),
         "cr_mask": _mask_metrics(geometry, pitch_nm=pitch_nm),
+        "cr_mask_interior_minimum_thickness_nm": (
+            _mask_interior_minimum_thickness_nm(
+                geometry, pitch_nm=pitch_nm, width_nm=width_nm)),
         "maximum_transport_relative_particle_balance_error": float(maximum_balance),
         "maximum_state_remap_relative_conservation_residual": float(maximum_remap),
         "parameter_evidence_supports_prediction": (
@@ -307,6 +352,28 @@ def _run_trajectory(
             ))
             target_index += 1
             continue
+        interior_minimum_nm = _mask_interior_minimum_thickness_nm(
+            geometry, pitch_nm=pitch_nm, width_nm=width_nm)
+        if interior_minimum_nm < float(dx_nm):
+            # Declared physical endpoint: the Cr mask no longer resolves one
+            # vertical cell somewhere inside its footprint.  Continuing would
+            # feed a degenerate sliver to marching cubes; the topology
+            # certifier stays fully armed for every other failure mode.
+            terminal_reason = "cr_mask_below_vertical_resolution_in_footprint"
+            for unresolved in targets[target_index:]:
+                profiles.append(_snapshot(
+                    geometry, width_nm=width_nm, dx_nm=dx_nm,
+                    pitch_nm=pitch_nm, scenario=scenario,
+                    rate_nm_min=unresolved["rate"], selectivity=selectivity,
+                    requested_duration_s=duration_s,
+                    reference_rate_nm_min=reference_rate,
+                    reference_elapsed_s=elapsed,
+                    accepted_steps=accepted_steps,
+                    maximum_balance=maximum_balance,
+                    maximum_remap=maximum_remap,
+                    validity=validity, terminal_reason=terminal_reason,
+                ))
+            break
         step_duration = min(float(maximum_step_s), remaining)
         try:
             step = advance_feature_step_3d(
@@ -333,6 +400,13 @@ def _run_trajectory(
                 reinitialization_method="cr2",
                 transport_device=transport_device,
             )
+        except RuntimeError as error:
+            raise RuntimeError(
+                "moving-mask step failed at reference elapsed "
+                f"{elapsed:.3f} s after {accepted_steps} accepted steps; "
+                f"cr interior minimum {interior_minimum_nm:.3f} nm; "
+                f"cr centre metrics {_mask_metrics(geometry, pitch_nm=pitch_nm)}"
+            ) from error
         except SurfaceTopologyChangeError as error:
             # A feature-floor breakthrough is an interpretable physical end
             # point.  Solid or material-component changes can instead expose a
