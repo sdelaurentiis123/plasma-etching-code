@@ -117,7 +117,7 @@ def manifest(payloads: dict[Path, str]) -> dict:
         "manifest_id": "JANISSEN-2016-TIO2-SUPPLEMENTARY-TABLES-R1",
         "source": {
             "citation": (
-                "R. Janissen et al., Nanoscale 8, 14010-14017 (2016); "
+                "S. Ha et al., Nanoscale 8, 10739-10748 (2016); "
                 "supplement reproduced in S. Ha, TU Delft thesis (2018)"
             ),
             "doi": "10.1039/C6NR00898D",

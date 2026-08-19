@@ -1,10 +1,11 @@
 # janissen-2016-tio2-rie
 
-**Janissen et al., tunable CHF3/O2 RIE of single-crystal TiO2 with Cr masks**
+**Ha et al., tunable CHF3/O2 RIE of single-crystal TiO2 with Cr masks**
 
-- **Citation:** R. Janissen et al., “Tunable top-down fabrication and
+- **Citation:** S. Ha, R. Janissen, Y. Y. Ussembayev, M. M. van Oene,
+  B. Solano, and N. H. Dekker, “Tunable top-down fabrication and
   functional surface coating of single-crystal titanium dioxide
-  nanostructures and nanoparticles,” *Nanoscale* **8**, 14010–14017 (2016).
+  nanostructures and nanoparticles,” *Nanoscale* **8**, 10739–10748 (2016).
 - **DOI:** `10.1039/C6NR00898D`
 - **Primary full text:**
   `https://pubs.rsc.org/en/content/articlehtml/2016/nr/c6nr00898d`
