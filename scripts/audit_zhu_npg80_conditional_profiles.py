@@ -9,6 +9,7 @@ not a target-machine absolute-depth prediction.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -22,8 +23,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from petch.feature_step_3d import (
+    FeatureGeometry3D,
+    SurfaceTopologyChangeError,
+    advance_feature_step_3d,
     make_square_pillar_mask_geometry_3d,
-    solve_feature_3d,
 )
 from petch.iadf_two_component import (
     build_two_component_boundary,
@@ -48,6 +51,8 @@ OUTPUT = (
     ROOT / "results" / "curated" / "zhu_npg80_conditional_profiles_v1"
     / "audit.json"
 )
+CACHE_DIR = OUTPUT.parent / "trajectories"
+MODEL_REVISION = "external-union-active-band-dose-factorization-v1"
 
 FILM_MATERIAL = 1
 MASK_MATERIAL = 2
@@ -71,6 +76,37 @@ def _hash(path: Path) -> str:
 
 def _render(payload: dict) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _trajectory_cache_spec(job, preregistration):
+    width, scenario, target_rates, duration, dx = job
+    return {
+        "model_revision": MODEL_REVISION,
+        "preregistration_sha256": _hash(PREREGISTRATION),
+        "width_nm": float(width),
+        "scenario": dict(scenario),
+        "target_rates_nm_min": [float(value) for value in target_rates],
+        "duration_s": float(duration),
+        "mesh_spacing_nm": float(dx),
+    }
+
+
+def _trajectory_cache_path(spec):
+    digest = sha256(_render(spec).encode("utf-8")).hexdigest()[:16]
+    width = int(round(spec["width_nm"]))
+    scenario = spec["scenario"]["name"]
+    return CACHE_DIR / f"w{width:03d}_{scenario}_{digest}.json"
+
+
+def _load_cached_trajectory(job, preregistration):
+    spec = _trajectory_cache_spec(job, preregistration)
+    path = _trajectory_cache_path(spec)
+    if not path.exists():
+        return None, path, spec
+    payload = _load(path)
+    if payload.get("job_spec") != spec:
+        raise RuntimeError(f"trajectory cache specification mismatch: {path}")
+    return payload["profiles"], path, spec
 
 
 def _maximum_named_numeric(value, name):
@@ -149,7 +185,11 @@ def _line_at_height(field, height, dx, *, axis, fixed_index):
 
 
 def _profile_metrics(geometry, *, pitch_um, nominal_width_um):
-    film = np.asarray(geometry.material_levelsets[FILM_MATERIAL], dtype=float)
+    film = np.asarray(
+        geometry.phi if geometry.material_levelsets is None
+        else geometry.material_levelsets[FILM_MATERIAL],
+        dtype=float,
+    )
     nx, ny, nz = film.shape
     x = np.arange(nx) * geometry.dx
     y = np.arange(ny) * geometry.dx
@@ -173,10 +213,15 @@ def _profile_metrics(geometry, *, pitch_um, nominal_width_um):
     depth = float(np.clip(FILM_TOP_UM - floor_height, 0.0, FILM_THICKNESS_UM))
     center_y = int(np.argmin(np.abs(y - center)))
     center_x = int(np.argmin(np.abs(x - center)))
+    # Sample only within the actual relief.  Sampling over ``max(depth, dx)``
+    # would reach below the etched floor for a sub-cell smoke depth and mistake
+    # the intact blanket for a full-cell pillar.  The result is still marked
+    # non-authoritative until at least two vertical cells of relief exist.
+    resolved_relief = depth >= 2.0 * geometry.dx
     fractions = np.linspace(0.10, 0.90, 17)
     cross_section = []
     for fraction in fractions:
-        height = FILM_TOP_UM - fraction * max(depth, geometry.dx)
+        height = FILM_TOP_UM - fraction * depth
         width_x = _center_width_um(
             _line_at_height(
                 film, height, geometry.dx, axis=0, fixed_index=center_y
@@ -217,6 +262,8 @@ def _profile_metrics(geometry, *, pitch_um, nominal_width_um):
         "bottom_cd_nm": bottom,
         "sidewall_angle_from_wafer_deg": sidewall_angle,
         "bow_nm": bow,
+        "cd_metrics_grid_resolved": bool(resolved_relief),
+        "minimum_relief_for_cd_claim_nm": 2.0 * geometry.dx * 1.0e3,
         "cross_section": cross_section,
     }
 
@@ -291,11 +338,10 @@ def _mechanism(scenario_name, rate_nm_min, density_kg_m3):
     ))
 
 
-def _run_profile(*, width_nm, scenario, rate_nm_min, duration_s, dx_nm,
-                 preregistration):
+def _initial_profile_geometry(*, width_nm, dx_nm, preregistration):
     geometry_board = preregistration["inferred_geometry_board"]
     pitch_nm = float(geometry_board["pitch_nm"])
-    geometry = make_square_pillar_mask_geometry_3d(
+    layered_geometry = make_square_pillar_mask_geometry_3d(
         pitch=pitch_nm * 1.0e-3,
         domain_height=DOMAIN_HEIGHT_UM,
         dx=dx_nm * 1.0e-3,
@@ -308,84 +354,243 @@ def _run_profile(*, width_nm, scenario, rate_nm_min, duration_s, dx_nm,
         mask_material_id=MASK_MATERIAL,
         base_material_id=BASE_MATERIAL,
     )
+    # Only TiO2 evolves in this conditional rung; Cr and fused silica are
+    # explicitly pinned.  Evolve the external gas/solid union and retain the
+    # material labels, rather than independently advecting TiO2's buried
+    # solid/solid level-set contacts.  The latter would incorrectly apply a
+    # sidewall recession speed to the TiO2/Cr contact within the extension
+    # band.  Multi-material level sets remain required when more than one
+    # material has a moving law.
+    geometry = FeatureGeometry3D(
+        layered_geometry.phi,
+        layered_geometry.material_id,
+        layered_geometry.dx,
+        layered_geometry.mesh_length_unit_m,
+        layered_geometry.mesh_origin_m,
+        material_levelsets=None,
+    )
+    return geometry, pitch_nm
+
+
+def _profile_snapshot(
+        geometry, *, width_nm, dx_nm, pitch_nm, scenario, target_rate_nm_min,
+        reference_rate_nm_min, requested_duration_s, reference_elapsed_s,
+        accepted_steps, maximum_balance, maximum_remap, validity,
+        clearance_reference_bracket_s=None):
+    metrics = _profile_metrics(
+        geometry,
+        pitch_um=pitch_nm * 1.0e-3,
+        nominal_width_um=width_nm * 1.0e-3,
+    )
+    cleared = clearance_reference_bracket_s is not None
+    clearance_process_bracket = None
+    if cleared:
+        metrics["etched_depth_nm"] = FILM_THICKNESS_UM * 1.0e3
+        clearance_process_bracket = [
+            float(value) * float(reference_rate_nm_min)
+            / float(target_rate_nm_min)
+            for value in clearance_reference_bracket_s
+        ]
+    return {
+        "width_nm": float(width_nm),
+        "mesh_spacing_nm": float(dx_nm),
+        "duration_s": float(requested_duration_s),
+        "blanket_rate_nm_min": float(target_rate_nm_min),
+        "transport_scenario": dict(scenario),
+        "dose_equivalent_reference_rate_nm_min": float(reference_rate_nm_min),
+        "dose_equivalent_reference_time_s": float(reference_elapsed_s),
+        "dose_equivalence_exact_for_declared_surface_law": True,
+        "accepted_profile_steps": int(accepted_steps),
+        "accepted_process_equivalent_duration_s": float(
+            reference_elapsed_s * reference_rate_nm_min / target_rate_nm_min
+        ),
+        "tio2_clearance_detected": bool(cleared),
+        "clearance_time_bracket_s": clearance_process_bracket,
+        "post_clearance_profile_identified": not cleared,
+        "profile_geometry_status": (
+            "last_pre_clearance_geometry; only depth=film thickness is identified"
+            if cleared else "endpoint_geometry"
+        ),
+        "maximum_transport_relative_particle_balance_error": float(
+            maximum_balance
+        ),
+        "maximum_state_remap_relative_conservation_residual": float(
+            maximum_remap
+        ),
+        "validity": {
+            "within_declared_scope": (
+                True if validity is None else validity.within_declared_scope
+            ),
+            "parameter_evidence_supports_prediction": (
+                False if validity is None
+                else validity.parameter_evidence_supports_prediction
+            ),
+            "nonpredictive_parameters": (
+                [] if validity is None else list(validity.nonpredictive_parameters)
+            ),
+            "known_limitations": (
+                [] if validity is None else list(validity.known_limitations)
+            ),
+        },
+        "profile": metrics,
+    }
+
+
+def _run_profile_dose_trajectory(
+        *, width_nm, scenario, target_rates_nm_min, duration_s, dx_nm,
+        preregistration):
+    """Solve one geometry path and sample all rate-equivalent dose endpoints.
+
+    The declared conditional law is linear in its transferred blanket rate and
+    has no time-dependent state.  Therefore geometry depends on the product of
+    rate and time.  Running the maximum rate once and stopping exactly at each
+    lower-rate dose is the same continuous equation, not a surrogate or an
+    interpolation between geometries.
+    """
+    rates = sorted(set(float(value) for value in target_rates_nm_min))
+    if not rates or any(value <= 0.0 for value in rates):
+        raise ValueError("target blanket rates must be positive")
+    reference_rate = max(rates)
+    targets = [
+        {
+            "rate_nm_min": rate,
+            "reference_time_s": float(duration_s) * rate / reference_rate,
+        }
+        for rate in rates
+    ]
+    geometry, pitch_nm = _initial_profile_geometry(
+        width_nm=width_nm,
+        dx_nm=dx_nm,
+        preregistration=preregistration,
+    )
     boundary = _boundary(scenario, preregistration)
     density = float(np.mean(
         preregistration["surface_response_axes"]["ald_tio2_density_kg_m3"]
     ))
-    result = solve_feature_3d(
-        geometry,
-        boundary,
-        {scenario["name"]: "energetic_bombardment"},
-        _mechanism(scenario["name"], rate_nm_min, density),
-        etchable_material_ids=(FILM_MATERIAL,),
-        duration_s=float(duration_s),
-        n_steps=max(1, int(np.ceil(duration_s / 20.0))),
-        source_bounds=(0.0, pitch_nm * 1.0e-3, 0.0, pitch_nm * 1.0e-3),
-        source_z=SOURCE_Z_UM,
-        ballistic_transport="face_gather",
-        ballistic_periodic_lateral=True,
-        ballistic_face_quadrature_points=int(
-            preregistration["deterministic_feature_transport"][
-                "triangle_quadrature_points"
-            ]
-        ),
-        profile_periodic_lateral=True,
-        topology_change_policy="continue_gas_cavity",
-        surface_state_remap_backend="indexed_knn",
-        reinitialization_method="cr2",
-        transport_device="cpu",
-        adaptive_timestep_options={
-            "initial_step_duration_s": min(10.0, float(duration_s)),
-            "minimum_step_duration_s": min(0.5, float(duration_s)),
-            "maximum_step_duration_s": min(30.0, float(duration_s)),
-            "target_displacement_cells": 0.25,
-            "maximum_displacement_cells": 0.5,
-            "maximum_accepted_steps": 1000,
-        },
-    )
-    metrics = _profile_metrics(
-        result.geometry,
-        pitch_um=pitch_nm * 1.0e-3,
-        nominal_width_um=width_nm * 1.0e-3,
-    )
-    maximum_balance = max(
-        max(
-            abs(
-                float(step.transport.hit_probability[name])
-                + float(step.transport.escape_probability[name])
-                + float(step.transport.truncation_probability[name])
-                - 1.0
+    mechanism = _mechanism(scenario["name"], reference_rate, density)
+    state = None
+    fingerprint = None
+    elapsed = 0.0
+    maximum_step_s = 8.0
+    accepted_steps = 0
+    maximum_balance = 0.0
+    maximum_remap = 0.0
+    validity = None
+    profiles = []
+    target_index = 0
+    while target_index < len(targets):
+        target = targets[target_index]
+        remaining = float(target["reference_time_s"]) - elapsed
+        if remaining <= 64.0 * np.finfo(float).eps * max(1.0, elapsed):
+            profiles.append(_profile_snapshot(
+                geometry,
+                width_nm=width_nm,
+                dx_nm=dx_nm,
+                pitch_nm=pitch_nm,
+                scenario=scenario,
+                target_rate_nm_min=target["rate_nm_min"],
+                reference_rate_nm_min=reference_rate,
+                requested_duration_s=duration_s,
+                reference_elapsed_s=elapsed,
+                accepted_steps=accepted_steps,
+                maximum_balance=maximum_balance,
+                maximum_remap=maximum_remap,
+                validity=validity,
+            ))
+            target_index += 1
+            continue
+        step_duration = min(maximum_step_s, remaining)
+        try:
+            step = advance_feature_step_3d(
+                geometry,
+                boundary,
+                {scenario["name"]: "energetic_bombardment"},
+                mechanism,
+                etchable_material_ids=(FILM_MATERIAL,),
+                duration_s=step_duration,
+                source_bounds=(
+                    0.0,
+                    pitch_nm * 1.0e-3,
+                    0.0,
+                    pitch_nm * 1.0e-3,
+                ),
+                source_z=SOURCE_Z_UM,
+                surface_state=state,
+                surface_state_mesh_fingerprint=fingerprint,
+                ballistic_transport="face_gather",
+                ballistic_periodic_lateral=True,
+                ballistic_face_quadrature_points=int(
+                    preregistration["deterministic_feature_transport"][
+                        "triangle_quadrature_points"
+                    ]
+                ),
+                profile_periodic_lateral=True,
+                topology_change_policy="continue_gas_cavity",
+                surface_state_remap_backend="indexed_knn",
+                reinitialization_method="cr2",
+                transport_device="cpu",
             )
-            for name in step.transport.hit_probability
-        )
-        for step in result.steps
-    )
-    maximum_remap = max(
-        _maximum_named_numeric(
-            step.state_remap_diagnostics,
-            "max_relative_conservation_residual",
-        )
-        for step in result.steps
-    )
-    return {
-        "width_nm": float(width_nm),
-        "mesh_spacing_nm": float(dx_nm),
-        "duration_s": float(duration_s),
-        "blanket_rate_nm_min": float(rate_nm_min),
-        "transport_scenario": dict(scenario),
-        "accepted_profile_steps": len(result.steps),
-        "maximum_transport_relative_particle_balance_error": maximum_balance,
-        "maximum_state_remap_relative_conservation_residual": maximum_remap,
-        "validity": {
-            "within_declared_scope": result.validity.within_declared_scope,
-            "parameter_evidence_supports_prediction": (
-                result.validity.parameter_evidence_supports_prediction
+        except SurfaceTopologyChangeError as error:
+            if error.event_kind != "domain_gas_breakthrough":
+                raise
+            clearance_bracket = [float(elapsed), float(elapsed + step_duration)]
+            for unresolved in targets[target_index:]:
+                profiles.append(_profile_snapshot(
+                    geometry,
+                    width_nm=width_nm,
+                    dx_nm=dx_nm,
+                    pitch_nm=pitch_nm,
+                    scenario=scenario,
+                    target_rate_nm_min=unresolved["rate_nm_min"],
+                    reference_rate_nm_min=reference_rate,
+                    requested_duration_s=duration_s,
+                    reference_elapsed_s=elapsed,
+                    accepted_steps=accepted_steps,
+                    maximum_balance=maximum_balance,
+                    maximum_remap=maximum_remap,
+                    validity=validity,
+                    clearance_reference_bracket_s=clearance_bracket,
+                ))
+            break
+        geometry = step.geometry
+        state = step.next_surface_state
+        fingerprint = step.next_surface_state_mesh_fingerprint
+        elapsed += step_duration
+        accepted_steps += 1
+        maximum_balance = max(
+            maximum_balance,
+            max(
+                abs(
+                    float(step.transport.hit_probability[name])
+                    + float(step.transport.escape_probability[name])
+                    + float(step.transport.truncation_probability[name])
+                    - 1.0
+                )
+                for name in step.transport.hit_probability
             ),
-            "nonpredictive_parameters": list(result.validity.nonpredictive_parameters),
-            "known_limitations": list(result.validity.known_limitations),
-        },
-        "profile": metrics,
-    }
+        )
+        maximum_remap = max(
+            maximum_remap,
+            _maximum_named_numeric(
+                step.state_remap_diagnostics,
+                "max_relative_conservation_residual",
+            ),
+        )
+        validity = step.validity
+    return profiles
+
+
+def _run_profile_trajectory(*, width_nm, scenario, rate_nm_min, duration_s,
+                            dx_nm, preregistration):
+    """Compatibility wrapper for one conditional rate endpoint."""
+    return _run_profile_dose_trajectory(
+        width_nm=width_nm,
+        scenario=scenario,
+        target_rates_nm_min=(rate_nm_min,),
+        duration_s=duration_s,
+        dx_nm=dx_nm,
+        preregistration=preregistration,
+    )[0]
 
 
 def _build(*, smoke=False):
@@ -398,30 +603,62 @@ def _build(*, smoke=False):
         float(analog["source_feature_depth_board"]["maximum_implied_rate_nm_min"]),
     ]
     if smoke:
-        jobs = [(200.0, scenarios[0], rates[0], 60.0, MESH_SPACING_NM)]
+        jobs = [(200.0, scenarios[0], (rates[0],), 60.0, MESH_SPACING_NM)]
     else:
-        # Envelope corners plus a central-geometry transport board.  The two
-        # extreme widths carry rate corners; the center width isolates all four
-        # IADF scenarios at the midpoint analog rate.
-        jobs = []
-        for width in (80.0, 320.0):
-            for scenario in scenarios:
-                for rate in rates:
-                    jobs.append((width, scenario, rate, 1200.0, MESH_SPACING_NM))
-        midpoint_rate = 0.5 * sum(rates)
-        for scenario in scenarios:
-            jobs.append((200.0, scenario, midpoint_rate, 1200.0, MESH_SPACING_NM))
-    profiles = [
-        _run_profile(
+        widths = tuple(float(value) for value in preregistration[
+            "inferred_geometry_board"]["width_nm"])
+        # Every width and every preregistered IADF condition receives both
+        # cross-machine rate endpoints.  Rate homogeneity reduces the 56
+        # reported profiles to 28 independent deterministic trajectories.
+        jobs = [
+            (width, scenario, tuple(rates), 1200.0, MESH_SPACING_NM)
+            for width in widths
+            for scenario in scenarios
+        ]
+    def execute(job):
+        width, scenario, target_rates, duration, dx = job
+        return _run_profile_dose_trajectory(
             width_nm=width,
             scenario=scenario,
-            rate_nm_min=rate,
+            target_rates_nm_min=target_rates,
             duration_s=duration,
             dx_nm=dx,
             preregistration=preregistration,
         )
-        for width, scenario, rate, duration, dx in jobs
-    ]
+
+    # Smoke stays single-process for fast error traces. Production jobs are
+    # independent deterministic periodic cells and therefore embarrassingly
+    # parallel. ``map`` preserves the preregistered job order.
+    if smoke:
+        profile_groups = [execute(jobs[0])]
+        cache_receipts = []
+    else:
+        profile_groups = [None] * len(jobs)
+        cache_paths = [None] * len(jobs)
+        missing = []
+        for index, job in enumerate(jobs):
+            cached, path, spec = _load_cached_trajectory(job, preregistration)
+            cache_paths[index] = path
+            if cached is None:
+                missing.append((index, job, preregistration, spec, path))
+            else:
+                profile_groups[index] = cached
+        worker_count = min(4, len(missing))
+        if missing:
+            with ProcessPoolExecutor(max_workers=worker_count) as pool:
+                computed = pool.map(_execute_profile_job, missing)
+                for (index, *_), group in zip(missing, computed):
+                    profile_groups[index] = group
+        if any(group is None for group in profile_groups):
+            raise RuntimeError("conditional profile trajectory board is incomplete")
+        cache_receipts = [
+            {
+                "path": str(path.relative_to(ROOT)),
+                "sha256": _hash(path),
+            }
+            for path in cache_paths
+        ]
+    profiles = [profile for group in profile_groups for profile in group]
     return {
         "schema": "petch.zhu-npg80-conditional-profile-board.v1",
         "condition_id": preregistration["condition_id"],
@@ -432,6 +669,15 @@ def _build(*, smoke=False):
         "surface_scale_status": (
             "cross-machine conditional analog; not an Oxford absolute-depth prediction"
         ),
+        "trajectory_factorization": {
+            "governing_invariance": "geometry depends on blanket_rate_times_time",
+            "exact_for_declared_rate_normalized_law": True,
+            "independent_trajectories": len(jobs),
+            "reported_profile_endpoints": len(profiles),
+        },
+        "geometry_evolution_mode": (
+            "single evolving TiO2 gas-solid union with pinned Cr and fused silica"
+        ),
         "mask_handling": (
             "45 nm Cr geometry is pinned during profile evolution; the separate blind board "
             "reports selectivity-conditioned exhaustion and forbids post-exhaustion claims"
@@ -441,8 +687,30 @@ def _build(*, smoke=False):
             "analog_board_sha256": _hash(ANALOG_BOARD),
             "reactor_dose_sha256": _hash(REACTOR_DOSE),
         },
+        "trajectory_cache_receipts": cache_receipts,
         "profiles": profiles,
     }
+
+
+def _execute_profile_job(payload):
+    index, job, preregistration, spec, path = payload
+    width, scenario, target_rates, duration, dx = job
+    profiles = _run_profile_dose_trajectory(
+        width_nm=width,
+        scenario=scenario,
+        target_rates_nm_min=target_rates,
+        duration_s=duration,
+        dx_nm=dx,
+        preregistration=preregistration,
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_render({
+        "schema": "petch.zhu-npg80-conditional-profile-trajectory.v1",
+        "job_index": int(index),
+        "job_spec": spec,
+        "profiles": profiles,
+    }), encoding="utf-8")
+    return profiles
 
 
 def main():
