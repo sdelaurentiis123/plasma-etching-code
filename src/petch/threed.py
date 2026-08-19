@@ -130,9 +130,7 @@ def _certify_extracted_surface_topology_3d(verts, faces, domain_size):
             f"{interior_count} unmatched interior edges")
 
 
-def extract_mesh_3d(phi, dx):
-    """Marching cubes -> topology-certified triangle mesh and derived geometry."""
-    field = np.asarray(phi, dtype=float)
+def _extract_certified_mesh_3d(field, dx):
     verts, faces, _, _ = measure.marching_cubes(
         field, level=0.0, spacing=(dx, dx, dx), allow_degenerate=False)
     # Warp consumes float32 vertices. Recompute every derived geometric quantity from those exact
@@ -158,6 +156,34 @@ def extract_mesh_3d(phi, dx):
     _certify_extracted_surface_topology_3d(
         verts, faces, (np.asarray(field.shape) - 1) * float(dx))
     return verts, faces, centroids, areas
+
+
+def extract_mesh_3d(phi, dx):
+    """Marching cubes -> topology-certified triangle mesh and derived geometry.
+
+    A level set whose surface passes within float noise of grid nodes (a
+    shielded, grid-plane-aligned film top under a retreating mask corner)
+    makes skimage silently delete degenerate vertex-on-node triangles, so the
+    extracted mesh carries a genuine hole and certification correctly fails
+    with unmatched interior edges (production w80 moving-Cr board, step 80).
+    Extraction is therefore retried exactly once with the near-zero nodes
+    nudged off the level by 1e-4*dx - sub-picometre at any production mesh,
+    far below every physical scale in the engine.  A field whose first
+    extraction certifies is returned bitwise unchanged, so no previously
+    certified result is perturbed; the nudge exists only where the
+    alternative was a refused mesh.
+    """
+    field = np.asarray(phi, dtype=float)
+    try:
+        return _extract_certified_mesh_3d(field, dx)
+    except RuntimeError:
+        eps = 1.0e-4 * float(dx)
+        tiny = np.abs(field) < eps
+        if not np.any(tiny):
+            raise
+        nudged = field.copy()
+        nudged[tiny] = np.where(field[tiny] >= 0.0, eps, -eps)
+        return _extract_certified_mesh_3d(nudged, dx)
 
 
 _mc_cache = {}

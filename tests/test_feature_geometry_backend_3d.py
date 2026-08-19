@@ -293,3 +293,24 @@ def test_backend_and_surface_fingerprints_are_deterministic_and_sensitive():
 def test_uniform_backend_refuses_invalid_periodic_axes(axes):
     with pytest.raises(ValueError, match="periodic axes"):
         UniformFeatureGeometryBackend3D(_plane_geometry(), periodic_axes=axes)
+
+
+def test_extract_mesh_survives_grid_aligned_near_zero_plateau():
+    """Production w80 moving-Cr failure, step 80: a shielded, grid-aligned
+    TiO2 top leaves float-noise phi (1e-19..3e-7) at mesh nodes under the
+    retreating Cr cap corner; marching cubes then emitted degenerate
+    vertex-on-node triangles and the watertight certification failed with
+    "3 unmatched interior edges".  The vertex-on-surface guard must extract
+    this exact captured field cleanly."""
+    from pathlib import Path
+    import numpy as np
+    from petch.threed import extract_mesh_3d
+
+    data = np.load(Path(__file__).parent / "data"
+                   / "w80_step80_grid_aligned_zero_phi.npz")
+    phi = np.asarray(data["phi"], dtype=float)
+    dx = float(data["dx"])
+    assert int(np.sum(np.abs(phi) < 1.0e-4 * dx)) >= 30  # the noise plateau
+    verts, faces, centroids, areas = extract_mesh_3d(phi, dx)
+    assert len(faces) > 1000
+    assert np.all(areas > 0.0)
