@@ -659,6 +659,27 @@ def _build(*, smoke=False):
             for path in cache_paths
         ]
     profiles = [profile for group in profile_groups for profile in group]
+    pitch_nm = float(preregistration["inferred_geometry_board"]["pitch_nm"])
+    # A resolved vertical relief is necessary but not sufficient for a CD
+    # claim. The narrower of the pillar and its periodic neighbor gap must
+    # also span at least six cells. This catches the exactly symmetric 80 nm
+    # case whose four-cell representation can otherwise acquire a grid-scale
+    # x/y difference, and the reciprocal 80 nm gap at width 320 nm. Keep the
+    # raw geometry in the receipt; only its claim status changes.
+    for row in profiles:
+        metrics = row["profile"]
+        vertical_resolved = bool(metrics["cd_metrics_grid_resolved"])
+        minimum_lateral_cells = min(
+            float(row["width_nm"]), pitch_nm - float(row["width_nm"])
+        ) / float(row["mesh_spacing_nm"])
+        metrics["vertical_relief_grid_resolved"] = vertical_resolved
+        metrics["minimum_lateral_feature_cells"] = float(minimum_lateral_cells)
+        metrics["lateral_feature_grid_resolved"] = bool(
+            minimum_lateral_cells >= 6.0
+        )
+        metrics["cd_metrics_grid_resolved"] = bool(
+            vertical_resolved and minimum_lateral_cells >= 6.0
+        )
     return {
         "schema": "petch.zhu-npg80-conditional-profile-board.v1",
         "condition_id": preregistration["condition_id"],
@@ -682,6 +703,15 @@ def _build(*, smoke=False):
             "45 nm Cr geometry is pinned during profile evolution; the separate blind board "
             "reports selectivity-conditioned exhaustion and forbids post-exhaustion claims"
         ),
+        "numerical_resolution_status": {
+            "production_mesh_spacing_nm": MESH_SPACING_NM,
+            "minimum_lateral_cells_for_cd_claim": 6.0,
+            "production_mesh_convergence_certified": False,
+            "reason": (
+                "the production envelope is a first mesh rung; a finer-grid "
+                "sentinel is required before quantitative CD certification"
+            ),
+        },
         "inputs": {
             "preregistration_sha256": _hash(PREREGISTRATION),
             "analog_board_sha256": _hash(ANALOG_BOARD),
