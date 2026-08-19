@@ -1,0 +1,80 @@
+{
+  "all_numerical_gates_pass": false,
+  "condition_id": "zhu-2026-tio2-npg80-rie",
+  "fine_grid_maximum_xy_asymmetry_nm": 0.0009202658197011715,
+  "frozen_gates": {
+    "maximum_fine_grid_xy_asymmetry_nm": 5.0,
+    "maximum_grid_cd_absolute_change_nm": 10.0,
+    "maximum_grid_depth_relative_change": 0.05,
+    "maximum_state_remap_relative_conservation_residual": 1e-12,
+    "maximum_timestep_cd_absolute_change_nm": 5.0,
+    "maximum_timestep_depth_relative_change": 0.02,
+    "maximum_transport_relative_particle_balance_error": 2e-12
+  },
+  "gate_results": {
+    "fine_grid_xy_symmetry": true,
+    "grid_cd": false,
+    "grid_depth": true,
+    "particle_balance": true,
+    "state_remap_conservation": true,
+    "timestep_cd": true,
+    "timestep_depth": true
+  },
+  "grid_comparison": {
+    "candidate_case": "fine_dt4",
+    "cd_absolute_change_nm": [
+      0.4174293289775619,
+      2.6007555675963374,
+      24.17289736586605
+    ],
+    "depth_relative_change": 0.008443723953684793,
+    "maximum_cd_absolute_change_nm": 24.17289736586605,
+    "reference_case": "coarse_dt4"
+  },
+  "inputs": {
+    "cases": {
+      "coarse_dt4": {
+        "path": "results/curated/zhu_npg80_profile_convergence_v1/cases/coarse_dt4.json",
+        "sha256": "e6529fc3e2720f68e6cfb7021737a094057ea647a02720d7c9b066a754bef52a"
+      },
+      "coarse_dt8": {
+        "path": "results/curated/zhu_npg80_profile_convergence_v1/cases/coarse_dt8.json",
+        "sha256": "fdd8fd59765c94ed840be086d2614a94bad9ecfe0e8b8c0795e0131c3f774a50"
+      },
+      "fine_dt4": {
+        "path": "results/curated/zhu_npg80_profile_convergence_v1/cases/fine_dt4.json",
+        "sha256": "903d4803bb92c193590bb8dc0ec7820bc053cc31758d7a32c4aba1dcbf815c9e"
+      }
+    },
+    "convergence_preregistration": {
+      "path": "data/experimental/zhu_2026_tio2_npg80/profile_convergence_preregistration.json",
+      "sha256": "fd6dda9da2e6f4cdcf34908e72c25cb26bb51127f0c14573db68796c9daae473"
+    }
+  },
+  "maximum_state_remap_relative_conservation_residual": 3.601678348681019e-15,
+  "maximum_transport_relative_particle_balance_error": 0.0,
+  "schema": "petch.zhu-npg80-profile-convergence.v1",
+  "sentinel": {
+    "blanket_rate_nm_min": 43.46666666666667,
+    "duration_s": 360.0,
+    "reason": "resolved central board feature under the broadest high-energy angular-tail sensitivity",
+    "transport_scenario": "ion_high_tail_0p65",
+    "width_nm": 200.0
+  },
+  "supports_absolute_target_profile_prediction": false,
+  "supports_atomic_accuracy": false,
+  "surface_law_status": "cross-machine conditional analog; numerical convergence does not validate the Oxford surface law",
+  "target_depth_used": false,
+  "target_sem_used": false,
+  "timestep_comparison": {
+    "candidate_case": "coarse_dt4",
+    "cd_absolute_change_nm": [
+      0.15909786760221323,
+      0.49289673042287063,
+      3.813058614529041
+    ],
+    "depth_relative_change": 0.005294168980051136,
+    "maximum_cd_absolute_change_nm": 3.813058614529041,
+    "reference_case": "coarse_dt8"
+  }
+}
