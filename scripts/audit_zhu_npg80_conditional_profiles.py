@@ -438,7 +438,7 @@ def _profile_snapshot(
 
 def _run_profile_dose_trajectory(
         *, width_nm, scenario, target_rates_nm_min, duration_s, dx_nm,
-        preregistration):
+        preregistration, maximum_step_s=8.0, transport_device="cpu"):
     """Solve one geometry path and sample all rate-equivalent dose endpoints.
 
     The declared conditional law is linear in its transferred blanket rate and
@@ -450,6 +450,8 @@ def _run_profile_dose_trajectory(
     rates = sorted(set(float(value) for value in target_rates_nm_min))
     if not rates or any(value <= 0.0 for value in rates):
         raise ValueError("target blanket rates must be positive")
+    if not np.isfinite(maximum_step_s) or maximum_step_s <= 0.0:
+        raise ValueError("maximum profile step must be positive")
     reference_rate = max(rates)
     targets = [
         {
@@ -471,7 +473,6 @@ def _run_profile_dose_trajectory(
     state = None
     fingerprint = None
     elapsed = 0.0
-    maximum_step_s = 8.0
     accepted_steps = 0
     maximum_balance = 0.0
     maximum_remap = 0.0
@@ -528,7 +529,7 @@ def _run_profile_dose_trajectory(
                 topology_change_policy="continue_gas_cavity",
                 surface_state_remap_backend="indexed_knn",
                 reinitialization_method="cr2",
-                transport_device="cpu",
+                transport_device=transport_device,
             )
         except SurfaceTopologyChangeError as error:
             if error.event_kind != "domain_gas_breakthrough":

@@ -1,0 +1,43 @@
+{
+  "schema": "petch.zhu-npg80-profile-convergence-preregistration.v1",
+  "condition_id": "zhu-2026-tio2-npg80-rie",
+  "frozen_before_target_sem": true,
+  "target_sem_used": false,
+  "target_depth_used": false,
+  "sentinel": {
+    "width_nm": 200.0,
+    "duration_s": 360.0,
+    "blanket_rate_nm_min": 43.46666666666667,
+    "transport_scenario": "ion_high_tail_0p65",
+    "reason": "resolved central board feature under the broadest high-energy angular-tail sensitivity"
+  },
+  "cases": {
+    "coarse_dt8": {
+      "mesh_spacing_nm": 20.0,
+      "maximum_step_s": 8.0
+    },
+    "coarse_dt4": {
+      "mesh_spacing_nm": 20.0,
+      "maximum_step_s": 4.0
+    },
+    "fine_dt4": {
+      "mesh_spacing_nm": 10.0,
+      "maximum_step_s": 4.0
+    }
+  },
+  "gates": {
+    "maximum_timestep_depth_relative_change": 0.02,
+    "maximum_timestep_cd_absolute_change_nm": 5.0,
+    "maximum_grid_depth_relative_change": 0.05,
+    "maximum_grid_cd_absolute_change_nm": 10.0,
+    "maximum_fine_grid_xy_asymmetry_nm": 5.0,
+    "maximum_transport_relative_particle_balance_error": 2e-12,
+    "maximum_state_remap_relative_conservation_residual": 1e-12
+  },
+  "interpretation": {
+    "pass": "numerical certification for this one conditional sentinel only",
+    "failure": "retain the production profile but demote the affected metric and refine again",
+    "does_not_validate_target_surface_law": true,
+    "does_not_support_atomic_accuracy": true
+  }
+}
