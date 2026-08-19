@@ -1,0 +1,7 @@
+chemistry,plasma_mode,source_power_on_percent,bias_power_on_percent,reported_remaining_acl_nm,reported_p1_tio2_depth_nm,evidence_type
+C4F8/SF6/Ar,CW,100,100,116,392,author_annotated_sem
+C4F8/SF6/Ar,S30_B70,30,70,395,450,author_annotated_sem
+C4F8/SF6/Ar,S70_B30,70,30,424,454,author_annotated_sem
+BCl3/CF4/Ar,CW,100,100,426,370,author_annotated_sem
+BCl3/CF4/Ar,S30_B70,30,70,443,340,author_annotated_sem
+BCl3/CF4/Ar,S70_B30,70,30,465,374,author_annotated_sem

@@ -1,0 +1,145 @@
+{
+  "manifest_id": "HONG-2023-TIO2-FEATURE-RESPONSE-R1",
+  "source": {
+    "citation": "J. W. Hong et al., Materials Science in Semiconductor Processing 164, 107617 (2023)",
+    "doi": "10.1016/j.mssp.2023.107617",
+    "author_copy_url": "https://swb.skku.edu/_res/pnpl/etc/2023-12.pdf",
+    "pdf_sha256": "165aa9bb4bccb1212bba1f772bf273a7d13f4300f5e5e78a36fce9c16f73bc45",
+    "render_dpi": 400,
+    "render_size_px": [
+      3308,
+      4410
+    ],
+    "figure2_pdf_page": 3,
+    "figure2_page_sha256": "ae7f30fe47476ca852c851f6632715e73ea70db4c2d9f12ab0deb261826ed1ef",
+    "figure2_crop_geometry": "3000x2300+150+200",
+    "figure2_crop_sha256": "08b48ce2f9c834ae2608c1931bd5d1bf3f0a97eebbd6d73ae7e1f4dd04519b97",
+    "figure3_pdf_page": 4,
+    "figure3_page_sha256": "557e4896c18594b6f728a4431b7f105a5a0b1ea574ab235559ac60b2ab73d23a",
+    "figure3_crop_geometry": "1900x1050+550+150",
+    "figure3_crop_sha256": "95697f27f7ab6f395133069cac438156019c94b5d81a835d5e9dd569fd2e5d95",
+    "redistribution": "source PDF and pixels are not committed"
+  },
+  "experiment": {
+    "reactor": "300 mm inductively coupled plasma etcher",
+    "icp_source_power_W": 1000,
+    "bias_power_W": 150,
+    "pressure_mTorr": 2,
+    "substrate_temperature_C": 70,
+    "pulse_frequency_Hz": 1000,
+    "c4f8_sf6_ar_sccm": [
+      130,
+      20,
+      15
+    ],
+    "bcl3_cf4_ar_sccm": [
+      100,
+      25,
+      60
+    ],
+    "measured_dc_bias_V": {
+      "C4F8/SF6/Ar": -135,
+      "BCl3/CF4/Ar": -190
+    },
+    "nominal_tio2_thickness_nm": 500,
+    "nominal_acl_thickness_nm": 500,
+    "patterns": {
+      "P1": {
+        "diameter_nm": 80,
+        "space_nm": 245
+      },
+      "P2": {
+        "diameter_nm": 155,
+        "space_nm": 160
+      },
+      "P3": {
+        "diameter_nm": 220,
+        "space_nm": 80
+      }
+    }
+  },
+  "pixel_calibration": {
+    "a": {
+      "quantity": "tio2_etch_rate",
+      "units": "nm/min",
+      "crop_y_high_px": 124.5,
+      "value_high": 120.0,
+      "crop_y_low_px": 859.5,
+      "value_low": 0.0,
+      "value_per_vertical_pixel": -0.16326530612244897
+    },
+    "b": {
+      "quantity": "acl_etch_rate",
+      "units": "nm/min",
+      "crop_y_high_px": 124.5,
+      "value_high": 80.0,
+      "crop_y_low_px": 859.5,
+      "value_low": 0.0,
+      "value_per_vertical_pixel": -0.10884353741496598
+    },
+    "c": {
+      "quantity": "tio2_acl_selectivity",
+      "units": "dimensionless",
+      "crop_y_high_px": 1195.5,
+      "value_high": 15.0,
+      "crop_y_low_px": 1932.0,
+      "value_low": 0.0,
+      "value_per_vertical_pixel": -0.020366598778004074
+    },
+    "d": {
+      "quantity": "arde_p1_depth_over_p3_depth",
+      "units": "dimensionless",
+      "crop_y_high_px": 1195.5,
+      "value_high": 2.5,
+      "crop_y_low_px": 1932.0,
+      "value_low": 1.0,
+      "value_per_vertical_pixel": -0.002036659877800407
+    }
+  },
+  "digitization": {
+    "method": "400-dpi Poppler render; original-resolution visual marker inspection; color-channel row-density cross-check",
+    "marker_and_axis_allowance_px": 5,
+    "figure2d_error_bars": "cap centres digitized separately; these are experimental error bars, not the digitization allowance",
+    "figure3_values": "author annotations transcribed exactly",
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "internal_checks": {
+    "paper_text_c4f8_p1_selectivity_s30_b70": 3.9,
+    "digitized_c4f8_p1_selectivity_s30_b70": 3.97148676,
+    "paper_text_c4f8_p1_selectivity_s70_b30": 5.9,
+    "digitized_c4f8_p1_selectivity_s70_b30": 5.82484725,
+    "c4f8_arde_cw": 1.48472505,
+    "c4f8_arde_s70_b30": 1.08961303,
+    "pulsing_moves_c4f8_arde_toward_unity": true
+  },
+  "claim_boundary": {
+    "valid": [
+      "external TiO2 feature-transport and ARDE response target",
+      "external mask-survival/profile-form target",
+      "evidence that layout-dependent feature response can occur under one reactor condition"
+    ],
+    "not_valid": [
+      "an absolute surface-law calibration for the Zhu CHF3/SF6/O2 Oxford process",
+      "a radial Oxford NPG80 flux map",
+      "a chromium-mask erosion law",
+      "evidence that clustered pillar collapse is caused by reactor nonuniformity"
+    ],
+    "transfer_differences_from_zhu": [
+      "ICP versus capacitively coupled RIE",
+      "C4F8/SF6/Ar versus CHF3/SF6/O2",
+      "2 mTorr versus 30 mTorr",
+      "ACL versus chromium mask",
+      "circular holes/pillars versus square/rectangular metasurface pillars"
+    ]
+  },
+  "outputs": {
+    "figure2_csv": {
+      "path": "data/experimental/hong_2023_tio2/figure2_feature_response.csv",
+      "sha256": "1fc846a280ac54d7a4007078c22c9ae4f23347048adc4d9c7e90227134980917"
+    },
+    "figure3_csv": {
+      "path": "data/experimental/hong_2023_tio2/figure3_reported_profile_labels.csv",
+      "sha256": "9b985fdd1653dde17f6789cdc2332a10861b05460995355db87ab81c7fd66029"
+    }
+  }
+}
