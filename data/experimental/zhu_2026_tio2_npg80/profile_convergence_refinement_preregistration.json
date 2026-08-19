@@ -18,16 +18,25 @@
     "source": "results/curated/zhu_npg80_profile_convergence_v1/cases/fine_dt4.json"
   },
   "cases": {
+    "fine_dt4_cuda_replicate": {
+      "mesh_spacing_nm": 10.0,
+      "maximum_step_s": 4.0,
+      "required_execution_device": "cuda"
+    },
     "fine_dt2": {
       "mesh_spacing_nm": 10.0,
-      "maximum_step_s": 2.0
+      "maximum_step_s": 2.0,
+      "required_execution_device": "cuda"
     },
     "ultrafine_dt2": {
       "mesh_spacing_nm": 5.0,
-      "maximum_step_s": 2.0
+      "maximum_step_s": 2.0,
+      "required_execution_device": "cuda"
     }
   },
   "gates": {
+    "maximum_cpu_cuda_depth_relative_change": 0.01,
+    "maximum_cpu_cuda_cd_absolute_change_nm": 2.0,
     "maximum_fine_timestep_depth_relative_change": 0.01,
     "maximum_fine_timestep_cd_absolute_change_nm": 3.0,
     "maximum_ultrafine_grid_depth_relative_change": 0.025,
@@ -41,5 +50,6 @@
     "failure": "bottom CD remains unresolved and requires local refinement or a finer global rung",
     "does_not_validate_target_surface_law": true,
     "does_not_support_atomic_accuracy": true
-  }
+  },
+  "amendment_before_gpu_reveal": "A same-mesh CUDA replicate was added so timestep and grid comparisons do not mix execution-device arithmetic."
 }

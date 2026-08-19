@@ -48,6 +48,11 @@ def run_case(name, *, device):
     reactor = _load(REACTOR_DOSE)
     sentinel = preregistration["sentinel"]
     case = preregistration["cases"][name]
+    required_device = case.get("required_execution_device")
+    if required_device is not None and str(device) != str(required_device):
+        raise ValueError(
+            f"case {name} requires execution device {required_device!r}"
+        )
     scenarios = {
         row["name"]: row
         for row in _scenario_inputs(profile_preregistration, reactor)
@@ -93,7 +98,12 @@ def build_audit():
         name: _load(_case_path(name))
         for name in preregistration["cases"]
     }
-    timestep = _comparison(reference, cases["fine_dt2"])
+    device_replicate = _comparison(
+        reference, cases["fine_dt4_cuda_replicate"]
+    )
+    timestep = _comparison(
+        cases["fine_dt4_cuda_replicate"], cases["fine_dt2"]
+    )
     grid = _comparison(cases["fine_dt2"], cases["ultrafine_dt2"])
     ultrafine_asymmetry = _maximum_xy_asymmetry(cases["ultrafine_dt2"])
     gates = preregistration["gates"]
@@ -109,6 +119,10 @@ def build_audit():
         for case in all_cases
     )
     gate_results = {
+        "cpu_cuda_depth": device_replicate["depth_relative_change"]
+        <= gates["maximum_cpu_cuda_depth_relative_change"],
+        "cpu_cuda_cd": device_replicate["maximum_cd_absolute_change_nm"]
+        <= gates["maximum_cpu_cuda_cd_absolute_change_nm"],
         "fine_timestep_depth": timestep["depth_relative_change"]
         <= gates["maximum_fine_timestep_depth_relative_change"],
         "fine_timestep_cd": timestep["maximum_cd_absolute_change_nm"]
@@ -151,6 +165,7 @@ def build_audit():
             },
         },
         "sentinel": preregistration["sentinel"],
+        "cpu_cuda_replicate_comparison": device_replicate,
         "fine_timestep_comparison": timestep,
         "ultrafine_grid_comparison": grid,
         "ultrafine_maximum_xy_asymmetry_nm": float(ultrafine_asymmetry),
@@ -162,7 +177,7 @@ def build_audit():
         "bottom_cd_numerically_certified_for_sentinel": all(
             gate_results[name]
             for name in (
-                "fine_timestep_cd", "ultrafine_grid_cd",
+                "cpu_cuda_cd", "fine_timestep_cd", "ultrafine_grid_cd",
                 "ultrafine_xy_symmetry",
             )
         ),
@@ -173,7 +188,10 @@ def build_audit():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case", choices=("fine_dt2", "ultrafine_dt2"))
+    parser.add_argument(
+        "--case",
+        choices=("fine_dt4_cuda_replicate", "fine_dt2", "ultrafine_dt2"),
+    )
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--assemble", action="store_true")
     parser.add_argument("--check", action="store_true")
