@@ -1,0 +1,64 @@
+{
+  "schema": "petch.christophorou_olthoff_rao_1996_cfx.v1",
+  "source": {
+    "authors": [
+      "L. G. Christophorou",
+      "J. K. Olthoff",
+      "M. V. V. S. Rao"
+    ],
+    "doi": "10.1063/1.555986",
+    "journal": "J. Phys. Chem. Ref. Data 25, 1341-1388 (1996)",
+    "nist_url": "https://www.nist.gov/system/files/documents/srd/jpcrd512.pdf",
+    "pdf_sha256": "381e368840e28c84bb03eb4e684691e5c330c8c4f592bc666ae13bc292a39244",
+    "source_pdf_committed": false,
+    "title": "Electron Interactions with CF4"
+  },
+  "source_checks": {
+    "table31_relative_uncertainty": {
+      "CF": 0.15,
+      "CF2": 0.16,
+      "CF3": 0.18
+    },
+    "table32_CF2plus_and_CFplus_relative_uncertainty": 0.2,
+    "table32_Fplus_70eV_relative_uncertainty": 0.3,
+    "table33_CFplus_relative_uncertainty": 0.16,
+    "table33_Fplus_70eV_relative_uncertainty": 0.3
+  },
+  "tables": {
+    "table31_parent_ionization.csv": {
+      "row_count": 103,
+      "sha256": "3f70148ca2cf67de4e788bb63d35d72c5aea17317b820953a7000097ef185e4f"
+    },
+    "table32_cf3_dissociative_ionization.csv": {
+      "row_count": 52,
+      "sha256": "60dacd91aed11f778e4363122e79152f11e26657b3bfc3224a452dbfb7a53179"
+    },
+    "table33_cf2_dissociative_ionization.csv": {
+      "row_count": 31,
+      "sha256": "a44d3a4e76eff89f352aaaf506ab0a7b2f0ef63d18413e35d316ab558cb6a1e7"
+    }
+  },
+  "transcription": {
+    "method": "manual_table_transcription_visually_checked_at_240_dpi",
+    "render_pixels_committed": false,
+    "render_sha256": {
+      "page-43.png": "c82b0fe08649cc53365ce560f5c9c802a943f837f27b1d2627dd021cc285634f",
+      "page-44.png": "40e36245eaaa74bdb3aab785458e43f567f8dd9f8f553815453cf3d1643f62fe"
+    },
+    "si_conversion": "printed cross sections 1e-20 m2",
+    "source_journal_pages": [
+      1383,
+      1384
+    ]
+  },
+  "use_boundaries": {
+    "supports_feature_depth": false,
+    "supports_secondary_CFx_electron_ionization": true,
+    "supports_secondary_neutral_dissociation": false,
+    "supports_unique_reactor_state": false,
+    "supports_wafer_flux": false,
+    "table32_Fplus_is_one_energy_anchor": true,
+    "table33_CFplus_combines_single_and_ion_pair_onsets": true,
+    "table33_Fplus_is_one_energy_mixed_channel_anchor": true
+  }
+}
