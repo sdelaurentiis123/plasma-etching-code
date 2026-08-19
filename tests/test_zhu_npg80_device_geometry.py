@@ -59,6 +59,47 @@ def test_square_geometry_has_film_mask_base_and_open_gas():
     assert set(geometry.material_levelsets) == {11, 12, 13}
 
 
+def test_square_geometry_etched_snapshot_lowers_only_exposed_film():
+    geometry = make_square_pillar_mask_geometry_3d(
+        pitch=0.4,
+        domain_height=1.05,
+        dx=0.025,
+        pillar_width=0.2,
+        film_thickness=0.7,
+        mask_thickness=0.05,
+        base_top=0.1,
+        etched_depth=0.4,
+        film_material_id=11,
+        mask_material_id=12,
+        base_material_id=13,
+    )
+    x = np.arange(geometry.phi.shape[0]) * geometry.dx
+    z = np.arange(geometry.phi.shape[2]) * geometry.dx
+    center = int(np.argmin(np.abs(x - 0.2)))
+    edge = int(np.argmin(np.abs(x - 0.0)))
+    below_floor = int(np.argmin(np.abs(z - 0.35)))
+    above_floor = int(np.argmin(np.abs(z - 0.55)))
+    protected = int(np.argmin(np.abs(z - 0.7)))
+
+    assert geometry.material_id[edge, edge, below_floor] == 11
+    assert geometry.material_id[edge, edge, above_floor] == 0
+    assert geometry.material_id[center, center, protected] == 11
+
+
+def test_square_geometry_refuses_depth_beyond_film():
+    with np.testing.assert_raises_regex(ValueError, "invalid square-pillar"):
+        make_square_pillar_mask_geometry_3d(
+            pitch=0.4,
+            domain_height=1.05,
+            dx=0.025,
+            pillar_width=0.2,
+            film_thickness=0.7,
+            mask_thickness=0.05,
+            base_top=0.1,
+            etched_depth=0.701,
+        )
+
+
 def test_geometry_evidence_square_cell_arithmetic_is_exact():
     evidence = json.loads(EVIDENCE.read_text(encoding="utf-8"))
     pitch = evidence["same_group_public_geometry_prior"]["pitch_nm"]

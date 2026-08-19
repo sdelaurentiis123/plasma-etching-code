@@ -1,0 +1,87 @@
+{
+  "schema": "petch.zhu-npg80-square-pillar-blind-preregistration.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "frozen_before_specific_condition_sem": true,
+  "target_sem_used": false,
+  "target_depth_used": false,
+  "coefficient_selected_from_target": null,
+  "exact_target_inputs": {
+    "film_material": "ALD TiO2",
+    "film_thickness_nm": 700.0,
+    "mask_material": "Cr",
+    "mask_thickness_nm": 45.0,
+    "substrate": "fused silica",
+    "pressure_mTorr": 30.0,
+    "forward_power_setpoint_W": 150.0,
+    "temperature_C": 20.0,
+    "etch_time_s": 1200.0,
+    "gas_flows_sccm": {
+      "CHF3": 55.0,
+      "SF6": 5.0,
+      "O2": 1.0
+    }
+  },
+  "inferred_geometry_board": {
+    "feature_family": "square hard-mask islands yielding square pillars",
+    "pitch_nm": 400.0,
+    "width_nm": [80.0, 120.0, 160.0, 200.0, 240.0, 280.0, 320.0],
+    "evidence_class": "same_group_public_geometry_prior",
+    "target_layout_confirmed": false,
+    "permitted_claim": "sensitivity board over a same-group geometry envelope",
+    "forbidden_claim": "these dimensions identify Freddie's held-out layout"
+  },
+  "deterministic_feature_transport": {
+    "operator": "periodic 3D triangle-mesh adjoint ballistic face gather",
+    "stochastic_sampling": false,
+    "ideal_snapshot_wall_shape": "vertical",
+    "etched_depth_nodes_nm": [0.0, 140.0, 280.0, 420.0, 560.0, 660.0],
+    "mesh_spacing_nm": 20.0,
+    "convergence_sentinel_spacing_nm": 10.0,
+    "triangle_quadrature_points": 3,
+    "polar_quadrature_nodes": 12,
+    "azimuthal_quadrature_nodes": 8,
+    "angular_model": "two-component axisymmetric Gaussian core plus collisional tail",
+    "core_transverse_temperature_eV": 0.044,
+    "tail_transverse_temperature_eV": 0.57,
+    "tail_fraction_sensitivity": [0.0, 0.65],
+    "impact_energy_rule": {
+      "low": "0.5 times the minimum powered-electrode sheath drop in the conserved daughter-reclosed power board",
+      "high": "1.0 times the maximum powered-electrode sheath drop in the conserved daughter-reclosed power board",
+      "target_iead_measured": false
+    },
+    "known_omissions": [
+      "self-consistent intra-feature charging",
+      "ion reflection and fast-neutral re-impact",
+      "profile-shape feedback beyond the preregistered vertical-wall snapshots"
+    ]
+  },
+  "surface_response_axes": {
+    "ald_tio2_density_kg_m3": [3250.0, 4150.0],
+    "effective_tio2_formula_units_per_incident_positive_ion": [0.5, 1.0, 1.5, 2.0],
+    "tio2_to_cr_selectivity": [14.0, 18.016664028610727],
+    "evidence_class": {
+      "density": "measured cross-process ALD TiO2 range",
+      "yield": "engineering sensitivity spanning the existing atom-counted dose board; not a measured target coefficient",
+      "selectivity": "cross-machine Janissen TiO2/Cr witnesses; not a measured target coefficient"
+    }
+  },
+  "reactor_axes": {
+    "absorbed_power_W": [60.0, 90.0, 105.0, 120.0],
+    "forward_power_setpoint_selects_unique_absorbed_power": false,
+    "species_resolved_center_wafer_flux_source": "results/curated/zhu_npg80_daughter_wafer_dose_v1/audit.json"
+  },
+  "frozen_outputs": [
+    "depth-indexed ideal-floor ion transmission",
+    "depth-indexed Cr-mask-top ion transmission",
+    "film-sidewall share of incident ion dose",
+    "20-minute mask-pinned depth envelope",
+    "mask exhaustion time and depth where applicable",
+    "controlled-profile depth only while Cr survives"
+  ],
+  "explicitly_not_predicted": [
+    "a unique target SEM",
+    "top, middle, or bottom CD after mask exhaustion",
+    "sidewall bowing or angle without a TiO2 sidewall reaction law",
+    "collapse probability without post-etch mechanics and drying inputs"
+  ]
+}
