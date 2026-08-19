@@ -34,6 +34,7 @@ from .electron_kinetics import (
 from .geometry import CylindricalReactor
 from .network import E_CHARGE_C, RateContext, ReactionNetwork
 from .neutral_transport import solve_cylindrical_neutral_wall_loss
+from .zhu_daughter_electron_collisions import ZhuAugmentedCollisionChemistry
 from .zhu_parent_collision_chemistry import ZhuParentCollisionChemistry
 from .zhu_supplemental_chemistry import ZhuSupplementalChemistry
 
@@ -399,12 +400,31 @@ def positive_ion_wall_return(species_name: str) -> Mapping[str, float]:
         "SF2+": "SF2", "SF+": "SF", "S+": "S",
         "SF4++": "SF4", "SF2++": "SF2",
         "O2+": "O2", "O+": "O",
-        "H2+": "H2", "H+": "H",
+        "H2+": "H2", "H+": "H", "HF+": "HF",
     }
     try:
         return MappingProxyType({direct[species_name]: 1.0})
     except KeyError as exc:
         raise KeyError(f"no wall-return closure for {species_name}") from exc
+
+
+def log_flux_ratio_residual(conservation_residual: np.ndarray) -> np.ndarray:
+    """Desaturate bounded production/loss residuals for nonlinear solves.
+
+    A species balance written as ``(P-L)/(P+L)`` is an excellent bounded
+    conservation grade but a poor optimization coordinate: its derivative
+    vanishes when a continuation state is orders of magnitude away from the
+    new steady inventory.  ``2*atanh(r)`` is exactly ``log(P/L)`` for that
+    balance, has the same and only root, and retains useful log-density
+    derivatives far from closure.  The physical bounded residual remains the
+    post-solve acceptance gate.
+    """
+
+    values = np.asarray(conservation_residual, dtype=float)
+    if values.ndim != 1 or np.any(~np.isfinite(values)):
+        raise ValueError("conservation residual must be one finite vector")
+    limit = 1.0 - 8.0 * np.finfo(float).eps
+    return 2.0 * np.arctanh(np.clip(values, -limit, limit))
 
 
 class ZhuOpenReactorModel:
@@ -413,17 +433,30 @@ class ZhuOpenReactorModel:
     def __init__(
         self,
         electron_solver: DeterministicTwoTermBoltzmannSolver,
-        parent_chemistry: ZhuParentCollisionChemistry,
+        parent_chemistry: (
+            ZhuParentCollisionChemistry | ZhuAugmentedCollisionChemistry
+        ),
         supplemental_chemistry: ZhuSupplementalChemistry,
     ):
         if not isinstance(electron_solver, DeterministicTwoTermBoltzmannSolver):
             raise TypeError("a deterministic electron solver is required")
-        if not isinstance(parent_chemistry, ZhuParentCollisionChemistry):
-            raise TypeError("Zhu parent chemistry is required")
+        if not isinstance(parent_chemistry, (
+            ZhuParentCollisionChemistry, ZhuAugmentedCollisionChemistry,
+        )):
+            raise TypeError("Zhu collision chemistry is required")
         if not isinstance(supplemental_chemistry, ZhuSupplementalChemistry):
             raise TypeError("Zhu supplemental chemistry is required")
         if electron_solver.collision_deck is not parent_chemistry.mixed_deck:
             raise ValueError("electron solver and parent chemistry must share a deck")
+        if (
+            isinstance(parent_chemistry, ZhuAugmentedCollisionChemistry)
+            and set(parent_chemistry.supplemental_reactions_replaced)
+            != set(supplemental_chemistry.electron_collision_rows_replaced)
+        ):
+            raise ValueError(
+                "augmented collision rows must be removed from supplemental "
+                "chemistry"
+            )
         reactor_species = supplemental_chemistry.network.species
         reactor_names = {species.name for species in reactor_species}
         parent_names = {species.name for species in parent_chemistry.species}
@@ -447,6 +480,9 @@ class ZhuOpenReactorModel:
             if species.role == "negative_ion")
         self.parent_species_names = tuple(
             species.name for species in self.parent_chemistry.species)
+        self.electron_collision_targets = tuple(
+            self.electron_solver.collision_deck.targets
+        )
         self._supplemental_index = {
             name: index for index, name in enumerate(
                 self.supplemental_chemistry.network.species_names)
@@ -599,7 +635,9 @@ class ZhuOpenReactorModel:
         column_index = {name: index for index, name in enumerate(column_order)}
         matrix = lil_matrix(
             (len(residual_order), len(column_order)), dtype=bool)
-        eedf_columns = {"e", "CHF3", "SF6", "O2", "reduced_field"}
+        eedf_columns = {
+            "e", *self.electron_collision_targets, "reduced_field",
+        }
 
         network = self.supplemental_chemistry.network
         for reaction in network.reactions:
@@ -628,7 +666,7 @@ class ZhuOpenReactorModel:
             matrix[row_index[name], column_index[name]] = True
             matrix[row_index[name], column_index["exhaust"]] = True
         charged_transport_dependencies = {
-            "e", *self.negative_names, "CHF3", "SF6", "O2", "reduced_field",
+            *eedf_columns, *self.negative_names,
         }
         for ion_name in self.positive_names:
             dependencies = charged_transport_dependencies | {ion_name}
@@ -679,9 +717,12 @@ class ZhuOpenReactorModel:
         densities = dict(zip(self.species_order, values[:len(self.species_order)]))
         exhaust_frequency = float(values[-2])
         reduced_field = float(values[-1])
-        target_density = sum(densities[name] for name in _FEED_SPECIES)
+        target_density = sum(
+            densities[name] for name in self.electron_collision_targets
+        )
         target_fractions = {
-            name: densities[name] / target_density for name in _FEED_SPECIES
+            name: densities[name] / target_density
+            for name in self.electron_collision_targets
         }
         electron_condition = TwoTermBoltzmannCondition(
             reduced_electric_field_Td=reduced_field,
@@ -693,7 +734,7 @@ class ZhuOpenReactorModel:
         )
         electron_key = (
             reduced_field,
-            *(target_fractions[name] for name in _FEED_SPECIES),
+            *(target_fractions[name] for name in self.electron_collision_targets),
             electron_condition.angular_field_frequency_over_density_m3_s,
             maximum_tail_population_fraction,
         )
@@ -883,6 +924,9 @@ class ZhuOpenReactorModel:
             "electron_solution": electron_solution,
             "parent_state": parent_state,
             "equivalent_temperature": equivalent_temperature,
+            "internal_sources": internal_sources,
+            "turnover": turnover,
+            "external_terms": external_terms,
             "positive_wall_loss": positive_wall_loss,
             "powered_positive_wall_loss": powered_positive_wall_loss,
             "grounded_positive_wall_loss": grounded_positive_wall_loss,
@@ -1009,7 +1053,7 @@ class ZhuOpenReactorModel:
         neutral_wall_frequency = self._neutral_wall_frequencies(condition)
 
         def residual(log_state):
-            return self._ledger(
+            physical = self._ledger(
                 log_state,
                 condition=condition,
                 maximum_tail_population_fraction=(
@@ -1020,6 +1064,11 @@ class ZhuOpenReactorModel:
                 electron_cache=electron_cache,
                 electron_continuation=electron_continuation,
             )["residual"]
+            transformed = physical.copy()
+            transformed[:len(self.heavy_order)] = log_flux_ratio_residual(
+                physical[:len(self.heavy_order)]
+            )
+            return transformed
 
         result = least_squares(
             residual,
@@ -1051,11 +1100,21 @@ class ZhuOpenReactorModel:
                 ledger["balances"],
                 key=lambda name: abs(ledger["balances"][name]),
             )
+            dominant_diagnostic = ""
+            if dominant in ledger["densities"]:
+                dominant_diagnostic = (
+                    f", density={ledger['densities'][dominant]:.12g}, "
+                    f"internal={ledger['internal_sources'][dominant]:.12g}, "
+                    f"turnover={ledger['turnover'][dominant]:.12g}, "
+                    "external="
+                    f"{sum(ledger['external_terms'][dominant]):.12g}"
+                )
             raise RuntimeError(
                 "Zhu open-reactor solve failed conservation gate: "
                 f"success={result.success}, residual={maximum_residual}, "
                 f"dominant={dominant}={ledger['balances'][dominant]}, "
-                f"E/N={ledger['reduced_field']} Td, message={result.message}"
+                f"E/N={ledger['reduced_field']} Td"
+                f"{dominant_diagnostic}, message={result.message}"
             )
         return ZhuOpenReactorSolution(
             condition_id=condition.condition_id,
@@ -1086,7 +1145,10 @@ class ZhuOpenReactorModel:
             parent_collision_state=ledger["parent_state"],
             solver_evaluations=result.nfev,
             electron_collision_basis_neutral_fraction=(
-                sum(ledger["densities"][name] for name in _FEED_SPECIES)
+                sum(
+                    ledger["densities"][name]
+                    for name in self.electron_collision_targets
+                )
                 / sum(
                     ledger["densities"][name]
                     for name in self.neutral_names

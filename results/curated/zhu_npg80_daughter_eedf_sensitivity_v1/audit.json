@@ -26,8 +26,8 @@
   "finding": {
     "daughter_collisions_material_to_eedf": true,
     "f2_incremental_mean_energy_relative_change_range": [
-      -0.006230275497306148,
-      0.001588778029559812
+      -0.006230275503797511,
+      0.00158877821073089
     ],
     "growth_sign_by_variant": {
       "parent_only_replay": [
@@ -52,8 +52,8 @@
     "interpretation": "HF momentum and threshold-shifted losses materially cool the frozen EEDF. F2 changes mean energy weakly at the frozen composition but its attachment changes electron balance. The parent-only heavy state is therefore not a self-consistent daughter-collision solution.",
     "nonlinear_reclose_required": true,
     "partial_hf_mean_energy_relative_change_range": [
-      -0.4498927692877589,
-      -0.2767416429027435
+      -0.4498927732367637,
+      -0.2767416452506507
     ]
   },
   "method": {
@@ -301,204 +301,204 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 2.1443192689419415e-17,
+              "rate_coefficient_m3_s": 2.1443192251900476e-17,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.244439126137552e-17
+              "target_fraction_weighted_electron_source_m3_s": 1.2444391007464784e-17
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 2.3742950423455067e-18,
+              "rate_coefficient_m3_s": 2.3742949902413637e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.3779037900205353e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.3779037597822983e-18
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 5.223806013506201e-19,
+              "rate_coefficient_m3_s": 5.223805900367223e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 3.031595474011364e-19
+              "target_fraction_weighted_electron_source_m3_s": 3.0315954083520323e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 5.371478374582858e-19,
+              "rate_coefficient_m3_s": 5.371478242342309e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 3.117295988218644e-19
+              "target_fraction_weighted_electron_source_m3_s": 3.1172959114738633e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 8.740885607545762e-19,
+              "rate_coefficient_m3_s": 8.740885373984906e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 5.072705452341421e-19
+              "target_fraction_weighted_electron_source_m3_s": 5.072705316796181e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 9.573111201555598e-24,
+              "rate_coefficient_m3_s": 9.573110863492737e-24,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 5.555681148152763e-24
+              "target_fraction_weighted_electron_source_m3_s": 5.555680951960593e-24
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 2.0056786805541254e-24,
+              "rate_coefficient_m3_s": 2.0056788458312055e-24,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.163980131453584e-24
+              "target_fraction_weighted_electron_source_m3_s": 1.163980227370861e-24
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 3.887639852080514e-18,
+              "rate_coefficient_m3_s": 3.887639832750627e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -2.2561617620718153e-18
+              "target_fraction_weighted_electron_source_m3_s": -2.2561617508538647e-18
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 3.466768355911129e-17,
+              "rate_coefficient_m3_s": 3.466768282881495e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.2632242669022677e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.2632242402916618e-18
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 1.685724454071261e-18,
+              "rate_coefficient_m3_s": 1.6857244147061705e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 6.142458390859913e-20
+              "target_fraction_weighted_electron_source_m3_s": 6.142458247421031e-20
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 3.1433845509807273e-18,
+              "rate_coefficient_m3_s": 3.1433844742243216e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.1453893763146875e-19
+              "target_fraction_weighted_electron_source_m3_s": 1.1453893483461172e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 2.1092247497718752e-20,
+              "rate_coefficient_m3_s": 2.1092246814683352e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 7.685612693791989e-22
+              "target_fraction_weighted_electron_source_m3_s": 7.685612444906917e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 1.3525525350906137e-21,
+              "rate_coefficient_m3_s": 1.3525524838121538e-21,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.928443464281014e-23
+              "target_fraction_weighted_electron_source_m3_s": 4.9284432774320866e-23
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 1.019692591859032e-23,
+              "rate_coefficient_m3_s": 1.0196926066103928e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.715565317828289e-25
+              "target_fraction_weighted_electron_source_m3_s": 3.715565371579434e-25
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 2.2889811924550668e-23,
+              "rate_coefficient_m3_s": 2.288981146494808e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 8.340610885817875e-25
+              "target_fraction_weighted_electron_source_m3_s": 8.340610718347458e-25
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 1.2697890216810524e-22,
+              "rate_coefficient_m3_s": 1.2697889734684504e-22,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.6268690069776165e-24
+              "target_fraction_weighted_electron_source_m3_s": 4.62686883130009e-24
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 3.4061886577722577e-25,
+              "rate_coefficient_m3_s": 3.4061906316544085e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.2411501803426179e-26
+              "target_fraction_weighted_electron_source_m3_s": 1.2411508995876257e-26
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 8.761168323185469e-16,
+              "rate_coefficient_m3_s": 8.761168350579479e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.192402634399448e-17
+              "target_fraction_weighted_electron_source_m3_s": -3.192402644381303e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 1.5181877053181957e-15,
+              "rate_coefficient_m3_s": 1.518187712051213e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -5.531986432841943e-17
+              "target_fraction_weighted_electron_source_m3_s": -5.5319864573757743e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.1498489154574868e-17,
+              "rate_coefficient_m3_s": 1.1498489159843795e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -4.189830136185732e-19
+              "target_fraction_weighted_electron_source_m3_s": -4.1898301381056284e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 1.0466247970495444e-18,
+              "rate_coefficient_m3_s": 1.0466247895330593e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.813701136738246e-20
+              "target_fraction_weighted_electron_source_m3_s": -3.813701109349608e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 7.033285958292986e-20,
+              "rate_coefficient_m3_s": 7.033285890176259e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.562795256691915e-21
+              "target_fraction_weighted_electron_source_m3_s": -2.5627952318714788e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 2.064910834471877e-18,
+              "rate_coefficient_m3_s": 2.064910829037763e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -7.524141238472623e-20
+              "target_fraction_weighted_electron_source_m3_s": -7.524141218671749e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.548400952995167e-16,
+              "rate_coefficient_m3_s": 1.5484009506918138e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -5.6420777447763055e-18
+              "target_fraction_weighted_electron_source_m3_s": -5.6420777363833254e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 7.834004587552287e-17,
+              "rate_coefficient_m3_s": 7.834004455764517e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 7.121626293745364e-19
+              "target_fraction_weighted_electron_source_m3_s": 7.121626173941598e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 3.329544727989208e-17,
+              "rate_coefficient_m3_s": 3.329544724899805e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -3.0267755164102954e-19
+              "target_fraction_weighted_electron_source_m3_s": -3.026775513601825e-19
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 5.578914992394038e-17,
+              "rate_coefficient_m3_s": 5.578914875510563e-17,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 2.087233730744441e-17
+              "target_fraction_weighted_electron_source_m3_s": 2.0872336870149466e-17
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 7.007304917255209e+23,
-          "growth_reconstruction_error_m3_s": -4.639279779314726e-24,
-          "iteration_count": 11,
-          "mean_electron_energy_eV": 4.864116235201257,
-          "net_growth_rate_coefficient_m3_s": -5.801075444587274e-17,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -5.801075908515251e-17,
-          "reduced_field_power_gain_eV_m3_s": 1.6154278333169972e-14,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 7.007304922396063e+23,
+          "growth_reconstruction_error_m3_s": -4.639279717684968e-24,
+          "iteration_count": 20,
+          "mean_electron_energy_eV": 4.864116219410919,
+          "net_growth_rate_coefficient_m3_s": -5.801075556292127e-17,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -5.801076020220099e-17,
+          "reduced_field_power_gain_eV_m3_s": 1.6154278338881672e-14,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.1319059435480161,
-            "mean_electron_energy": -0.2767416429027435,
-            "reduced_field_power_gain": -0.48292463940462205
+            "flux_reduced_mobility": 0.13190594437842984,
+            "mean_electron_energy": -0.2767416452506507,
+            "reduced_field_power_gain": -0.4829246392217986
           },
           "represented_neutral_density_m3": 6.832168449725874e+20,
           "represented_neutral_fraction": 0.8254402061932514,
@@ -510,7 +510,7 @@
             "SF6": 0.03643809269080136
           },
           "total_neutral_reduced_field_Td": 143.93896718354645,
-          "weighted_iteration_residual": 8.094514018830034e-16
+          "weighted_iteration_residual": 1.973723346559876e-15
         },
         "partial_hf_plus_f2": {
           "angular_frequency_over_represented_density_m3_s": 1.2168293520091883e-13,
@@ -527,218 +527,218 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 2.038581632929682e-17,
+              "rate_coefficient_m3_s": 2.038581590909353e-17,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.1544124470838641e-17
+              "target_fraction_weighted_electron_source_m3_s": 1.1544124232885007e-17
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 2.2450275091866015e-18,
+              "rate_coefficient_m3_s": 2.2450274594108986e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.271319067525462e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.2713190393383686e-18
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 4.945131488881996e-19,
+              "rate_coefficient_m3_s": 4.945131380606296e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 2.800339829917742e-19
+              "target_fraction_weighted_electron_source_m3_s": 2.8003397686031424e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 5.029365567839883e-19,
+              "rate_coefficient_m3_s": 5.029365442651919e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 2.848040087610088e-19
+              "target_fraction_weighted_electron_source_m3_s": 2.8480400167183747e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 8.116737188256709e-19,
+              "rate_coefficient_m3_s": 8.1167369689808835e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 4.596363613050975e-19
+              "target_fraction_weighted_electron_source_m3_s": 4.596363488878983e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 8.325522760350724e-24,
+              "rate_coefficient_m3_s": 8.325522325530346e-24,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 4.714595161547013e-24
+              "target_fraction_weighted_electron_source_m3_s": 4.714594915315982e-24
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 1.709466178414304e-24,
+              "rate_coefficient_m3_s": 1.709465836483631e-24,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 9.680402306942735e-25
+              "target_fraction_weighted_electron_source_m3_s": 9.680400370650271e-25
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 3.8505986225622036e-18,
+              "rate_coefficient_m3_s": 3.850598603145689e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -2.180525374508326e-18
+              "target_fraction_weighted_electron_source_m3_s": -2.1805253635131e-18
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 3.288099050220858e-17,
+              "rate_coefficient_m3_s": 3.288098980254655e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.1690934105411483e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.1690933856644565e-18
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 1.585802601685591e-18,
+              "rate_coefficient_m3_s": 1.5858025642665976e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 5.638368381649287e-20
+              "target_fraction_weighted_electron_source_m3_s": 5.638368248604942e-20
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 2.9452888550352905e-18,
+              "rate_coefficient_m3_s": 2.9452887823519377e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.0472062246211098e-19
+              "target_fraction_weighted_electron_source_m3_s": 1.0472061987783273e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 1.9135373635966463e-20,
+              "rate_coefficient_m3_s": 1.9135373007774768e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 6.803639088837232e-22
+              "target_fraction_weighted_electron_source_m3_s": 6.803638865481804e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 1.1940700887459024e-21,
+              "rate_coefficient_m3_s": 1.1940700404920113e-21,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.245551764577628e-23
+              "target_fraction_weighted_electron_source_m3_s": 4.245551593009481e-23
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 8.703241304476747e-24,
+              "rate_coefficient_m3_s": 8.703240231332824e-24,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.0944633674371445e-25
+              "target_fraction_weighted_electron_source_m3_s": 3.094462985877627e-25
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 1.9671038220370818e-23,
+              "rate_coefficient_m3_s": 1.9671036702493792e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 6.994096227239231e-25
+              "target_fraction_weighted_electron_source_m3_s": 6.994095687553533e-25
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 1.108619832216141e-22,
+              "rate_coefficient_m3_s": 1.1086197809204064e-22,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.94173083244578e-24
+              "target_fraction_weighted_electron_source_m3_s": 3.941730650062267e-24
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 2.8579046569197184e-25,
+              "rate_coefficient_m3_s": 2.857902373244159e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.0161365127170613e-26
+              "target_fraction_weighted_electron_source_m3_s": 1.0161357007494144e-26
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 8.764298945074568e-16,
+              "rate_coefficient_m3_s": 8.764298972497644e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.116172593405051e-17
+              "target_fraction_weighted_electron_source_m3_s": -3.116172603155407e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 1.5161914309525391e-15,
+              "rate_coefficient_m3_s": 1.5161914376763597e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -5.390863790817088e-17
+              "target_fraction_weighted_electron_source_m3_s": -5.390863814723832e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.1515347408854925e-17,
+              "rate_coefficient_m3_s": 1.15153474136981e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -4.094316068392197e-19
+              "target_fraction_weighted_electron_source_m3_s": -4.094316070114202e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 1.0320137522421212e-18,
+              "rate_coefficient_m3_s": 1.0320137447100777e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.669355633471773e-20
+              "target_fraction_weighted_electron_source_m3_s": -3.669355606691368e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 6.899952952139896e-20,
+              "rate_coefficient_m3_s": 6.899952884320292e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.453298822871186e-21
+              "target_fraction_weighted_electron_source_m3_s": -2.453298798757724e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 2.0560663738255643e-18,
+              "rate_coefficient_m3_s": 2.0560663683692114e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -7.310405229773247e-20
+              "target_fraction_weighted_electron_source_m3_s": -7.310405210373021e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.5447151012433865e-16,
+              "rate_coefficient_m3_s": 1.5447150988985884e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -5.4922805500818005e-18
+              "target_fraction_weighted_electron_source_m3_s": -5.492280541744801e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 7.534864879593514e-17,
+              "rate_coefficient_m3_s": 7.534864751582259e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 6.683739459906912e-19
+              "target_fraction_weighted_electron_source_m3_s": 6.68373934635559e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 3.323424335429078e-17,
+              "rate_coefficient_m3_s": 3.323424332174541e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -2.948016019886552e-19
+              "target_fraction_weighted_electron_source_m3_s": -2.948016016999642e-19
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 5.2937846455850027e-17,
+              "rate_coefficient_m3_s": 5.293784533539654e-17,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 1.9325747245421403e-17
+              "target_fraction_weighted_electron_source_m3_s": 1.9325746836383212e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "F^-+F",
-              "rate_coefficient_m3_s": 1.123907664120268e-15,
+              "rate_coefficient_m3_s": 1.1239076676677331e-15,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": -2.722919414078257e-17
+              "target_fraction_weighted_electron_source_m3_s": -2.72291942267279e-17
             },
             {
               "kind": "IONIZATION",
               "product": "F2^+",
-              "rate_coefficient_m3_s": 1.7883929543554694e-17,
+              "rate_coefficient_m3_s": 1.78839291768913e-17,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": 4.3327846680598683e-19
+              "target_fraction_weighted_electron_source_m3_s": 4.3327845792274045e-19
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 7.04521667987096e+23,
-          "growth_reconstruction_error_m3_s": -3.951892307981444e-24,
-          "iteration_count": 11,
-          "mean_electron_energy_eV": 4.833811451005033,
-          "net_growth_rate_coefficient_m3_s": -8.51905953427151e-17,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -8.519059929460741e-17,
-          "reduced_field_power_gain_eV_m3_s": 1.562279873964256e-14,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 7.045216684843582e+23,
+          "growth_reconstruction_error_m3_s": -3.951892480544767e-24,
+          "iteration_count": 15,
+          "mean_electron_energy_eV": 4.833811435281499,
+          "net_growth_rate_coefficient_m3_s": -8.519059649516791e-17,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -8.519060044706039e-17,
+          "reduced_field_power_gain_eV_m3_s": 1.5622798744934816e-14,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.13802991702168055,
-            "mean_electron_energy": -0.28124774172318845,
-            "reduced_field_power_gain": -0.49993654156480627
+            "flux_reduced_mobility": 0.13802991782491958,
+            "mean_electron_energy": -0.2812477440611625,
+            "reduced_field_power_gain": -0.49993654139540866
           },
           "represented_neutral_density_m3": 7.001802892466046e+20,
           "represented_neutral_fraction": 0.8459348837503516,
@@ -751,7 +751,7 @@
             "SF6": 0.0355552978388112
           },
           "total_neutral_reduced_field_Td": 143.93896718354645,
-          "weighted_iteration_residual": 6.8499616002530645e-16
+          "weighted_iteration_residual": 5.149587067726409e-15
         }
       }
     },
@@ -992,204 +992,204 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 1.4210018034446982e-18,
+              "rate_coefficient_m3_s": 1.42100170797062e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 4.350507069584189e-19
+              "target_fraction_weighted_electron_source_m3_s": 4.350506777282905e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 1.2025289400420939e-19,
+              "rate_coefficient_m3_s": 1.20252885297001e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 3.681635478822467e-20
+              "target_fraction_weighted_electron_source_m3_s": 3.6816352122445393e-20
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 2.6611783906420704e-20,
+              "rate_coefficient_m3_s": 2.6611781956434676e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 8.147403735764202e-21
+              "target_fraction_weighted_electron_source_m3_s": 8.147403138760879e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 1.5972975513541484e-20,
+              "rate_coefficient_m3_s": 1.5972974188568355e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 4.890250154890938e-21
+              "target_fraction_weighted_electron_source_m3_s": 4.890249749240153e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 1.817067570673806e-20,
+              "rate_coefficient_m3_s": 1.8170674117084025e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 5.563093088949912e-21
+              "target_fraction_weighted_electron_source_m3_s": 5.563092602265018e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 7.038509039360619e-27,
+              "rate_coefficient_m3_s": 7.038685376848864e-27,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 2.154894051565663e-27
+              "target_fraction_weighted_electron_source_m3_s": 2.1549480386533206e-27
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 5.204260748350037e-28,
+              "rate_coefficient_m3_s": 5.210600921375567e-28,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.5933247320848652e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.5952658251575897e-28
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 2.2041701558538056e-18,
+              "rate_coefficient_m3_s": 2.2041701213911358e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -6.748237632325887e-19
+              "target_fraction_weighted_electron_source_m3_s": -6.748237526815754e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 2.0726423128215428e-18,
+              "rate_coefficient_m3_s": 2.0726421699077475e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.5979366409209815e-20
+              "target_fraction_weighted_electron_source_m3_s": 3.597936392834384e-20
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 6.584887047578569e-20,
+              "rate_coefficient_m3_s": 6.584886537675885e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.1430822500461434e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.1430821615312298e-21
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 9.988375913787892e-20,
+              "rate_coefficient_m3_s": 9.988375101427883e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.7338999334905656e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.733899792471547e-21
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 1.2954505974216254e-22,
+              "rate_coefficient_m3_s": 1.2954504817705455e-22,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.2487957242468763e-24
+              "target_fraction_weighted_electron_source_m3_s": 2.2487955234861104e-24
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 2.108540128297281e-24,
+              "rate_coefficient_m3_s": 2.108543136054349e-24,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.660252297042733e-26
+              "target_fraction_weighted_electron_source_m3_s": 3.6602575182617033e-26
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 2.7810520896380893e-27,
+              "rate_coefficient_m3_s": 2.7826221798529854e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.8276777675146676e-29
+              "target_fraction_weighted_electron_source_m3_s": 4.830403315033784e-29
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 8.9278561449145e-27,
+              "rate_coefficient_m3_s": 8.929315587936453e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.5498024212837322e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.5500557685926982e-28
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 1.1226531126739212e-25,
+              "rate_coefficient_m3_s": 1.1226643798316713e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.948833498257968e-27
+              "target_fraction_weighted_electron_source_m3_s": 1.948853057117428e-27
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 3.8456822840523366e-29,
+              "rate_coefficient_m3_s": 3.897786188041072e-29,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 6.6757882503597885e-31
+              "target_fraction_weighted_electron_source_m3_s": 6.766236343663884e-31
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 1.2263721817741762e-15,
+              "rate_coefficient_m3_s": 1.2263721887297326e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.1288812743597737e-17
+              "target_fraction_weighted_electron_source_m3_s": -2.128881286434048e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 2.1831807677946162e-15,
+              "rate_coefficient_m3_s": 2.1831807914256097e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.789822310203204e-17
+              "target_fraction_weighted_electron_source_m3_s": -3.7898223512246656e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.0859374741523995e-17,
+              "rate_coefficient_m3_s": 1.0859374710372422e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.8850981685707335e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.8850981631630765e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 4.308619468655395e-19,
+              "rate_coefficient_m3_s": 4.308619349700368e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -7.479409139803414e-21
+              "target_fraction_weighted_electron_source_m3_s": -7.479408933307268e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 2.1257188925760637e-20,
+              "rate_coefficient_m3_s": 2.125718815213817e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.690073219380382e-22
+              "target_fraction_weighted_electron_source_m3_s": -3.690073085085883e-22
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 1.5617701789130359e-18,
+              "rate_coefficient_m3_s": 1.5617701691047103e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.7111046207290015e-20
+              "target_fraction_weighted_electron_source_m3_s": -2.711104603702555e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.2596418485045763e-16,
+              "rate_coefficient_m3_s": 1.259641841405297e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.1866346803478927e-18
+              "target_fraction_weighted_electron_source_m3_s": -2.1866346680241277e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 9.559813133896206e-18,
+              "rate_coefficient_m3_s": 9.559812616429417e-18,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 4.8868756779583555e-20
+              "target_fraction_weighted_electron_source_m3_s": 4.886875413434789e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 2.7233341580657067e-17,
+              "rate_coefficient_m3_s": 2.723334138963232e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -1.3921397075028845e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.392139697737901e-19
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 3.3714126806483084e-18,
+              "rate_coefficient_m3_s": 3.3714124482879094e-18,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 2.2634693205471258e-18
+              "target_fraction_weighted_electron_source_m3_s": 2.26346916454705e-18
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.488092634660557e+23,
-          "growth_reconstruction_error_m3_s": -1.9498053127218155e-27,
-          "iteration_count": 18,
-          "mean_electron_energy_eV": 3.5616996226587494,
-          "net_growth_rate_coefficient_m3_s": -5.956951301302592e-17,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -5.956951301497572e-17,
-          "reduced_field_power_gain_eV_m3_s": 8.8447549630992e-15,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.48809265280289e+23,
+          "growth_reconstruction_error_m3_s": -1.9491890151396116e-27,
+          "iteration_count": 21,
+          "mean_electron_energy_eV": 3.5616995989001827,
+          "net_growth_rate_coefficient_m3_s": -5.956951371394244e-17,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -5.956951371589163e-17,
+          "reduced_field_power_gain_eV_m3_s": 8.844754970577567e-15,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.30226299535372103,
-            "mean_electron_energy": -0.44132501001942326,
-            "reduced_field_power_gain": -0.7121004588799782
+            "flux_reduced_mobility": 0.30226299813716007,
+            "mean_electron_energy": -0.4413250137461039,
+            "reduced_field_power_gain": -0.712100458636555
           },
           "represented_neutral_density_m3": 6.506133339289771e+20,
           "represented_neutral_fraction": 0.7860497125953679,
@@ -1201,7 +1201,7 @@
             "SF6": 0.01735917779282917
           },
           "total_neutral_reduced_field_Td": 100.36809226619745,
-          "weighted_iteration_residual": 1.4582600212490807e-15
+          "weighted_iteration_residual": 7.299165586403166e-17
         },
         "partial_hf_plus_f2": {
           "angular_frequency_over_represented_density_m3_s": 1.25009772123128e-13,
@@ -1218,218 +1218,218 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 1.2712983790897623e-18,
+              "rate_coefficient_m3_s": 1.2712982922816309e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 3.71552431842493e-19
+              "target_fraction_weighted_electron_source_m3_s": 3.715524064717595e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 1.0613908346328508e-19,
+              "rate_coefficient_m3_s": 1.061390756477961e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 3.1020439593852765e-20
+              "target_fraction_weighted_electron_source_m3_s": 3.102043730968094e-20
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 2.3438804439186403e-20,
+              "rate_coefficient_m3_s": 2.3438802690508777e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 6.850276010810073e-21
+              "target_fraction_weighted_electron_source_m3_s": 6.850275499737742e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 1.368514896048226e-20,
+              "rate_coefficient_m3_s": 1.368514780100805e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 3.999651427255482e-21
+              "target_fraction_weighted_electron_source_m3_s": 3.9996510883850256e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 1.5315147040309736e-20,
+              "rate_coefficient_m3_s": 1.5315145654579698e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 4.476038214511608e-21
+              "target_fraction_weighted_electron_source_m3_s": 4.4760378095151305e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 4.978862460281822e-27,
+              "rate_coefficient_m3_s": 4.978840569816104e-27,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.4551331814420511e-27
+              "target_fraction_weighted_electron_source_m3_s": 1.4551267836868857e-27
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 3.4934288779079806e-28,
+              "rate_coefficient_m3_s": 3.493061842916565e-28,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.0209971289233074e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.0208898584776946e-28
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 2.17200543201943e-18,
+              "rate_coefficient_m3_s": 2.1720053979030325e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -6.347950359377774e-19
+              "target_fraction_weighted_electron_source_m3_s": -6.347950259668448e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 1.8457768021853957e-18,
+              "rate_coefficient_m3_s": 1.8457766728609887e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.058691667232679e-20
+              "target_fraction_weighted_electron_source_m3_s": 3.058691452925356e-20
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 5.733106762452372e-20,
+              "rate_coefficient_m3_s": 5.733106310574661e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 9.500501827147267e-22
+              "target_fraction_weighted_electron_source_m3_s": 9.500501078327265e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 8.600209872266502e-20,
+              "rate_coefficient_m3_s": 8.600209159417186e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.4251663712323316e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.4251662531039501e-21
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 1.0231538861893367e-22,
+              "rate_coefficient_m3_s": 1.0231537678378992e-22,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.6954987527629135e-24
+              "target_fraction_weighted_electron_source_m3_s": 1.6954985566392244e-24
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 1.549501551289665e-24,
+              "rate_coefficient_m3_s": 1.5495008984631675e-24,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.5677251321407402e-26
+              "target_fraction_weighted_electron_source_m3_s": 2.567724050322524e-26
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 1.8697697313882923e-27,
+              "rate_coefficient_m3_s": 1.8696440598322024e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.0984510642185515e-29
+              "target_fraction_weighted_electron_source_m3_s": 3.098242810143105e-29
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 6.111497648755897e-27,
+              "rate_coefficient_m3_s": 6.1113630571258625e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.0127544625346402e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.012732158955097e-28
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 8.011548171543572e-26,
+              "rate_coefficient_m3_s": 8.011533540353762e-26,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.3276174890116634e-27
+              "target_fraction_weighted_electron_source_m3_s": 1.3276150644336593e-27
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 2.4729443530502413e-29,
+              "rate_coefficient_m3_s": 2.4702666427148874e-29,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.097989679602189e-31
+              "target_fraction_weighted_electron_source_m3_s": 4.093552366119696e-31
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 1.1911590208600712e-15,
+              "rate_coefficient_m3_s": 1.1911590276175416e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.9739050610777928e-17
+              "target_fraction_weighted_electron_source_m3_s": -1.9739050722757985e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 2.1044447190848526e-15,
+              "rate_coefficient_m3_s": 2.104444741740614e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.487337970005605e-17
+              "target_fraction_weighted_electron_source_m3_s": -3.4873380075491414e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.0944100301577352e-17,
+              "rate_coefficient_m3_s": 1.0944100268970756e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.8135794294391072e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.813579424035771e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 4.1700185761764777e-19,
+              "rate_coefficient_m3_s": 4.170018458894574e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -6.910261877847211e-21
+              "target_fraction_weighted_electron_source_m3_s": -6.910261683495879e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 2.0295837961039978e-20,
+              "rate_coefficient_m3_s": 2.029583720843135e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.363283706753526e-22
+              "target_fraction_weighted_electron_source_m3_s": -3.36328358203651e-22
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 1.5661653317763244e-18,
+              "rate_coefficient_m3_s": 1.56616532209746e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.5953391786813577e-20
+              "target_fraction_weighted_electron_source_m3_s": -2.5953391626422237e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.2640496473208517e-16,
+              "rate_coefficient_m3_s": 1.264049640163611e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.094694287332553e-18
+              "target_fraction_weighted_electron_source_m3_s": -2.094694275472076e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 8.816678455987992e-18,
+              "rate_coefficient_m3_s": 8.81667797176563e-18,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 4.3024343791533104e-20
+              "target_fraction_weighted_electron_source_m3_s": 4.3024341428585485e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 2.7236449947368554e-17,
+              "rate_coefficient_m3_s": 2.7236449751711014e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -1.3291064112705627e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.329106401722707e-19
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 3.003015423747906e-18,
+              "rate_coefficient_m3_s": 3.0030152134179707e-18,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 1.9246316548344316e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.924631520034041e-18
             },
             {
               "kind": "ATTACHMENT",
               "product": "F^-+F",
-              "rate_coefficient_m3_s": 1.5117700601151054e-15,
+              "rate_coefficient_m3_s": 1.5117700691883176e-15,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": -6.861463814479299e-17
+              "target_fraction_weighted_electron_source_m3_s": -6.861463855659846e-17
             },
             {
               "kind": "IONIZATION",
               "product": "F2^+",
-              "rate_coefficient_m3_s": 1.1121319457070902e-18,
+              "rate_coefficient_m3_s": 1.1121318692089096e-18,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": 5.0476281438029314e-20
+              "target_fraction_weighted_electron_source_m3_s": 5.047627796600991e-20
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.402555201353181e+23,
-          "growth_reconstruction_error_m3_s": -1.3280966377461497e-27,
-          "iteration_count": 19,
-          "mean_electron_energy_eV": 3.5581734474117055,
-          "net_growth_rate_coefficient_m3_s": -1.2383503136910278e-16,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -1.2383503137043087e-16,
-          "reduced_field_power_gain_eV_m3_s": 8.332151296193964e-15,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.402555218569529e+23,
+          "growth_reconstruction_error_m3_s": -1.3280719858428615e-27,
+          "iteration_count": 16,
+          "mean_electron_energy_eV": 3.558173423926268,
+          "net_growth_rate_coefficient_m3_s": -1.2383503241651146e-16,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -1.2383503241783953e-16,
+          "reduced_field_power_gain_eV_m3_s": 8.33215130349521e-15,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.28913964256903646,
-            "mean_electron_energy": -0.44187811278762956,
-            "reduced_field_power_gain": -0.7287858686051953
+            "flux_reduced_mobility": 0.2891396452104089,
+            "mean_electron_energy": -0.44187811647146813,
+            "reduced_field_power_gain": -0.7287858683675374
           },
           "represented_neutral_density_m3": 6.815466608597424e+20,
           "represented_neutral_fraction": 0.8234223446573492,
@@ -1442,7 +1442,7 @@
             "SF6": 0.016571297589238282
           },
           "total_neutral_reduced_field_Td": 100.36809226619745,
-          "weighted_iteration_residual": 2.7590705627808913e-15
+          "weighted_iteration_residual": 1.6705148702242386e-15
         }
       }
     },
@@ -1683,204 +1683,204 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 7.456476912167858e-19,
+              "rate_coefficient_m3_s": 7.456476287581823e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.6112580130290686e-19
+              "target_fraction_weighted_electron_source_m3_s": 1.6112578780632846e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 5.902365861455583e-20,
+              "rate_coefficient_m3_s": 5.90236532760971e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.275432674455177e-20
+              "target_fraction_weighted_electron_source_m3_s": 1.2754325590972874e-20
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 1.2895341553358853e-20,
+              "rate_coefficient_m3_s": 1.2895340366975407e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 2.786533459882378e-21
+              "target_fraction_weighted_electron_source_m3_s": 2.7865332035187014e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 6.797444567819473e-21,
+              "rate_coefficient_m3_s": 6.797443855717687e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.4688487816742646e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.4688486277973437e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 7.180336826442109e-21,
+              "rate_coefficient_m3_s": 7.1803360136463e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.551587349378507e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.551587173742778e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 1.2951137834484933e-27,
+              "rate_coefficient_m3_s": 1.2950143030605693e-27,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 2.7985903878552805e-28
+              "target_fraction_weighted_electron_source_m3_s": 2.7983754222970553e-28
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 7.713502482471932e-29,
+              "rate_coefficient_m3_s": 7.687934336212598e-29,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.666798252016465e-29
+              "target_fraction_weighted_electron_source_m3_s": 1.6612732727234393e-29
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 2.007477449930154e-18,
+              "rate_coefficient_m3_s": 2.007477413724633e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -4.337925491188467e-19
+              "target_fraction_weighted_electron_source_m3_s": -4.337925412952543e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 1.0640729899165481e-18,
+              "rate_coefficient_m3_s": 1.0640728985400899e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.3041905864316906e-20
+              "target_fraction_weighted_electron_source_m3_s": 1.3041904744353166e-20
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 3.025961092856675e-20,
+              "rate_coefficient_m3_s": 3.025960799359494e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.7087963040220886e-22
+              "target_fraction_weighted_electron_source_m3_s": 3.708795944294641e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 4.3547802476129533e-20,
+              "rate_coefficient_m3_s": 4.3547798026118794e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 5.337475397586122e-22
+              "target_fraction_weighted_electron_source_m3_s": 5.337474852166571e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 3.809784857448901e-23,
+              "rate_coefficient_m3_s": 3.809784142771353e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.66949691844404e-25
+              "target_fraction_weighted_electron_source_m3_s": 4.669496042493105e-25
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 4.553370985648076e-25,
+              "rate_coefficient_m3_s": 4.553349781692262e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 5.580879913584823e-27
+              "target_fraction_weighted_electron_source_m3_s": 5.580853924766547e-27
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 4.141468623496397e-28,
+              "rate_coefficient_m3_s": 4.1342275663498105e-28,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 5.076028095769837e-30
+              "target_fraction_weighted_electron_source_m3_s": 5.067153029251014e-30
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 1.4317131129371382e-27,
+              "rate_coefficient_m3_s": 1.430991394177239e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.754791994588518e-29
+              "target_fraction_weighted_electron_source_m3_s": 1.7539074135291066e-29
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 2.1429010718406143e-26,
+              "rate_coefficient_m3_s": 2.1428355390422565e-26,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.6264658834805053e-28
+              "target_fraction_weighted_electron_source_m3_s": 2.6263855626195016e-28
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 4.9301766955723156e-30,
+              "rate_coefficient_m3_s": 4.7305455595436525e-30,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 6.042715205386981e-32
+              "target_fraction_weighted_electron_source_m3_s": 5.798035516273112e-32
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 1.154631937103796e-15,
+              "rate_coefficient_m3_s": 1.154631944448832e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.4151849708000374e-17
+              "target_fraction_weighted_electron_source_m3_s": -1.4151849798025464e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 1.9531273533771572e-15,
+              "rate_coefficient_m3_s": 1.953127379514502e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.3938680264560643e-17
+              "target_fraction_weighted_electron_source_m3_s": -2.393868058491535e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.1113225874858175e-17,
+              "rate_coefficient_m3_s": 1.1113225832481741e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.3621024787045691e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.3621024735106635e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 3.537615777178423e-19,
+              "rate_coefficient_m3_s": 3.5376156552570878e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -4.335910448558767e-21
+              "target_fraction_weighted_electron_source_m3_s": -4.335910299124791e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 1.5993395254655823e-20,
+              "rate_coefficient_m3_s": 1.5993394523724507e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.9602448078152287e-22
+              "target_fraction_weighted_electron_source_m3_s": -1.9602447182279776e-22
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 1.5435958838468092e-18,
+              "rate_coefficient_m3_s": 1.5435958737525834e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.8919221144083342e-20
+              "target_fraction_weighted_electron_source_m3_s": -1.891922102036256e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.258129650096313e-16,
+              "rate_coefficient_m3_s": 1.258129641943065e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.5420378693146738e-18
+              "target_fraction_weighted_electron_source_m3_s": -1.5420378593215724e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 5.9052944809326496e-18,
+              "rate_coefficient_m3_s": 5.905294086436567e-18,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 2.422622551075969e-20
+              "target_fraction_weighted_electron_source_m3_s": 2.4226223892355885e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 2.6975303318839916e-17,
+              "rate_coefficient_m3_s": 2.6975303080495886e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -1.1066506226462536e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.1066506128682888e-19
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 1.7310464016082157e-18,
+              "rate_coefficient_m3_s": 1.731046252906888e-18,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 1.328669118562817e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.3286690044267302e-18
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.699362495399143e+23,
-          "growth_reconstruction_error_m3_s": -2.628878966649022e-28,
-          "iteration_count": 18,
-          "mean_electron_energy_eV": 3.481572235073444,
-          "net_growth_rate_coefficient_m3_s": -3.879015740908127e-17,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -3.879015740934416e-17,
-          "reduced_field_power_gain_eV_m3_s": 7.845869856938098e-15,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.699362516908402e+23,
+          "growth_reconstruction_error_m3_s": -2.629187115440124e-28,
+          "iteration_count": 20,
+          "mean_electron_energy_eV": 3.481572210080598,
+          "net_growth_rate_coefficient_m3_s": -3.8790157932066273e-17,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -3.879015793232919e-17,
+          "reduced_field_power_gain_eV_m3_s": 7.845869863850283e-15,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.31487267915155215,
-            "mean_electron_energy": -0.4498927692877589,
-            "reduced_field_power_gain": -0.7534706189282105
+            "flux_reduced_mobility": 0.3148726824025878,
+            "mean_electron_energy": -0.4498927732367637,
+            "reduced_field_power_gain": -0.753470618711019
           },
           "represented_neutral_density_m3": 6.278257413680894e+20,
           "represented_neutral_fraction": 0.758518489866011,
@@ -1892,7 +1892,7 @@
             "SF6": 0.012256589527133606
           },
           "total_neutral_reduced_field_Td": 92.27324736256882,
-          "weighted_iteration_residual": 7.045950685220828e-16
+          "weighted_iteration_residual": 8.059434009366278e-16
         },
         "partial_hf_plus_f2": {
           "angular_frequency_over_represented_density_m3_s": 1.2729301935203e-13,
@@ -1909,218 +1909,218 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 6.361207986695161e-19,
+              "rate_coefficient_m3_s": 6.361207442537995e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.2893628606772668e-19
+              "target_fraction_weighted_electron_source_m3_s": 1.2893627503812284e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 4.9378654331296083e-20,
+              "rate_coefficient_m3_s": 4.9378649772314693e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.000863407361575e-20
+              "target_fraction_weighted_electron_source_m3_s": 1.0008633149548922e-20
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 1.0739827993226767e-20,
+              "rate_coefficient_m3_s": 1.0739826983316748e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 2.1768719673199786e-21
+              "target_fraction_weighted_electron_source_m3_s": 2.1768717626197903e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 5.439254579661931e-21,
+              "rate_coefficient_m3_s": 5.43925400085409e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.1024907312342709e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.1024906139148347e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 5.6154350122477626e-21,
+              "rate_coefficient_m3_s": 5.615434389765854e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.1382010093810232e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.1382008832092242e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 7.840028683631982e-28,
+              "rate_coefficient_m3_s": 7.841306078220914e-28,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.589107262718398e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.5893661797581873e-28
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 4.313666327826802e-29,
+              "rate_coefficient_m3_s": 4.3585832102396847e-29,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 8.743435473399025e-30
+              "target_fraction_weighted_electron_source_m3_s": 8.834478181201866e-30
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 1.9713855250970237e-18,
+              "rate_coefficient_m3_s": 1.971385489530799e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -3.995831114865672e-19
+              "target_fraction_weighted_electron_source_m3_s": -3.9958310427759534e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 9.021327137076323e-19,
+              "rate_coefficient_m3_s": 9.021326346258983e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.0371563288497252e-20
+              "target_fraction_weighted_electron_source_m3_s": 1.0371562379317044e-20
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 2.4811707343089154e-20,
+              "rate_coefficient_m3_s": 2.4811704887489074e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.8525314412655255e-22
+              "target_fraction_weighted_electron_source_m3_s": 2.8525311589521667e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 3.512698090006461e-20,
+              "rate_coefficient_m3_s": 3.512697724360063e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 4.038449110680688e-22
+              "target_fraction_weighted_electron_source_m3_s": 4.038448690307421e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 2.7082454070086583e-23,
+              "rate_coefficient_m3_s": 2.708245220448593e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.11359273561112e-25
+              "target_fraction_weighted_electron_source_m3_s": 3.113592521128318e-25
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 2.913554182416683e-25,
+              "rate_coefficient_m3_s": 2.913577850400518e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.3496303967526594e-27
+              "target_fraction_weighted_electron_source_m3_s": 3.349657607160677e-27
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 2.3239380005640574e-28,
+              "rate_coefficient_m3_s": 2.335156867629183e-28,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.6717654381842166e-30
+              "target_fraction_weighted_electron_source_m3_s": 2.684663450641051e-30
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 8.25682794809861e-28,
+              "rate_coefficient_m3_s": 8.267323876582995e-28,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 9.492640309426918e-30
+              "target_fraction_weighted_electron_source_m3_s": 9.5047071799542e-30
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 1.3136921930463578e-26,
+              "rate_coefficient_m3_s": 1.3137752108205457e-26,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.5103145595716333e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.5104100027460108e-28
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 2.498845120514437e-30,
+              "rate_coefficient_m3_s": 2.866209789451859e-30,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.8728511805156994e-32
+              "target_fraction_weighted_electron_source_m3_s": 3.295199894396518e-32
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 1.0976188020308389e-15,
+              "rate_coefficient_m3_s": 1.097618808974672e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.26190112595748e-17
+              "target_fraction_weighted_electron_source_m3_s": -1.2619011339406076e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 1.8345595219276953e-15,
+              "rate_coefficient_m3_s": 1.8345595461406866e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.1091409167492847e-17
+              "target_fraction_weighted_electron_source_m3_s": -2.1091409445862725e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.1250213877081458e-17,
+              "rate_coefficient_m3_s": 1.1250213832541132e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.2934050995194859e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.2934050943988113e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 3.3739724511040247e-19,
+              "rate_coefficient_m3_s": 3.3739723320203505e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.878960188291367e-21
+              "target_fraction_weighted_electron_source_m3_s": -3.878960051384253e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 1.494802573541308e-20,
+              "rate_coefficient_m3_s": 1.4948025035283135e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.7185320141617965e-22
+              "target_fraction_weighted_electron_source_m3_s": -1.7185319336698474e-22
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 1.5556885028709213e-18,
+              "rate_coefficient_m3_s": 1.5556884930169878e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.7885308358236067e-20
+              "target_fraction_weighted_electron_source_m3_s": -1.7885308244948195e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.2675637713485825e-16,
+              "rate_coefficient_m3_s": 1.2675637631271291e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.4572820248051338e-18
+              "target_fraction_weighted_electron_source_m3_s": -1.4572820153531627e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 5.2680898893326126e-18,
+              "rate_coefficient_m3_s": 5.268089530523322e-18,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 2.0272229814139457e-20
+              "target_fraction_weighted_electron_source_m3_s": 2.0272228433399083e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 2.7009888498276792e-17,
+              "rate_coefficient_m3_s": 2.7009888253111867e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -1.0393722931723088e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.0393722837380739e-19
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 1.46768369447907e-18,
+              "rate_coefficient_m3_s": 1.4676835657332382e-18,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 1.0566830696686032e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.0566829769759194e-18
             },
             {
               "kind": "ATTACHMENT",
               "product": "F^-+F",
-              "rate_coefficient_m3_s": 1.3971489995187536e-15,
+              "rate_coefficient_m3_s": 1.3971490089323641e-15,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": -8.661928541944011e-17
+              "target_fraction_weighted_electron_source_m3_s": -8.661928600305733e-17
             },
             {
               "kind": "IONIZATION",
               "product": "F2^+",
-              "rate_coefficient_m3_s": 5.522854919383858e-19,
+              "rate_coefficient_m3_s": 5.522854442275651e-19,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": 3.4240138078118275e-20
+              "target_fraction_weighted_electron_source_m3_s": 3.424013512018237e-20
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.50035784506293e+23,
-          "growth_reconstruction_error_m3_s": -1.5101755954324745e-28,
-          "iteration_count": 20,
-          "mean_electron_energy_eV": 3.487017509365377,
-          "net_growth_rate_coefficient_m3_s": -1.2117616594587196e-16,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -1.2117616594602298e-16,
-          "reduced_field_power_gain_eV_m3_s": 7.24213804206364e-15,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.500357864728046e+23,
+          "growth_reconstruction_error_m3_s": -1.5106686334982376e-28,
+          "iteration_count": 10,
+          "mean_electron_energy_eV": 3.487017484799303,
+          "net_growth_rate_coefficient_m3_s": -1.2117616697972812e-16,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -1.2117616697987918e-16,
+          "reduced_field_power_gain_eV_m3_s": 7.24213804891372e-15,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.2847939489124591,
-            "mean_electron_energy": -0.4490323865184379,
-            "reduced_field_power_gain": -0.7724408074947123
+            "flux_reduced_mobility": 0.28479395188476,
+            "mean_electron_energy": -0.4490323904000103,
+            "reduced_field_power_gain": -0.7724408072794722
           },
           "represented_neutral_density_m3": 6.693217994125337e+20,
           "represented_neutral_fraction": 0.8086526675674162,
@@ -2133,7 +2133,7 @@
             "SF6": 0.011496715650485236
           },
           "total_neutral_reduced_field_Td": 92.27324736256882,
-          "weighted_iteration_residual": 7.989260075241317e-16
+          "weighted_iteration_residual": 1.3566996214851346e-15
         }
       }
     },
@@ -2374,204 +2374,204 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 6.63020235860831e-19,
+              "rate_coefficient_m3_s": 6.630201770638022e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.0919646371826127e-19
+              "target_fraction_weighted_electron_source_m3_s": 1.0919645403465392e-19
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 5.186673335643755e-20,
+              "rate_coefficient_m3_s": 5.1866728398261053e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 8.542218714919852e-21
+              "target_fraction_weighted_electron_source_m3_s": 8.542217898330385e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 1.1296905474143373e-20,
+              "rate_coefficient_m3_s": 1.1296904375913884e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.860549741946119e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.86054956107264e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 5.8402978054908515e-21,
+              "rate_coefficient_m3_s": 5.8402971719095196e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 9.618708946237732e-22
+              "target_fraction_weighted_electron_source_m3_s": 9.618707902757652e-22
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 6.11306338510809e-21,
+              "rate_coefficient_m3_s": 6.1130627426737894e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.0067941640916997e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.0067940582856473e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 1.0476208828840822e-27,
+              "rate_coefficient_m3_s": 1.04825659816769e-27,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.7253846796971144e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.7264316743007027e-28
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 6.23241079295074e-29,
+              "rate_coefficient_m3_s": 6.469833397671275e-29,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.0264501477034789e-29
+              "target_fraction_weighted_electron_source_m3_s": 1.0655525874783379e-29
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 2.014752620048542e-18,
+              "rate_coefficient_m3_s": 2.0147525825501387e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -3.3182073408477627e-19
+              "target_fraction_weighted_electron_source_m3_s": -3.3182072790895715e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 9.426843064778548e-19,
+              "rate_coefficient_m3_s": 9.42684220804223e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 8.916982402758194e-21
+              "target_fraction_weighted_electron_source_m3_s": 8.916981592359356e-21
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 2.630433361658561e-20,
+              "rate_coefficient_m3_s": 2.6304330926438032e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.4881636234270416e-22
+              "target_fraction_weighted_electron_source_m3_s": 2.4881633689622283e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 3.755720586525598e-20,
+              "rate_coefficient_m3_s": 3.755720184204952e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.5525885123570976e-22
+              "target_fraction_weighted_electron_source_m3_s": 3.552588131796384e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 3.146253663934028e-23,
+              "rate_coefficient_m3_s": 3.1462541134443716e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.976085245413204e-25
+              "target_fraction_weighted_electron_source_m3_s": 2.9760856706113105e-25
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 3.694825403689582e-25,
+              "rate_coefficient_m3_s": 3.694942515989235e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.4949869091448505e-27
+              "target_fraction_weighted_electron_source_m3_s": 3.495097687303347e-27
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 3.35076017028684e-28,
+              "rate_coefficient_m3_s": 3.408799419968244e-28,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.169530803577953e-30
+              "target_fraction_weighted_electron_source_m3_s": 3.2244309397658596e-30
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 1.1579803356312691e-27,
+              "rate_coefficient_m3_s": 1.1633456736056132e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.0953497586210873e-29
+              "target_fraction_weighted_electron_source_m3_s": 1.100424906682142e-29
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 1.734078794301902e-26,
+              "rate_coefficient_m3_s": 1.7344922186626513e-26,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.6402893298987418e-28
+              "target_fraction_weighted_electron_source_m3_s": 1.6406803937707446e-28
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 3.8631036707007586e-30,
+              "rate_coefficient_m3_s": 5.8188234134553935e-30,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 3.654163670165912e-32
+              "target_fraction_weighted_electron_source_m3_s": 5.504106266115931e-32
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 1.0488148595401027e-15,
+              "rate_coefficient_m3_s": 1.048814866560331e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -9.920886114263644e-18
+              "target_fraction_weighted_electron_source_m3_s": -9.920886180668964e-18
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 1.6827132636072567e-15,
+              "rate_coefficient_m3_s": 1.6827132880766363e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.5917019576294607e-17
+              "target_fraction_weighted_electron_source_m3_s": -1.591701980775388e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.1516049349467142e-17,
+              "rate_coefficient_m3_s": 1.1516049305391628e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.0893191781474276e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.0893191739782633e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 3.475740796929428e-19,
+              "rate_coefficient_m3_s": 3.475740670889883e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -3.2877517223732983e-21
+              "target_fraction_weighted_electron_source_m3_s": -3.2877516031507334e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 1.5360963400472564e-20,
+              "rate_coefficient_m3_s": 1.5360962658578677e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.453014963654158e-22
+              "target_fraction_weighted_electron_source_m3_s": -1.4530148934773798e-22
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 1.5822402612650192e-18,
+              "rate_coefficient_m3_s": 1.5822402511193223e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.4966631426538068e-20
+              "target_fraction_weighted_electron_source_m3_s": -1.4966631330568503e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.29613558762623e-16,
+              "rate_coefficient_m3_s": 1.2961355792231062e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.2260327393838133e-18
+              "target_fraction_weighted_electron_source_m3_s": -1.2260327314351811e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 5.431364797557422e-18,
+              "rate_coefficient_m3_s": 5.431364414327024e-18,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 1.924585583252848e-20
+              "target_fraction_weighted_electron_source_m3_s": 1.924585447456464e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 2.776491269448341e-17,
+              "rate_coefficient_m3_s": 2.776491244151846e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -9.838402074577613e-20
+              "target_fraction_weighted_electron_source_m3_s": -9.838401984940346e-20
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 1.5333397182713365e-18,
+              "rate_coefficient_m3_s": 1.533339578802847e-18,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 1.2608681219147276e-18
+              "target_fraction_weighted_electron_source_m3_s": 1.2608680072295275e-18
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.630489757731159e+23,
-          "growth_reconstruction_error_m3_s": -1.639628902574407e-28,
-          "iteration_count": 17,
-          "mean_electron_energy_eV": 3.5397026337151134,
-          "net_growth_rate_coefficient_m3_s": -2.6210271553006736e-17,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -2.62102715531707e-17,
-          "reduced_field_power_gain_eV_m3_s": 7.748051503208997e-15,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.630489779764988e+23,
+          "growth_reconstruction_error_m3_s": -1.6395364579370763e-28,
+          "iteration_count": 22,
+          "mean_electron_energy_eV": 3.5397026081003053,
+          "net_growth_rate_coefficient_m3_s": -2.6210271963018868e-17,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -2.621027196318282e-17,
+          "reduced_field_power_gain_eV_m3_s": 7.748051509640042e-15,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.2979876644022368,
-            "mean_electron_energy": -0.44234134778929235,
-            "reduced_field_power_gain": -0.7648166604665189
+            "flux_reduced_mobility": 0.2979876677160278,
+            "mean_electron_energy": -0.44234135182474976,
+            "reduced_field_power_gain": -0.7648166602713118
           },
           "represented_neutral_density_m3": 6.032344308315078e+20,
           "represented_neutral_fraction": 0.728808074151972,
@@ -2583,7 +2583,7 @@
             "SF6": 0.009459139545957498
           },
           "total_neutral_reduced_field_Td": 89.39853140726005,
-          "weighted_iteration_residual": 4.736585511424186e-16
+          "weighted_iteration_residual": 5.344389615802321e-16
         },
         "partial_hf_plus_f2": {
           "angular_frequency_over_represented_density_m3_s": 1.3025837254359356e-13,
@@ -2600,218 +2600,218 @@
             {
               "kind": "IONIZATION",
               "product": "CF3+ + H",
-              "rate_coefficient_m3_s": 5.414980288171441e-19,
+              "rate_coefficient_m3_s": 5.414979794477827e-19,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 8.224904845691388e-20
+              "target_fraction_weighted_electron_source_m3_s": 8.224904095811836e-20
             },
             {
               "kind": "IONIZATION",
               "product": "CHF2+ + F",
-              "rate_coefficient_m3_s": 4.1326953735095694e-20,
+              "rate_coefficient_m3_s": 4.1326949663632365e-20,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 6.277220671993158e-21
+              "target_fraction_weighted_electron_source_m3_s": 6.277220053571729e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CF2+ + HF",
-              "rate_coefficient_m3_s": 8.947613045164614e-21,
+              "rate_coefficient_m3_s": 8.94761214604399e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 1.3590680293574489e-21
+              "target_fraction_weighted_electron_source_m3_s": 1.3590678927885015e-21
             },
             {
               "kind": "IONIZATION",
               "product": "CHF+ + F + F",
-              "rate_coefficient_m3_s": 4.398305002526908e-21,
+              "rate_coefficient_m3_s": 4.398304499473731e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 6.680659615166987e-22
+              "target_fraction_weighted_electron_source_m3_s": 6.680658851071035e-22
             },
             {
               "kind": "IONIZATION",
               "product": "CF+ + HF + F",
-              "rate_coefficient_m3_s": 4.47322958439872e-21,
+              "rate_coefficient_m3_s": 4.4732290363357014e-21,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 6.794463825654144e-22
+              "target_fraction_weighted_electron_source_m3_s": 6.794462993191986e-22
             },
             {
               "kind": "IONIZATION",
               "product": "CH+ + F2 + F",
-              "rate_coefficient_m3_s": 5.55124869359259e-28,
+              "rate_coefficient_m3_s": 5.550855465314424e-28,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 8.431885223904643e-29
+              "target_fraction_weighted_electron_source_m3_s": 8.431287942843876e-29
             },
             {
               "kind": "IONIZATION",
               "product": "F+ + CHF2",
-              "rate_coefficient_m3_s": 3.0259544251562586e-29,
+              "rate_coefficient_m3_s": 3.01041909338476e-29,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": 4.596173188049293e-30
+              "target_fraction_weighted_electron_source_m3_s": 4.572576310726223e-30
             },
             {
               "kind": "ATTACHMENT",
               "product": "CHF2 + F-",
-              "rate_coefficient_m3_s": 1.9679017232469265e-18,
+              "rate_coefficient_m3_s": 1.9679016866825236e-18,
               "target": "CHF3",
-              "target_fraction_weighted_electron_source_m3_s": -2.989079102417894e-19
+              "target_fraction_weighted_electron_source_m3_s": -2.989079046879606e-19
             },
             {
               "kind": "IONIZATION",
               "product": "SF5+",
-              "rate_coefficient_m3_s": 7.63958311841369e-19,
+              "rate_coefficient_m3_s": 7.639582404759317e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 6.66459103373015e-21
+              "target_fraction_weighted_electron_source_m3_s": 6.664590411155009e-21
             },
             {
               "kind": "IONIZATION",
               "product": "SF4+",
-              "rate_coefficient_m3_s": 2.04333175066204e-20,
+              "rate_coefficient_m3_s": 2.0433315345682194e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.7825541332975306e-22
+              "target_fraction_weighted_electron_source_m3_s": 1.7825539447824093e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF3+",
-              "rate_coefficient_m3_s": 2.857598097784923e-20,
+              "rate_coefficient_m3_s": 2.857597779301694e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 2.4929007728966557e-22
+              "target_fraction_weighted_electron_source_m3_s": 2.4929004950594436e-22
             },
             {
               "kind": "IONIZATION",
               "product": "SF2+",
-              "rate_coefficient_m3_s": 2.041106702970759e-23,
+              "rate_coefficient_m3_s": 2.0411063439286162e-23,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.7806130544895536e-25
+              "target_fraction_weighted_electron_source_m3_s": 1.7806127412697079e-25
             },
             {
               "kind": "IONIZATION",
               "product": "SF+",
-              "rate_coefficient_m3_s": 2.099161511906881e-25,
+              "rate_coefficient_m3_s": 2.099154034631311e-25,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.8312586922296577e-27
+              "target_fraction_weighted_electron_source_m3_s": 1.831252169231878e-27
             },
             {
               "kind": "IONIZATION",
               "product": "S+",
-              "rate_coefficient_m3_s": 1.6232891200148656e-28,
+              "rate_coefficient_m3_s": 1.619568853811358e-28,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.4161189094633716e-30
+              "target_fraction_weighted_electron_source_m3_s": 1.412873437505193e-30
             },
             {
               "kind": "IONIZATION",
               "product": "F+",
-              "rate_coefficient_m3_s": 5.780551206916506e-28,
+              "rate_coefficient_m3_s": 5.777151969400938e-28,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 5.04281570689072e-30
+              "target_fraction_weighted_electron_source_m3_s": 5.0398502927422474e-30
             },
             {
               "kind": "IONIZATION",
               "product": "SF4++",
-              "rate_coefficient_m3_s": 9.334730723918176e-27,
+              "rate_coefficient_m3_s": 9.334474328144588e-27,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 8.143397580813073e-29
+              "target_fraction_weighted_electron_source_m3_s": 8.14317390722418e-29
             },
             {
               "kind": "IONIZATION",
               "product": "SF2++",
-              "rate_coefficient_m3_s": 1.9328335460323635e-30,
+              "rate_coefficient_m3_s": 1.8040028118123595e-30,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": 1.6861581215775698e-32
+              "target_fraction_weighted_electron_source_m3_s": 1.573769246053457e-32
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF5-",
-              "rate_coefficient_m3_s": 9.808138537548522e-16,
+              "rate_coefficient_m3_s": 9.8081386022743e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -8.556387323985567e-18
+              "target_fraction_weighted_electron_source_m3_s": -8.5563873804508e-18
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF6-",
-              "rate_coefficient_m3_s": 1.5501017389895076e-15,
+              "rate_coefficient_m3_s": 1.5501017610227778e-15,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.3522719749116504e-17
+              "target_fraction_weighted_electron_source_m3_s": -1.3522719941329526e-17
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF4-",
-              "rate_coefficient_m3_s": 1.168285113450882e-17,
+              "rate_coefficient_m3_s": 1.1682851087628517e-17,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.0191842108737867e-19
+              "target_fraction_weighted_electron_source_m3_s": -1.0191842067840604e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF3-",
-              "rate_coefficient_m3_s": 3.267052361337674e-19,
+              "rate_coefficient_m3_s": 3.267052239328792e-19,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -2.8500989565277638e-21
+              "target_fraction_weighted_electron_source_m3_s": -2.85009885009011e-21
             },
             {
               "kind": "ATTACHMENT",
               "product": "SF2-",
-              "rate_coefficient_m3_s": 1.406919888424881e-20,
+              "rate_coefficient_m3_s": 1.4069198183789482e-20,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.2273635260244494e-22
+              "target_fraction_weighted_electron_source_m3_s": -1.2273634649180398e-22
             },
             {
               "kind": "ATTACHMENT",
               "product": "F2-",
-              "rate_coefficient_m3_s": 1.5975029274845414e-18,
+              "rate_coefficient_m3_s": 1.5975029176845958e-18,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.3936236469774622e-20
+              "target_fraction_weighted_electron_source_m3_s": -1.3936236384282222e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "F-",
-              "rate_coefficient_m3_s": 1.3075023178982934e-16,
+              "rate_coefficient_m3_s": 1.3075023094219512e-16,
               "target": "SF6",
-              "target_fraction_weighted_electron_source_m3_s": -1.140633996564953e-18
+              "target_fraction_weighted_electron_source_m3_s": -1.1406339891703932e-18
             },
             {
               "kind": "IONIZATION",
               "product": "O2+/O+ aggregate",
-              "rate_coefficient_m3_s": 4.694579935918348e-18,
+              "rate_coefficient_m3_s": 4.6945795966053444e-18,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": 1.53418313773095e-20
+              "target_fraction_weighted_electron_source_m3_s": 1.534183026843864e-20
             },
             {
               "kind": "ATTACHMENT",
               "product": "O- + O",
-              "rate_coefficient_m3_s": 2.777694492156932e-17,
+              "rate_coefficient_m3_s": 2.77769446599309e-17,
               "target": "O2",
-              "target_fraction_weighted_electron_source_m3_s": -9.077472553040408e-20
+              "target_fraction_weighted_electron_source_m3_s": -9.077472467537283e-20
             },
             {
               "kind": "IONIZATION",
               "product": "HF+",
-              "rate_coefficient_m3_s": 1.2426186753613491e-18,
+              "rate_coefficient_m3_s": 1.242618559184669e-18,
               "target": "HF",
-              "target_fraction_weighted_electron_source_m3_s": 9.423698162842955e-19
+              "target_fraction_weighted_electron_source_m3_s": 9.423697281789106e-19
             },
             {
               "kind": "ATTACHMENT",
               "product": "F^-+F",
-              "rate_coefficient_m3_s": 1.2550297656631788e-15,
+              "rate_coefficient_m3_s": 1.255029774432846e-15,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": -9.756910891877626e-17
+              "target_fraction_weighted_electron_source_m3_s": -9.75691096005518e-17
             },
             {
               "kind": "IONIZATION",
               "product": "F2^+",
-              "rate_coefficient_m3_s": 4.690754485757818e-19,
+              "rate_coefficient_m3_s": 4.690754053714089e-19,
               "target": "F2",
-              "target_fraction_weighted_electron_source_m3_s": 3.6467082124566256e-20
+              "target_fraction_weighted_electron_source_m3_s": 3.6467078765751763e-20
             }
           ],
-          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.35514120870038e+23,
-          "growth_reconstruction_error_m3_s": -8.159779988379841e-29,
+          "flux_reduced_mobility_m_inv_V_inv_s_inv": 8.355141228089124e+23,
+          "growth_reconstruction_error_m3_s": -8.127732514105237e-29,
           "iteration_count": 14,
-          "mean_electron_energy_eV": 3.5453264354907352,
-          "net_growth_rate_coefficient_m3_s": -1.202048562211179e-16,
-          "reconstructed_net_growth_rate_coefficient_m3_s": -1.202048562211995e-16,
-          "reduced_field_power_gain_eV_m3_s": 7.014249224982655e-15,
+          "mean_electron_energy_eV": 3.5453264104765223,
+          "net_growth_rate_coefficient_m3_s": -1.202048572388174e-16,
+          "reconstructed_net_growth_rate_coefficient_m3_s": -1.2020485723889867e-16,
+          "reduced_field_power_gain_eV_m3_s": 7.014249231444945e-15,
           "relative_to_parent_only": {
-            "flux_reduced_mobility": 0.25657645483178926,
-            "mean_electron_energy": -0.441455351974666,
-            "reduced_field_power_gain": -0.7870903986159196
+            "flux_reduced_mobility": 0.25657645774777116,
+            "mean_electron_energy": -0.44145535591550333,
+            "reduced_field_power_gain": -0.7870903984197641
           },
           "represented_neutral_density_m3": 6.54084578991967e+20,
           "represented_neutral_fraction": 0.790243557037262,
@@ -2824,7 +2824,7 @@
             "SF6": 0.008723762711170042
           },
           "total_neutral_reduced_field_Td": 89.39853140726005,
-          "weighted_iteration_residual": 4.231598910460657e-16
+          "weighted_iteration_residual": 1.294096485651186e-15
         }
       }
     }

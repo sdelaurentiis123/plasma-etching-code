@@ -32,9 +32,16 @@ from .electron_collision_deck import (
     ElectronCollisionDeck,
     ElectronCollisionProcess,
 )
+from .electron_collision_chemistry import (
+    ElectronCollisionChemistry,
+    ElectronCollisionHeavyMapping,
+)
+from .electron_collision_mixture import compose_electron_collision_decks
+from .network import Species
+from .zhu_parent_collision_chemistry import ZhuParentCollisionChemistry
 
 
-HF_MASS_AMU = 20.006343
+HF_MASS_AMU = 20.006243163
 HF_DISSOCIATION_THRESHOLD_EV = 5.87
 HF_IONIZATION_THRESHOLD_EV = 16.007
 HUANG_2020_DOI = "10.1116/1.5125568"
@@ -90,6 +97,42 @@ class F2EffectiveDeconvolution:
             or self.supports_feature_depth
         ):
             raise ValueError("invalid F2 effective-momentum deconvolution")
+
+
+@dataclass(frozen=True)
+class ZhuAugmentedCollisionChemistry:
+    """One fully mapped parent+HF+F2 collision provider for reactor closure."""
+
+    parent_chemistry: ZhuParentCollisionChemistry
+    hf_replay: HFDaughterCollisionSensitivity
+    f2_replay: F2EffectiveDeconvolution
+    mixed_deck: ElectronCollisionDeck
+    species: tuple[Species, ...]
+    collision_chemistry: ElectronCollisionChemistry
+    supplemental_reactions_replaced: tuple[str, ...]
+    supports_parent_collision_sources: bool = True
+    supports_complete_daughter_eedf: bool = False
+    supports_unique_reactor_state: bool = False
+    supports_wafer_flux: bool = False
+    supports_feature_depth: bool = False
+
+    def __post_init__(self):
+        nonmomentum = sum(
+            process.kind not in {"MOMENTUM", "ELASTIC", "EFFECTIVE"}
+            for process in self.mixed_deck.processes
+        )
+        if (
+            self.collision_chemistry.collision_deck is not self.mixed_deck
+            or self.collision_chemistry.species != self.species
+            or len(self.collision_chemistry.mappings) != nonmomentum
+            or not self.supplemental_reactions_replaced
+            or not self.supports_parent_collision_sources
+            or self.supports_complete_daughter_eedf
+            or self.supports_unique_reactor_state
+            or self.supports_wafer_flux
+            or self.supports_feature_depth
+        ):
+            raise ValueError("invalid augmented Zhu collision chemistry")
 
 
 def _derivation_hash(payload: dict[str, object]) -> str:
@@ -327,4 +370,117 @@ def deconvolve_siglo_f2_effective_momentum(
         source_f2_payload_sha256=f2_deck.payload_sha256,
         maximum_energy_eV=maximum,
         minimum_elastic_cross_section_m2=float(np.min(elastic_sigma)),
+    )
+
+
+def zhu_hf_f2_replaced_supplemental_reactions(
+    *,
+    kokkoris_eedf_shape: str = "druyvesteyn",
+) -> tuple[str, ...]:
+    """Scalar rows superseded by energy-resolved HF/F2 collision moments."""
+
+    if kokkoris_eedf_shape not in {"druyvesteyn", "maxwellian"}:
+        raise ValueError("unsupported Kokkoris EEDF shape")
+    return (
+        f"kokkoris_2009_G6_{kokkoris_eedf_shape}",
+        f"kokkoris_2009_G7_{kokkoris_eedf_shape}",
+        f"kokkoris_2009_G16_{kokkoris_eedf_shape}",
+        f"kokkoris_2009_G19_{kokkoris_eedf_shape}",
+        "lim_2014_R14",
+    )
+
+
+def _daughter_heavy_products(
+    process: ElectronCollisionProcess,
+) -> tuple[dict[str, int], str]:
+    if process.target == "HF":
+        if process.kind == "EXCITATION" and process.product == "H + F":
+            return {"H": 1, "F": 1}, "huang_hcl_threshold_shift"
+        if process.kind == "IONIZATION" and process.product == "HF+":
+            return {"HF+": 1}, "huang_hcl_threshold_shift"
+    if process.target == "F2":
+        if process.kind == "ATTACHMENT":
+            return {"F-": 1, "F": 1}, "siglo_product_resolved"
+        if process.kind == "IONIZATION":
+            return {"F2+": 1}, "siglo_product_resolved"
+        if process.kind == "EXCITATION":
+            if process.energy_loss_eV in {3.16, 4.34}:
+                return {"F": 2}, "kokkoris_dissociation_interpretation"
+            return {"F2": 1}, "internal_state_collapsed_to_inventory"
+    raise RuntimeError(
+        "unmapped daughter collision "
+        f"{process.target}/{process.kind}/{process.product}"
+    )
+
+
+def build_zhu_augmented_collision_chemistry(
+    parent: ZhuParentCollisionChemistry,
+    hf_replay: HFDaughterCollisionSensitivity,
+    f2_replay: F2EffectiveDeconvolution,
+    *,
+    reactor_species: tuple[Species, ...],
+    kokkoris_eedf_shape: str = "druyvesteyn",
+) -> ZhuAugmentedCollisionChemistry:
+    """Compose and atom/charge-map the enlarged reactor collision basis."""
+
+    if not isinstance(parent, ZhuParentCollisionChemistry):
+        raise TypeError("a Zhu parent collision provider is required")
+    if not isinstance(hf_replay, HFDaughterCollisionSensitivity):
+        raise TypeError("an HF daughter replay is required")
+    if not isinstance(f2_replay, F2EffectiveDeconvolution):
+        raise TypeError("an F2 daughter replay is required")
+    species = tuple(reactor_species)
+    mixed = compose_electron_collision_decks(
+        (parent.mixed_deck, hf_replay.derived_deck, f2_replay.derived_deck),
+        retrieved_at="2026-08-18",
+        mixture_name="Zhu NPG80 parent plus partial HF and SIGLO F2",
+    )
+    mappings = [
+        ElectronCollisionHeavyMapping(
+            process_index=mapping.process_index,
+            reaction_name=mapping.reaction_name,
+            heavy_reactants=mapping.heavy_reactants,
+            heavy_products=mapping.heavy_products,
+            source=mapping.source,
+            evidence_kind=mapping.evidence_kind,
+        )
+        for mapping in parent.collision_chemistry.mappings
+    ]
+    parent_count = len(parent.mixed_deck.processes)
+    for index, process in enumerate(
+        mixed.processes[parent_count:], start=parent_count
+    ):
+        if process.kind in {"MOMENTUM", "ELASTIC", "EFFECTIVE"}:
+            continue
+        products, evidence = _daughter_heavy_products(process)
+        mappings.append(ElectronCollisionHeavyMapping(
+            process_index=index,
+            reaction_name=(
+                f"daughter_electron_{index:02d}_{process.target}_"
+                f"{process.kind.lower()}_"
+                f"{str(process.product).replace(' ', '_')}"
+            ),
+            heavy_reactants={process.target: 1},
+            heavy_products=products,
+            source=(
+                "derived daughter collision source and explicit heavy "
+                f"mapping; target={process.target}; product={process.product}"
+            ),
+            evidence_kind=evidence,
+        ))
+    chemistry = ElectronCollisionChemistry(
+        mixed, species, tuple(mappings)
+    )
+    return ZhuAugmentedCollisionChemistry(
+        parent_chemistry=parent,
+        hf_replay=hf_replay,
+        f2_replay=f2_replay,
+        mixed_deck=mixed,
+        species=species,
+        collision_chemistry=chemistry,
+        supplemental_reactions_replaced=(
+            zhu_hf_f2_replaced_supplemental_reactions(
+                kokkoris_eedf_shape=kokkoris_eedf_shape
+            )
+        ),
     )

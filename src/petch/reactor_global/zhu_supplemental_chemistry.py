@@ -45,6 +45,7 @@ KOKKORIS_2009_DOI = "10.1088/0022-3727/42/5/055209"
 KOKKORIS_2009_TARGET_PRESSURE_PA = 2.0
 ZHU_RECIPE_PRESSURE_PA = 3.0e-2 * 133.32236842105263
 PATEAU_2014_DOI = "10.1116/1.4853675"
+HUANG_2020_DOI = "10.1116/1.5125568"
 
 _PARENT_SF6_ROWS_REPLACED_BY_MEASURED_CROSS_SECTIONS = (
     "G1", "G2", "G3", "G8", "G9", "G10", "G17", "G18",
@@ -170,6 +171,7 @@ class ZhuSupplementalChemistry:
     pressure_specific_rows_excluded: tuple[str, ...]
     sandia_rows_selected: tuple[int, ...]
     chf3_f_rate_branch: str
+    electron_collision_rows_replaced: tuple[str, ...] = ()
     supports_measured_parent_eedf: bool = True
     supports_complete_daughter_eedf: bool = False
     supports_target_pressure_falloff: bool = False
@@ -206,6 +208,13 @@ def zhu_reactor_species() -> tuple[Species, ...]:
             composition={"H": 1}, role="positive_ion",
             source="sandia-2001-fluorocarbon-mechanisms Table 9",
             evidence_kind="published_compilation"),
+        Species(
+            name="HF+", mass_amu=20.006243163, charge_number=1,
+            composition={"H": 1, "F": 1}, role="positive_ion",
+            source=(
+                "Huang-2020 HCl-threshold-shifted HF ionization closure"
+            ),
+            evidence_kind="semi_empirical"),
     )
     oxygenated = (
         ("CH", {"C": 1, "H": 1}),
@@ -430,6 +439,53 @@ def _pateau_sf6_charge_closure_reactions() -> tuple[Reaction, ...]:
     return tuple(reactions)
 
 
+def _huang_hf_charge_closure_reactions() -> tuple[Reaction, ...]:
+    """Close HF+ with the estimated rates printed by Huang et al. 2020.
+
+    These rows are not promoted to measurements: Huang labels the
+    dissociative-recombination and mutual-neutralization coefficients
+    ``est.`` in its appendix.  They are still preferable to silently giving
+    the newly produced HF+ ion only a material-wall sink.
+    """
+
+    source = (
+        f"Huang et al. 2020 appendix ({HUANG_2020_DOI}); printed as estimated"
+    )
+    reactions = [Reaction(
+        name="huang_2020_hfplus_e_dissociative_recombination",
+        reactants={"e": 1, "HF+": 1},
+        products={"H": 1, "F": 1},
+        kinetic_orders={"e": 1, "HF+": 1},
+        rate_coefficient=ElectronArrheniusRateCoefficient.from_cm3_per_s(
+            1.0e-7,
+            activation_eV=0.0,
+            temperature_power=-0.5,
+            source=source,
+            evidence_kind="estimated",
+        ),
+        # The printed -10.1 eV is reaction enthalpy, not a measured electron
+        # energy-loss moment, so it is not inserted into the electron ledger.
+        electron_energy_loss_eV=0.0,
+        source=source,
+    )]
+    for negative, neutral in (("F-", "F"), ("O-", "O")):
+        products = {neutral: 1, "H": 1, "F": 1}
+        if neutral == "F":
+            products = {"F": 2, "H": 1}
+        reactions.append(Reaction(
+            name=f"huang_2020_hfplus_{negative}_mutual_neutralization",
+            reactants={negative: 1, "HF+": 1},
+            products=products,
+            kinetic_orders={negative: 1, "HF+": 1},
+            rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+                2.0e-7, source=source, evidence_kind="estimated"
+            ),
+            electron_energy_loss_eV=0.0,
+            source=source,
+        ))
+    return tuple(reactions)
+
+
 def _electron_reaction(row: _KokkorisElectronRow, shape: str) -> Reaction:
     coefficients = getattr(row, shape)
     return Reaction(
@@ -479,6 +535,7 @@ def build_zhu_supplemental_chemistry(
     *,
     kokkoris_eedf_shape: str = "druyvesteyn",
     chf3_f_rate_branch: str = "voloshin_350K",
+    electron_collision_rows_replaced: tuple[str, ...] = (),
 ) -> ZhuSupplementalChemistry:
     """Return the non-parent volume network for a declared EEDF closure."""
     if kokkoris_eedf_shape not in {"druyvesteyn", "maxwellian"}:
@@ -500,16 +557,31 @@ def build_zhu_supplemental_chemistry(
         raise RuntimeError("Sandia daughter-row selection is incomplete")
     lim = build_lim_2014_daughter_chemistry(
         chf3_f_rate_branch=chf3_f_rate_branch)
+    all_reactions = tuple((
+        *kokkoris,
+        *selected_sandia,
+        *lim.reactions,
+        *_pateau_oxygen_reactions(),
+        *_pateau_titration_reactions(),
+        *_pateau_sf6_charge_closure_reactions(),
+        *_huang_hf_charge_closure_reactions(),
+    ))
+    replaced = tuple(str(name) for name in electron_collision_rows_replaced)
+    if len(set(replaced)) != len(replaced) or any(not name for name in replaced):
+        raise ValueError("invalid replaced supplemental electron rows")
+    available = {reaction.name: reaction for reaction in all_reactions}
+    if set(replaced) - set(available):
+        raise ValueError(
+            "requested replacement names absent supplemental reactions"
+        )
+    if any("e" not in available[name].kinetic_orders for name in replaced):
+        raise ValueError("only electron rows may be collision-deck replaced")
     network = ReactionNetwork(
         species=zhu_reactor_species(),
-        reactions=tuple((
-            *kokkoris,
-            *selected_sandia,
-            *lim.reactions,
-            *_pateau_oxygen_reactions(),
-            *_pateau_titration_reactions(),
-            *_pateau_sf6_charge_closure_reactions(),
-        )),
+        reactions=tuple(
+            reaction for reaction in all_reactions
+            if reaction.name not in set(replaced)
+        ),
     )
     return ZhuSupplementalChemistry(
         network=network,
@@ -518,4 +590,5 @@ def build_zhu_supplemental_chemistry(
         pressure_specific_rows_excluded=_PRESSURE_SPECIFIC_ROWS_EXCLUDED,
         sandia_rows_selected=_SANDIA_ROWS_SELECTED,
         chf3_f_rate_branch=lim.chf3_f_rate_branch,
+        electron_collision_rows_replaced=replaced,
     )

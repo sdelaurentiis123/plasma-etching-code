@@ -8,13 +8,16 @@ from petch.reactor_global.zhu_supplemental_chemistry import (
     build_zhu_supplemental_chemistry,
     zhu_reactor_species,
 )
+from petch.reactor_global.zhu_daughter_electron_collisions import (
+    zhu_hf_f2_replaced_supplemental_reactions,
+)
 
 
 def test_supplemental_network_is_closed_and_does_not_duplicate_parent_rows():
     chemistry = build_zhu_supplemental_chemistry()
     names = {reaction.name for reaction in chemistry.network.reactions}
-    assert len(chemistry.network.species) == 66
-    assert len(chemistry.network.reactions) == 259
+    assert len(chemistry.network.species) == 67
+    assert len(chemistry.network.reactions) == 262
     assert chemistry.sandia_rows_selected == tuple(range(20, 39))
     assert chemistry.chf3_f_rate_branch == "voloshin_350K"
     assert chemistry.parent_sf6_rows_replaced == (
@@ -57,6 +60,23 @@ def test_two_kokkoris_eedf_assumptions_are_exposed_not_averaged():
     ratios = np.asarray([d_rates[name] / m_rates[name] for name in d_rates])
     assert ratios.min() < 0.5
     assert ratios.max() > 1.05
+
+
+def test_energy_resolved_hf_f2_rows_replace_scalar_rows_exactly_once():
+    replaced = zhu_hf_f2_replaced_supplemental_reactions()
+    chemistry = build_zhu_supplemental_chemistry(
+        electron_collision_rows_replaced=replaced
+    )
+    names = {reaction.name for reaction in chemistry.network.reactions}
+    assert chemistry.electron_collision_rows_replaced == replaced
+    assert len(chemistry.network.reactions) == 257
+    assert not set(replaced) & names
+    chemistry.network.assert_closed_conservation()
+
+    with pytest.raises(ValueError, match="absent supplemental"):
+        build_zhu_supplemental_chemistry(
+            electron_collision_rows_replaced=("not_a_reaction",)
+        )
 
 
 def test_pressure_specific_neutral_falloff_is_not_silently_transferred():
@@ -110,6 +130,32 @@ def test_every_parent_negative_ion_has_a_volume_loss_path():
         if name in negative_names
     }
     assert consumed == negative_names
+
+
+def test_huang_estimated_hf_positive_ion_closure_is_explicit_and_conserved():
+    chemistry = build_zhu_supplemental_chemistry()
+    rows = {
+        reaction.name: reaction
+        for reaction in chemistry.network.reactions
+        if reaction.name.startswith("huang_2020_hfplus_")
+    }
+    assert set(rows) == {
+        "huang_2020_hfplus_e_dissociative_recombination",
+        "huang_2020_hfplus_F-_mutual_neutralization",
+        "huang_2020_hfplus_O-_mutual_neutralization",
+    }
+    recombination = rows[
+        "huang_2020_hfplus_e_dissociative_recombination"
+    ]
+    assert recombination.products == {"H": 1, "F": 1}
+    assert (
+        recombination.rate_coefficient.coefficient_si(RateContext(4.0))
+        == pytest.approx(5.0e-14)
+    )
+    assert all(
+        reaction.rate_coefficient.evidence_kind == "estimated"
+        for reaction in rows.values()
+    )
 
 
 def test_oxygen_titration_releases_fluorine_without_losing_atoms():

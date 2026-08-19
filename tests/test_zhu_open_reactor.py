@@ -10,6 +10,7 @@ from petch.reactor_global.zhu_open_reactor import (
     ZhuOpenReactorCondition,
     ZhuOpenReactorModel,
     compile_bimolecular_kinetic_pairs,
+    log_flux_ratio_residual,
     positive_ion_wall_return,
     wall_resolved_charged_power_density_W_m3,
 )
@@ -124,6 +125,7 @@ def test_every_positive_ion_has_atom_conserving_wall_return():
             ) == count
     assert set(positive_ion_wall_return("SF4++")) == {"SF4"}
     assert set(positive_ion_wall_return("H2+")) == {"H2"}
+    assert dict(positive_ion_wall_return("HF+")) == {"HF": 1.0}
     with pytest.raises(KeyError):
         positive_ion_wall_return("missing+")
 
@@ -153,6 +155,17 @@ def test_sparse_jacobian_shape_requires_no_false_dense_columns():
     assert callable(ZhuOpenReactorModel.jacobian_sparsity)
 
 
+def test_log_flux_ratio_residual_has_same_root_and_exact_ratio_coordinate():
+    production = np.asarray([1.0e-9, 1.0, 1.0e9])
+    loss = np.asarray([1.0, 1.0, 1.0])
+    bounded = (production - loss) / (production + loss)
+    transformed = log_flux_ratio_residual(bounded)
+    assert transformed == pytest.approx(np.log(production / loss))
+    assert log_flux_ratio_residual(np.asarray([0.0]))[0] == 0.0
+    with pytest.raises(ValueError):
+        log_flux_ratio_residual(np.asarray([float("nan")]))
+
+
 def test_continuation_lifts_old_solution_without_breaking_pressure(tmp_path):
     path = tmp_path / "prior.json"
     path.write_text(json.dumps({"state": {
@@ -163,6 +176,8 @@ def test_continuation_lifts_old_solution_without_breaking_pressure(tmp_path):
     model = SimpleNamespace(
         species_order=("CHF3", "F", "CO", "e"),
         neutral_names=("CHF3", "F", "CO"),
+        positive_names=(),
+        negative_names=(),
     )
     condition = SimpleNamespace(target_neutral_density_m3=100.0)
     densities, exhaust, field = _continuation_state(
@@ -173,6 +188,41 @@ def test_continuation_lifts_old_solution_without_breaking_pressure(tmp_path):
     assert densities["e"] == pytest.approx(0.1)
     assert exhaust == 3.0
     assert field == 250.0
+
+
+def test_continuation_seeds_new_ions_without_changing_charge_inventory(tmp_path):
+    path = tmp_path / "prior.json"
+    path.write_text(json.dumps({"state": {
+        "densities_m3": {
+            "CHF3": 1000.0,
+            "old+": 100.0,
+            "old-": 90.0,
+            "e": 10.0,
+        },
+        "exhaust_loss_frequency_s_inv": 3.0,
+        "reduced_electric_field_Td": 250.0,
+    }}), encoding="utf-8")
+    model = SimpleNamespace(
+        species_order=("CHF3", "old+", "new+", "old-", "new-", "e"),
+        neutral_names=("CHF3",),
+        positive_names=("old+", "new+"),
+        negative_names=("old-", "new-"),
+        species_by_name={
+            "old+": SimpleNamespace(charge_number=1),
+            "new+": SimpleNamespace(charge_number=1),
+            "old-": SimpleNamespace(charge_number=-1),
+            "new-": SimpleNamespace(charge_number=-1),
+        },
+    )
+    condition = SimpleNamespace(target_neutral_density_m3=1000.0)
+    densities, _, _ = _continuation_state(
+        path, model=model, condition=condition)
+    positive_charge = densities["old+"] + densities["new+"]
+    negative_charge = densities["old-"] + densities["new-"]
+    assert positive_charge == pytest.approx(100.0)
+    assert negative_charge == pytest.approx(90.0)
+    assert densities["new+"] == pytest.approx(5.0)
+    assert densities["new-"] == pytest.approx(4.5)
 
 
 def test_compiled_zhu_mass_action_matches_general_network_evaluator():

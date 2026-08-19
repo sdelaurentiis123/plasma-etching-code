@@ -468,8 +468,11 @@ from .zhu_daughter_electron_collisions import (
     HF_MASS_AMU,
     HUANG_2020_DOI,
     LXCAT_EFFECTIVE_DEFINITION_DOI,
+    ZhuAugmentedCollisionChemistry,
+    build_zhu_augmented_collision_chemistry,
     deconvolve_siglo_f2_effective_momentum,
     derive_huang_2020_partial_hf_replay,
+    zhu_hf_f2_replaced_supplemental_reactions,
 )
 from .zhu_parent_collision_chemistry import (
     ZhuParentCollisionChemistry,
@@ -828,8 +831,11 @@ __all__ = [
     "HF_MASS_AMU",
     "HUANG_2020_DOI",
     "LXCAT_EFFECTIVE_DEFINITION_DOI",
+    "ZhuAugmentedCollisionChemistry",
+    "build_zhu_augmented_collision_chemistry",
     "deconvolve_siglo_f2_effective_momentum",
     "derive_huang_2020_partial_hf_replay",
+    "zhu_hf_f2_replaced_supplemental_reactions",
     "ZhuParentCollisionChemistry",
     "build_zhu_parent_collision_chemistry",
     "zhu_parent_collision_species",

@@ -1,4 +1,5 @@
 from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -7,13 +8,22 @@ from petch.reactor_global.argon import ELECTRON_MASS_AMU
 from petch.reactor_global.electron_collision_deck import (
     ElectronCollisionDeck,
     ElectronCollisionProcess,
+    parse_bolsig_lxcat_bytes,
 )
 from petch.reactor_global.zhu_daughter_electron_collisions import (
     HF_DISSOCIATION_THRESHOLD_EV,
     HF_IONIZATION_THRESHOLD_EV,
     HF_MASS_AMU,
     deconvolve_siglo_f2_effective_momentum,
+    build_zhu_augmented_collision_chemistry,
     derive_huang_2020_partial_hf_replay,
+    zhu_hf_f2_replaced_supplemental_reactions,
+)
+from petch.reactor_global.zhu_parent_collision_chemistry import (
+    build_zhu_parent_collision_chemistry,
+)
+from petch.reactor_global.zhu_supplemental_chemistry import (
+    build_zhu_supplemental_chemistry,
 )
 
 
@@ -166,3 +176,45 @@ def test_f2_deconvolution_fails_closed_on_inconsistent_effective_set():
     )
     with pytest.raises(ValueError, match="nonzero tail"):
         deconvolve_siglo_f2_effective_momentum(damaged)
+
+
+def test_local_augmented_deck_has_complete_conserved_heavy_mapping():
+    source_dir = Path("/private/tmp/cross-sec-browser/source")
+    hcl_path = source_dir / "lxcat_ne_xe_hcl.txt"
+    f2_path = source_dir / "lxcat_siglo.txt"
+    workbook = Path("/private/tmp/o2_song_2026_supplement.xlsx")
+    if not all(path.is_file() for path in (hcl_path, f2_path, workbook)):
+        pytest.skip("rights-restricted local collision sources not supplied")
+    metadata = {
+        "retrieved_at": "2026-08-18",
+        "source_reference": "local test source; bytes not packaged",
+    }
+    hcl = parse_bolsig_lxcat_bytes(
+        hcl_path.read_bytes(),
+        source_database="Hayashi database",
+        target="HCl",
+        database_filter="Hayashi database",
+        **metadata,
+    )
+    f2 = parse_bolsig_lxcat_bytes(
+        f2_path.read_bytes(),
+        source_database="SIGLO database",
+        target="F2",
+        database_filter="SIGLO database",
+        **metadata,
+    )
+    replaced = zhu_hf_f2_replaced_supplemental_reactions()
+    supplemental = build_zhu_supplemental_chemistry(
+        electron_collision_rows_replaced=replaced
+    )
+    augmented = build_zhu_augmented_collision_chemistry(
+        build_zhu_parent_collision_chemistry(workbook),
+        derive_huang_2020_partial_hf_replay(hcl),
+        deconvolve_siglo_f2_effective_momentum(f2),
+        reactor_species=supplemental.network.species,
+    )
+    assert augmented.mixed_deck.targets == ("CHF3", "F2", "HF", "O2", "SF6")
+    assert len(augmented.mixed_deck.processes) == 63
+    assert len(augmented.collision_chemistry.mappings) == 58
+    assert augmented.supplemental_reactions_replaced == replaced
+    assert not augmented.supports_complete_daughter_eedf

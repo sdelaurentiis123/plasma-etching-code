@@ -61,6 +61,7 @@ ZHU_POSITIVE_ION_IDENTITIES = MappingProxyType({
     "CH+": PositiveIonIdentity(13.0),
     "O+": PositiveIonIdentity(16.0),
     "F+": PositiveIonIdentity(19.0),
+    "HF+": PositiveIonIdentity(20.006243163),
     "CF+": PositiveIonIdentity(31.0),
     "CHF+": PositiveIonIdentity(32.0),
     "O2+": PositiveIonIdentity(32.0),

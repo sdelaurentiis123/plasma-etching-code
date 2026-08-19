@@ -21,9 +21,14 @@ from petch.reactor_global import (
     ElectronEnergyGrid,
     ZhuOpenReactorCondition,
     ZhuOpenReactorModel,
+    build_zhu_augmented_collision_chemistry,
     build_zhu_parent_collision_chemistry,
     build_zhu_supplemental_chemistry,
+    deconvolve_siglo_f2_effective_momentum,
+    derive_huang_2020_partial_hf_replay,
+    parse_bolsig_lxcat_bytes,
     standard_volume_flow_molecules_s,
+    zhu_hf_f2_replaced_supplemental_reactions,
 )
 
 
@@ -101,6 +106,28 @@ def _continuation_state(
         total = sum(densities[name] for name in model.neutral_names)
         for name in model.neutral_names:
             densities[name] *= target_density / total
+    for charged_names in (model.positive_names, model.negative_names):
+        new_charged = tuple(name for name in charged_names if name not in usable)
+        old_charged = tuple(name for name in charged_names if name in usable)
+        if not new_charged:
+            continue
+        if not old_charged:
+            raise ValueError(
+                "continuation cannot charge-balance an entirely new ion class"
+            )
+        charge_inventory = sum(
+            abs(model.species_by_name[name].charge_number) * densities[name]
+            for name in old_charged
+        )
+        reserve = min(0.25, 0.05 * len(new_charged))
+        for name in old_charged:
+            densities[name] *= 1.0 - reserve
+        charge_per_species = reserve * charge_inventory / len(new_charged)
+        for name in new_charged:
+            densities[name] = (
+                charge_per_species
+                / abs(model.species_by_name[name].charge_number)
+            )
     exhaust = float(state.get("exhaust_loss_frequency_s_inv", float("nan")))
     field = float(state.get("reduced_electric_field_Td", float("nan")))
     if not math.isfinite(exhaust) or exhaust <= 0.0:
@@ -112,12 +139,61 @@ def _continuation_state(
 
 def run(args) -> dict:
     parent = build_zhu_parent_collision_chemistry(args.source_workbook)
+    hcl_path = getattr(args, "hcl_lxcat", None)
+    f2_path = getattr(args, "f2_lxcat", None)
+    if (hcl_path is None) != (f2_path is None):
+        raise ValueError("HCl and F2 LXCat sources must be supplied together")
+    augmented = hcl_path is not None
+    replaced_rows = (
+        zhu_hf_f2_replaced_supplemental_reactions(
+            kokkoris_eedf_shape=args.kokkoris_eedf_shape
+        )
+        if augmented else ()
+    )
     supplemental = build_zhu_supplemental_chemistry(
         kokkoris_eedf_shape=args.kokkoris_eedf_shape,
         chf3_f_rate_branch=args.chf3_f_rate_branch,
+        electron_collision_rows_replaced=replaced_rows,
     )
+    hcl = None
+    f2 = None
+    hf_replay = None
+    f2_replay = None
+    collision_provider = parent
+    if augmented:
+        hcl = parse_bolsig_lxcat_bytes(
+            hcl_path.read_bytes(),
+            source_database="Hayashi database",
+            retrieved_at="2026-08-18",
+            source_reference=(
+                "local user-supplied LXCat export; official Hayashi "
+                "database reference"
+            ),
+            target="HCl",
+            database_filter="Hayashi database",
+        )
+        f2 = parse_bolsig_lxcat_bytes(
+            f2_path.read_bytes(),
+            source_database="SIGLO database",
+            retrieved_at="2026-08-18",
+            source_reference=(
+                "local user-supplied LXCat export; official SIGLO "
+                "database reference"
+            ),
+            target="F2",
+            database_filter="SIGLO database",
+        )
+        hf_replay = derive_huang_2020_partial_hf_replay(hcl)
+        f2_replay = deconvolve_siglo_f2_effective_momentum(f2)
+        collision_provider = build_zhu_augmented_collision_chemistry(
+            parent,
+            hf_replay,
+            f2_replay,
+            reactor_species=supplemental.network.species,
+            kokkoris_eedf_shape=args.kokkoris_eedf_shape,
+        )
     solver = DeterministicTwoTermBoltzmannSolver(
-        _grid(parent.mixed_deck), parent.mixed_deck)
+        _grid(collision_provider.mixed_deck), collision_provider.mixed_deck)
     geometry = CylindricalReactor(
         radius_m=.5e-3 * args.electrode_diameter_mm,
         length_m=1.0e-3 * args.plasma_height_mm,
@@ -166,7 +242,7 @@ def run(args) -> dict:
         grounded_surface_sheath_drop_V=(
             args.grounded_surface_sheath_drop_V),
     )
-    model = ZhuOpenReactorModel(solver, parent, supplemental)
+    model = ZhuOpenReactorModel(solver, collision_provider, supplemental)
     initial_densities = None
     initial_exhaust = None
     continuation_field = None
@@ -174,6 +250,23 @@ def run(args) -> dict:
         initial_densities, initial_exhaust, continuation_field = (
             _continuation_state(
                 args.initial_state_json, model=model, condition=condition))
+        if augmented:
+            prior = json.loads(
+                args.initial_state_json.read_text(encoding="utf-8")
+            )
+            prior_total_field = float(prior["state"][
+                "implied_total_neutral_reduced_electric_field_Td"
+            ])
+            represented = sum(
+                initial_densities[name]
+                for name in model.electron_collision_targets
+            )
+            neutral_total = sum(
+                initial_densities[name] for name in model.neutral_names
+            )
+            continuation_field = (
+                prior_total_field * neutral_total / represented
+            )
     initial_field = (
         args.initial_field_Td
         if args.initial_field_Td is not None
@@ -234,11 +327,33 @@ def run(args) -> dict:
                 }
             ),
             "feature_or_sem_target_used": False,
+            "daughter_collision_basis": {
+                "enabled": augmented,
+                "targets": list(model.electron_collision_targets),
+                "hcl_lxcat_payload_sha256": (
+                    None if hcl is None else hcl.payload_sha256
+                ),
+                "f2_lxcat_payload_sha256": (
+                    None if f2 is None else f2.payload_sha256
+                ),
+                "partial_hf_deck_sha256": (
+                    None if hf_replay is None
+                    else hf_replay.derived_deck.payload_sha256
+                ),
+                "f2_deconvolved_deck_sha256": (
+                    None if f2_replay is None
+                    else f2_replay.derived_deck.payload_sha256
+                ),
+                "supplemental_reactions_replaced": list(replaced_rows),
+                "complete_hf_eedf": False,
+                "raw_lxcat_bytes_committed": False,
+            },
         },
         "state": {
             "reduced_electric_field_Td": solution.reduced_electric_field_Td,
             "reduced_electric_field_convention": (
-                "E divided by represented CHF3+SF6+O2 neutral density"
+                "E divided by represented collision-target neutral density: "
+                + "+".join(model.electron_collision_targets)
             ),
             "implied_total_neutral_reduced_electric_field_Td": (
                 solution.implied_total_neutral_reduced_electric_field_Td),
@@ -289,7 +404,7 @@ def run(args) -> dict:
             "feature_depth_prediction": False,
             "reason": (
                 "absorbed power, active geometry, wall state, all-wall sheath "
-                "energy, daughter-gas electron transport, and several "
+                "energy, incomplete HF vibration/attachment, and several "
                 "cross-family reactions remain machine sensitivity inputs"
             ),
         },
@@ -299,6 +414,8 @@ def run(args) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-workbook", type=Path, required=True)
+    parser.add_argument("--hcl-lxcat", type=Path)
+    parser.add_argument("--f2-lxcat", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--initial-state-json", type=Path)
     parser.add_argument("--absorbed-power-W", type=float, default=90.0)

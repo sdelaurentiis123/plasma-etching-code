@@ -1,10 +1,19 @@
 import numpy as np
 
+from petch.reactor_global.zhu_axisymmetric_transport import (
+    ZHU_POSITIVE_ION_IDENTITIES,
+)
 from scripts.audit_zhu_npg80_axisymmetric_ccp import (
     DEFAULT_STATE,
     _load_input,
     build_receipt,
 )
+
+
+def test_axisymmetric_transport_carries_hf_positive_ion_identity():
+    identity = ZHU_POSITIVE_ION_IDENTITIES["HF+"]
+    assert identity.charge_number == 1
+    assert identity.mass_amu == 20.006243163
 
 
 def test_effective_bohm_mass_uses_inventory_not_graded_flux():
