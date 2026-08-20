@@ -30,6 +30,23 @@ def test_feature_step_reexports_exact_dependency_neutral_authorities():
     assert _face_material_ids is face_material_ids_3d
 
 
+def test_material_levelset_id_mismatch_reports_lifecycle_state():
+    geometry = _plane_geometry()
+    extinct = -np.ones_like(geometry.phi)
+
+    with pytest.raises(ValueError) as info:
+        FeatureGeometry3D(
+            geometry.phi, geometry.material_id, geometry.dx,
+            geometry.mesh_length_unit_m,
+            material_levelsets={1: geometry.phi, 2: extinct},
+        )
+
+    message = str(info.value)
+    assert "registered ids [1, 2]" in message
+    assert "labeled solid ids [1]" in message
+    assert "2: (-1.0, -1.0, 0)" in message
+
+
 @pytest.mark.parametrize("module_order", [
     ("petch.feature_geometry_backend_3d", "petch.feature_step_3d"),
     ("petch.feature_step_3d", "petch.feature_geometry_backend_3d"),

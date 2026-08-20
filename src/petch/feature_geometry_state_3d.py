@@ -43,10 +43,25 @@ class FeatureGeometry3D:
             raise ValueError("phi must contain both gas and solid")
         if layers is not None:
             material_ids = set(np.unique(material)) - {0}
-            if (not layers or set(layers) != material_ids or any(key <= 0 for key in layers)
+            if (not layers or any(key <= 0 for key in layers)
                     or any(value.shape != phi.shape or np.any(~np.isfinite(value))
                            for value in layers.values())):
                 raise ValueError("invalid material level-set fields")
+            if set(layers) != material_ids:
+                ranges = {
+                    int(key): (
+                        float(np.min(value)), float(np.max(value)),
+                        int(np.count_nonzero(value >= 0.0)),
+                    )
+                    for key, value in sorted(layers.items())
+                }
+                raise ValueError(
+                    "invalid material level-set fields: registered ids "
+                    f"{sorted(layers)} do not match labeled solid ids "
+                    f"{sorted(material_ids)}; "
+                    "ranges=(minimum, maximum, nonnegative_node_count) "
+                    f"{ranges}"
+                )
             union = np.maximum.reduce(tuple(layers.values()))
             if np.any((union >= 0.0) != (phi >= 0.0)):
                 raise ValueError("material level sets do not reconstruct the combined solid")
