@@ -33,7 +33,7 @@ from ..bosch_process_data import (
 )
 from .axisymmetric_reaction_diffusion import (
     AxisymmetricFiniteVolumeGrid, DeterministicAxisymmetricInventoryLift,
-    normalized_annular_skin_source,
+    normalized_annular_skin_source, normalized_exponential_skin_source,
 )
 from .geometry import CylindricalReactor
 
@@ -81,6 +81,9 @@ class BoschSPTSReducedParameters:
     source_axial_skin_depth_m: float = 0.045
     source_ring_radius_m: float = 0.085
     source_radial_width_m: float = 0.055
+    source_central_fraction: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    central_source_radial_scale_m: float = 0.060
+    central_source_radial_power: float = 2.0
     diffusion_coefficient_m2_s: tuple[float, float, float] = (0.12, 0.06, 0.20)
     lower_wall_velocity_m_s: tuple[float, float, float] = (120.0, 45.0, 1700.0)
     upper_wall_velocity_m_s: tuple[float, float, float] = (45.0, 20.0, 500.0)
@@ -99,6 +102,7 @@ class BoschSPTSReducedParameters:
             "lifetime_reference_pressure_torr", "pressure_channel_to_torr",
             "plasma_potential_per_electron_temperature",
             "source_axial_skin_depth_m", "source_radial_width_m",
+            "central_source_radial_scale_m", "central_source_radial_power",
         )
         if (any(not math.isfinite(getattr(self, name)) or getattr(self, name) <= 0.0
                 for name in positive)
@@ -121,6 +125,12 @@ class BoschSPTSReducedParameters:
                     not math.isfinite(item) or item <= 0.0 for item in value):
                 raise ValueError(f"invalid SPTS axisymmetric parameter: {name}")
             object.__setattr__(self, name, value)
+        central = tuple(float(value) for value in self.source_central_fraction)
+        if (len(central) != len(_SPECIES)
+                or any(not math.isfinite(value) or not 0.0 <= value <= 1.0
+                       for value in central)):
+            raise ValueError("invalid species-resolved central-source fractions")
+        object.__setattr__(self, "source_central_fraction", central)
 
     @property
     def reactor_volume_m3(self):
@@ -380,12 +390,20 @@ class DeterministicBoschSPTSReactorToWafer:
             geometry,
             radial_cell_count=parameters.radial_cell_count,
             axial_cell_count=parameters.axial_cell_count)
-        source_shape = normalized_annular_skin_source(
+        annular_source = normalized_annular_skin_source(
             grid,
             axial_skin_depth_m=parameters.source_axial_skin_depth_m,
             ring_radius_m=parameters.source_ring_radius_m,
             radial_width_m=parameters.source_radial_width_m)
-        source_shapes = np.stack((source_shape, source_shape, source_shape))
+        central_source = normalized_exponential_skin_source(
+            grid,
+            axial_skin_depth_m=parameters.source_axial_skin_depth_m,
+            radial_scale_m=parameters.central_source_radial_scale_m,
+            radial_power=parameters.central_source_radial_power)
+        source_shapes = np.stack(tuple(
+            central_fraction * central_source
+            + (1.0 - central_fraction) * annular_source
+            for central_fraction in parameters.source_central_fraction))
         wall = np.column_stack((
             parameters.lower_wall_velocity_m_s,
             parameters.upper_wall_velocity_m_s,
@@ -398,7 +416,8 @@ class DeterministicBoschSPTSReactorToWafer:
             wall_velocity_m_s=wall,
             source_shape=source_shapes,
             source=(
-                "SPTS Rapier source-1 annular ICP skin moment; source-2 is measured off"))
+                "SPTS Rapier species-resolved central/annular source-1 skin "
+                "moments; source-2 is measured off"))
         unit = self._lift.solve(np.ones(len(_SPECIES)))
         self._unit_lower_flux_per_density_m_s = (
             unit.solution.lower_endcap_flux_m2_s.copy())

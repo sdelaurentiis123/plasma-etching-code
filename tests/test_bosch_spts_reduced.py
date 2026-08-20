@@ -105,3 +105,22 @@ def test_absorbed_power_coupling_changes_flux_without_changing_surface_law(trace
         low.wafer_area_average_flux_m2_s[sf6, 0])
     assert np.mean(high.wafer_area_average_flux_m2_s[sf6, 2]) > np.mean(
         low.wafer_area_average_flux_m2_s[sf6, 2])
+
+
+def test_species_resolved_dual_zone_source_changes_radial_shapes_conservatively(trace):
+    annular = DeterministicBoschSPTSReactorToWafer(BoschSPTSReducedParameters())
+    split = DeterministicBoschSPTSReactorToWafer(BoschSPTSReducedParameters(
+        source_central_fraction=(0.0, 0.5, 1.0)))
+    annular_solution = annular.solve(trace)
+    split_solution = split.solve(trace)
+
+    assert split_solution.maximum_axisymmetric_species_ledger_relative_residual < 1e-12
+    assert not np.allclose(
+        split_solution.radial_flux_m2_s[:, 1],
+        annular_solution.radial_flux_m2_s[:, 1])
+    assert not np.allclose(
+        split_solution.radial_flux_m2_s[:, 2],
+        annular_solution.radial_flux_m2_s[:, 2])
+    assert np.array_equal(
+        split_solution.reactor.volume_average_density_m3,
+        annular_solution.reactor.volume_average_density_m3)
