@@ -1,12 +1,12 @@
 # Codex takeover — absolute depth and Oxford blind profiles
 
-Status snapshot: 2026-08-20 15:42 EDT
+Status snapshot: 2026-08-20 15:58 EDT
 
 Repository: `plasma-etching-code`
 
 Branch: `codex/validation-first-multiphysics`
 
-Baseline pushed checkpoint inspected: `d852a1f`
+Baseline pushed checkpoint inspected: `43e80ea`
 
 Read this file first when resuming the absolute-depth campaign.  Then read
 `PROGRESS_STATE_2026-08-20.md` for the full scientific record.  This report
@@ -37,20 +37,27 @@ either the requested 1200 seconds or a declared physical domain breakthrough.
 That result is committed in `bdabd8a`.
 
 The full 56-cell v5 board is live on the one authorized Vast instance.  At
-this snapshot it had nine completed v5 content-addressed caches—the exact
-acceptance cell plus eight board cells—and eight healthy workers computing the
+this snapshot it had 17 completed v5 content-addressed caches—the exact
+acceptance cell plus 16 board cells—and eight healthy workers computing the
 remaining cells.  No target SEM or target depth has been used to tune the
 calculation.
 
-## Live execution update at 15:42 EDT
+A second independent absolute-depth path is now frozen before scoring: the
+official 96-wafer SPTS Bosch process dataset has been decoded and a
+chronological 20-wafer holdout preregistered.  This adds a real
+machine-waveform-to-wafer-depth problem in `SF6/C4F8 -> Si`, including 89-point
+radial maps and oxide-mask loss.  The physical model and sealed calibration
+receipt still have to be implemented; no Bosch pass is claimed yet.
+
+## Live execution update at 15:58 EDT
 
 The stale `55 of 56 / CPU spin` handoff is forensic history, not an active
 failure.  A direct process inspection at this snapshot found:
 
-- Oxford parent PID `8980` alive for 22 minutes with eight runnable workers;
+- Oxford parent PID `8980` alive for 39 minutes with eight runnable workers;
 - all eight Oxford workers near one fully used CPU each, stable resident
   memory, and no runaway-substep signature;
-- exactly **9 of 56** v5 content-addressed trajectory caches present;
+- exactly **17 of 56** v5 content-addressed trajectory caches present;
 - no final v5 audit is accepted yet—the board parent is still running;
 - host memory has 232 GiB available;
 - the GPU has a valid 2.7 GiB context and was idle at the instant sampled,
@@ -62,9 +69,9 @@ tree:
 
 | Case | Supervisor PID | Child PID | Last sealed point at snapshot |
 | --- | ---: | ---: | --- |
-| published aggregate ion, identity unresolved | `10284` | `10288` | step 6, 0.09375 s, 0.9830 nm |
-| all aggregate ions declared CF2+ | `10285` | `10289` | step 6, 0.09375 s, 0.8547 nm |
-| all aggregate ions declared CF3+ | `10286` | `10290` | step 6, 0.09375 s, 0.8278 nm |
+| published aggregate ion, identity unresolved | `10284` | `10288` | step 29, 0.453 s, 5.662 nm |
+| all aggregate ions declared CF2+ | `10285` | `10289` | step 29, 0.453 s, 6.778 nm |
+| all aggregate ions declared CF3+ | `10286` | `10290` | step 29, 0.453 s, 7.283 nm |
 
 All three runtime audits say `experimental_outcomes_read=false`.  The CF2+
 and CF3+ calculations are composition-envelope endpoints, not fitted reactor
@@ -72,9 +79,9 @@ mixtures.  Their early transient ordering must not be interpreted as the
 60-second ordering and must not be changed to move toward the 825 nm target.
 
 These are deliberately expensive converged feature integrations: 3,840
-nominal steps per 60-second trajectory.  The first six accepted steps took
-roughly 45 seconds each under the current shared-host load.  A naive linear
-projection is therefore about 48 hours per full trajectory; a declared
+nominal steps per 60-second trajectory.  At this snapshot an accepted step
+took roughly 39--40 seconds under the shared-host load.  A naive linear
+projection remains roughly 42--48 hours per full trajectory; a declared
 physical clogging event could end a trajectory earlier.  The jobs checkpoint
 and automatically resume every 30 wall-clock minutes.  Do not promise an
 overnight Krueger answer, and do not replace the frozen resolution or time
@@ -317,6 +324,69 @@ The strongest eventual closure is a validated C4F6 reactor boundary or the
 authors' species-resolved HPEM/PCMCM wafer output—not an optimizer-adjusted
 yield chosen to hit 825 nm.
 
+## Independent SPTS Bosch depth gate
+
+Commit `43e80ea` establishes the next independent reactor-to-depth problem
+from the official Sayyed et al. Bosch dataset (Zenodo 17122442).  This is not a
+synthetic benchmark and not another Krueger-derived target.  It contains 96
+SPTS Omega i2L DSi Rapier process records, sampled at 5 Hz, for a nominal
+100-cycle process with approximately 4.5 s `SF6` etch and 1.5 s `C4F8`
+passivation phases.  The available wafer outcomes include silicon depth,
+oxide-mask loss, selectivity, and 89-point radial maps.
+
+The official compact source assets are vendored with verified source MD5s:
+
+- `Process_data.nc` and its lossless channel dictionary;
+- `Lot_status.xlsx` for conditioning and source missingness;
+- the source `Readme.pdf`;
+- a deterministic, label-free 96-row process summary and manifest.
+
+The process extractor never reads depth or oxide outcomes.  It recovers the
+measured gas, pressure, source RF, platen RF, reflected power, platen Vpp/DC,
+backside helium, current, and thermal waveforms.  Because the public source
+anonymizes gas-channel numbers, the mapping `Gas5 -> SF6` and `Gas4 -> C4F8`
+is explicitly labeled as a waveform-role inference: their approximately
+4.5 s / 1.5 s pulses, 600 / 300 unit levels, and cycle counts match the
+documented recipe.
+
+The frozen chronological split is:
+
+- 76 calibration process records from July 2 through August 7;
+- 20 held-out process records from August 21--22;
+- model selection by leave-one-lot-out calibration only;
+- outcome files forbidden until the model receipt is hash-sealed.
+
+This is honestly labeled an **execution-held-out** test, not a never-seen
+blind test, because the measurement CSVs already existed in the repository
+before the protocol was written.  The implementation may use one shared
+equipment-transfer parameter set, but may not regress depth directly on date,
+lot, wafer number, experiment identifier, or held-out outcomes.
+
+The preregistered physical path is:
+
+```text
+measured 5 Hz machine waveform
+  -> deterministic phase-resolved 0-D radical/ion state
+  -> measured-waveform-conditioned sheath / ion energy
+  -> common axisymmetric wafer-transfer operator
+  -> conserved C4F8 film memory + unchanged Belen SF6 silicon surface law
+  -> wafer-mean depth, radial depth map, oxide loss, and selectivity
+```
+
+The frozen held-out gates require wafer-mean silicon `MAE <= 1 um` and
+`MAPE <= 3%`, pointwise silicon `RMSE <= 1.5 um`, normalized radial-shape
+`RMSE <= 2%`, oxide-loss `MAE <= 0.08 um`, and selectivity `MAPE <= 12%`.
+The model must also beat both the calibration global-mean depth baseline and
+the calibration mean radial-map baseline.
+
+Nothing in this section is a result yet.  The decoder, provenance checks,
+split, acceptance gates, and label firewall are complete and tested; the
+composite Bosch silicon/fluorocarbon film mechanism, physical reactor transfer,
+calibration receipt, and sealed holdout score are the next implementation
+work.  A pass would validate absolute wafer depth, drift, selectivity, and
+radial transfer.  It would not by itself validate feature charging, ARDE,
+sidewall angle, or Bosch scallops.
+
 ## Cross-chemistry status
 
 Existing unchanged-core evidence includes:
@@ -361,6 +431,10 @@ Key pushed checkpoints:
 - `44956d0` — advance Oxford board past Cr loss;
 - `242177b` — update the v5 content-addressed cache sentinel;
 - `bdabd8a` — land the passed exact v5 continuation receipt.
+- `d852a1f` — preregister the no-target-fit Guo-to-Krueger full-feature
+  forecasts;
+- `43e80ea` — vendor and preregister the independent SPTS Bosch reactor-depth
+  holdout.
 
 The lifecycle-focused group is 138 passed.  The v5 driver/core group is 118
 passed.  Before the final cache-sentinel update, the full repository run was
@@ -377,19 +451,31 @@ untouched:
 
 Do not reset, delete, or absorb them into this campaign.
 
-## Immediate priorities after Oxford v5 lands
+## Immediate priorities
 
-1. Finish and certify the full deterministic Guo/Krueger feature forecast.
-2. Turn two independent chemistry datasets into formal held-out feature-depth
-   gates with the same common engine.
-3. Replace Oxford's cross-machine rate axes with independent target-tool
+1. Let Oxford v5 and the three sealed Krueger forecasts finish; retrieve,
+   hash-check, locally certify, test, commit, and push their artifacts.
+2. Implement the Bosch composite surface mechanism: unchanged Belen bare-Si
+   removal behind a conserved C4F8-derived finite-film state, with exact
+   material ledgers and feature-engine compatibility tests.
+3. Fit only shared physical equipment-transfer coefficients on the 76 Bosch
+   calibration records, seal their receipt, then open and score the 20-record
+   chronological holdout.
+4. Promote one more independent chemistry to a formal held-out feature-depth
+   or profile gate so the unchanged-core requirement is actually met rather
+   than inferred from surface points.
+5. Replace Oxford's cross-machine rate axes with independent target-tool
    self-bias, blanket TiO2 loss, and Cr survival when Freddie supplies them.
-4. Freeze the predicted board before opening the target SEM, then score depth,
+6. Freeze the predicted board before opening the target SEM, then score depth,
    top/middle/bottom CD where defined, sidewall angle, bowing, mask survival,
    terminal class, and spatial variation.
 
 The current accomplishment is substantial but bounded: the full stack can now
 evolve a real two-material mask/film system through complete mask extinction
-without a numerical singularity or silent freeze.  Oxford absolute rates are
-still conditional; Krueger still needs its full independent transfer forecast;
-and cross-chemistry feature-profile validation is not yet complete.
+without a numerical singularity or silent freeze; Oxford's full conditional
+profile envelope is actively computing; Krueger's independent surface-transfer
+forecast is target-firewalled and actively computing; and a real SPTS
+machine-waveform depth holdout is frozen before implementation.  Oxford
+absolute rates are still conditional, Krueger is not yet honestly matched,
+Bosch is preregistered rather than passed, and cross-chemistry feature-profile
+validation is not yet complete.
