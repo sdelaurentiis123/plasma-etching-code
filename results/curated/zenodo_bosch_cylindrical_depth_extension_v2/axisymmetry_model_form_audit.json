@@ -1,0 +1,32 @@
+{
+  "calibration_asset": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+  "calibration_asset_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+  "calibration_manifest_sha256": "714a8d3ce51b84e588d249886ad95e26380a4b23abfe40c98e8edcca38975947",
+  "calibration_measurement_summary": {
+    "oxide_mean_loss_um_max": 0.7098651757528089,
+    "oxide_mean_loss_um_median": 0.6818525041235954,
+    "oxide_mean_loss_um_min": 0.5709217213146068,
+    "silicon_mean_depth_um_max": 44.36490342820224,
+    "silicon_mean_depth_um_median": 43.58551297651686,
+    "silicon_mean_depth_um_min": 42.942928089887644
+  },
+  "calibration_wafer_count": 75,
+  "frozen_shape_gate_percent": 2.0,
+  "heldout_outcomes_read": false,
+  "interpretation": "Even a nonphysical oracle shared radial curve exceeds the frozen shape gate, while a shared unconstrained x-y map is below it. Axisymmetry is therefore a falsified model form for this gate.",
+  "normalization": "each silicon map divided by its 89-point arithmetic mean",
+  "oracle_lower_bounds": {
+    "separate_axisymmetric_per_wafer_rmse_percent_max": 4.07001515469142,
+    "separate_axisymmetric_per_wafer_rmse_percent_median": 2.05314781337552,
+    "separate_axisymmetric_per_wafer_rmse_percent_min": 1.9019517127297558,
+    "shared_axisymmetric_normalized_rmse_percent": 2.128943073654196,
+    "shared_unconstrained_coordinate_map_normalized_rmse_percent": 0.6217531124643888
+  },
+  "points_per_wafer": 89,
+  "schema": "petch-bosch-axisymmetry-model-form-audit-v1",
+  "shared_axisymmetric_model_can_pass_frozen_gate": false,
+  "source_record": "https://zenodo.org/records/17122442",
+  "unique_measured_radius_count": 15,
+  "v1_preregistration_sha256": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+  "weighting": "equal weight per measured point and calibration wafer"
+}

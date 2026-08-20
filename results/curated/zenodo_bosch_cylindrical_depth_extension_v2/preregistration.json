@@ -1,0 +1,177 @@
+{
+  "calibration_exposure": {
+    "axisymmetric_calibration_outcomes_examined": true,
+    "cylindrical_fit_started_before_this_freeze": false,
+    "heldout_outcomes_examined": false,
+    "status": "calibration-visible model-form extension; execution-heldout outcome firewall remains closed"
+  },
+  "conditioning_state": {
+    "allowed_form": "one shared wall-state law using log(carbon-cycle count) plus Si and SiO2 preconditioning indicators",
+    "declared_lot_types": {
+      "2024-07-02": "3C",
+      "2024-07-05": "1C",
+      "2024-07-09": "9C",
+      "2024-07-11": "3C-Si",
+      "2024-07-19": "1C-Si",
+      "2024-08-01": "9C-Si",
+      "2024-08-05": "3C-SiO2",
+      "2024-08-07": "3C-SiO2",
+      "2024-08-21": "3C",
+      "2024-08-22": "3C-SiO2"
+    },
+    "forbidden_form": "independent per-lot or per-wafer offsets",
+    "maximum_free_coefficients": 3,
+    "metadata_source": "data/experimental/zenodo_17122442/Lot_status.xlsx",
+    "metadata_source_sha256": "f7d85345ac51a20944fe52d7b846bc387bc52c79169d4c4b419361ccbc317b05",
+    "physical_action": "bounded multiplier on effective neutral wall-loss velocity, carried through the reactor state rather than added to predicted depth"
+  },
+  "frozen_from_v1": {
+    "acceptance_gates_unchanged": true,
+    "calibration_and_heldout_keys_unchanged": true,
+    "heldout_baselines_unchanged": true,
+    "surface_laws_unchanged": [
+      "Belen SF6 silicon removal",
+      "La Magna/Garozzo C4F8 film and SiO2 removal"
+    ],
+    "v1_preregistration": "results/curated/zenodo_bosch_reactor_depth_holdout_v1/preregistration.json",
+    "v1_preregistration_sha256": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75"
+  },
+  "model_extension": {
+    "azimuthal_coordinate": "official measured x-y frame; no post-reveal rotation or reflection",
+    "cylindrical_grid": {
+      "certification_minimum": [
+        32,
+        32,
+        32
+      ],
+      "fit_resolution": [
+        24,
+        16,
+        24
+      ],
+      "ordering": "radial, azimuthal, axial",
+      "refinement_requirement": "all acceptance observables change by less than 0.25 of their frozen gate between fit and certification grids"
+    },
+    "harmonic_source": {
+      "coefficient_bounds": [
+        -1.5,
+        1.5
+      ],
+      "form": "positive exponential Fourier modulation of each effective species source",
+      "maximum_free_coefficients": 24,
+      "maximum_order": 4,
+      "selection": "add complete harmonic orders sequentially and select the lowest order meeting leave-one-lot-out calibration gates; ties choose lower order",
+      "species": [
+        "F",
+        "C4F8_film_precursor",
+        "positive_ion"
+      ]
+    },
+    "operators": [
+      "measured 5 Hz machine waveform to conservative effective-species inventory",
+      "positive cylindrical r-phi-z finite-volume diffusion and Robin wall loss",
+      "bilinear r and periodic-phi interpolation at all 89 measured coordinates",
+      "exact unchanged fused Belen and La Magna surface recurrence"
+    ],
+    "reason": "the calibration-only oracle audit proves any shared axisymmetric map has at least 2.128943 percent normalized shape RMSE, above the frozen 2 percent gate"
+  },
+  "model_form_audit": {
+    "file": "results/curated/zenodo_bosch_cylindrical_depth_extension_v2/axisymmetry_model_form_audit.json",
+    "sha256": "e5c5848c48f4d360efeb20e2d95f6a1a72bd778fb475fa8365c6a9a175d77aa0",
+    "shared_axisymmetric_gate_possible": false,
+    "shared_axisymmetric_lower_bound_percent": 2.128943073654196,
+    "shared_unconstrained_xy_lower_bound_percent": 0.6217531124643888
+  },
+  "parameter_bounds": {
+    "absorbed_source_power_fraction": [
+      0.1,
+      1.0
+    ],
+    "collisional_ion_energy_transmission": [
+      0.3,
+      1.0
+    ],
+    "diffusion_coefficient_m2_s": {
+      "C4F8_film_precursor": [
+        0.02,
+        5.0
+      ],
+      "F": [
+        0.05,
+        10.0
+      ],
+      "positive_ion": [
+        0.2,
+        30.0
+      ]
+    },
+    "reference_lifetime_s": {
+      "C4F8_film_precursor": [
+        1e-06,
+        0.02
+      ],
+      "F": [
+        0.02,
+        1.5
+      ],
+      "positive_ion": [
+        2e-05,
+        0.0005
+      ]
+    },
+    "sheath_bias_fraction_of_vpp": [
+      0.1,
+      0.5
+    ],
+    "source_central_fraction_each_species": [
+      0.0,
+      1.0
+    ],
+    "source_radial_width_m": [
+      0.01,
+      0.08
+    ],
+    "source_ring_radius_m": [
+      0.05,
+      0.15
+    ]
+  },
+  "selection_and_seal": {
+    "calibration_margin_requirement": "leave-one-lot-out aggregate scores must meet all frozen heldout gates; normalized shape RMSE must be at most 1.8 percent before sealing",
+    "fold_unit": "entire lot/date",
+    "harmonic_complexity_rule": "lowest complete Fourier order satisfying every calibration margin",
+    "objective": "sum of squared aggregate leave-one-lot-out errors normalized by the corresponding frozen gate; no wafer receives an independent fit parameter",
+    "seal_contents": [
+      "code and input hashes",
+      "all parameter bounds and selected values",
+      "fold membership and fold scores",
+      "grid-refinement scores",
+      "frozen heldout prediction arrays",
+      "experimental_outcomes_read=false runtime audit"
+    ],
+    "sealed_prediction_required_before_heldout_reveal": true
+  },
+  "forbidden_shortcuts": [
+    "changing either surface mechanism or yield law during cylindrical calibration",
+    "fitting an unconstrained value at each of the 89 coordinates",
+    "rotating or reflecting the source map after heldout reveal",
+    "per-wafer, per-heldout-lot, or target-depth multipliers",
+    "selecting harmonic order or parameter bounds from heldout results",
+    "weakening the v1 acceptance gates",
+    "reporting calibration fit as heldout validation"
+  ],
+  "frozen_code_parent": {
+    "bosch_point_surface_sha256": "da837c8c37ee33dc3ecf2bdd226af1fbd520fe432d2e95c60878760644e04745",
+    "bosch_wafer_cylindrical_sha256": "ea168a4b390ea4e7ec138b59dbd02c4e6ec330ae24082ea31879d3234267be11",
+    "cylindrical_inventory_lift_sha256": "e74ab0b787401471e19431b74a3f754c40c6eb4fa82ab5ffec1f61087ce90480",
+    "git_commit": "32a6613456de450a843922e25f1dffbb7746a4c8"
+  },
+  "schema": "petch-zenodo-bosch-cylindrical-depth-extension-preregistration-v2",
+  "target_firewall": {
+    "calibration_asset_only": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+    "calibration_asset_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "heldout_numeric_fields_may_be_parsed_only_after_prediction_seal": true,
+    "heldout_outcomes_read_at_freeze": false,
+    "mixed_outcome_csv_forbidden_to_fit_process": true
+  }
+}

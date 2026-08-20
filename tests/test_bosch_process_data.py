@@ -1,4 +1,4 @@
-from hashlib import md5
+from hashlib import md5, sha256
 import json
 from pathlib import Path
 
@@ -21,6 +21,11 @@ from scripts.extract_bosch_calibration_measurements import (
     OUTPUT as CALIBRATION_MEASUREMENTS,
     main as extract_calibration_main,
 )
+from scripts.audit_bosch_axisymmetry_model_form import (
+    OUTPUT as AXISYMMETRY_AUDIT,
+    build_audit as build_axisymmetry_audit,
+    main as audit_axisymmetry_main,
+)
 from scripts.extract_zenodo_bosch_process_features import main as extract_main
 from scripts.preregister_zenodo_bosch_reactor_depth_holdout import (
     HELDOUT_DATES,
@@ -37,6 +42,11 @@ SUMMARY = DATA / "process_wafer_summary.csv"
 SUMMARY_MANIFEST = DATA / "process_wafer_summary_manifest.json"
 PREREGISTRATION = (
     ROOT / "results" / "curated" / "zenodo_bosch_reactor_depth_holdout_v1"
+    / "preregistration.json"
+)
+CYLINDRICAL_PREREGISTRATION = (
+    ROOT / "results" / "curated"
+    / "zenodo_bosch_cylindrical_depth_extension_v2"
     / "preregistration.json"
 )
 
@@ -145,3 +155,36 @@ def test_measurement_loader_refuses_a_disallowed_key_before_numeric_conversion(
     with pytest.raises(ValueError, match="outside the allowed key set"):
         load_bosch_wafer_measurements_89pt(
             mixed, allowed_experiment_keys={"2024-07-02_01"})
+
+
+def test_axisymmetry_model_form_failure_is_replayable_without_heldout():
+    assert audit_axisymmetry_main(["--check"]) == 0
+    audit = build_axisymmetry_audit()
+
+    assert audit["heldout_outcomes_read"] is False
+    assert audit["calibration_wafer_count"] == 75
+    assert audit["points_per_wafer"] == 89
+    assert audit["shared_axisymmetric_model_can_pass_frozen_gate"] is False
+    assert (
+        audit["oracle_lower_bounds"]
+        ["shared_axisymmetric_normalized_rmse_percent"] > 2.0)
+    assert (
+        audit["oracle_lower_bounds"]
+        ["shared_unconstrained_coordinate_map_normalized_rmse_percent"] < 1.0)
+
+
+def test_cylindrical_v2_is_frozen_before_fit_and_keeps_v1_surface_and_gates():
+    payload = json.loads(CYLINDRICAL_PREREGISTRATION.read_text())
+    audit_hash = sha256(AXISYMMETRY_AUDIT.read_bytes()).hexdigest()
+
+    assert payload["calibration_exposure"]["cylindrical_fit_started_before_this_freeze"] is False
+    assert payload["calibration_exposure"]["heldout_outcomes_examined"] is False
+    assert payload["frozen_from_v1"]["acceptance_gates_unchanged"] is True
+    assert payload["frozen_from_v1"]["surface_laws_unchanged"] == [
+        "Belen SF6 silicon removal",
+        "La Magna/Garozzo C4F8 film and SiO2 removal",
+    ]
+    assert payload["model_form_audit"]["sha256"] == audit_hash
+    assert payload["model_extension"]["harmonic_source"]["maximum_order"] == 4
+    assert payload["selection_and_seal"]["sealed_prediction_required_before_heldout_reveal"] is True
+    assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False
