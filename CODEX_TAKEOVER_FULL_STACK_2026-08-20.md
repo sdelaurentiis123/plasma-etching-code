@@ -1,12 +1,12 @@
 # Codex takeover — reactor-to-depth and blind-profile campaign
 
-Status snapshot: 2026-08-20 16:24 EDT
+Status snapshot: 2026-08-20 17:16 EDT
 
 Repository: `plasma-etching-code`
 
 Branch: `codex/validation-first-multiphysics`
 
-Pushed implementation checkpoint: `aaeec38`
+Pushed implementation checkpoint: `e5aed0f`
 
 This is the canonical resume document.  It supersedes the live-state portions
 of `CODEX_TAKEOVER_ABSOLUTE_DEPTH_2026-08-20.md`,
@@ -27,27 +27,34 @@ freezing at first mask loss.
 The current state is three separate experiments:
 
 1. **Oxford TiO2/Cr blind board:** the corrected v5 board is actively running
-   and healthy.  At the live inspection for this report, 24 of 56 v5 cells had
+   and healthy.  At the live inspection for this report, 35 of 56 v5 cells had
    completed.  One exact hard cell has already passed through Cr extinction.
    The board is a conditional surface-rate and ion-boundary envelope; it is not
    yet a match to Freddie's held-out SEM.
 2. **Krueger SiO2 trench:** the published-input model still predicts about
    346.833 nm rather than 825 nm.  The old website-era 790--811 nm agreement is
    retracted because two bugs canceled.  Three independent Guo-to-Krueger,
-   no-target-fit forecasts are actively running and had reached 1.000 s of a
-   requested 60 s.  No Krueger match is claimed yet.
+   no-target-fit forecasts are actively running and had reached approximately
+   2.0 s of a requested 60 s.  No Krueger match is claimed yet.
 3. **SPTS Bosch Si/C4F8 depth gate:** the official machine dataset, chronological
-   holdout, reduced deterministic reactor, radial wafer transfer, conserved
-   C4F8 film memory, unchanged Belen silicon law, and oxide-mask law now exist
-   in code.  The path runs in seconds and closes its ledgers, but its untouched
-   defaults predict only 0.289 um mean Si depth for the first calibration wafer
-   versus roughly 52 um in that wafer's allowed 89-point calibration record.
-   The scaffold is therefore not calibrated and has not passed the holdout.
+   target firewall, reduced deterministic reactor, conserved C4F8 film memory,
+   unchanged Belen silicon law, and oxide-mask law now exist in code.  A shared,
+   physically plausible equipment-transfer point reaches 1.813% calibration
+   MAPE on wafer-mean Si depth and 9.073% MAPE on oxide loss without changing
+   either surface law.  The old axisymmetric wafer-transfer model nevertheless
+   has a 2.129% *mathematical lower bound* on normalized shape error, already
+   above the frozen 2% gate.  A deterministic positive cylindrical `(r,phi,z)`
+   lift with exact JVPs is now implemented and pushed.  It is not yet coupled
+   through the fused surface evaluator, fitted by leave-one-lot-out validation,
+   or sealed for heldout reveal.
 
 The bottom line is substantial but bounded: the software architecture now
-spans measured machine waveforms to radial wafer depth and evolving
-multi-material 3-D profiles.  Absolute depth is not yet closed across all
-three experiments.
+spans measured machine waveforms to species-resolved, non-axisymmetric wafer
+flux and evolving multi-material 3-D profiles.  Absolute depth is not yet
+closed across all three experiments.  The Bosch scale failure has been reduced
+from two orders of magnitude to a calibration-grade mean-depth result, but the
+spatial transfer and heldout gate remain open; Oxford remains a blind physical
+envelope; and Krueger remains a frozen independent forecast in progress.
 
 ## Correct repository and protected working-tree state
 
@@ -59,7 +66,7 @@ codex/validation-first-multiphysics
 ```
 
 Do not switch to the older branches or the other repositories for this
-campaign.  At the checkpoint for this report, `aaeec38` is pushed to the
+campaign.  At the checkpoint for this report, `e5aed0f` is pushed to the
 private remote.
 
 The following unrelated, pre-existing untracked paths belong to the user and
@@ -89,14 +96,14 @@ Krueger checkpoints/results have been retrieved and hash-verified.
 
 ### Oxford live process
 
-At the 16:19 EDT inspection:
+At the 17:09 EDT inspection:
 
 - parent PID file `/root/zhu_v5_board.pid` contained PID `8980`;
 - PID `8980` was alive with eight runnable workers;
 - workers used roughly one CPU each, with normal memory usage;
 - host memory had about 234 GiB available;
 - the GPU held a valid context and was lightly used at the instant sampled;
-- 24 of 56 content-addressed v5 caches existed;
+- 35 of 56 content-addressed v5 caches existed;
 - the existing `audit.json` predates completion and must not be accepted as a
   final v5 audit merely because the file exists.
 
@@ -106,19 +113,21 @@ contains v1--v4 forensic caches.  Never use the raw JSON file count.
 
 ### Krueger live processes
 
-At the same inspection:
+At the same inspection, the exact supervisors remained healthy and had
+advanced to the following prefixes:
 
-| Case | Supervisor PID file | State at 1.000 s |
+| Case | Supervisor PID file | Latest accepted prefix |
 | --- | --- | ---: |
-| published aggregate ion, identity unresolved | `/root/krueger_guo_60s_nominal.pid` | 12.438 nm |
-| all aggregate ions declared CF2+ | `/root/krueger_guo_60s_cf2.pid` | 15.700 nm |
-| all aggregate ions declared CF3+ | `/root/krueger_guo_60s_cf3.pid` | 17.296 nm |
+| published aggregate ion, identity unresolved | `/root/krueger_guo_60s_nominal.pid` | 2.062 s, 25.278 nm |
+| all aggregate ions declared CF2+ | `/root/krueger_guo_60s_cf2.pid` | 2.031 s, 32.216 nm |
+| all aggregate ions declared CF3+ | `/root/krueger_guo_60s_cf3.pid` | 2.000 s, 35.317 nm |
 
 The supervisor PIDs were `10284`, `10285`, and `10286`.  Each had one healthy
 feature worker.  The workers checkpoint and resume every 30 wall-clock minutes.
-The runtime audits say `experimental_outcomes_read=false`.
+The runtime audits say `experimental_outcomes_read=false`.  These prefixes are
+far too short to establish final depth; no linear extrapolation is accepted.
 
-Do not linearly extrapolate the 1 s prefix to 60 s and call it a result.  Mask
+Do not linearly extrapolate the short prefix to 60 s and call it a result.  Mask
 opening, transport, surface state, and topology evolve.  At approximately
 40 wall-seconds per accepted 0.015625 s step, a complete trajectory remains a
 roughly 42--48 hour calculation unless a declared physical terminal event
@@ -311,12 +320,22 @@ Commit `aaeec38` adds the measured-waveform reactor-to-depth scaffold:
 - all radial annuli advanced through the same surface mechanisms;
 - no depth regression and no wafer-specific multiplier.
 
-The current focused validation is 35 tests passed.  On the first official
-calibration trace, the measured-waveform boundary solves in roughly 0.1 s and
-the full radial surface evolution in roughly 4.6 s on the local CPU.  Its
-ledger residual is zero at reported precision.
+Commit `92daba4` then implements the target firewall that fitting actually
+needs.  The official mixed 89-point CSV is split once by a broker that checks
+the string experiment key before parsing any numeric outcome.  Fit code can
+open only the extracted calibration asset.  That asset contains 75 measured
+calibration wafers and 6,675 rows; 1,157 rows from 13 measured heldout wafers
+are absent.  One calibration process key has no 89-point outcome, and seven
+heldout process keys likewise have no 89-point outcome.  The manifest records
+those gaps and pins all relevant hashes.
 
-### Current Bosch result is a failed initialization, not a validation pass
+Commit `36ddd5b` fuses the exact canonical surface recurrence.  It is not a
+surrogate: parity tests compare it against the rich Belen/La Magna mechanism
+objects at machine precision.  A batch of all 76 calibration process traces
+now requires about 3.75 s for the reactor and 0.98 s for the surface pass on
+the local CPU, rather than several minutes.
+
+### Current Bosch calibration result: scale reached, shape model falsified
 
 For calibration wafer `2024-07-02_01`, the untouched defaults produce:
 
@@ -325,20 +344,61 @@ For calibration wafer `2024-07-02_01`, the untouched defaults produce:
 - Si:oxide selectivity `119.07`;
 - strong predicted radial falloff toward the wafer edge.
 
-The allowed calibration record has Si depths near 52 um at the first measured
-89-point locations.  The default scale is therefore about two orders of
-magnitude too small.  This is not hidden or patched.  It means the physically
-bounded initialization values for absorbed coupling, effective lifetimes,
-wall loss, source geometry, and sheath transfer are not yet tool calibrated,
-and possibly that the frozen surface law's declared domain must be tested more
-carefully at Bosch conditions.
+The allowed calibration record is actually `44.288991 um` mean Si depth and
+`0.601803 um` mean oxide loss for that wafer.  The older 52 um statement in
+this report was wrong and is superseded by the typed calibration loader.
 
-Do not repair this by multiplying every predicted depth by a fitted number.
-The next step is a calibration-only physical fit of shared equipment-transfer
-parameters, with leave-one-lot-out checks and explicit parameter bounds.  If
-the unchanged surface law cannot reach the calibration scale within those
-bounds, that is a scientific model-form failure to diagnose—not permission to
-fit the held-out depths.
+Reaching the correct scale does not require changing the surface yields.  An
+exploratory calibration-only shared equipment point, using the unchanged laws,
+sets the reference lifetimes to approximately `0.616 s` for F, `30 us` for the
+effective film precursor, and `0.151 ms` for positive ions; diffusion to
+`(2, 1, 10) m2/s`; and the source ring radius/width to `0.12/0.02 m`.  It
+matches the first calibration wafer's two means and, unchanged across all 75
+measured calibration wafers, gives:
+
+- Si mean-depth MAE `0.7873 um`, MAPE `1.8126%`;
+- oxide mean-loss MAE `0.06120 um`, MAPE `9.0730%`;
+- Si prediction range `43.882--44.714 um` versus measured
+  `42.943--44.365 um`;
+- oxide prediction range `0.5964--0.6089 um` versus measured
+  `0.5709--0.7099 um`;
+- wafer-mean correlation only `0.009` for Si and `0.076` for oxide;
+- pointwise Si RMSE `3.269 um` and normalized shape RMSE `7.214%`.
+
+This is important: absolute scale and selectivity are reachable with plausible
+equipment transfer while retaining measured surface science.  The remaining
+failure is wafer shape and lot/conditioning drift, not a need to multiply
+depth by an arbitrary fitted constant.  The low correlations also mean the
+above point is not yet a validated calibration model.
+
+The 89-point maps provide a model-form test independent of any plasma
+parameter optimizer.  If every wafer is normalized by its measured mean, the
+best possible shared axisymmetric map has `2.128943%` RMSE.  Even an oracle
+axisymmetric fit performed separately on each wafer has median `2.053148%`
+RMSE.  Both exceed the preregistered `2%` shape gate.  By contrast, the best
+shared full 2-D coordinate map has `0.621753%` RMSE.  The data therefore carry
+a stable azimuthal signature that an `(r,z)` model cannot represent.
+
+Commit `e5aed0f` lands the required deterministic 3-D extension:
+
+- conservative cylindrical `(r,phi,z)` finite volumes with periodic azimuth;
+- independent effective-species-resolved inventory lift after the waveform 0-D
+  chemistry;
+- Robin loss on powered electrode, upper wall, and cylindrical sidewall;
+- a nonnegative M-matrix solve and positive normalized source moments;
+- up to four species-specific cosine/sine source harmonics represented through
+  exponential modulation, so fitted sources cannot become negative;
+- exact target-inventory and density-to-point-flux JVPs;
+- interpolation at the actual 89 measured `(x,y)` locations;
+- exact recovery of the axisymmetric area average when all harmonics are zero.
+
+All six direct cylindrical tests pass, including conservation, positivity,
+axisymmetric parity, non-axisymmetric response, and finite-difference JVP
+parity.  This is a general, deterministic, differentiable equipment-transfer
+operator, not a Bosch depth regressor.  The next unimplemented link is the
+fused pointwise surface evolution and the preregistered calibration-v2 receipt.
+The original axisymmetric preregistered path must be preserved and graded as a
+falsified model form; it must not be silently rewritten after this discovery.
 
 ### Frozen Bosch acceptance gates
 
@@ -401,27 +461,33 @@ held-out error approaches the experimental measurement floor.
 3. **Let all three Krueger cases remain frozen.** On completion, retrieve and
    hash-verify all outputs.  Grade every case and its validity domain.  Do not
    choose a composition endpoint based on closeness to 825 nm.
-4. **Build a calibration-only Bosch outcome loader.** It may materialize only
-   the 76 preregistered calibration keys.  The mixed source CSV contains
-   heldout rows, so check the experiment key before converting any numeric
-   outcome fields.  Record in the receipt that heldout numeric fields were not
-   parsed during fitting.
-5. **Fit shared Bosch equipment transfer, not depth.** Candidate physical
-   parameters are absorbed-power coupling, F/film/ion lifetimes, wall-loss
-   velocities, source ring/width, and sheath transfer within explicit bounds.
-   Use leave-one-lot-out calibration and retain one parameter set for every
-   wafer.  Test whether the unchanged surface law can physically reach both
-   absolute Si depth and oxide loss.
-6. **Seal the Bosch model receipt before reveal.** Hash the code, source data,
+4. **Complete the Bosch cylindrical pointwise path.** Refactor the exact fused
+   surface recurrence so it advances arbitrary measurement points as well as
+   radial annuli.  Prove parity with the canonical surface mechanisms and keep
+   the already-passed axisymmetric path unchanged.
+5. **Freeze a Bosch v2 extension before fitting it.** Record that v1
+   axisymmetry is mathematically unable to meet its frozen shape gate.  Limit
+   v2 to the already-landed positive cylindrical source harmonics (maximum
+   order four), shared equipment-transfer parameters, and declared
+   conditioning-class memory.  The heldout outcome firewall remains sealed.
+6. **Fit shared Bosch equipment transfer, not depth.** Fit absorbed coupling,
+   F/film/ion lifetimes, wall loss, source moments/harmonics, and sheath
+   transfer within explicit physical bounds.  Use leave-one-lot-out calibration
+   and one shared parameterization across wafers.  Require mean depth, oxide
+   loss, spatial shape, and lot drift simultaneously; do not accept a good
+   mean with a failed map.
+7. **Seal the Bosch model receipt before reveal.** Hash the code, source data,
    calibration keys, parameter bounds, fitted values, cross-validation scores,
-   and prediction file.  Only then open and score the heldout outcomes.
-7. **Promote a second independent heldout feature chemistry.** Surface points
+   and prediction file.  Only then open and score heldout outcomes.  If the
+   unchanged surface law or bounded transfer cannot pass calibration, retain
+   that as a model-form failure rather than tuning against heldout depth.
+8. **Promote a second independent heldout feature chemistry.** Surface points
    alone are not enough for the stated mission.
-8. **When Freddie's answer key arrives, preserve blindness.** Freeze the
+9. **When Freddie's answer key arrives, preserve blindness.** Freeze the
    Oxford predictions first, then digitize and score depth, top/middle/bottom
    CD where defined, sidewall angle, bowing, mask survival, terminal class,
    and spatial variation.
-9. **Destroy only the task-owned instance after retrieval.** Verify the
+10. **Destroy only the task-owned instance after retrieval.** Verify the
    Oxford and Krueger artifacts locally first, then destroy only `48177892` and
    confirm it no longer exists.
 
@@ -437,18 +503,24 @@ Key pushed checkpoints:
 - `d852a1f` — preregister the no-target-fit Guo-to-Krueger forecasts;
 - `43e80ea` — vendor and preregister the SPTS Bosch holdout;
 - `638ac34` — conserved Bosch Si/C4F8 surface closure;
-- `aaeec38` — deterministic measured-waveform Bosch reactor-to-depth scaffold.
+- `aaeec38` — deterministic measured-waveform Bosch reactor-to-depth scaffold;
+- `92daba4` — enforce a calibration-only Bosch target firewall;
+- `36ddd5b` — fuse the exact Bosch surface recurrence for fast batch fitting;
+- `a9ed475` — resolve species-specific central/annular Bosch source zones;
+- `e5aed0f` — lift the Bosch wafer boundary to conservative cylindrical 3-D.
 
-Focused Bosch/common-surface validation at this snapshot: 35 passed.  A fresh
-repository-wide run including the newest Bosch scaffold completed with
-**2161 passed and 7 skipped in 1211.85 s**.  No full-suite failure is pending at
-this checkpoint.
+The newest direct cylindrical tests are 6/6 passing.  A focused set covering
+the target firewall, axisymmetric reactor, cylindrical reactor, fused surface,
+and wafer-depth path is 23/23 passing.  The last repository-wide run completed
+with **2161 passed and 7 skipped in 1211.85 s** before the final four Bosch
+commits; no focused failure is pending, but the full suite has not yet been
+rerun at `e5aed0f`.
 
 ## One-sentence handoff
 
-The numerical Oxford failure is fixed and the corrected blind board is running;
-the honest Krueger match is still being tested through frozen independent
-surface transfer; the first real machine-waveform Bosch full-stack path now
-runs fast and conservatively but exposes a roughly two-order-of-magnitude
-default depth-scale failure that must be resolved through calibration-only
-physical equipment transfer before any heldout claim.
+The numerical Oxford failure is fixed and its corrected blind board is 35/56;
+the honest Krueger match is still being tested through three frozen independent
+surface-transfer forecasts; and the Bosch machine-waveform path now reaches
+calibration-grade mean depth without changing surface science, while proving
+that non-axisymmetric cylindrical wafer transfer and conditioning drift must be
+closed before the heldout depth/profile claim can be sealed.
