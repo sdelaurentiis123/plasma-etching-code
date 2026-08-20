@@ -69,6 +69,12 @@ OUTPUT = (
     / "audit.json"
 )
 CACHE_DIR = OUTPUT.parent / "trajectories"
+# v5: the common engine continues through certified final Cr extinction.  A
+# mask layer is retired only when it owns no material, supports no resolved
+# volume cell, and has at most roundoff-scale positive level-set residue.
+# Surviving TiO2 state is conservatively remapped, freshly exposed TiO2 is
+# initialized by exact common refinement, and retired Cr inventory is receipted.
+#
 # v4: periodic strip projection is uniform in flux density, so incident rate
 # is distributed in proportion to triangle area.  v3 divided equal event rate
 # among strip triangles; an unequal-area marching-cubes sliver could therefore
@@ -82,7 +88,7 @@ CACHE_DIR = OUTPUT.parent / "trajectories"
 # geometrically degenerate first and the marching-cubes topology certifier
 # correctly refused the mesh ("unmatched interior edges").  The certifier is
 # untouched; the trajectory now stops before the mesh can degenerate.
-MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v4"
+MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v5"
 PRODUCTION_MESH_SPACING_NM = 10.0
 CHROMIUM_MOLAR_MASS_KG_MOL = 51.9961e-3
 CHROMIUM_REFERENCE_DENSITY_KG_M3 = 7190.0
@@ -207,6 +213,17 @@ def _zero_crossings(line, coordinate):
 
 
 def _mask_metrics(geometry, *, pitch_nm):
+    if (geometry.material_levelsets is None
+            or MASK_MATERIAL not in geometry.material_levelsets):
+        return {
+            "center_remaining_thickness_nm": 0.0,
+            "center_top_height_nm": None,
+            "center_bottom_height_nm": None,
+            "vertical_cells_remaining": 0.0,
+            "mask_exhausted_at_center": True,
+            "mask_below_vertical_resolution_at_center": True,
+            "material_layer_retired": True,
+        }
     mask = np.asarray(geometry.material_levelsets[MASK_MATERIAL], dtype=float)
     coordinate = np.arange(mask.shape[0]) * geometry.dx
     z = np.arange(mask.shape[2]) * geometry.dx
@@ -221,6 +238,7 @@ def _mask_metrics(geometry, *, pitch_nm):
             "vertical_cells_remaining": 0.0,
             "mask_exhausted_at_center": True,
             "mask_below_vertical_resolution_at_center": True,
+            "material_layer_retired": False,
         }
     bottom, top = crossing[-2], crossing[-1]
     thickness = max(0.0, top - bottom)
@@ -233,6 +251,7 @@ def _mask_metrics(geometry, *, pitch_nm):
         "mask_below_vertical_resolution_at_center": bool(
             thickness < geometry.dx
         ),
+        "material_layer_retired": False,
     }
 
 
@@ -244,6 +263,9 @@ def _mask_interior_minimum_thickness_nm(geometry, *, pitch_nm, width_nm):
     motion can produce a non-manifold extracted surface; the trajectory must
     end as a declared mask-exhaustion event before that happens.
     """
+    if (geometry.material_levelsets is None
+            or MASK_MATERIAL not in geometry.material_levelsets):
+        return 0.0
     mask = np.asarray(geometry.material_levelsets[MASK_MATERIAL], dtype=float)
     dx = float(geometry.dx)
     coordinate = np.arange(mask.shape[0]) * dx
@@ -276,7 +298,7 @@ def _snapshot(
         geometry, *, width_nm, dx_nm, pitch_nm, scenario, rate_nm_min,
         selectivity, requested_duration_s, reference_rate_nm_min,
         reference_elapsed_s, accepted_steps, maximum_balance, maximum_remap,
-        validity, terminal_reason):
+        validity, terminal_reason, material_lifecycle_events):
     return {
         "width_nm": float(width_nm),
         "mesh_spacing_nm": float(dx_nm),
@@ -292,6 +314,7 @@ def _snapshot(
         ),
         "accepted_profile_steps": int(accepted_steps),
         "terminal_reason": terminal_reason,
+        "material_lifecycle_events": tuple(material_lifecycle_events),
         "profile": _profile_metrics(
             geometry,
             pitch_um=float(pitch_nm) * 1.0e-3,
@@ -341,6 +364,7 @@ def _run_trajectory(
     maximum_balance = 0.0
     maximum_remap = 0.0
     validity = None
+    material_lifecycle_events = []
     profiles = []
     target_index = 0
     terminal_reason = "requested_duration"
@@ -356,31 +380,12 @@ def _run_trajectory(
                 reference_elapsed_s=elapsed, accepted_steps=accepted_steps,
                 maximum_balance=maximum_balance, maximum_remap=maximum_remap,
                 validity=validity, terminal_reason=terminal_reason,
+                material_lifecycle_events=material_lifecycle_events,
             ))
             target_index += 1
             continue
         interior_minimum_nm = _mask_interior_minimum_thickness_nm(
             geometry, pitch_nm=pitch_nm, width_nm=width_nm)
-        if interior_minimum_nm < float(dx_nm):
-            # Declared physical endpoint: the Cr mask no longer resolves one
-            # vertical cell somewhere inside its footprint.  Continuing would
-            # feed a degenerate sliver to marching cubes; the topology
-            # certifier stays fully armed for every other failure mode.
-            terminal_reason = "cr_mask_below_vertical_resolution_in_footprint"
-            for unresolved in targets[target_index:]:
-                profiles.append(_snapshot(
-                    geometry, width_nm=width_nm, dx_nm=dx_nm,
-                    pitch_nm=pitch_nm, scenario=scenario,
-                    rate_nm_min=unresolved["rate"], selectivity=selectivity,
-                    requested_duration_s=duration_s,
-                    reference_rate_nm_min=reference_rate,
-                    reference_elapsed_s=elapsed,
-                    accepted_steps=accepted_steps,
-                    maximum_balance=maximum_balance,
-                    maximum_remap=maximum_remap,
-                    validity=validity, terminal_reason=terminal_reason,
-                ))
-            break
         step_duration = min(float(maximum_step_s), remaining)
         try:
             step = advance_feature_step_3d(
@@ -402,7 +407,8 @@ def _run_trajectory(
                     ]
                 ),
                 profile_periodic_lateral=True,
-                topology_change_policy="continue_gas_cavity",
+                topology_change_policy=(
+                    "continue_gas_cavity_and_material_extinction"),
                 surface_state_remap_backend="indexed_knn",
                 reinitialization_method="cr2",
                 transport_device=transport_device,
@@ -434,8 +440,24 @@ def _run_trajectory(
                     maximum_balance=maximum_balance,
                     maximum_remap=maximum_remap,
                     validity=validity, terminal_reason=terminal_reason,
+                    material_lifecycle_events=material_lifecycle_events,
                 ))
             break
+        topology_event = step.diagnostics["topology_event"]
+        if topology_event is not None:
+            material_lifecycle_events.append({
+                "kind": str(topology_event["kind"]),
+                "reference_elapsed_s": float(elapsed + step_duration),
+                "retired_material_ids": tuple(
+                    topology_event.get("retired_material_ids", ())),
+                "material_extinction_geometry": dict(
+                    topology_event.get("material_extinction_geometry", {})),
+                "state_retirement": dict(
+                    step.state_remap_diagnostics.get("retired_materials", {})),
+                "effective_surface_state_remap_backend": str(
+                    step.state_remap_diagnostics[
+                        "surface_state_remap_backend"]),
+            })
         geometry = step.geometry
         state = step.next_surface_state
         fingerprint = step.next_surface_state_mesh_fingerprint
@@ -452,23 +474,6 @@ def _run_trajectory(
             step.state_remap_diagnostics,
             "max_relative_conservation_residual",
         ))
-        mask = _mask_metrics(geometry, pitch_nm=pitch_nm)
-        if mask["mask_below_vertical_resolution_at_center"]:
-            terminal_reason = "cr_mask_below_vertical_resolution_at_center"
-            for unresolved in targets[target_index:]:
-                profiles.append(_snapshot(
-                    geometry, width_nm=width_nm, dx_nm=dx_nm,
-                    pitch_nm=pitch_nm, scenario=scenario,
-                    rate_nm_min=unresolved["rate"], selectivity=selectivity,
-                    requested_duration_s=duration_s,
-                    reference_rate_nm_min=reference_rate,
-                    reference_elapsed_s=elapsed,
-                    accepted_steps=accepted_steps,
-                    maximum_balance=maximum_balance,
-                    maximum_remap=maximum_remap,
-                    validity=validity, terminal_reason=terminal_reason,
-                ))
-            break
     return profiles
 
 

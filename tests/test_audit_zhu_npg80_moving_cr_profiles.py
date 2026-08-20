@@ -49,8 +49,7 @@ def test_subcell_mask_is_unresolved_but_not_relabelled_physically_exhausted():
     dx = 0.01
     mask = -np.ones((41, 41, 101), dtype=float)
     # Retain a real center interval thinner than one vertical cell.  The
-    # production driver must stop its quantitative claim, but must not call
-    # the remaining material physically exhausted.
+    # lifecycle gate must not call the remaining material physically exhausted.
     x = np.arange(mask.shape[0]) * dx
     z = np.arange(mask.shape[2]) * dx
     middle = int(np.argmin(np.abs(x - 0.2)))
@@ -61,6 +60,17 @@ def test_subcell_mask_is_unresolved_but_not_relabelled_physically_exhausted():
     assert 0.0 < metrics["center_remaining_thickness_nm"] < 10.0
     assert metrics["mask_below_vertical_resolution_at_center"] is True
     assert metrics["mask_exhausted_at_center"] is False
+    assert metrics["material_layer_retired"] is False
+
+
+def test_retired_mask_layer_is_reported_without_indexing_a_missing_field():
+    geometry = SimpleNamespace(material_levelsets={1: np.ones((3, 3, 3))}, dx=0.01)
+
+    metrics = _mask_metrics(geometry, pitch_nm=400.0)
+
+    assert metrics["center_remaining_thickness_nm"] == 0.0
+    assert metrics["mask_exhausted_at_center"] is True
+    assert metrics["material_layer_retired"] is True
 
 
 def test_cuda_multiworker_campaign_uses_spawn_context():
@@ -109,11 +119,13 @@ def test_oxford_thin_cr_first_steps_do_not_create_subcell_material_island():
     )
 
 
-def test_interior_minimum_thickness_ends_trajectory_before_mesh_degeneracy():
-    """The v3 mask-exhaustion guard: the trajectory must end as a declared
-    physical event when the Cr mask thins below one vertical cell anywhere
-    inside the footprint interior, never by feeding marching cubes a
-    degenerate sliver (the second production-board failure, w80/low/tail0)."""
+def test_interior_minimum_thickness_resolves_local_mask_loss_diagnostic():
+    """The old v3 endpoint remains a useful local-thickness diagnostic.
+
+    V5 no longer treats it as a terminal condition: fixed-point mesh cleanup
+    and explicit material extinction now carry the process through the final
+    Cr layer while preserving this observable in every snapshot.
+    """
     from scripts.audit_zhu_npg80_moving_cr_profiles import (
         MASK_MATERIAL,
         _geometry,
