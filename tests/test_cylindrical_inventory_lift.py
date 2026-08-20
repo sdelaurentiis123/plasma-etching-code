@@ -73,3 +73,26 @@ def test_inventory_jvp_is_exact(grid):
     time_tangent = np.stack((tangent, -0.5 * tangent))
     assert lift.density_to_lower_flux_jvp(time_tangent).shape == (
         2, 2, grid.radial_cell_count, grid.azimuthal_cell_count)
+
+
+def test_new_source_moment_reuses_operator_with_exact_conservation(grid):
+    base_source = normalized_cylindrical_annular_skin_source(
+        grid, axial_skin_depth_m=0.05, ring_radius_m=0.09,
+        radial_width_m=0.05)
+    lift = _lift(grid, base_source)
+    replay, replay_ledger, replay_linear = (
+        lift.source_shape_to_unit_lower_flux(
+            np.stack((base_source, base_source))))
+    changed = normalized_cylindrical_annular_skin_source(
+        grid, axial_skin_depth_m=0.05, ring_radius_m=0.11,
+        radial_width_m=0.025, cosine_coefficients=(0.2, -0.1),
+        sine_coefficients=(-0.15, 0.05))
+    changed_flux, changed_ledger, changed_linear = (
+        lift.source_shape_to_unit_lower_flux(np.stack((changed, changed))))
+
+    assert replay == pytest.approx(
+        lift._unit_lower_flux_per_density_m_s, rel=2.0e-14, abs=1.0e-16)
+    assert max(replay_ledger, changed_ledger) < 1.0e-12
+    assert max(replay_linear, changed_linear) < 1.0e-12
+    assert np.all(changed_flux >= 0.0)
+    assert np.any(np.ptp(changed_flux, axis=2) > 0.0)

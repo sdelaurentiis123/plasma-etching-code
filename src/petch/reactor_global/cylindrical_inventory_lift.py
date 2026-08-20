@@ -270,6 +270,13 @@ class DeterministicCylindricalIndependentInventoryLift:
         nz = self.grid.axial_cell_count
         return (radial * nphi + azimuthal) * nz + axial
 
+    @property
+    def unit_lower_flux_per_density_m_s(self):
+        """Read-only lower-wall flux response to unit average inventory."""
+        view = self._unit_lower_flux_per_density_m_s.view()
+        view.setflags(write=False)
+        return view
+
     def _assemble_species_operator(self, species):
         grid = self.grid
         nr = grid.radial_cell_count
@@ -389,6 +396,64 @@ class DeterministicCylindricalIndependentInventoryLift:
                 or np.any(~np.isfinite(tangent))):
             raise ValueError("density tangent must have shape (time, species)")
         return tangent[:, :, None, None] * self._unit_lower_flux_per_density_m_s
+
+    def source_shape_to_unit_lower_flux(self, source_shape):
+        """Solve a new positive source moment without refactorizing transport.
+
+        Diffusion and Robin wall losses define the sparse operator; source
+        moments enter only through its right-hand side.  Calibration can
+        therefore vary a physical source map while reusing the exact same
+        factorization.  The returned response is normalized to one unit of
+        volume-average density for each species.
+        """
+        shape = np.asarray(source_shape, dtype=float)
+        expected = (
+            len(self.species_names), self.grid.radial_cell_count,
+            self.grid.azimuthal_cell_count, self.grid.axial_cell_count)
+        volume = self.grid.cell_volume_m3
+        if (shape.shape != expected or np.any(~np.isfinite(shape))
+                or np.any(shape < 0.0)):
+            raise ValueError("invalid cylindrical source moments")
+        means = np.sum(shape * volume[None], axis=(1, 2, 3)) / (
+            self.grid.geometry.volume_m3)
+        if np.any(np.abs(means - 1.0) > 1.0e-10):
+            raise ValueError("cylindrical source moments must average to one")
+
+        unit_lower = []
+        ledgers = []
+        linears = []
+        for species, (factor, operator, effective) in enumerate(zip(
+                self._factorizations, self._operators, self._boundary_velocity)):
+            rhs = (shape[species] * volume).ravel()
+            raw = factor.solve(rhs)
+            scale = max(1.0, float(np.max(np.abs(raw))))
+            if np.min(raw) < -1.0e-10 * scale:
+                raise RuntimeError("cylindrical inventory solve lost positivity")
+            raw[np.abs(raw) < 1.0e-13 * scale] = 0.0
+            density = np.maximum(raw, 0.0).reshape(shape[species].shape)
+            response = float(
+                np.sum(density * volume) / self.grid.geometry.volume_m3)
+            if not math.isfinite(response) or response <= 0.0:
+                raise ValueError("cylindrical inventory response is singular")
+            amplitude = 1.0 / response
+            density *= amplitude
+            lower = effective[0] * density[:, :, 0]
+            upper = effective[1] * density[:, :, -1]
+            side = effective[2] * density[-1]
+            source_rate = amplitude * float(np.sum(shape[species] * volume))
+            wall_rate = (
+                float(np.sum(lower * self.grid.endcap_cell_area_m2))
+                + float(np.sum(upper * self.grid.endcap_cell_area_m2))
+                + float(np.sum(side * self.grid.sidewall_cell_area_m2)))
+            ledgers.append(
+                abs(source_rate - wall_rate) / max(source_rate, wall_rate, 1.0))
+            linears.append(float(
+                np.linalg.norm(operator @ density.ravel() - amplitude * rhs)
+                / max(np.linalg.norm(amplitude * rhs), 1.0)))
+            unit_lower.append(lower)
+        output = np.stack(unit_lower)
+        output.setflags(write=False)
+        return output, float(max(ledgers)), float(max(linears))
 
 
 def normalized_cylindrical_annular_skin_source(

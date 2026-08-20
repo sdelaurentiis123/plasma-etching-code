@@ -64,6 +64,47 @@ class BoschSPTSCylindricalParameters:
 
 
 @dataclass(frozen=True)
+class BoschSPTSCylindricalSourceResponse:
+    species_names: tuple[str, ...]
+    x_m: np.ndarray
+    y_m: np.ndarray
+    unit_point_flux_per_density_m_s: np.ndarray
+    unit_wafer_average_flux_per_density_m_s: np.ndarray
+    maximum_species_ledger_relative_residual: float
+    maximum_linear_system_relative_residual: float
+    provenance: dict
+
+    def __post_init__(self):
+        names = tuple(self.species_names)
+        x = np.asarray(self.x_m, dtype=float).copy()
+        y = np.asarray(self.y_m, dtype=float).copy()
+        point = np.asarray(self.unit_point_flux_per_density_m_s, dtype=float).copy()
+        average = np.asarray(
+            self.unit_wafer_average_flux_per_density_m_s, dtype=float).copy()
+        if (
+            names != _SPECIES
+            or x.ndim != 1 or y.shape != x.shape or x.size < 4
+            or point.shape != (len(names), x.size)
+            or average.shape != (len(names),)
+            or any(np.any(~np.isfinite(value)) for value in (x, y, point, average))
+            or np.any(point < 0.0) or np.any(average < 0.0)
+            or len(set(zip(x, y))) != x.size
+            or not 0.0 <= self.maximum_species_ledger_relative_residual < 1.0e-8
+            or not 0.0 <= self.maximum_linear_system_relative_residual < 1.0e-10
+        ):
+            raise ValueError("invalid cylindrical Bosch source response")
+        for value in (x, y, point, average):
+            value.setflags(write=False)
+        object.__setattr__(self, "species_names", names)
+        object.__setattr__(self, "x_m", x)
+        object.__setattr__(self, "y_m", y)
+        object.__setattr__(self, "unit_point_flux_per_density_m_s", point)
+        object.__setattr__(
+            self, "unit_wafer_average_flux_per_density_m_s", average)
+        object.__setattr__(self, "provenance", MappingProxyType(dict(self.provenance)))
+
+
+@dataclass(frozen=True)
 class BoschSPTSWaferBoundaryMapTrace:
     reactor: BoschSPTSReducedReactorSolution
     species_names: tuple[str, ...]
@@ -145,6 +186,40 @@ def _point_interpolation_weights(grid, x_m, y_m):
     return weights
 
 
+def _source_shapes(grid, parameters):
+    base = parameters.reduced
+    shapes = []
+    for species in range(len(_SPECIES)):
+        cosine = parameters.source_cosine_coefficients[species]
+        sine = parameters.source_sine_coefficients[species]
+        annular = normalized_cylindrical_annular_skin_source(
+            grid, axial_skin_depth_m=base.source_axial_skin_depth_m,
+            ring_radius_m=base.source_ring_radius_m,
+            radial_width_m=base.source_radial_width_m,
+            cosine_coefficients=cosine, sine_coefficients=sine)
+        central = normalized_cylindrical_annular_skin_source(
+            grid, axial_skin_depth_m=base.source_axial_skin_depth_m,
+            ring_radius_m=0.0,
+            radial_width_m=(base.central_source_radial_scale_m / math.sqrt(2.0)),
+            cosine_coefficients=cosine, sine_coefficients=sine)
+        central_fraction = base.source_central_fraction[species]
+        shapes.append(
+            central_fraction * central + (1.0 - central_fraction) * annular)
+    return np.stack(shapes)
+
+
+def _wafer_area_weights(grid, wafer_radius_m):
+    clipped_outer = np.minimum(grid.radial_edges_m[1:], wafer_radius_m)
+    clipped_inner = np.minimum(grid.radial_edges_m[:-1], wafer_radius_m)
+    sector_area = (
+        0.5 * np.maximum(clipped_outer ** 2 - clipped_inner ** 2, 0.0)
+        * np.diff(grid.azimuthal_edges_rad)[0])
+    area_weights = np.repeat(
+        sector_area[:, None], grid.azimuthal_cell_count, axis=1)
+    area_weights /= np.sum(area_weights)
+    return area_weights
+
+
 class DeterministicBoschSPTSCylindricalReactorToWafer:
     """0-D measured waveform plus positive cylindrical 3-D inventory lift."""
 
@@ -158,23 +233,7 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
             radial_cell_count=base.radial_cell_count,
             azimuthal_cell_count=parameters.azimuthal_cell_count,
             axial_cell_count=base.axial_cell_count)
-        source_shapes = []
-        for species in range(len(_SPECIES)):
-            cosine = parameters.source_cosine_coefficients[species]
-            sine = parameters.source_sine_coefficients[species]
-            annular = normalized_cylindrical_annular_skin_source(
-                grid, axial_skin_depth_m=base.source_axial_skin_depth_m,
-                ring_radius_m=base.source_ring_radius_m,
-                radial_width_m=base.source_radial_width_m,
-                cosine_coefficients=cosine, sine_coefficients=sine)
-            central = normalized_cylindrical_annular_skin_source(
-                grid, axial_skin_depth_m=base.source_axial_skin_depth_m,
-                ring_radius_m=0.0,
-                radial_width_m=(base.central_source_radial_scale_m / math.sqrt(2.0)),
-                cosine_coefficients=cosine, sine_coefficients=sine)
-            central_fraction = base.source_central_fraction[species]
-            source_shapes.append(
-                central_fraction * central + (1.0 - central_fraction) * annular)
+        source_shapes = _source_shapes(grid, parameters)
         wall = np.column_stack((
             base.lower_wall_velocity_m_s,
             base.upper_wall_velocity_m_s,
@@ -182,7 +241,7 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
         self._lift = DeterministicCylindricalIndependentInventoryLift(
             grid=grid, species_names=_SPECIES,
             diffusion_coefficient_m2_s=base.diffusion_coefficient_m2_s,
-            wall_velocity_m_s=wall, source_shape=np.stack(source_shapes),
+            wall_velocity_m_s=wall, source_shape=source_shapes,
             source=(
                 "SPTS species-resolved positive cylindrical source moments; "
                 "source-2 measured off"))
@@ -191,57 +250,95 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
         self._maximum_linear = (
             self._lift.maximum_unit_linear_system_relative_residual)
 
-    def solve(self, trace, *, x_m, y_m, initial_density_m3=(0.0, 0.0, 0.0)):
+    def source_response(
+            self, *, x_m, y_m, source_cosine_coefficients=None,
+            source_sine_coefficients=None):
+        if ((source_cosine_coefficients is None)
+                != (source_sine_coefficients is None)):
+            raise ValueError("cosine and sine source coefficients must be paired")
+        if source_cosine_coefficients is None:
+            parameters = self.parameters
+            unit_lower = self._lift.unit_lower_flux_per_density_m_s
+            maximum_ledger = self._maximum_ledger
+            maximum_linear = self._maximum_linear
+            reused_factorization = True
+        else:
+            parameters = BoschSPTSCylindricalParameters(
+                reduced=self.parameters.reduced,
+                azimuthal_cell_count=self.parameters.azimuthal_cell_count,
+                source_cosine_coefficients=source_cosine_coefficients,
+                source_sine_coefficients=source_sine_coefficients)
+            unit_lower, maximum_ledger, maximum_linear = (
+                self._lift.source_shape_to_unit_lower_flux(
+                    _source_shapes(self._grid, parameters)))
+            reused_factorization = True
+        weights = _point_interpolation_weights(self._grid, x_m, y_m)
+        unit_point_flux = np.einsum("srp,qrp->sq", unit_lower, weights)
+        area_weights = _wafer_area_weights(
+            self._grid, self.parameters.reduced.wafer_radius_m)
+        unit_average_flux = np.einsum(
+            "srp,rp->s", unit_lower, area_weights)
+        return BoschSPTSCylindricalSourceResponse(
+            species_names=_SPECIES, x_m=np.asarray(x_m), y_m=np.asarray(y_m),
+            unit_point_flux_per_density_m_s=unit_point_flux,
+            unit_wafer_average_flux_per_density_m_s=unit_average_flux,
+            maximum_species_ledger_relative_residual=maximum_ledger,
+            maximum_linear_system_relative_residual=maximum_linear,
+            provenance={
+                "model": "spts-bosch-cylindrical-source-response-v1",
+                "parameters": parameters.manifest(),
+                "transport_factorization_reused": reused_factorization,
+                "target_depth_used": False,
+            })
+
+    def solve(
+            self, trace, *, x_m, y_m, initial_density_m3=(0.0, 0.0, 0.0),
+            source_response=None):
         base = self.parameters.reduced
         reactor = solve_bosch_spts_reduced_reactor(
             trace, base, initial_density_m3=initial_density_m3)
-        weights = _point_interpolation_weights(self._grid, x_m, y_m)
-        unit_point_flux = np.einsum(
-            "srp,qrp->sq", self._lift._unit_lower_flux_per_density_m_s,
-            weights)
+        if source_response is None:
+            source_response = self.source_response(x_m=x_m, y_m=y_m)
+        if (not isinstance(source_response, BoschSPTSCylindricalSourceResponse)
+                or not np.array_equal(source_response.x_m, np.asarray(x_m))
+                or not np.array_equal(source_response.y_m, np.asarray(y_m))):
+            raise ValueError("source response does not match requested wafer points")
         point_flux = (
             reactor.volume_average_density_m3[:, :, None]
-            * unit_point_flux[None])
-        clipped_outer = np.minimum(
-            self._grid.radial_edges_m[1:], base.wafer_radius_m)
-        clipped_inner = np.minimum(
-            self._grid.radial_edges_m[:-1], base.wafer_radius_m)
-        sector_area = (
-            0.5 * np.maximum(clipped_outer ** 2 - clipped_inner ** 2, 0.0)
-            * np.diff(self._grid.azimuthal_edges_rad)[0])
-        area_weights = np.repeat(
-            sector_area[:, None], self._grid.azimuthal_cell_count, axis=1)
-        area_weights /= np.sum(area_weights)
-        unit_average_flux = np.einsum(
-            "srp,rp->s", self._lift._unit_lower_flux_per_density_m_s,
-            area_weights)
+            * source_response.unit_point_flux_per_density_m_s[None])
         average_flux = (
-            reactor.volume_average_density_m3 * unit_average_flux[None])
+            reactor.volume_average_density_m3
+            * source_response.unit_wafer_average_flux_per_density_m_s[None])
         return BoschSPTSWaferBoundaryMapTrace(
             reactor=reactor, species_names=_SPECIES,
             x_m=np.asarray(x_m), y_m=np.asarray(y_m),
             point_flux_m2_s=point_flux,
             wafer_area_average_flux_m2_s=average_flux,
             maximum_cylindrical_species_ledger_relative_residual=(
-                self._maximum_ledger),
+                source_response.maximum_species_ledger_relative_residual),
             maximum_cylindrical_inventory_relative_residual=0.0,
             maximum_cylindrical_linear_system_relative_residual=(
-                self._maximum_linear),
+                source_response.maximum_linear_system_relative_residual),
             source_jvp_supported=True,
             provenance={
                 "model": "spts-bosch-measured-waveform-cylindrical-wafer-v1",
-                "parameters": self.parameters.manifest(),
+                "parameters": source_response.provenance["parameters"],
                 "point_interpolation": "bilinear r/periodic-phi; axis-averaged at r=0",
                 "target_depth_used": False,
             })
 
-    def density_to_point_flux_jvp(self, density_tangent_m3, *, x_m, y_m):
+    def density_to_point_flux_jvp(
+            self, density_tangent_m3, *, x_m, y_m, source_response=None):
         tangent = np.asarray(density_tangent_m3, dtype=float)
         if (tangent.ndim != 2 or tangent.shape[1] != len(_SPECIES)
                 or np.any(~np.isfinite(tangent))):
             raise ValueError("density tangent must have shape (time, 3)")
-        weights = _point_interpolation_weights(self._grid, x_m, y_m)
-        unit_point_flux = np.einsum(
-            "srp,qrp->sq", self._lift._unit_lower_flux_per_density_m_s,
-            weights)
-        return tangent[:, :, None] * unit_point_flux[None]
+        if source_response is None:
+            source_response = self.source_response(x_m=x_m, y_m=y_m)
+        if (not isinstance(source_response, BoschSPTSCylindricalSourceResponse)
+                or not np.array_equal(source_response.x_m, np.asarray(x_m))
+                or not np.array_equal(source_response.y_m, np.asarray(y_m))):
+            raise ValueError("source response does not match requested wafer points")
+        return (
+            tangent[:, :, None]
+            * source_response.unit_point_flux_per_density_m_s[None])

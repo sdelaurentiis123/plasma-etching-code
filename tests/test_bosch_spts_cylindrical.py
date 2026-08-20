@@ -82,3 +82,30 @@ def test_cylindrical_point_flux_jvp_is_exact(trace):
     assert model.density_to_point_flux_jvp(
         tangent, x_m=x, y_m=y) == pytest.approx(
             finite_difference, rel=2.0e-9, abs=1.0e5)
+
+
+def test_source_harmonics_reuse_factorization_and_match_fresh_model(trace):
+    reduced = BoschSPTSReducedParameters(radial_cell_count=8, axial_cell_count=7)
+    cosine = ((0.2, -0.05), (-0.1, 0.08), (0.15, 0.04))
+    sine = ((-0.1, 0.07), (0.05, -0.04), (0.12, -0.06))
+    x = np.array([0.01, 0.03, -0.04, 0.06, -0.07])
+    y = np.array([0.02, -0.04, 0.05, 0.01, -0.02])
+    reusable = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=8))
+    response = reusable.source_response(
+        x_m=x, y_m=y, source_cosine_coefficients=cosine,
+        source_sine_coefficients=sine)
+    reused = reusable.solve(
+        trace, x_m=x, y_m=y, source_response=response)
+    fresh = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=8,
+            source_cosine_coefficients=cosine,
+            source_sine_coefficients=sine)).solve(trace, x_m=x, y_m=y)
+
+    assert response.provenance["transport_factorization_reused"] is True
+    assert reused.point_flux_m2_s == pytest.approx(
+        fresh.point_flux_m2_s, rel=2.0e-14, abs=1.0)
+    assert reused.wafer_area_average_flux_m2_s == pytest.approx(
+        fresh.wafer_area_average_flux_m2_s, rel=2.0e-14, abs=1.0)
