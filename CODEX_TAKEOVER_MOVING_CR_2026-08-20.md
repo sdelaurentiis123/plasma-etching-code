@@ -34,9 +34,10 @@ proportion to recipient triangle area, so total rate is conserved without a
 small-area singularity.  The implementation is also vectorized while
 preserving deterministic event-major/member-major ordering.
 
-The exact formerly failing trajectory has passed step 40 under v4 with two
-CFL substeps and speed approximately `7.25e-4` throughout.  This is a direct
-same-trajectory reproduction of both the defect and the correction.
+The exact formerly failing trajectory completed under v4 in 381.65 wall
+seconds, with two CFL substeps and speed approximately `7.25e-4` throughout.
+This is a direct same-trajectory reproduction of both the defect and the
+correction.
 
 ## What was wrong with the prior handoff
 
@@ -142,9 +143,43 @@ v4.  The relevant focused suite is 99 tests green.
 
 ### 5. Same-path confirmation
 
-The v4 replay passed the exact former step 39 and reached at least step 40 with
-all printed CFL counts equal to 2 and all maximum speeds near `7.25e-4`.
-There was no stack timeout or GPU/context error at the former failure point.
+The v4 replay passed the exact former step 39 and completed after 82 accepted
+steps.  All printed CFL counts were 2 and all maximum speeds stayed near
+`7.25e-4`.  There was no stack timeout or GPU/context error at the former
+failure point.  The resulting cache is
+`w320_s14.000_ion_low_tail_0p0_d037283bbcd7364e.json`.
+
+The declared endpoint was local Cr-mask loss: the footprint minimum was zero
+while 26.77 nm remained at the centre.  At that point the conditional TiO2
+profile depth was 278.16 nm, particle balance error was exactly zero, and the
+maximum conservative-remap residual was `6.59e-16`.
+
+## Critical scope finding: this is not yet a 20-minute profile board
+
+Every one of the 55 committed v3 trajectories terminated on
+`cr_mask_below_vertical_resolution_in_footprint`; none reached the requested
+1200-second process endpoint.  Their accepted process-equivalent durations
+ranged from 391.33 to 713.85 seconds and their endpoint depths from 274.90 to
+406.09 nm.  The corrected v4 target likewise stopped at local mask loss after
+about 396.17 reference seconds.
+
+That is not automatically a bad physical result.  A 45 nm Cr mask combined
+with the preregistered low TiO2:Cr selectivity cannot survive a 20-minute
+blanket exposure, and feature corners can fail earlier than the centre.  But
+it changes the deliverable meaning:
+
+- a completed 56-cell cache board certifies conditional evolution **up to
+  first unresolved local Cr loss**;
+- it does not yet predict Freddie's final 20-minute SEM;
+- copying the terminal geometry forward to 1200 seconds would be a false
+  prediction;
+- the next feature-engine requirement is a certified continuation through
+  local hard-mask perforation and eventual material-component extinction.
+
+That continuation must remove sub-resolution Cr locally while preserving the
+remaining resolved mask, rebuild/redistance a valid material level set, and
+keep topology, mass/remap, and particle-balance certifiers active.  It must not
+silently reinterpret mask loss as complete process success.
 
 ## Cache consequence
 
@@ -171,11 +206,13 @@ Vast instance:
 - tree `/root/petch-4b656fd`
 - venv `/root/petch-venv`
 
-At 13:44 EDT the exact v4 diagnostic trajectory was still running as PID 5471
-and had passed the former failure.  Its log is `/root/w320_v4_debug.log`; its
-pid file is `/root/w320_debug.pid`.  Always re-read the pid and verify the
-command line before sending a signal.  Never use `pgrep -f` with the pattern
-in the probe command because it can match the probe itself.
+The exact v4 diagnostic completed.  Its log is
+`/root/w320_v4_debug.log`; its pid file is `/root/w320_debug.pid` but that PID
+is no longer live.  A clean eight-worker v4 board was subsequently launched
+under parent PID 5718 with log `/root/zhu_v4_board.log` and pid file
+`/root/zhu_v4_board.pid`.  Always re-read the pid and verify the command line
+before sending a signal.  Never use `pgrep -f` with the pattern in the probe
+command because it can match the probe itself.
 
 The remote tree began from commit `4b656fd` and has the committed v4 versions
 of these files copied into place:
@@ -192,19 +229,18 @@ PYTHONPATH=/root/petch-4b656fd:/root/petch-4b656fd/src
 
 ## Required landing sequence
 
-1. Let the exact v4 diagnostic complete or inspect any new declared failure.
-   A successful run writes
-   `w320_s14.000_ion_low_tail_0p0_d037283bbcd7364e.json`.
-2. Run a clean v4 production board.  Because all 56 v3 caches are ineligible,
-   expect all 56 cells to recompute.  Use conservative worker concurrency and
-   monitor RSS; the previous handoff established that 12 workers did not fit a
-   70 GB machine.
-3. Assemble v4 `audit.json`, pull all v4 caches and audit, then run local
+1. Monitor the active clean v4 production board.  The exact target cache is
+   already complete, so 55 cells remain.  Because all v3 caches are
+   ineligible, the other cells must recompute.  Eight workers are active;
+   monitor RSS because 12 workers did not fit a prior 70 GB machine.
+2. Assemble v4 `audit.json`, pull all v4 caches and audit, then run local
    `--check` against the identical committed code.
-4. Run the full local suite, render the conditional profile atlas, and commit
+3. Run the full local suite, render the conditional endpoint atlas, and commit
    the v4 receipts.
-5. Destroy Vast instance `48177892` immediately after all artifacts are pulled
+4. Destroy Vast instance `48177892` immediately after all artifacts are pulled
    and verified.  Confirm it disappears from `vastai show instances --raw`.
+5. Treat post-mask continuation as the next implementation block before
+   calling this a final 20-minute profile predictor.
 
 ## Scientific interpretation
 
