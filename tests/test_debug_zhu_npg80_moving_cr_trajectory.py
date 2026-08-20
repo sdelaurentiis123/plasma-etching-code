@@ -18,7 +18,7 @@ def test_debug_driver_selects_exact_missing_production_cell():
     assert spec["duration_s"] == 1200.0
     assert spec["mesh_spacing_nm"] == 10.0
     assert board._cache_path(spec).name == (
-        "w320_s14.000_ion_low_tail_0p0_e66c0e4cb7ba6c58.json"
+        "w320_s14.000_ion_low_tail_0p0_d037283bbcd7364e.json"
     )
 
 

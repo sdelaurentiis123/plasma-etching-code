@@ -1196,36 +1196,61 @@ def symmetrize_transport_across_strips(transport, verts, faces, centroids, norma
 
 
 def _symmetrize_face_resolved(population, areas, groups):
-    """Redistribute each sparse event's rate equally across its strip faces."""
+    """Project every sparse event to uniform flux density over its strip.
+
+    The invariant is translationally uniform *flux density*, not equal rate
+    per marching-cubes triangle.  Strip triangles can have unequal areas when
+    an interface cuts adjacent cells at different fractions.  Splitting rate
+    equally and then dividing by each recipient area amplifies a vanishing
+    sliver without bound.  Instead, distribute rate in proportion to area,
+    which is equivalent to assigning one flux density over the whole strip.
+    """
     face = np.asarray(population.event_face, dtype=int)
     rate = np.asarray(population.event_flux_m2_s, dtype=float) * areas[face]
     energy = np.asarray(population.event_energy_eV, dtype=float)
     cosine = np.asarray(population.event_cosine_incidence, dtype=float)
     direction = population.event_incident_direction
-    key_of_face = {}
-    for members in groups.values():
-        for member in members:
-            key_of_face[member] = members
-    new_face, new_rate, new_energy, new_cos = [], [], [], []
-    new_dir = [] if direction is not None else None
-    for i in range(face.size):
-        members = key_of_face[int(face[i])]
-        share = rate[i] / len(members)
-        for member in members:
-            new_face.append(member)
-            new_rate.append(share)
-            new_energy.append(energy[i])
-            new_cos.append(cosine[i])
-            if new_dir is not None:
-                new_dir.append(direction[i])
-    new_face = np.asarray(new_face, dtype=int)
-    new_areas = areas[new_face]
+    member_lists = list(groups.values())
+    maximum_members = max((len(members) for members in member_lists), default=0)
+    group_of_face = np.full(population.face_count, -1, dtype=int)
+    group_size = np.empty(len(member_lists), dtype=int)
+    group_area = np.empty(len(member_lists), dtype=float)
+    member_table = np.full(
+        (len(member_lists), maximum_members), -1, dtype=int)
+    for group_index, members in enumerate(member_lists):
+        member = np.asarray(members, dtype=int)
+        group_of_face[member] = group_index
+        group_size[group_index] = member.size
+        group_area[group_index] = float(np.sum(areas[member]))
+        member_table[group_index, :member.size] = member
+    event_group = group_of_face[face]
+    if np.any(event_group < 0):  # pragma: no cover - groups cover every face
+        raise RuntimeError("strip symmetrization omitted an energetic event face")
+    event_size = group_size[event_group]
+    event_group_area = group_area[event_group]
+    if (np.any(~np.isfinite(event_group_area))
+            or np.any(event_group_area <= 0.0)):
+        raise RuntimeError("strip symmetrization encountered nonpositive group area")
+    if face.size:
+        retained = (
+            np.arange(maximum_members)[None, :] < event_size[:, None]
+        )
+        new_face = member_table[event_group][retained]
+    else:
+        new_face = np.empty(0, dtype=int)
+    # Repeating the per-event density and attributes retains the former
+    # deterministic event-major/member-major ordering without Python scalar
+    # append loops.  This is also materially faster for million-event boards.
+    new_flux = np.repeat(rate / event_group_area, event_size)
+    new_energy = np.repeat(energy, event_size)
+    new_cos = np.repeat(cosine, event_size)
+    new_dir = (
+        None if direction is None
+        else np.repeat(np.asarray(direction, dtype=float), event_size, axis=0)
+    )
     return FaceResolvedEnergeticFlux(
         population.name, population.face_count, new_face,
-        np.asarray(new_rate, dtype=float) / new_areas,
-        np.asarray(new_energy, dtype=float), np.asarray(new_cos, dtype=float),
-        event_incident_direction=(None if new_dir is None
-                                  else np.asarray(new_dir, dtype=float)))
+        new_flux, new_energy, new_cos, event_incident_direction=new_dir)
 
 
 @wp.kernel

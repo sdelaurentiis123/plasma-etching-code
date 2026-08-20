@@ -69,13 +69,20 @@ OUTPUT = (
     / "audit.json"
 )
 CACHE_DIR = OUTPUT.parent / "trajectories"
+# v4: periodic strip projection is uniform in flux density, so incident rate
+# is distributed in proportion to triangle area.  v3 divided equal event rate
+# among strip triangles; an unequal-area marching-cubes sliver could therefore
+# amplify its local removal velocity by millions and request millions of CFL
+# substeps.  The corrected projection changes the transport operator, so no v3
+# trajectory cache is eligible for reuse.
+#
 # v3: trajectories end as a declared physical event when the Cr mask thins
 # below one vertical cell anywhere over the footprint interior.  v2 checked
 # only the centre column; the mask thins non-uniformly, so edge columns went
 # geometrically degenerate first and the marching-cubes topology certifier
 # correctly refused the mesh ("unmatched interior edges").  The certifier is
 # untouched; the trajectory now stops before the mesh can degenerate.
-MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v3"
+MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v4"
 PRODUCTION_MESH_SPACING_NM = 10.0
 CHROMIUM_MOLAR_MASS_KG_MOL = 51.9961e-3
 CHROMIUM_REFERENCE_DENSITY_KG_M3 = 7190.0

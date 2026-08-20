@@ -85,6 +85,37 @@ def test_asymmetric_face_resolved_redistributes_conserving_rate():
     assert np.all(sym.event_energy_eV == 500.0)
 
 
+def test_face_resolved_projection_is_uniform_density_on_unequal_area_faces():
+    """A sub-cell triangle must not receive a singular equal-rate density."""
+    verts, faces, areas, centroids, normals = _two_strip_mesh()
+    # Shorten the second strip in y so its area is one quarter of the first.
+    # The x/z centroid and normal remain the declared extrusion group key.
+    verts[faces[1, 2], 1] = 1.25
+    tri = verts[faces]
+    areas = 0.5 * np.linalg.norm(
+        np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]), axis=1)
+    assert areas[1] == pytest.approx(0.25 * areas[0])
+    pop = FaceResolvedEnergeticFlux(
+        "Ar+", 3, np.array([0]), np.array([3.0e19]), np.array([500.0]),
+        np.array([0.4]))
+
+    out = symmetrize_transport_across_strips(
+        _result({}, (pop,)), verts, faces, centroids, normals)
+    sym = out.surface_fluxes.energetic_fluxes[0]
+    flux_by_face = np.bincount(
+        sym.event_face, weights=sym.event_flux_m2_s, minlength=3)
+    rate_by_face = np.bincount(
+        sym.event_face,
+        weights=sym.event_flux_m2_s * areas[sym.event_face], minlength=3)
+
+    # Uniform flux density is the extrusion invariant; rates scale with area.
+    assert flux_by_face[0] == pytest.approx(flux_by_face[1], rel=1e-12)
+    assert rate_by_face[1] == pytest.approx(
+        0.25 * rate_by_face[0], rel=1e-12)
+    assert rate_by_face.sum() == pytest.approx(
+        3.0e19 * areas[0], rel=1e-12)
+
+
 def test_already_symmetric_input_is_unchanged():
     verts, faces, areas, centroids, normals = _two_strip_mesh()
     neutral = {"CF2": np.array([4.0e19, 4.0e19, 1.0e19])}   # strips equal
