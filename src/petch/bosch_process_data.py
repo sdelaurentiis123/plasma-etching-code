@@ -14,8 +14,10 @@ records the inference and the thresholds used to make it auditable.
 """
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
 from hashlib import md5
+import math
 from pathlib import Path
 import re
 from types import MappingProxyType
@@ -26,6 +28,8 @@ import numpy as np
 
 PROCESS_DATA_MD5 = "4567d24ec2125102a2e5129203ba31fa"
 PROCESS_DICTIONARY_MD5 = "0dde5a3a913eb1fa8512ef2f8748fb34"
+WAFER_MEASUREMENT_89_POINT_MD5 = "446e75b040eea37b634eeb8f763a62fc"
+WAFER_MEASUREMENT_9_POINT_MD5 = "78515caf25e29e558e1859b92f8a4827"
 
 SF6_FLOW_CHANNEL = "Stat3_Etch_MV_Gas5Flow"
 C4F8_FLOW_CHANNEL = "Stat3_Etch_MV_Gas4Flow"
@@ -151,6 +155,136 @@ class BoschProcessSummary:
         ):
             raise ValueError("invalid Bosch process summary")
         object.__setattr__(self, "metrics", MappingProxyType(metrics))
+
+
+@dataclass(frozen=True)
+class BoschWaferMeasurementMap:
+    """One identified wafer's spatial Si/oxide measurements in micrometres."""
+
+    experiment_key: str
+    lot_number: int
+    wafer_number: int
+    x_um: np.ndarray
+    y_um: np.ndarray
+    preoxide_thickness_um: np.ndarray
+    postoxide_thickness_um: np.ndarray
+    stepheight_um: np.ndarray
+    oxide_loss_um: np.ndarray
+    silicon_depth_um: np.ndarray
+
+    def __post_init__(self):
+        arrays = {
+            name: _readonly(getattr(self, name))
+            for name in (
+                "x_um", "y_um", "preoxide_thickness_um",
+                "postoxide_thickness_um", "stepheight_um", "oxide_loss_um",
+                "silicon_depth_um",
+            )
+        }
+        size = arrays["x_um"].size
+        expected_suffix = f"_{self.wafer_number:02d}"
+        if (
+            not self.experiment_key.endswith(expected_suffix)
+            or self.lot_number <= 0
+            or self.wafer_number <= 0
+            or size == 0
+            or any(value.ndim != 1 or value.size != size for value in arrays.values())
+            or any(np.any(~np.isfinite(value)) for value in arrays.values())
+            or np.any(arrays["preoxide_thickness_um"] <= 0.0)
+            or np.any(arrays["postoxide_thickness_um"] < 0.0)
+            or np.any(arrays["stepheight_um"] <= 0.0)
+            or np.any(arrays["oxide_loss_um"] < 0.0)
+            or np.any(arrays["silicon_depth_um"] <= 0.0)
+            or len(set(zip(arrays["x_um"], arrays["y_um"]))) != size
+        ):
+            raise ValueError("invalid Bosch wafer measurement map")
+        for name, value in arrays.items():
+            object.__setattr__(self, name, value)
+
+    @property
+    def wafer_mean_silicon_depth_um(self):
+        return float(np.mean(self.silicon_depth_um))
+
+    @property
+    def wafer_mean_oxide_loss_um(self):
+        return float(np.mean(self.oxide_loss_um))
+
+    @property
+    def wafer_mean_selectivity(self):
+        oxide = self.wafer_mean_oxide_loss_um
+        return self.wafer_mean_silicon_depth_um / oxide if oxide > 0.0 else math.inf
+
+
+_MEASUREMENT_89_COLUMNS = (
+    "experiment_key", "lot_number", "wafer_number", "X", "Y",
+    "preox_thickness", "postox_thickness", "postox_thickness_nan",
+    "stepheight", "oxide_etch", "si_etch",
+)
+
+
+def load_bosch_wafer_measurements_89pt(
+        path, *, allowed_experiment_keys) -> tuple[BoschWaferMeasurementMap, ...]:
+    """Load a calibration-only or revealed 89-point measurement asset.
+
+    ``allowed_experiment_keys`` is mandatory.  A row outside that allowlist is
+    rejected immediately after reading its string key and before converting
+    any numeric outcome field.  Fit code must therefore consume the extracted
+    calibration-only asset, never the mixed official source CSV.
+    """
+    path = Path(path)
+    allowed = frozenset(str(key) for key in allowed_experiment_keys)
+    if not allowed or any(not key for key in allowed):
+        raise ValueError("measurement loader requires a nonempty key allowlist")
+
+    grouped: dict[str, list[dict[str, str]]] = {}
+    identities: dict[str, tuple[int, int]] = {}
+    with path.open("r", newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if tuple(reader.fieldnames or ()) != _MEASUREMENT_89_COLUMNS:
+            raise ValueError("unexpected Bosch 89-point measurement schema")
+        for row_number, row in enumerate(reader, start=2):
+            key = str(row["experiment_key"]).strip()
+            if key not in allowed:
+                raise ValueError(
+                    f"measurement row {row_number} is outside the allowed key set: {key!r}")
+            try:
+                lot = int(row["lot_number"])
+                wafer = int(row["wafer_number"])
+                numeric = {
+                    name: float(row[column])
+                    for name, column in (
+                        ("x_um", "X"), ("y_um", "Y"),
+                        ("preoxide_thickness_um", "preox_thickness"),
+                        ("postoxide_thickness_um", "postox_thickness"),
+                        ("stepheight_um", "stepheight"),
+                        ("oxide_loss_um", "oxide_etch"),
+                        ("silicon_depth_um", "si_etch"),
+                    )
+                }
+            except (TypeError, ValueError) as error:
+                raise ValueError(
+                    f"invalid numeric Bosch measurement at row {row_number}") from error
+            identity = (lot, wafer)
+            if key in identities and identities[key] != identity:
+                raise ValueError(f"inconsistent Bosch wafer identity: {key}")
+            identities[key] = identity
+            grouped.setdefault(key, []).append(numeric)
+
+    output = []
+    for key in sorted(grouped):
+        rows = grouped[key]
+        lot, wafer = identities[key]
+        if len(rows) != 89:
+            raise ValueError(f"Bosch 89-point wafer is incomplete: {key}")
+        output.append(BoschWaferMeasurementMap(
+            experiment_key=key, lot_number=lot, wafer_number=wafer,
+            **{
+                name: np.asarray([row[name] for row in rows], dtype=float)
+                for name in rows[0]
+            }))
+    if not output:
+        raise ValueError("no allowed Bosch wafer measurements were found")
+    return tuple(output)
 
 
 def load_bosch_process_traces(

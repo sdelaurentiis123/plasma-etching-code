@@ -10,9 +10,16 @@ pytest.importorskip("h5py")
 from petch.bosch_process_data import (
     PROCESS_DATA_MD5,
     PROCESS_DICTIONARY_MD5,
+    WAFER_MEASUREMENT_89_POINT_MD5,
+    load_bosch_wafer_measurements_89pt,
     load_bosch_process_traces,
     process_ingestion_manifest,
     summarize_bosch_process_traces,
+)
+from scripts.extract_bosch_calibration_measurements import (
+    MANIFEST as CALIBRATION_MANIFEST,
+    OUTPUT as CALIBRATION_MEASUREMENTS,
+    main as extract_calibration_main,
 )
 from scripts.extract_zenodo_bosch_process_features import main as extract_main
 from scripts.preregister_zenodo_bosch_reactor_depth_holdout import (
@@ -106,3 +113,35 @@ def test_committed_preregistration_is_current():
     payload = json.loads(PREREGISTRATION.read_text())
     assert payload["forbidden_shortcuts"]
     assert payload["heldout_score"]["absolute_acceptance"]
+
+
+def test_calibration_measurement_broker_is_replayable_and_excludes_holdout():
+    assert extract_calibration_main(["--check"]) == 0
+    manifest = json.loads(CALIBRATION_MANIFEST.read_text())
+    preregistration = json.loads(PREREGISTRATION.read_text())
+
+    assert manifest["source_md5"] == WAFER_MEASUREMENT_89_POINT_MD5
+    assert manifest["splitter_numeric_outcome_fields_parsed"] is False
+    assert manifest["heldout_rows_copied_to_fit_asset"] is False
+    assert manifest["output_experiment_key_count"] == 75
+    assert manifest["output_row_count"] == 75 * 89
+    assert manifest["excluded_heldout_experiment_key_count"] == 13
+    allowed = preregistration["split_rule"]["calibration_experiment_keys"]
+    measurements = load_bosch_wafer_measurements_89pt(
+        CALIBRATION_MEASUREMENTS, allowed_experiment_keys=allowed)
+    assert len(measurements) == 75
+    assert {measurement.lot_number for measurement in measurements} == set(range(1, 9))
+    assert all(measurement.x_um.size == 89 for measurement in measurements)
+    assert 40.0 < measurements[0].wafer_mean_silicon_depth_um < 60.0
+
+
+def test_measurement_loader_refuses_a_disallowed_key_before_numeric_conversion(
+        tmp_path):
+    mixed = tmp_path / "mixed.csv"
+    mixed.write_text(
+        "experiment_key,lot_number,wafer_number,X,Y,preox_thickness,"
+        "postox_thickness,postox_thickness_nan,stepheight,oxide_etch,si_etch\n"
+        "2024-08-21_01,not-an-int,also-bad,bad,bad,bad,bad,N/A,bad,bad,bad\n")
+    with pytest.raises(ValueError, match="outside the allowed key set"):
+        load_bosch_wafer_measurements_89pt(
+            mixed, allowed_experiment_keys={"2024-07-02_01"})

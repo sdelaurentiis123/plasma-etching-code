@@ -1,0 +1,32 @@
+{
+  "calibration_allowlist_sha256": "15bf186a217ae4982869fd341c5bef665fb736ca6a482fe5590b5d2bacfed9d0",
+  "excluded_heldout_experiment_key_count": 13,
+  "excluded_heldout_row_count": 1157,
+  "fit_process_must_open_only_output_file": true,
+  "heldout_rows_copied_to_fit_asset": false,
+  "missing_calibration_process_keys": [
+    "2024-07-02_07"
+  ],
+  "missing_heldout_process_keys": [
+    "2024-08-21_09",
+    "2024-08-22_05",
+    "2024-08-22_06",
+    "2024-08-22_07",
+    "2024-08-22_08",
+    "2024-08-22_09",
+    "2024-08-22_10"
+  ],
+  "mixed_source_bytes_opened_by_splitter": true,
+  "output_experiment_key_count": 75,
+  "output_file": "calibration_Si_Oxide_etch_89_points.csv",
+  "output_row_count": 6675,
+  "output_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+  "preregistration_file": "results/curated/zenodo_bosch_reactor_depth_holdout_v1/preregistration.json",
+  "preregistration_sha256": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+  "schema": "petch-bosch-calibration-measurement-extraction-v1",
+  "source_file": "Si_Oxide_etch_89_points.csv",
+  "source_md5": "446e75b040eea37b634eeb8f763a62fc",
+  "source_record": "https://zenodo.org/records/17122442",
+  "source_row_count": 7832,
+  "splitter_numeric_outcome_fields_parsed": false
+}

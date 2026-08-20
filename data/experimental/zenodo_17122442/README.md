@@ -13,6 +13,11 @@ Included here:
 - `Si_Oxide_etch_89_points.csv` — 7,832 measurements from 88 identified wafers. Its distinct source
   schema preserves 157 originally unavailable post-oxide measurements as `N/A` in
   `postox_thickness_nan`, alongside the processed `postox_thickness` used in the derived columns.
+- `calibration_Si_Oxide_etch_89_points.csv` and its manifest — the 6,675 rows from the 75 measured
+  wafers in the preregistered calibration allowlist. The deterministic broker checks only each raw
+  row's experiment key and copies allowed rows byte-for-byte; it does not convert any outcome field.
+  The mixed source bytes necessarily pass through the broker, which is disclosed in the manifest,
+  while fitting code is required to open only the calibration-only output asset.
 - Nine rows forming one complete nine-position wafer have blank experiment, lot, and wafer identifiers
   in the source CSV. The physical measurements are retained and the loader exposes those identifiers as
   missing; identified-wafer analyses must exclude or separately handle this record.
