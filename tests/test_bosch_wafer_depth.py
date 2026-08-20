@@ -8,10 +8,18 @@ from petch.bosch_wafer_depth import (
     build_bosch_reference_surface_mechanisms,
     predict_bosch_wafer_depth,
 )
-from petch.bosch_wafer_depth_fast import predict_bosch_wafer_depth_batch_fast
+from petch.bosch_wafer_depth_fast import (
+    predict_bosch_wafer_depth_batch_fast,
+    predict_bosch_wafer_point_depth_batch_fast,
+)
+from petch.reactor_global.bosch_spts_cylindrical import (
+    BoschSPTSCylindricalParameters,
+    DeterministicBoschSPTSCylindricalReactorToWafer,
+)
 from petch.reactor_global.bosch_spts_reduced import (
     BoschSPTSReducedParameters,
     DeterministicBoschSPTSReactorToWafer,
+    BoschSPTSWaferBoundaryTrace,
 )
 
 
@@ -76,3 +84,43 @@ def test_fused_batch_path_is_numerically_identical_to_canonical_mechanisms():
         assert actual.wafer_mean_oxide_loss_m == pytest.approx(
             expected.wafer_mean_oxide_loss_m, rel=2.0e-15)
         assert actual.provenance["target_depth_used"] is False
+
+
+def test_cylindrical_point_batch_is_exact_canonical_surface_recurrence():
+    trace = load_bosch_process_traces(
+        DATA / "Process_data.nc", DATA / "Dictionary_process.nc")[0]
+    reduced = BoschSPTSReducedParameters(radial_cell_count=8, axial_cell_count=7)
+    cylindrical_model = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=8,
+            source_cosine_coefficients=((0.15,), (-0.08,), (0.12,)),
+            source_sine_coefficients=((-0.07,), (0.05,), (0.09,))))
+    phi = np.linspace(0.0, 2.0 * np.pi, 8, endpoint=False)
+    cylindrical = cylindrical_model.solve(
+        trace, x_m=0.075 * np.cos(phi), y_m=0.075 * np.sin(phi))
+
+    synthetic_radial = BoschSPTSWaferBoundaryTrace(
+        reactor=cylindrical.reactor,
+        species_names=cylindrical.species_names,
+        radial_centers_m=np.linspace(0.01, 0.08, phi.size),
+        radial_flux_m2_s=cylindrical.point_flux_m2_s,
+        wafer_area_average_flux_m2_s=np.mean(
+            cylindrical.point_flux_m2_s, axis=2),
+        maximum_axisymmetric_species_ledger_relative_residual=(
+            cylindrical.maximum_cylindrical_species_ledger_relative_residual),
+        inventory_lift_condition_number=1.0,
+        source_jvp_supported=True)
+    silicon, oxide = build_bosch_reference_surface_mechanisms()
+    canonical = predict_bosch_wafer_depth(synthetic_radial, silicon, oxide)
+    point = predict_bosch_wafer_point_depth_batch_fast(
+        (cylindrical,), silicon, oxide)[0]
+
+    assert point.silicon_depth_m == pytest.approx(
+        canonical.silicon_depth_m, rel=2.0e-15, abs=1.0e-20)
+    assert point.oxide_loss_m == pytest.approx(
+        canonical.oxide_loss_m, rel=2.0e-15, abs=1.0e-20)
+    assert point.remaining_film_units_m2 == pytest.approx(
+        canonical.remaining_film_units_m2, rel=2.0e-15, abs=1.0)
+    assert point.measurement_point_mean_silicon_depth_m == pytest.approx(
+        np.mean(point.silicon_depth_m), rel=2.0e-15)
+    assert point.provenance["target_depth_used"] is False
