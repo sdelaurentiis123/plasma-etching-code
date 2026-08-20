@@ -1,12 +1,12 @@
 # Codex takeover — absolute depth and Oxford blind profiles
 
-Status snapshot: 2026-08-20 15:23 EDT
+Status snapshot: 2026-08-20 15:42 EDT
 
 Repository: `plasma-etching-code`
 
 Branch: `codex/validation-first-multiphysics`
 
-Baseline pushed checkpoint inspected: `bdabd8a`
+Baseline pushed checkpoint inspected: `d852a1f`
 
 Read this file first when resuming the absolute-depth campaign.  Then read
 `PROGRESS_STATE_2026-08-20.md` for the full scientific record.  This report
@@ -37,9 +37,65 @@ either the requested 1200 seconds or a declared physical domain breakthrough.
 That result is committed in `bdabd8a`.
 
 The full 56-cell v5 board is live on the one authorized Vast instance.  At
-this snapshot it had one completed v5 content-addressed cache—the exact
-acceptance cell—and eight healthy workers computing the remaining cells.  No
-target SEM or target depth has been used to tune the calculation.
+this snapshot it had nine completed v5 content-addressed caches—the exact
+acceptance cell plus eight board cells—and eight healthy workers computing the
+remaining cells.  No target SEM or target depth has been used to tune the
+calculation.
+
+## Live execution update at 15:42 EDT
+
+The stale `55 of 56 / CPU spin` handoff is forensic history, not an active
+failure.  A direct process inspection at this snapshot found:
+
+- Oxford parent PID `8980` alive for 22 minutes with eight runnable workers;
+- all eight Oxford workers near one fully used CPU each, stable resident
+  memory, and no runaway-substep signature;
+- exactly **9 of 56** v5 content-addressed trajectory caches present;
+- no final v5 audit is accepted yet—the board parent is still running;
+- host memory has 232 GiB available;
+- the GPU has a valid 2.7 GiB context and was idle at the instant sampled,
+  which is expected during CPU-heavy surface and level-set phases.
+
+Three additional preregistered Krueger forecasts are running in parallel on
+the same authorized box from the separately verified `/root/petch-d852a1f`
+tree:
+
+| Case | Supervisor PID | Child PID | Last sealed point at snapshot |
+| --- | ---: | ---: | --- |
+| published aggregate ion, identity unresolved | `10284` | `10288` | step 6, 0.09375 s, 0.9830 nm |
+| all aggregate ions declared CF2+ | `10285` | `10289` | step 6, 0.09375 s, 0.8547 nm |
+| all aggregate ions declared CF3+ | `10286` | `10290` | step 6, 0.09375 s, 0.8278 nm |
+
+All three runtime audits say `experimental_outcomes_read=false`.  The CF2+
+and CF3+ calculations are composition-envelope endpoints, not fitted reactor
+mixtures.  Their early transient ordering must not be interpreted as the
+60-second ordering and must not be changed to move toward the 825 nm target.
+
+These are deliberately expensive converged feature integrations: 3,840
+nominal steps per 60-second trajectory.  The first six accepted steps took
+roughly 45 seconds each under the current shared-host load.  A naive linear
+projection is therefore about 48 hours per full trajectory; a declared
+physical clogging event could end a trajectory earlier.  The jobs checkpoint
+and automatically resume every 30 wall-clock minutes.  Do not promise an
+overnight Krueger answer, and do not replace the frozen resolution or time
+step merely for speed without a preregistered convergence/performance study.
+
+The archive used for those forecasts is `/private/tmp/petch-d852a1f.tgz`
+locally and `/root/petch-d852a1f.tgz` remotely, with SHA-256:
+
+`153b416c236ab1493389fd050181d5afdb1279bdb719d522fa8c03eefff524e0`
+
+Logs and outputs:
+
+- `/root/krueger_guo_60s_nominal.log` and
+  `/root/krueger_guo_60s_nominal/`;
+- `/root/krueger_guo_60s_cf2.log` and `/root/krueger_guo_60s_cf2/`;
+- `/root/krueger_guo_60s_cf3.log` and `/root/krueger_guo_60s_cf3/`.
+
+Use the exact PID files under `/root/krueger_guo_60s_*.pid`; never use
+`pgrep -f` for liveness.  Do not destroy instance `48177892` until the Oxford
+artifacts and every Krueger checkpoint/result worth retaining have been
+retrieved and hash-verified.
 
 ## What the software now does
 
