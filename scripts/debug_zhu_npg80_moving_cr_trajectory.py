@@ -74,6 +74,10 @@ def main() -> None:
         "--trace-symmetry-shapes", action="store_true",
         help="print sparse-event and expanded-event counts before strip projection",
     )
+    parser.add_argument(
+        "--trace-advection", action="store_true",
+        help="print the CFL substep count and extended-speed extrema per feature step",
+    )
     args = parser.parse_args()
     if args.stack_interval_s <= 0.0:
         parser.error("--stack-interval-s must be positive")
@@ -116,6 +120,32 @@ def main() -> None:
             return real_symmetrize(population, areas, groups)
 
         boundary_transport._symmetrize_face_resolved = traced_symmetrize
+
+    if args.trace_advection:
+        from petch import feature_step_3d as feature_step
+
+        real_advect_materials = feature_step._advect_exposed_material_levelsets
+
+        def traced_advect_materials(
+                material_levelsets, etchable_material_ids, extended_velocity,
+                dx, duration_s, substeps, *, periodic_lateral=False):
+            velocity = np.asarray(extended_velocity, dtype=float)
+            print(
+                "ADVECTION_SHAPE "
+                f"grid={velocity.shape} duration_s={float(duration_s):.17g} "
+                f"dx={float(dx):.17g} substeps={int(substeps)} "
+                f"speed_abs_max={float(np.max(np.abs(velocity))):.17g} "
+                f"speed_min={float(np.min(velocity)):.17g} "
+                f"speed_max={float(np.max(velocity)):.17g}",
+                flush=True,
+            )
+            return real_advect_materials(
+                material_levelsets, etchable_material_ids, extended_velocity,
+                dx, duration_s, substeps,
+                periodic_lateral=periodic_lateral,
+            )
+
+        feature_step._advect_exposed_material_levelsets = traced_advect_materials
 
     job = _production_job(
         width_nm=args.width_nm,
