@@ -27,6 +27,8 @@ class BoschSPTSCylindricalParameters:
     reduced: BoschSPTSReducedParameters = field(
         default_factory=BoschSPTSReducedParameters)
     azimuthal_cell_count: int = 16
+    species_source_ring_radius_m: tuple[float, float, float] | None = None
+    species_source_radial_width_m: tuple[float, float, float] | None = None
     source_cosine_coefficients: tuple[tuple[float, ...], ...] = ((), (), ())
     source_sine_coefficients: tuple[tuple[float, ...], ...] = ((), (), ())
 
@@ -36,6 +38,21 @@ class BoschSPTSCylindricalParameters:
         if (int(self.azimuthal_cell_count) != self.azimuthal_cell_count
                 or self.azimuthal_cell_count < 8):
             raise ValueError("cylindrical Bosch transfer requires at least 8 phi cells")
+        ring = self.species_source_ring_radius_m
+        if ring is None:
+            ring = (self.reduced.source_ring_radius_m,) * len(_SPECIES)
+        ring = tuple(float(value) for value in ring)
+        width = self.species_source_radial_width_m
+        if width is None:
+            width = (self.reduced.source_radial_width_m,) * len(_SPECIES)
+        width = tuple(float(value) for value in width)
+        if (len(ring) != len(_SPECIES) or len(width) != len(_SPECIES)
+                or any(not math.isfinite(value)
+                       or not 0.0 <= value <= self.reduced.reactor_radius_m
+                       for value in ring)
+                or any(not math.isfinite(value) or value <= 0.0
+                       for value in width)):
+            raise ValueError("invalid species-resolved radial source moments")
         cosine = tuple(tuple(float(value) for value in row)
                        for row in self.source_cosine_coefficients)
         sine = tuple(tuple(float(value) for value in row)
@@ -48,12 +65,18 @@ class BoschSPTSCylindricalParameters:
             raise ValueError("invalid species-resolved source harmonics")
         object.__setattr__(self, "source_cosine_coefficients", cosine)
         object.__setattr__(self, "source_sine_coefficients", sine)
+        object.__setattr__(self, "species_source_ring_radius_m", ring)
+        object.__setattr__(self, "species_source_radial_width_m", width)
 
     def manifest(self):
         return {
             "schema": "petch-spts-bosch-cylindrical-parameters-v1",
             "reduced": self.reduced.manifest(),
             "azimuthal_cell_count": self.azimuthal_cell_count,
+            "species_source_ring_radius_m": list(
+                self.species_source_ring_radius_m),
+            "species_source_radial_width_m": list(
+                self.species_source_radial_width_m),
             "source_cosine_coefficients": [
                 list(row) for row in self.source_cosine_coefficients],
             "source_sine_coefficients": [
@@ -194,8 +217,8 @@ def _source_shapes(grid, parameters):
         sine = parameters.source_sine_coefficients[species]
         annular = normalized_cylindrical_annular_skin_source(
             grid, axial_skin_depth_m=base.source_axial_skin_depth_m,
-            ring_radius_m=base.source_ring_radius_m,
-            radial_width_m=base.source_radial_width_m,
+            ring_radius_m=parameters.species_source_ring_radius_m[species],
+            radial_width_m=parameters.species_source_radial_width_m[species],
             cosine_coefficients=cosine, sine_coefficients=sine)
         central = normalized_cylindrical_annular_skin_source(
             grid, axial_skin_depth_m=base.source_axial_skin_depth_m,
@@ -253,13 +276,22 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
     def source_response(
             self, *, x_m, y_m, source_cosine_coefficients=None,
             source_sine_coefficients=None, source_ring_radius_m=None,
-            source_radial_width_m=None, source_central_fraction=None):
+            source_radial_width_m=None, source_central_fraction=None,
+            species_source_ring_radius_m=None,
+            species_source_radial_width_m=None):
         if ((source_cosine_coefficients is None)
                 != (source_sine_coefficients is None)):
             raise ValueError("cosine and sine source coefficients must be paired")
+        if (source_ring_radius_m is not None
+                and species_source_ring_radius_m is not None):
+            raise ValueError("shared and species ring radii are mutually exclusive")
+        if (source_radial_width_m is not None
+                and species_source_radial_width_m is not None):
+            raise ValueError("shared and species radial widths are mutually exclusive")
         source_geometry_changed = any(value is not None for value in (
             source_ring_radius_m, source_radial_width_m,
-            source_central_fraction))
+            source_central_fraction, species_source_ring_radius_m,
+            species_source_radial_width_m))
         if source_cosine_coefficients is None and not source_geometry_changed:
             parameters = self.parameters
             unit_lower = self._lift.unit_lower_flux_per_density_m_s
@@ -282,6 +314,16 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
             parameters = BoschSPTSCylindricalParameters(
                 reduced=reduced,
                 azimuthal_cell_count=self.parameters.azimuthal_cell_count,
+                species_source_ring_radius_m=(
+                    species_source_ring_radius_m
+                    if species_source_ring_radius_m is not None
+                    else (None if source_ring_radius_m is not None
+                          else self.parameters.species_source_ring_radius_m)),
+                species_source_radial_width_m=(
+                    species_source_radial_width_m
+                    if species_source_radial_width_m is not None
+                    else (None if source_radial_width_m is not None
+                          else self.parameters.species_source_radial_width_m)),
                 source_cosine_coefficients=(
                     self.parameters.source_cosine_coefficients
                     if source_cosine_coefficients is None

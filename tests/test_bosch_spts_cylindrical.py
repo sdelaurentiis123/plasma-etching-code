@@ -136,3 +136,30 @@ def test_radial_source_geometry_reuses_unchanged_transport_operator(trace):
     assert reused.point_flux_m2_s == pytest.approx(
         fresh.point_flux_m2_s, rel=2.0e-14, abs=1.0)
     assert response.provenance["transport_factorization_reused"] is True
+
+
+def test_species_radial_source_moments_match_fresh_model(trace):
+    reduced = BoschSPTSReducedParameters(radial_cell_count=8, axial_cell_count=7)
+    rings = (0.06, 0.11, 0.14)
+    widths = (0.05, 0.025, 0.015)
+    x = np.array([0.01, 0.03, -0.04, 0.06, -0.07])
+    y = np.array([0.02, -0.04, 0.05, 0.01, -0.02])
+    reusable = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=8))
+    response = reusable.source_response(
+        x_m=x, y_m=y, species_source_ring_radius_m=rings,
+        species_source_radial_width_m=widths)
+    reused = reusable.solve(
+        trace, x_m=x, y_m=y, source_response=response)
+    fresh = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=8,
+            species_source_ring_radius_m=rings,
+            species_source_radial_width_m=widths)).solve(
+                trace, x_m=x, y_m=y)
+
+    assert reused.point_flux_m2_s == pytest.approx(
+        fresh.point_flux_m2_s, rel=2.0e-14, abs=1.0)
+    assert response.provenance["parameters"]["species_source_ring_radius_m"] == list(rings)
+    assert response.provenance["parameters"]["species_source_radial_width_m"] == list(widths)
