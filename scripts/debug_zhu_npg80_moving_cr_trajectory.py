@@ -17,6 +17,7 @@ import os
 import signal
 import sys
 from time import monotonic
+import json
 
 import numpy as np
 
@@ -77,6 +78,13 @@ def main() -> None:
     parser.add_argument(
         "--trace-advection", action="store_true",
         help="print the CFL substep count and extended-speed extrema per feature step",
+    )
+    parser.add_argument(
+        "--explore-post-mask", action="store_true",
+        help=(
+            "diagnostic only: bypass the campaign's sub-cell Cr stop and do "
+            "not write a production cache"
+        ),
     )
     args = parser.parse_args()
     if args.stack_interval_s <= 0.0:
@@ -159,14 +167,60 @@ def main() -> None:
     print(f"cache={cache}", flush=True)
     started = monotonic()
     try:
-        profiles, path, device = board._execute((job, args.transport_device))
+        if args.explore_post_mask:
+            # The v3 campaign guard was added after a grid-aligned sliver made
+            # mesh extraction fail.  Mesh extraction and strip projection have
+            # since both been repaired independently.  Bypass only these two
+            # driver-level stop predicates to discover what the unchanged core
+            # now does after local Cr perforation.  Never write this exploratory
+            # path under a production content-addressed cache key.
+            real_minimum = board._mask_interior_minimum_thickness_nm
+            real_metrics = board._mask_metrics
+
+            def bypassed_minimum(*_args, **_kwargs):
+                return float("inf")
+
+            def diagnostic_metrics(*metric_args, **metric_kwargs):
+                metrics = dict(real_metrics(*metric_args, **metric_kwargs))
+                metrics["mask_below_vertical_resolution_at_center"] = False
+                metrics["mask_exhausted_at_center"] = False
+                return metrics
+
+            board._mask_interior_minimum_thickness_nm = bypassed_minimum
+            board._mask_metrics = diagnostic_metrics
+            preregistration = board._load(board.PREREGISTRATION)
+            width, scenario, rates, selectivity, duration, dx = job
+            profiles = board._run_trajectory(
+                width_nm=width,
+                scenario=scenario,
+                rates_nm_min=rates,
+                selectivity=selectivity,
+                duration_s=duration,
+                dx_nm=dx,
+                preregistration=preregistration,
+                transport_device=args.transport_device,
+            )
+            path = None
+            device = args.transport_device
+        else:
+            profiles, path, device = board._execute(
+                (job, args.transport_device)
+            )
     finally:
         faulthandler.cancel_dump_traceback_later()
-    print(
-        f"COMPLETE wall_s={monotonic() - started:.3f} device={device} "
-        f"profiles={len(profiles)} cache={path}",
-        flush=True,
-    )
+    if args.explore_post_mask:
+        print(
+            f"COMPLETE_EXPLORATION wall_s={monotonic() - started:.3f} "
+            f"device={device} profiles={len(profiles)} cache_written=false",
+            flush=True,
+        )
+        print(json.dumps(profiles, indent=2, sort_keys=True), flush=True)
+    else:
+        print(
+            f"COMPLETE wall_s={monotonic() - started:.3f} device={device} "
+            f"profiles={len(profiles)} cache={path}",
+            flush=True,
+        )
 
 
 if __name__ == "__main__":
