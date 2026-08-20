@@ -1,4 +1,5 @@
 from pathlib import Path
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -109,3 +110,29 @@ def test_source_harmonics_reuse_factorization_and_match_fresh_model(trace):
         fresh.point_flux_m2_s, rel=2.0e-14, abs=1.0)
     assert reused.wafer_area_average_flux_m2_s == pytest.approx(
         fresh.wafer_area_average_flux_m2_s, rel=2.0e-14, abs=1.0)
+
+
+def test_radial_source_geometry_reuses_unchanged_transport_operator(trace):
+    reduced = BoschSPTSReducedParameters(radial_cell_count=8, axial_cell_count=7)
+    x = np.array([0.01, 0.03, -0.04, 0.06, -0.07])
+    y = np.array([0.02, -0.04, 0.05, 0.01, -0.02])
+    reusable = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=8))
+    response = reusable.source_response(
+        x_m=x, y_m=y, source_ring_radius_m=0.12,
+        source_radial_width_m=0.025,
+        source_central_fraction=(0.2, 0.7, 0.1))
+    reused = reusable.solve(
+        trace, x_m=x, y_m=y, source_response=response)
+    changed_reduced = replace(
+        reduced, source_ring_radius_m=0.12, source_radial_width_m=0.025,
+        source_central_fraction=(0.2, 0.7, 0.1))
+    fresh = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=changed_reduced, azimuthal_cell_count=8)).solve(
+                trace, x_m=x, y_m=y)
+
+    assert reused.point_flux_m2_s == pytest.approx(
+        fresh.point_flux_m2_s, rel=2.0e-14, abs=1.0)
+    assert response.provenance["transport_factorization_reused"] is True

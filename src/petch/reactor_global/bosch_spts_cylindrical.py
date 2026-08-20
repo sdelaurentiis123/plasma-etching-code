@@ -1,7 +1,7 @@
 """Measured-waveform SPTS Bosch reactor with cylindrical 3-D wafer transfer."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from types import MappingProxyType
 import math
 
@@ -252,22 +252,44 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
 
     def source_response(
             self, *, x_m, y_m, source_cosine_coefficients=None,
-            source_sine_coefficients=None):
+            source_sine_coefficients=None, source_ring_radius_m=None,
+            source_radial_width_m=None, source_central_fraction=None):
         if ((source_cosine_coefficients is None)
                 != (source_sine_coefficients is None)):
             raise ValueError("cosine and sine source coefficients must be paired")
-        if source_cosine_coefficients is None:
+        source_geometry_changed = any(value is not None for value in (
+            source_ring_radius_m, source_radial_width_m,
+            source_central_fraction))
+        if source_cosine_coefficients is None and not source_geometry_changed:
             parameters = self.parameters
             unit_lower = self._lift.unit_lower_flux_per_density_m_s
             maximum_ledger = self._maximum_ledger
             maximum_linear = self._maximum_linear
             reused_factorization = True
         else:
+            base = self.parameters.reduced
+            reduced = replace(
+                base,
+                source_ring_radius_m=(
+                    base.source_ring_radius_m if source_ring_radius_m is None
+                    else source_ring_radius_m),
+                source_radial_width_m=(
+                    base.source_radial_width_m if source_radial_width_m is None
+                    else source_radial_width_m),
+                source_central_fraction=(
+                    base.source_central_fraction if source_central_fraction is None
+                    else source_central_fraction))
             parameters = BoschSPTSCylindricalParameters(
-                reduced=self.parameters.reduced,
+                reduced=reduced,
                 azimuthal_cell_count=self.parameters.azimuthal_cell_count,
-                source_cosine_coefficients=source_cosine_coefficients,
-                source_sine_coefficients=source_sine_coefficients)
+                source_cosine_coefficients=(
+                    self.parameters.source_cosine_coefficients
+                    if source_cosine_coefficients is None
+                    else source_cosine_coefficients),
+                source_sine_coefficients=(
+                    self.parameters.source_sine_coefficients
+                    if source_sine_coefficients is None
+                    else source_sine_coefficients))
             unit_lower, maximum_ledger, maximum_linear = (
                 self._lift.source_shape_to_unit_lower_flux(
                     _source_shapes(self._grid, parameters)))
