@@ -6,10 +6,12 @@ Repository: `plasma-etching-code`
 
 Branch: `codex/validation-first-multiphysics`
 
-Current pushed checkpoint: `242177b`
+Baseline pushed checkpoint inspected: `bdabd8a`
 
-This is the authoritative handoff for the Oxford/Freddie moving-mask work and
-the broader reactor-to-feature absolute-depth mission.  It supersedes
+This is the detailed scientific record for the Oxford/Freddie moving-mask work
+and the broader reactor-to-feature absolute-depth mission.  For the concise
+operational takeover sequence, read
+`CODEX_TAKEOVER_ABSOLUTE_DEPTH_2026-08-20.md` first.  This file supersedes
 `HANDOFF_MOVING_CR_BOARD_2026-08-20.md` and updates
 `CODEX_TAKEOVER_MOVING_CR_2026-08-20.md`.  The older files remain useful as a
 forensic history, but their live-process instructions must not be followed.

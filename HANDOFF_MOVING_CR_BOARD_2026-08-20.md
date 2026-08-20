@@ -1,9 +1,9 @@
 # HANDOFF — moving-Cr blind board, 2026-08-20
 
-> **SUPERSEDED:** Read `CODEX_TAKEOVER_MOVING_CR_2026-08-20.md` instead.
+> **SUPERSEDED:** Read `CODEX_TAKEOVER_ABSOLUTE_DEPTH_2026-08-20.md` instead.
 > The debug-file/process/cost claims below were disproved on live inspection,
-> the numerical singularity was identified and fixed in v4, and v3 caches are
-> no longer eligible for the corrected board.
+> the numerical singularity was fixed, certified material extinction was
+> added, and the full v5 board is now the live campaign.
 
 For: Codex (or any resuming session). Read this before touching the board.
 State is honest, including one operational failure at the end.

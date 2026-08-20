@@ -1,5 +1,11 @@
 # Codex takeover report — Oxford moving-Cr board
 
+> **SUPERSEDED:** Read `CODEX_TAKEOVER_ABSOLUTE_DEPTH_2026-08-20.md` first.
+> The v4 board below completed, a certified material-extinction lifecycle was
+> subsequently implemented, the exact v5 continuation passed, and the full
+> v5 board is now the live campaign.  This file is retained as the forensic
+> record of the v3 strip-projection diagnosis.
+
 Status timestamp: 2026-08-20 13:44 EDT  
 Repository: `plasma-etching-code`  
 Branch: `codex/validation-first-multiphysics`  
