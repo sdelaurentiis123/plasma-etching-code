@@ -22,6 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 # cupy gives the GPU edge-adjacency sort (a small extra speedup on big meshes); needs CUDA 12.x.
 gpu = ["cupy-cuda12x"]
+reactor-data = ["h5py>=3.10"]
 
 [project.scripts]
 petch-nozawa = "petch.nozawa_replay_3d:main"

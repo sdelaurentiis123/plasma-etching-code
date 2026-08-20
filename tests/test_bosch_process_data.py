@@ -1,0 +1,108 @@
+from hashlib import md5
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+pytest.importorskip("h5py")
+
+from petch.bosch_process_data import (
+    PROCESS_DATA_MD5,
+    PROCESS_DICTIONARY_MD5,
+    load_bosch_process_traces,
+    process_ingestion_manifest,
+    summarize_bosch_process_traces,
+)
+from scripts.extract_zenodo_bosch_process_features import main as extract_main
+from scripts.preregister_zenodo_bosch_reactor_depth_holdout import (
+    HELDOUT_DATES,
+    build_preregistration,
+    main as preregister_main,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "data" / "experimental" / "zenodo_17122442"
+PROCESS = DATA / "Process_data.nc"
+DICTIONARY = DATA / "Dictionary_process.nc"
+SUMMARY = DATA / "process_wafer_summary.csv"
+SUMMARY_MANIFEST = DATA / "process_wafer_summary_manifest.json"
+PREREGISTRATION = (
+    ROOT / "results" / "curated" / "zenodo_bosch_reactor_depth_holdout_v1"
+    / "preregistration.json"
+)
+
+
+@pytest.fixture(scope="module")
+def traces():
+    return load_bosch_process_traces(PROCESS, DICTIONARY)
+
+
+def test_official_process_files_are_checksum_pinned():
+    assert md5(PROCESS.read_bytes()).hexdigest() == PROCESS_DATA_MD5
+    assert md5(DICTIONARY.read_bytes()).hexdigest() == PROCESS_DICTIONARY_MD5
+    manifest = process_ingestion_manifest()
+    assert manifest["experimental_outcomes_read"] is False
+    assert manifest["expected_wafer_records"] == 96
+
+
+def test_process_decoder_recovers_every_wafer_without_target_labels(traces):
+    assert len(traces) == 96
+    assert len({trace.experiment_key for trace in traces}) == 96
+    assert {len(trace.channels) for trace in traces} == {31, 44}
+    assert all(0.19 <= np.median(np.diff(trace.elapsed_s)) <= 0.21 for trace in traces)
+    forbidden = {"si_etch", "oxide_etch", "stepheight", "target_depth"}
+    assert all(
+        name.lower() not in forbidden
+        for trace in traces for name in trace.channels)
+
+
+def test_phase_summary_recovers_declared_hundred_cycle_structure(traces):
+    summaries = summarize_bosch_process_traces(traces)
+    assert len(summaries) == 96
+    assert {summary.metrics["c4f8_episode_count"] for summary in summaries} == {100}
+    assert all(
+        100 <= summary.metrics["sf6_episode_count"] <= 102
+        for summary in summaries)
+    assert all(
+        420.0 < summary.metrics["sf6_above_threshold_s"] < 450.0
+        for summary in summaries)
+    assert all(
+        summary.metrics["sf6_source_load_power_q50"] > 2700.0
+        for summary in summaries)
+    assert all(
+        summary.metrics["c4f8_platen_peak_to_peak_q50"] >
+        summary.metrics["sf6_platen_peak_to_peak_q50"]
+        for summary in summaries)
+
+
+def test_committed_process_extraction_is_exactly_replayable():
+    assert extract_main(["--check"]) == 0
+    manifest = json.loads(SUMMARY_MANIFEST.read_text())
+    assert manifest["summary_row_count"] == 96
+    assert manifest["calculated_without_measurement_csv"] is True
+
+
+def test_preregistration_never_opens_measurement_outcomes(monkeypatch):
+    original_open = Path.open
+
+    def guarded_open(path, *args, **kwargs):
+        if path.name.startswith("Si_Oxide_etch_"):
+            raise AssertionError("preregistration opened an experimental outcome")
+        return original_open(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", guarded_open)
+    payload = build_preregistration(SUMMARY)
+    assert payload["target_firewall"]["outcome_files_opened_during_preregistration"] is False
+    assert payload["target_firewall"]["preexposure_blind"] is False
+    assert payload["split_rule"]["calibration_process_record_count"] == 76
+    assert payload["split_rule"]["heldout_process_record_count"] == 20
+    assert set(HELDOUT_DATES) == {"2024-08-21", "2024-08-22"}
+
+
+def test_committed_preregistration_is_current():
+    assert preregister_main(["--check"]) == 0
+    payload = json.loads(PREREGISTRATION.read_text())
+    assert payload["forbidden_shortcuts"]
+    assert payload["heldout_score"]["absolute_acceptance"]
