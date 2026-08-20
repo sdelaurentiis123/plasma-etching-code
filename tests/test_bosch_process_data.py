@@ -54,6 +54,11 @@ SPECIES_RADIAL_PREREGISTRATION = (
     / "zenodo_bosch_species_radial_depth_extension_v3"
     / "preregistration.json"
 )
+EDGE_SHEATH_PREREGISTRATION = (
+    ROOT / "results" / "curated"
+    / "zenodo_bosch_edge_sheath_depth_extension_v4"
+    / "preregistration.json"
+)
 
 
 @pytest.fixture(scope="module")
@@ -207,4 +212,17 @@ def test_species_radial_v3_is_narrowly_frozen_before_fit():
     ]
     assert payload["model_extension"]["new_free_parameter_count"] == 4
     assert payload["frozen_code_parent"]["species_resolved_radial_source_response_implemented"] is False
+    assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False
+
+
+def test_edge_sheath_v4_is_frozen_before_fit_and_conserves_ion_current():
+    payload = json.loads(EDGE_SHEATH_PREREGISTRATION.read_text())
+
+    assert payload["calibration_exposure"]["edge_sheath_fit_started_before_this_freeze"] is False
+    assert payload["calibration_exposure"]["heldout_outcomes_examined"] is False
+    assert payload["frozen_from_prior_versions"]["surface_laws_unchanged"]
+    assert payload["model_extension"]["affected_channel"] == "positive_ion wafer flux only"
+    assert payload["model_extension"]["new_free_parameter_count"] == 3
+    assert payload["model_extension"]["total_wafer_ion_current_conserved"] is True
+    assert payload["frozen_code_parent"]["edge_sheath_operator_implemented"] is False
     assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False

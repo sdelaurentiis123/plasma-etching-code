@@ -1,0 +1,88 @@
+{
+  "calibration_exposure": {
+    "edge_sheath_fit_started_before_this_freeze": false,
+    "heldout_outcomes_examined": false,
+    "status": "calibration-visible equipment-boundary extension; chronological heldout firewall remains closed"
+  },
+  "frozen_from_prior_versions": {
+    "acceptance_gates_unchanged": true,
+    "calibration_and_heldout_keys_unchanged": true,
+    "conditioning_law_unchanged": true,
+    "surface_laws_unchanged": [
+      "Belen SF6 silicon removal",
+      "La Magna/Garozzo C4F8 film and SiO2 removal"
+    ],
+    "v2_preregistration_sha256": "66f681abbe54d7785965e5e949a23f7562c3cad18d4105752b964eba59b93555",
+    "v3_preregistration_sha256": "5cead3eb900412560a8343d82efc713ec537df4aa0b82897876143140e3b6b81"
+  },
+  "model_extension": {
+    "affected_channel": "positive_ion wafer flux only",
+    "amplitude_bounds": [
+      0.0,
+      0.5
+    ],
+    "form": "multiply positive-ion lower-wall flux by 1 + amplitude * sigmoid((radius - onset_radius) / width), then normalize by its continuous wafer-area mean",
+    "new_free_parameter_count": 3,
+    "onset_radius_m_bounds": [
+      0.08,
+      0.099
+    ],
+    "physical_interpretation": "curved wafer-edge/focus-ring sheath redistributes directional ion current within a narrow edge boundary layer while conserving total wafer ion current",
+    "total_wafer_ion_current_conserved": true,
+    "width_m_bounds": [
+      0.0005,
+      0.015
+    ]
+  },
+  "selection_order": [
+    "fit the three edge-sheath parameters with zero azimuthal harmonics",
+    "require leave-one-lot-out calibration and grid-refinement margins",
+    "only after radial and edge closures pass may complete azimuthal harmonic orders be added under v2 rules",
+    "hash-seal heldout predictions before parsing heldout outcomes"
+  ],
+  "v3_calibration_failure_evidence": {
+    "evaluation_scope": "shared normalized 89-point calibration map using the first measured waveform; no heldout outcomes",
+    "initializations": 3,
+    "selected_diffusion_coefficient_m2_s": [
+      0.05000816,
+      0.13042823,
+      6.33196892
+    ],
+    "best_species_ring_radius_m": [
+      0.10974156,
+      0.14319672,
+      0.1105086
+    ],
+    "best_species_radial_width_m": [
+      0.01000014,
+      0.01000009,
+      0.01000013
+    ],
+    "best_si_shape_rmse_percent": 4.846301565197019,
+    "best_oxide_shape_rmse_percent": 7.432948307068556,
+    "status": "three-start bounded calibration failure, not a mathematical lower bound",
+    "residual_structure": "largest silicon residual is a sharp increase at the two outermost measured radii, approximately 95 to 96.9 mm on a 100 mm wafer",
+    "interpretation": "smooth volume-production moments are exhausted; the remaining edge-localized signature motivates an ion sheath/focus-ring boundary closure"
+  },
+  "forbidden_shortcuts": [
+    "changing neutral or polymer flux with the ion edge factor",
+    "changing ion energy or surface yield in v4",
+    "using a free value at each radius or coordinate",
+    "per-wafer or per-lot edge factors",
+    "opening heldout outcomes before the prediction seal",
+    "weakening any frozen gate"
+  ],
+  "frozen_code_parent": {
+    "edge_sheath_operator_implemented": false,
+    "git_commit": "787672fe63a44e9ac5ed49948da25354f1b3ca58",
+    "species_resolved_radial_source_implemented": true
+  },
+  "schema": "petch-zenodo-bosch-edge-sheath-depth-extension-preregistration-v4",
+  "target_firewall": {
+    "calibration_asset_only": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+    "calibration_asset_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "heldout_numeric_fields_may_be_parsed_only_after_prediction_seal": true,
+    "heldout_outcomes_read_at_freeze": false,
+    "mixed_outcome_csv_forbidden_to_fit_process": true
+  }
+}
