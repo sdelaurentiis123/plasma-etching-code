@@ -283,10 +283,28 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 |---|---|---|
 | [`okawa-2026-apl`](library/okawa-2026-apl.md) | Okawa/Takahashi, APL 129, 011109 (2026) | ABSTRACT-ONLY |
 
+### Post-etch wet processing: capillary pattern collapse and pillar mechanics
+
+| bibkey | source | status |
+|---|---|---|
+| [`tanaka-1993-jjap`](library/tanaka-1993-jjap.md) | Tanaka, Morigami & Atoda, JJAP 32, 6059 (1993) — the classic collapse mechanism | PUBLISHER RECORD + ABSTRACT VERBATIM; **BODY PAYWALLED, EQUATIONS [unquoted]** |
+| [`mack-2006-pattern-collapse`](library/mack-2006-pattern-collapse.md) | Mack, *The Lithography Expert* (Nov 2006) — verbatim restatement of Tanaka's line criterion | PRIMARY FULL TEXT ARCHIVED (secondary w.r.t. Tanaka) |
+| [`chandra-2010-thesis`](library/chandra-2010-thesis.md) | Chandra, UPenn PhD thesis — the published PILLAR variant (Eq. 5.11) + adhesive branch | PRIMARY FULL TEXT ARCHIVED; **EQUATIONS VISUALLY VERIFIED AT 170 dpi** |
+| [`glassmaker-2004-jrsi`](library/glassmaker-2004-jrsi.md) | Glassmaker, Jagota, Hui & Kim, J. R. Soc. Interface 1, 23 (2004) — square/circular pillar adhesive lateral collapse | **NOT FETCHED — RELAY via chandra-2010-thesis Eqs. 4.2/4.3** |
+| [`namatsu-1995-apl`](library/namatsu-1995-apl.md) | Namatsu et al., APL 66, 2655 (1995) — Si nanoline k·AR² distortion limit | **FULL TEXT INACCESSIBLE; ALL CLAIMS [unquoted]** |
+| [`iapws-2014-water-surface-tension`](library/iapws-2014-water-surface-tension.md) | IAPWS R1-76(2014), surface tension of ordinary water | PRIMARY RELEASE ARCHIVED; TABLE 1 + EQUATION PAGE VERIFIED |
+| [`ylivaara-2021-ald-tio2-mechanical`](library/ylivaara-2021-ald-tio2-mechanical.md) | Ylivaara et al., Thin Solid Films 732, 138758 (2021) — ALD TiO2 modulus/hardness/stress | PRIMARY CC-BY FULL TEXT ARCHIVED; TABLE 3 EXTRACTED |
+| [`janczarek-2006-tio2-hydrophilicity`](library/janczarek-2006-tio2-hydrophilicity.md) | Janczarek, Hupka & Kisch, PPMP 40, 287 (2006) — TiO2 water contact angle vs UV | PRIMARY FULL TEXT ARCHIVED (Table 1 is a RELAY of Wang 1999) |
+| [`wang-1997-nature-amphiphilic`](library/wang-1997-nature-amphiphilic.md) | Wang, Hashimoto, Fujishima et al., Nature 388, 431 (1997) — light-induced amphiphilic TiO2 | ABSTRACT VERBATIM ONLY; **NO NUMERIC CONTACT ANGLE OBTAINABLE** |
+
 ## Reverse index — petch constant / law / decision → source
 
 | petch constant, law or decision | source | what it fixed / why it is there |
 |---|---|---|
+| capillary pattern-collapse criterion for TiO2 pillars (line form E_crit = 4√3γh³B/(wl³ws²); circular-pillar form Eq. 5.11) | [`mack-2006-pattern-collapse`](library/mack-2006-pattern-collapse.md), [`chandra-2010-thesis`](library/chandra-2010-thesis.md), [`tanaka-1993-jjap`](library/tanaka-1993-jjap.md) | the whole rinse/dry survival prediction in `RESEARCH_PATTERN_COLLAPSE_CRITERION_2026-08-20.md`; transcription cross-checked two ways (identical brackets; 26.6 vs 27 GPa on Chandra's own worked example) |
+| water surface tension 72.74 mN/m (20 °C), 71.98 mN/m (25 °C) | [`iapws-2014-water-surface-tension`](library/iapws-2014-water-surface-tension.md) | the γ in every collapse-threshold evaluation; supersedes Mack's "about 0.072 N/m" |
+| Young's modulus of amorphous ALD TiO2 = 149–156 GPa (nanoindentation) / 107–129 GPa (LSAW), ν = 0.27 | [`ylivaara-2021-ald-tio2-mechanical`](library/ylivaara-2021-ald-tio2-mechanical.md) | the E that gives the 7.8–11× collapse margin; two methods disagree by up to 45 %, so the band is carried, not a point value |
+| water contact angle on TiO2 as a BAND: 0° (UV/fresh) → 53–58° (dark film) → 74° (dark single crystal) | [`janczarek-2006-tio2-hydrophilicity`](library/janczarek-2006-tio2-hydrophilicity.md), [`wang-1997-nature-amphiphilic`](library/wang-1997-nature-amphiphilic.md) | θ is a process-history variable, not a material constant; the 0→74° swing moves E_crit by 2.4×, so θ = 0 is used for any go/no-go |
 | Zhu NPG80 topology, 13.56 MHz source, 300 W ceiling, and actively temperature-controlled electrode | [`cuny-asrc-npg80-rie`](library/cuny-asrc-npg80-rie.md) | exact-tool constraints for the prospective TiO2 validation case; does not convert the 150 W forward demand into absorbed power or self-bias |
 | Oxford RIE-80 self-bias evidence (`276 V` same-chemistry/reduced-drive point; exact-NGP80 `>300` to `<~200 V` drift; `360--400 V` adjacent witnesses) | [`harmon-2019-ngp80-rie`](library/harmon-2019-ngp80-rie.md), [`penaud-2006-plasmalab80-ternary`](library/penaud-2006-plasmalab80-ternary.md), [`zou-2004-plasmalab80-sf6-o2`](library/zou-2004-plasmalab80-sf6-o2.md), [`plattner-2003-plasmalab80-appendix`](library/plattner-2003-plasmalab80-appendix.md) | target-free deterministic voltage histories for sheath/depth sensitivity; censor statements remain inequalities and the transfer is not a target-voltage measurement or probability interval |
 | CF3+ + CHF3 reactive-destruction kernel (`18 A2` summed CID plus 21-point summed-DCT curve) | [`peko-2002-chf3-ion-molecule`](library/peko-2002-chf3-ion-molecule.md) | measured target-independent collision floor with explicit lab-to-relative energy conversion and source uncertainty; elastic/angular transport, other species pairs, target IEAD, and depth remain open |

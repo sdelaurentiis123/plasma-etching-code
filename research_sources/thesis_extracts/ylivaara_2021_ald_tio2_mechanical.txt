@@ -1,0 +1,837 @@
+                                     This is an electronic reprint of the original article.
+                                     This reprint may differ from the original in pagination and typographic detail.
+
+
+
+                                   Ylivaara, Oili M.E.; Langner, Andreas; Liu, Xuwen; Schneider, Dieter; Julin, Jaakko; Arstila,
+                                   Kai; Sintonen, Sakari; Ali, Saima; Lipsanen, Harri; Sajavaara, Timo; Hannula, Simo-Pekka;
+                                   Puurunen, Riikka L.
+                                   Mechanical and optical properties of as-grown and thermally annealed titanium dioxide from
+                                   titanium tetrachloride and water by atomic layer deposition
+
+                                   Published in:
+                                   Thin Solid Films
+
+
+                                   DOI:
+                                   10.1016/j.tsf.2021.138758
+
+
+                                   E-pub ahead of print: 31/08/2021
+
+
+
+                                   Document Version
+                                   Publisher's PDF, also known as Version of record
+
+
+                                   Published under the following license:
+                                   CC BY
+
+
+                                   Please cite the original version:
+                                   Ylivaara, O. M. E., Langner, A., Liu, X., Schneider, D., Julin, J., Arstila, K., Sintonen, S., Ali, S., Lipsanen, H.,
+                                   Sajavaara, T., Hannula, S-P., & Puurunen, R. L. (2021). Mechanical and optical properties of as-grown and
+                                   thermally annealed titanium dioxide from titanium tetrachloride and water by atomic layer deposition. Thin Solid
+                                   Films, 732, [138758]. https://doi.org/10.1016/j.tsf.2021.138758
+
+
+
+
+                                   This material is protected by copyright and other intellectual property rights, and duplication or sale of all or
+                                   part of any of the repository collections is not permitted, except that material may be duplicated by you for
+                                   your research use or educational purposes in electronic or print form. You must obtain permission for any
+                                   other use. Electronic or print copies may not be offered, whether for sale or otherwise to anyone who is not
+                                   an authorised user.
+
+
+
+
+Powered by TCPDF (www.tcpdf.org)
+                                                                       Thin Solid Films 732 (2021) 138758
+
+
+                                                                   Contents lists available at ScienceDirect
+
+
+                                                                          Thin Solid Films
+                                                            journal homepage: www.elsevier.com/locate/tsf
+
+
+
+
+Mechanical and optical properties of as-grown and thermally annealed
+titanium dioxide from titanium tetrachloride and water by atomic
+layer deposition
+Oili M.E. Ylivaara a, *, Andreas Langner a, Xuwen Liu b, Dieter Schneider c, Jaakko Julin d,
+Kai Arstila d, Sakari Sintonen e, Saima Ali e, Harri Lipsanen e, Timo Sajavaara d,
+Simo-Pekka Hannula b, Riikka L. Puurunen a, b
+a
+  VTT Technical Research Centre of Finland, P. O. Box 1000, FI-02044 VTT, Finland
+b
+  Aalto University, School of Chemical Engineering, Department of Chemical and Metallurgical Engineering, P.O. Box 16100, FI-00076 AALTO, Finland
+c
+  Fraunhofer IWS Dresden, Winterbergstrasse 28, Dresden 01277, Germany
+d
+  University of Jyväskylä, Department of Physics, P. O. Box 35, Jyväskylä FI-40014, Finland
+e
+  Aalto University School of Electrical Engineering, Department of Electronics and Nanoengineering, P. O. Box 13500, Aalto FI-00076, Finland
+
+
+
+
+A R T I C L E I N F O                                     A B S T R A C T
+
+Keywords:                                                 The use of thin-films made by atomic layer deposition (ALD) is increasing in the field of optical sensing. ALD TiO2
+ALD                                                       has been widely characterized for its physical and optical properties, but systematic information about the in­
+Atomic Layer Deposition                                   fluence of thermal history to optical and mechanical properties of the film is lacking. Optical applications require
+TiO2
+                                                          planar surface and tunability of the refractive index and residual stress. In addition, mechanical properties such
+residual stress
+optical properties
+                                                          as elastic modulus and film hardness influence the performance of the layer, especially, when optics is integrated
+elastic modulus                                           with microelectromechanical systems. In this work, optical properties, density, elemental analysis, residual
+hardness                                                  stress, elastic modulus and hardness of as-grown ALD TiO2 thin films on silicon were studied at temperature
+                                                          range from 80 to 350 ◦ C and influence of post-ALD thermal annealing was studied on films annealed up to 900
+                                                          ◦
+                                                            C. ALD TiO2 films were under tensile stress in the scale of hundreds of MPa. The stress depended both on the
+                                                          ALD temperature and film thickness in a complex way, and onset of crystallization increased the residual stress.
+                                                          Films grown at 110 and 300 ◦ C were able to withstand post-ALD annealing at 420 ◦ C without major change in
+                                                          residual stress, refractive index or extinction coefficient. Elastic modulus and hardness increased upon crystal­
+                                                          lization with increasing ALD temperature. The results presented here help to improve the design of the optical
+                                                          devices by choosing films with desired optical properties, and further help to design the post-ALD thermal budget
+                                                          so that films maintain their desired features.
+
+
+
+
+1. Introduction                                                                                temperature dependent [19,21,32–42].
+                                                                                                   Considering the use of ALD TiO2 in optical applications requires
+    TiO2 is a polymorphic material [1,2], and at temperature range used                        precise understanding, not only of the desired optical properties of the
+in thermal atomic layer deposition (ALD), it exists at least in amorphous,                     grown films, but also of the material properties and their dependence on
+anatase and rutile forms [3–6]. Its electrical [7–9] and optical properties                    process conditions. For ALD TiO2, both tensile and compressive residual
+[10–14] depend on the film morphology. Titanium dioxide (TiO2) grown                           stress have been measured at temperature range from 80 to 300 ◦ C
+by ALD from titanium tetrachloride (TiCl4) and deionized water (H2O)                           depending on the used substrate material [13,43,44,48]. The mechani­
+has been widely studied since the first experiments under the names of                         cal properties such as elastic modulus and hardness, have been studied
+molecular layering and atomic layer epitaxy [15–18]. The nucleation                            by X-ray methods [45,46], interfacial mechanical testing [47] and
+and the growth of ALD TiO2 is known to be sensitive to different sub­                          nanoindentation [48–50]. As post-ALD thermal treatments are known to
+strates and substrate terminations [4,19–31]. The onset of crystallisation                     create, for example adhesion problems [51], it is important to do sys­
+and the grain growth are shown to be both thickness, and growth                                tematical characterization of the relation of processing conditions to
+
+
+
+    * Corresponding author.
+
+https://doi.org/10.1016/j.tsf.2021.138758
+Received 2 October 2020; Received in revised form 5 March 2021; Accepted 20 May 2021
+Available online 26 May 2021
+0040-6090/© 2021 The Author(s). Published by Elsevier B.V. This is an open access article under the CC BY license (http://creativecommons.org/licenses/by/4.0/).
+O.M.E. Ylivaara et al.                                                                                                                Thin Solid Films 732 (2021) 138758
+
+
+optical and mechanical properties of the material.                                    furnace was ATV Technologies GmbH PEO-603. Films examined were
+    The goal of this work was to gain better understanding of the residual            targeted to be 100 nm thick.
+stress, elastic modulus, and hardness in ALD TiO2 films related to their
+use in optical applications. The physicochemical, mechanical, and sys­                2.2. Characterization
+tem properties of ALD TiO2 were studied as a function of process tem­
+perature, film thickness and storage time in air. Investigations on the                   Film thicknesses were measured with spectroscopic reflectometry
+effect of the post-ALD annealing on optical properties and residual stress            SCI FilmTek 2000M, and 49-point automated measurement recipe. The
+of the TiO2 film were also carried out. This article continues the article            refractive index and extinction coefficient for the automated measure­
+series on mechanical characterization of ALD thin films previously                    ment recipe were determined, from films grown at 300 ◦ C (using 5000
+published on Al2O3 [49,52,53], Al2O3-TiO2 nanolaminates[49,54,55,                     cycles), with SCI FilmTek 4000 at wavelength range from 480 to 1650
+56] and TiO2[48,49,53].                                                               nm. For some wafers, thickness and refractive index were measured with
+                                                                                      a Plasmos spectroscopic ellipsometry using 633 nm wavelength (HeNe
+2. Experimental                                                                       -laser) and 70◦ incident angle. Optical characterization of refractive
+                                                                                      index and extinction coefficient over a range from UV to NIR on wave­
+2.1. Sample preparation                                                               length range from 190 to 1650 nm was done using spectroscopic
+                                                                                      reflectometry SCI FilmTek4000. Optical measurements were done after
+    ALD TiO2 films were grown on 150 mm p-type (100) silicon wafers                   ALD, and repeated after post-ALD thermal annealing at 300, 450 and
+from Okmetic Oyj. Double side polished (DSP) 380 ± 5 µm thick wafers                  900 ◦ C.
+were used for the wafer curvature measurements, and single side pol­                      X-ray reflectivity (XRR) and a gracing incidence X-ray diffraction
+ished (SSP) wafers of 675 ± 15 µm for other characterization. Wafers                  (GIXRD) analysis were carried out using a Philips X’Pert Pro diffrac­
+were wet cleaned before ALD using RCA -cleaning (SC-1, DHF and SC-2).                 tometer. Film thickness, density and crystallographic structure were
+Cleaned wafers were covered with 1 - 2 nm thick chemical oxide. The                   measured and analyzed using Cu-alpha wavelength with 40 kV / 40 mA
+major reason for the use of the RCA -cleaned silicon surface was to get               voltage and current, respectively. Crystallite sizes were calculated using
+controllable surface condition for the film growth.                                   Scherrer equation [57] from (101) peak. Selected samples were also
+    The ALD reactor was a single-wafer Picosun® R-150 tool with three                 examined for crystallinity with tapping mode atomic force microscopy
+reactant lines. The tool was equipped with a load-lock. The intermediate              (AFM), Digital Instruments NanoScope Dimension 3100 equipment
+space pressure was about 7 hPa. There was a constant 200 sccm ultra­                  using 3 x 3 µm scan and 512 sample size. AFM rms roughness was
+pure nitrogen 6.0 flow through the reactant lines to the reaction space,              analyzed for samples after first order flattening.
+and 300 sccm nitrogen flow to the intermediate space located between                      Time-of-flight elastic recoil detection analysis (TOF-ERDA) was
+the reaction space and the heated vacuum chamber wall. Electronic                     made with self-built equipment using 10.2 MeV 35Cl and 11.9 MeV 63Cu
+grade TiCl4 from SAFC Hitech with purity of 99.995%, and deionized                    ions from a 1.7 MV Pelletron accelerator [58]. Rutherford backscat­
+H2O with resistivity of 18.2 MΩ⋅cm were used as precursors. The TiCl4                 tering (RBS) was used to determine the Cl levels.
+bubbler was kept at 14 ◦ C with a Peltier cooling element, and the                        Residual stress was determined by the wafer curvature method using
+bubbler for the H2O at room temperature. TiCl4 and H2O precursor dose                 Veeco DEKTAK V200-Si stylus profilometer. Wafer curvature was
+and purge times were 0.1 and 4.0 s, respectively. The growth tempera­                 measured before and after ALD using 120 mm long scan parallel and
+ture was varied from 80 to 350 ◦ C, and the number of growth cycles from              perpendicular to the wafer flat, and residual stress was calculated using
+190 to 7400, corresponding nominal film thicknesses of about 10 to 300                Stoney’s equation [59,60]. For selected wafers, the residual stress was
+nm. As the pulse and purge times were kept constant through the tem­                  determined after ALD, and after post-ALD annealing using laser-based
+perature range, we are aware that the process may not have fully cor­                 wafer curvature measurement tool, Toho Technology FLX-2320-S
+responded to saturated ALD, especially at lower growth temperatures.                  equipment, and 120 mm scan in parallel and perpendicular to the
+    The influence of the post-ALD annealing on optical properties and                 wafer flat. In both cases the residual stress values were reported with the
+residual stress was studied on low resistivity, 380 ± 5 µm thick, DSP                 maximum measurement uncertainty as calculated in Ref. [52]. The
+silicon wafers to enable reliable optical measurements also in the near               maximum measurement uncertainty for these two tools are different
+infrared (NIR) region. Films were grown at temperature range from 110                 mostly, because of the uncertainty in the bow measurement and wafer
+to 300 ◦ C, and selected samples were post-ALD annealed at 300, 450,                  placement. For example, in the case of ALD Al2O3 under 200 MPa re­
+and 900 ◦ C for 30 min under 1000 sccm nitrogen flow. The annealing                   sidual stress, the maximum measurement uncertainty composes of three
+
+
+
+
+Fig. 1. (a) Thickness as a function of ALD cycles for TiO2 grown at 110, 200 and 300 ◦ C on silicon. In (b) average growth per cycle is presented as a function of ALD
+temperature. GPC values, calculated from thickness values measured with XRR and spectroscopic reflectometry were in line.
+
+                                                                                  2
+                                                                                                                                                                                                                              O.M.E. Ylivaara et al.
+
+
+
+
+    Table 1
+    Spectroscopic reflectometry, ellipsometry, XRR and XRD results measured for ALD TiO2 thin films. The growth per cycle values was calculated from thickness measured by reflectometry divided by the number of growth
+    cycles.
+     Growth              Growth      Reflectometer             St.dev.(49   St.dev.    Thickness/     Refractive index    XRR             XRR density   XRR             GIXRD observed peaks          Crystallite size from
+       temperature       cycles      thickness (49 pts) [nm]   pts) [nm]    (49 pts)   cycles [nm]    @633 nm (5 pts)     thickness       [g/cm3]       roughness                                     (101) peak [nm]
+       [◦ C]                                                                [%]                                           [nm]                          [nm]
+     80                  1662        96.6                      1.9          2.0        0.0581         -                   102.2           3.55          0.5             -                             -
+     110                 1924        98.0                      2.2          2.2        0.0510         2.42                101.5           3.70          0.2             -                             -
+     150                 2312        97.8                      2.6          2.7        0.0423         2.45                99.5            3.75          0.3             -                             -
+     200                 247         9.8                       0.3          3.0        0.0401         -                   9.5             3.75          0.4             -                             -
+     200                 493         18.6                      0.5          2.7        0.0377         -                   18.0            3.75          0.4             -                             -
+     200                 1233        48.8                      1.2          2.4        0.0497         -                   47.7            3.85          0.4             (101)                         32.3
+     200                 1850        71.3                      2.3          3.2        0.0385         -                   67.0            3.90          0.7             (101), (004), (200), (211),   26.6
+                                                                                                                                                                        (204)
+     2001                2467        100.7                     2.9          2.9        0.0408         2.60                93.4            3.85          0.8             (101), (103), (004), (112),   29.7
+                                                                                                                                                                        (200), (105), (211), (204),
+                                                                                                                                                                        (215)
+     2001                2467        103.9                     3.8          3.7        0.0421         2.66                92.9            3.85          1.2             (101), (004), (200), (105)    27.6
+                                                                                                                                                                        (211), (204)
+          2
+     200                 4933        229.8                     7.1          3.1        0.0466         -                   -               -             -               (101), (103), (004), (112),   28.9
+3                                                                                                                                                                       (200), (105), (211), (204)
+          2
+     200                 7400        372.6                     8.0          2.1        0.0504         -                   -               -             -               (101), (103), (004), (112),   32.1
+                                                                                                                                                                        (200), (105), (211), (204),
+                                                                                                                                                                        (215)
+     250                 1953        101.9                     0.6          0.6        0.0522         2.59                92.4            3.70          3.2             (101), (112), (200), (211),   26.9
+                                                                                                                                                                        (204),(202)
+     300                 319         13.0                      0.6          4.6        0.0408         -                   11.9            3.80          1.0             (101)                         14.3
+     300                 531         23.2                      0.3          1.3        0.0437         -                   21.2            3.80          1.6             (101), (211)                  27.0
+     300                 1062        48.3                      0.6          1.2        0.0455         -                   45.5            3.80          3.3             (101), (200)                  24.2
+     3003                2124        105.5                     0.8          0.8        0.0497         2.73                109.8           3.85          3.3             (101), (004), (200), (105),   24.0
+                                                                                                                                                                        (211), (204),(202)
+     3003                2124        101.5                     1.0          1.0        0.0478         -                   91.5            3.80          4.3             (101), (200), (211)           23.0
+     3002                6373        323.5                     2.4          0.7        0.0508         -                   -               -             -               (101), (112), (200), (211),   30.5
+                                                                                                                                                                        (204)
+     350                 2030        97.8                      1.1          1.1        0.0482         -                   105.0           3.85          4.0             N.A.                          N.A.
+     1
+         Duplicated sample grown at 200 C.
+                                         ◦
+
+
+     2
+         Sample too rough for XRR measurement.
+
+
+
+
+                                                                                                                                                                                                                              Thin Solid Films 732 (2021) 138758
+     3
+         Duplicated sample grown at 300 ◦ C.
+O.M.E. Ylivaara et al.                                                                                                              Thin Solid Films 732 (2021) 138758
+
+
+
+
+Fig. 2. Impurity concentrations and O/Ti ratio as a function of ALD tempera­          Fig. 3. GIXRD peaks for ALD TiO2 samples grown at temperatures from 110 to
+ture. Targeted film thickness was 100 nm. Results for the 110, 200 and 300 ◦ C        300 ◦ C. Targeted film thickness for these samples was 100 nm.
+samples were published already in Ref. [48], and for 150 and 250 ◦ C samples in
+Ref. [54], and repeated here for completeness.                                             With increasing ALD temperature, GPC decreased at temperature
+                                                                                      range from 80 to 200 ◦ C (Table 1 and Fig. 1b). For films grown at higher
+factors: the substrate thickness (380 ± 5 µm) of about 5 MPa, the film                temperatures, above 200 ◦ C, GPC was higher, and remained nearly
+thickness (100 ± 1 nm) of about 2 MPa, and bow and wafer placement                    constant, independent of the growth temperature. Films grown at 250 ◦ C
+uncertainty for 120 mm scan length causing error in measurement                       and up were uniform in thickness, as the st.dev. was ~1% for about 100
+repeatability. Maximum measurement uncertainty thus varies between                    nm thick films, compared to the higher non-uniformity of ≥ 2% of the
+individual samples.                                                                   films grown at lower temperatures. The refractive index, measured with
+    Besides measuring as-grown films, the influence of the storage time               ellipsometry, increased from 2.4 to 2.7, as ALD temperature was
+to residual stress was studied by means of wafer curvature measurement                increased from 110 to 300 ◦ C, except for a drop around 250 ◦ C.
+with duplicated samples using both Veeco DEKTAK V200-Si and Toho                           XRR density and roughness increased with increasing ALD temper­
+Technology FLX-2320-S tools. With first tool, the first measurement was               ature, as presented in Table 1. The density was experiencing a similar
+done within 30 min after ALD process was finished and repeated after                  drop, around 250 ◦ C, as detected for refractive index. With increasing
+one day, two days, one week, and continued with increasing time in­                   film thickness, from about 10 to 100 nm, XRR roughness increased from
+terval. With the latter tool, the first measurement was made within 30                0.4 to 1.2 nm, and 1.0 to 4.3 nm for films grown at 200 and 300 ◦ C,
+min after the ALD process was finished and repeated in 5-minutes in­                  respectively.
+tervals during 72-hour measurement period. During about 220 days                           According to TOF-ERDA and RBS, the impurity concentration
+measurement period, the wafers were stored in ISO 4 cleanroom. The                    decreased with increasing growth temperature. Impurities and O/Ti
+Toho Technology FLX-2320-S was also used for analyzing the thermal                    ratio for 100 nm TiO2 are presented in Fig. 2. The main impurity was
+stability of the as-grown film by thermal cycling. The wafer curvature                chlorine and its concentration decreased from 2.9 ± 0.1 to <0.05 at. %,
+was measured in-situ during the thermal cycling. The controlled heating               as the ALD temperature was increased from 80 to 350 ◦ C. Hydrogen
+rate was 10 ◦ C/min, from 25 to 500 ºC, and cooling back to room tem­                 concentration was at maximum, 2.6 ± 0.2 at. %, at lowest growth
+perature took more time. This heating-cooling cycle was repeated three                temperature, and decreased to under detection limit of < 0.05 at. % at
+times continuously for each sample. During the thermal cycling wafers                 350 ◦ C. The O/Ti-ratio remained near stoichiometric TiO2.
+were under continuous nitrogen flow.                                                       The as-grown TiO2 was amorphous at low growth temperatures, 80,
+    Nanoindentation was performed with a Hysitron Triboindenter for                   110 and 150◦ C, and at lower film thicknesses (Table 1 and Fig. 3). A
+the elastic modulus and hardness using a cube-corner indenter with a                  polycrystalline film with anatase was observed for about 50 nm TiO2
+90◦ total induced angle and 40 nm tip radius. The indent depth was kept               film, grown at 200◦ C. For films grown at 300 ◦ C, anatase phase was
+less than 10 % of the film thickness. The elastic modulus was determined              already detected for about 10 nm film. No other phases were detected.
+also with laser-generated surface acoustic wave (LSAW) measurements                   Crystallite size (Table 1) did not change with a systematic manner, as at
+using the density values measured by XRR. The elastic modulus values                  200 ◦ C the crystallite size was at largest on thinnest polycrystalline film,
+were calculated using Poisson’s ratio of 0.27 [46] for ALD TiO2. Mea­                 thereafter decreased, and again increased with around 380 nm thick
+surement methods are described in detail in Ref [52].                                 film.
+                                                                                           The AFM rms surface roughness for about 100 nm TiO2 samples,
+3. Results                                                                            grown at 200, 250, 300 and 350 ◦ C, decreased with increasing growth
+                                                                                      temperature; rms values were 8.5, 6.3, 6.4 and 5.8 nm, respectively.
+3.1. Structural and optical properties                                                AFM images are presented in Fig. 4. Large plate-like crystals with some
+                                                                                      large grains were detected for sample grown at 200 ◦ C. For sample
+    Thickness as a function of ALD cycles for TiO2 films grown at 110,                grown at 250 ◦ C, grains were larger compared to 200 ◦ C sample, and for
+200 and 300 ◦ C is presented in Fig. 1a. Thickness increase was linear as a           samples grown at 300 and 350 ◦ C, the grain size decreased.
+function of ALD cycles at 110 ◦ C, except for the thinnest sample (192                     ALD TiO2 films were characterized also after the post-ALD annealing.
+cycles), which had substantially lower average growth per cycle (GPC)                 The film thicknesses, measured by reflectometry, increased slightly due
+value compared to the other samples. For films grown at 200 and 300 ◦ C,              to annealing for samples grown at 110◦ C (Table 2). With sample grown
+growth was slightly nonlinear with upward curvature. The growth                       at 300 ◦ C, a thickness change was detected only after annealing at 900
+nonlinearity was largest with TiO2 grown at 200 ◦ C. In every case, the
+                                                                                      ◦
+                                                                                        C. The hydrogen concentration decreased for sample grown at 110 ◦ C
+extrapolated intercept with y-axis was negative, most probably because                upon annealing. For samples grown at 300 ◦ C, no major changes in
+of the change in growth upon onset of crystallization, as crystallites                impurity content were detected, and most of the values were near or
+grow faster than amorphous material.                                                  under the detection limit. Density measured by XRR increased upon the
+
+
+                                                                                  4
+O.M.E. Ylivaara et al.                                                                                                              Thin Solid Films 732 (2021) 138758
+
+
+
+
+Fig. 4. AFM images of TiO2 grown at (a) 200 ◦ C, (b) 250 ◦ C, (c) 300 ◦ C, and (d) 350 ◦ C using 2467, 1953, 2124, and 2030 growth cycles, respectively, composed of
+0.1-4.0-0.1-4.0 s pulse-purge sequence. Image scale was 3 x 3 µm and sample size 512. In (b) one particle detected in Figure was excluded from analysis (marked with
+the square).
+
+
+transition from anatase to rutile (sample grown at 300 ◦ C and annealed              temperatures and with different film thicknesses. Fig. 6 presents the
+at 900 ◦ C), but appeared to decrease with sample grown at 110 ◦ C and               residual stress of ALD TiO2 as a function of film thickness for films grown
+annealed at 450 ◦ C.                                                                 at 110, 200 and 300 ◦ C. Amorphous films were measured to have about
+    Refractive index, n and extinction coefficient, k were characterized             the same level of residual stress, independent of the ALD temperature.
+as a function of the wavelength, from ultraviolet to infrared, from 190 to           For TiO2 grown at 200 ◦ C, with onset of crystallization, the residual
+1650 nm wavelengths, for as-grown and post-ALD annealed samples.                     stress first increased with increasing film thickness, reached a maximum
+The results are presented in Fig. 5. The sample grown at 110 ºC, had                 for about 100 nm film and thereafter decreased. The residual stress for
+foggy surface after post-ALD annealing at 300 ºC; no measurable change               TiO2 films grown at 300 ◦ C decreased slightly with increasing film
+was detected in refractive index or extinction coefficient, the latter               thickness. When the residual stress of about 100 nm samples were
+remained at a zero value for wavelength range from 380 to 1645 nm.                   studied as a function of the ALD temperature, presented in Table 3, the
+Only after annealing at 450 ºC, a clear drop was seen in refractive index,           residual stress reached the maximum level with onset of crystallization
+and in extinction coefficient a change at wavelengths below 380 nm, and              around 200 ◦ C, and thereafter decreased.
+again from 1470 nm upwards. Film grown at 200 ◦ C had k >                                The residual stress was also characterized as a function of storage
+0 throughout the wavelength range. Film grown at 300 ◦ C had a zero k                time in air after the film growth. The first measurement was done within
+value at wavelength range from 380 to 485 nm, and no change was                      30 minutes after the ALD process was finished, and measurements were
+detected upon annealing at 450 ◦ C. Change in refractive index and k                 repeated with increasing time intervals during 220 days measurement
+values were seen after post-ALD annealed at 900 ºC.                                  period. The residual stress values, based on stylus profilometry results,
+                                                                                     showed somewhat deviation from measurement to measurement (Fig. 7)
+                                                                                     and it seemed that there was a continuous decrease in residual stress
+3.2. Residual stress                                                                 with sample grown at 300 ◦ C, as the stress relaxed some from 540 to 470
+                                                                                     MPa during the storage. The shelf-lifetime series was repeated with a
+    The residual stress was measured for samples grown at different
+
+                                                                                 5
+O.M.E. Ylivaara et al.                                                                                                                                                                                                                                                                                                                             Thin Solid Films 732 (2021) 138758
+
+
+                                                                                                                                                                                                                                                                                                       new sample series and more precise measurement equipment (Toho
+
+
+
+
+                   Table 2
+                                                                                                                                                                                                                                                    **
+                                                                                                                                                                                                                                                                                                       Technology FLX-2320-S, laser profilometry). Results showed no changes
+                                                                                                                                                                                                                                            GIXRD
+                                                                                                                                                                                                                                                    anatase
+                                                                                                                                                                                                                                                    anatase
+                                                                                                                                                                                                                                                    anatase
+                                                                                                                                                                                                                                                                                                       in residual stress upon 220 days measurement period.
+                                                                                                                                                                                                                                                    anatase
+                                                                                                                                                                                                                                                    anatase
+                                                                                                                                                                                                                                                    rutile
+                                                                                                                                                                                                                                                                                                            Selected samples grown at 110 and 300 ◦ C were annealed after the
+                                                                                                                                                                                                                                                                                                       ALD at 300, 450 and 900 ◦ C. The residual stress was measured before
+                                                                                                                                                                                                                                                    ±
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                                                                       and after the annealing using Toho Technology FLX-2320-S. Due to post-
+                                                                                                                                                                                                                                                                                                       ALD annealing, the residual stress decreased for samples grown at 110
+                                                                                                                                                                                                                                                Ti
+                                                                                                                                                                                                                                                32
+                                                                                                                                                                                                                                                32
+                                                                                                                                                                                                                                                32
+                                                                                                                                                                                                                                                33
+                                                                                                                                                                                                                                                33
+                                                                                                                                                                                                                                                33
+                                                                                                                                                                                                                                                32
+                                                                                                                                                                                                                                                                                                       ◦
+                                                                                                                                                                                                                                                                                                         C, from initial 413 to 260 MPa, and further to 128 MPa, when annealed
+                                                                                                                                                                                                                                                                                                       at 300 and 450 ◦ C, respectively as presented in Table 2. For samples
+                                                                                                                                                                                                                                                    ±
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+                                                                                                                                                                                                                                                    1
+
+                                                                                                                                                                                                                                                O
+                                                                                                                                                                                                                                                66                                                     grown at 300 ◦ C, the residual stress increased with increasing post-ALD
+                                                                                                                                                                                                                                                                                                       annealing temperature.
+                                                                                                                                                                                                                                                66
+                                                                                                                                                                                                                                                65
+                                                                                                                                                                                                                                                67
+                                                                                                                                                                                                                                                67
+                                                                                                                                                                                                                                                67
+                                                                                                                                                                                                                                                68
+
+                                                                                                                                                                                                                                                    ±                                                       The temperature cycling, made with in-situ wafer curvature mea­
+                                                                                                                                                                                                                                                                                                       surement using Toho Technology FLX-2320-S tool, from room temper­
+                                                                                                                                                                                                                                                    0.20
+                                                                                                                                                                                                                                                    0.20
+                                                                                                                                                                                                                                                    0.20
+                                                                                                                                                                                                                                                    0.10
+                                                                                                                                                                                                                                                    -
+                                                                                                                                                                                                                                                    -
+                                                                                                                                                                                                                                                    -
+                                                                                                                                                                                                                                                                                                       ature up to 500 ◦ C and back to room temperature, showed differences in
+                                                                                                                                                                                                                                                Cl
+                                                                                                                                                                                                                                                1.50
+                                                                                                                                                                                                                                                1.70                                                   thermal behavior between the samples grown at different temperatures,
+                                                                                                                                                                                                                                                                                                       from 110 to 300 ◦ C, presented in Fig. 8. The residual stress curve of the
+                                                                                                                                                                                                                                                1.90
+                                                                                                                                                                                                                                                0.20
+                                                                                                                                                                                                                                                <0.05
+                                                                                                                                                                                                                                                <0.05
+                                                                                                                                                                                                                                                <0.05
+                                                                                                                                                                                                                                                                                                       TiO2 film grown at 300 ºC was reversible and returned close to its
+                                                                                                                                                                                                                                                                                                       original value, initially starting from 450 MPa and ending to 385 MPa. In
+                                                                                                                                                                                                                                            Chemical composition [atm.%]
+                                                                                                                                                                                                                                                                                                       films grown at lower temperatures, at 110 and 200 ºC, irreversible
+                                                                                                                                                                                                                                            H         ±        C         ±
+                                                                                                                                                                                                                                                                                                       change in the residual stress was detected already during the first heat
+                                                                                                                                                                                                                                            0.80      0.10     <0.05     -
+                                                                                                                                                                                                                                                                                                       cycle around 440 and 260 ◦ C, respectively, as there was an abrupt rise
+                                                                                                                                                                                                                                            0.40      0.10     0.15      0.05
+
+
+
+
+                   Thin film characterization results of ALD TiO2 samples grown at 110, 200 and 300 ◦ C after the ALD and post-ALD annealing at 300, 450 and 900 ◦ C are presented here. Measurement uncertainty of the residual stress
+                                                                                                                                                                                                                                                                                                       detected in stress values. In following heating and cooling cycles, no
+                                                                                                                                                                                                                                            0.40      0.10     0.18      0.05
+                                                                                                                                                                                                                                                                                                       further changes were detected. The sample grown at 110 ◦ C had rise in
+                                                                                                                                                                                                                                            0.10      0.05     <0.05     -                             residual stress from initial 440 to 840 MPa and the sample grown at 200
+                                                                                                                                                                                                                                            <0.10     -        <0.10     -                             ◦
+                                                                                                                                                                                                                                                                                                         C had similar rise in initial residual stress from 470 to 780 MPa.
+                                                                                                                                                                                                                                            <0.10     -        <0.10     -
+                                                                                                                                                                                                                                            0.20      0.10     0.10      0.05                          3.3. Elastic modulus and hardness
+
+                                                                                                                                                                                                                                          Thin film characterization                                        Elastic modulus values were measured with two methods: nano­
+                                                                                                                                                                                                                                          XRR density      XRR roughness                               indentation and LSAW, and the values are reported in Table 3 as a
+                                                                                                                                                                                                                                          [g/cm3]          [nm]                                        function of film thickness and ALD temperature. Approximately stable
+                                                                                                                                                                                                                                          3.65             0.6                                         elastic modulus values were measured with nanoindentation for films
+                                                                                                                                                                                                                                          3.75             0.8
+                                                                                                                                                                                                                                                                                                       grown at temperatures below 300 ◦ C. Films grown at 300 ◦ C and above
+                                                                                                                                                                                                                                          3.45             0.9
+                                                                                                                                                                                                                                          3.75             1.0
+                                                                                                                                                                                                                                                                                                       had somewhat higher elastic modulus values, although with higher
+                                                                                                                                                                                                                                          3.85             4.5                                         result deviation.
+                                                                                                                                                                                                                                          3.85             4.5                                              The elastic modulus values measured with LSAW for about 100 nm
+                                                                                                                                                                                                                                          4.15             4.0                                         films increased with increasing ALD temperature from about 107 to 170
+                                                                                                                                                                                                                                                                                                       GPa, as growth temperature was increased from 80 to 200 ◦ C. At higher
+                                                                                                                                                                                                                                            Residual stress                                            temperatures, slightly lower modulus values were measured as pre­
+                                                                                                                                                                                                                                                                                                       sented in Table 3. In addition, with increasing film thickness, the
+                                                                                                                                                                                                                                            MPa      ±
+                                                                                                                                                                                                                                            -        -
+                                                                                                                                                                                                                                            260      13
+                                                                                                                                                                                                                                            128
+                                                                                                                                                                                                                                            -
+                                                                                                                                                                                                                                                     5
+                                                                                                                                                                                                                                                     -                                                 maximum modulus was measured from about 70 to 230 nm thick films
+                                                                                                                                                                                                                                                                                                       grown at 200 ◦ C with onset of crystallization. For samples grown at 300
+
+
+
+
+                   measurement is in MPa and it presents uncertainty of the measurement system. Wafer curvature measurements were made with Toho Technology FLX-2320-S.
+                                                                                                                                                                                                                                            -        -
+                                                                                                                                                                                                                                            348      13
+                                                                                                                                                                                                                                                                                                         C, the modulus values decreased from 175 to 165 GPa with increasing
+                                                                                                                                                                                                                                            967      26                                                ◦
+
+                                                                                                                                                                                                                                                                                                       film thickness.
+                                                                                                                                                                                                                                          Post-ALD annealing
+                                                                                                                                                                                                                                          Temp      Film thickness
+                                                                                                                                                                                                                                                                                                            Hardness, measured with nanoindentation from about 100 nm thick
+                                                                                                                                                                                                                                          [◦ C]     [nm]      st.dev                                   films, increased from 6.7 to 10.5 GPa with increasing ALD temperature
+                                                                                                                                                                                                                                          -         -         -                                        (Table 3), from 80 to 250 ◦ C and thereafter stabilized. Maximum
+                                                                                                                                                                                                                                          300       101.6     5.7
+                                                                                                                                                                                                                                          450       106.7     4.5                                      hardness was measured for thinnest sample grown at 300 ◦ C, and at this
+                                                                                                                                                                                                                                          -         -         -                                        temperature hardness decreased with increasing film thickness.
+                                                                                                                                                                                                                                          -         -         -
+                                                                                                                                                                                                                                          450       108.7     1.0
+                                                                                                                                                                                                                                          900       110.1     0.9                                      4. Discussion
+
+                                                                                                                                                                                                                                            Residual stress                                                The growth of the ALD TiO2 was studied as a function of ALD cycles
+                                                                                                                                                                                                                                            MPa
+                                                                                                                                                                                                                                            413
+                                                                                                                                                                                                                                                     ±
+                                                                                                                                                                                                                                                     17                                                at different temperatures. For amorphous films, grown at 110 ◦ C, linear
+                                                                                                                                                                                                                                                                                                       growth as a function of the ALD cycles was measured. Slight non-linear
+                                                                                                                                                                                                                                            413      17
+                                                                                                                                                                                                                                            415      17
+                                                                                                                                                                                                                                            630      37
+                                                                                                                                                                                                                                            327
+                                                                                                                                                                                                                                            316
+                                                                                                                                                                                                                                                     13
+                                                                                                                                                                                                                                                     12                                                growth as a function of ALD cycles was detected for films grown at 200
+                                                                                                                                                                                                                                            329      12
+                                                                                                                                                                                                                                                                                                       and 300 ◦ C. The non-linear growth behavior, usually accompanied with
+                                                                                                                                                                                                                                                                                                       onset of crystallization [5,61,62], was most noticeable for films grown at
+                                                                                                                                                                                                                                          ALD growth                                                   200 ◦ C. Consequently, the thicker the film, the larger was the average
+                                                                                                                                                                                                                                          Temp     Film thickness
+                                                                                                                                                                                                                                          [◦ C]    [nm]      st.dev                                    GPC, calculated by dividing the measured thickness with ALD cycles.
+                                                                                                                                                                                                                                          110      99.2      3.2                                       One reason for the origin of the increased GPC could be faster growth of
+                                                                                                                                                                                                                                          110      99.8      3.3
+                                                                                                                                                                                                                                                                                                       the crystallites in the upward direction, leading to increased surface
+
+
+                                                                                                                                                                                                                                                                                * amorphous film
+                                                                                                                                                                                                                                          110      99.5      3.3
+                                                                                                                                                                                                                                          200      103.8     4.6                                       area, and thus measured thickness [63]. Also increased hydroxyl group
+                                                                                                                                                                                                                                          300      108.7     1.0                                       (OH) density upon crystallization has been reported to cause increase in
+                                                                                                                                                                                                                                          300      108.6     1.0
+                                                                                                                                                                                                                                          300      108.0     1.3                                       the GPC [61,64]; in this work, we can neither confirm nor exclude such
+                                                                                                                                                                                                                                                                                                       an effect.
+
+                                                                                                                                                                                                                                                                                                   6
+O.M.E. Ylivaara et al.                                                                                                                 Thin Solid Films 732 (2021) 138758
+
+
+
+
+Fig. 5. (a) Refractive index presented as a function of wavelength for samples grown at 110, 200, and 300 ◦ C and for selected samples annealed at 300, 450, and 900
+◦
+  C. Wavelength range was from 190 to 1645 nm. In (b) the extinction coefficient for the same samples is presented as a function of wavelength.
+
+
+
+
+Fig. 6. Residual stress is presented as a function of the film thickness for films grown at (a) 100, (b) 200, and (c) 300 ◦ C. The symbols present median stress values
+and bars present calculated maximum measurement uncertainty.
+
+
+
+Table 3
+The residual stress, elastic modulus and hardness as a function of the film thickness and ALD temperature.
+  ALD temperature         Film thickness       Wafer curvature measurement               Nanoindentation                                          LSAW
+                                               Residual stress                           Elastic modulus             Hardness                     Elastic modulus
+  [◦ C]                   [nm]                 [MPa]           ±                         [GPa]          st.dev       [GPa]         st.dev         [GPa]          st.dev
+  80                      97                   452*            29                        156            19           6.7           0.3            107.4          0.4
+  110                     98                   413*            32                        152            5            6.9           0.1            126.7          0.5
+  150                     98                   382             78                        149            4            7.3           0.1            129.0          0.5
+  200                     19                   230             329                       -              -            -             -              128.0          3.4
+                          49                   391             137                       -              -            -             -              137.4          2.9
+                          71                   800             122                       -              -            -             -              172.2          0.6
+                          101                  630*            51                        154            8            8.5           1.0            171.2          0.6
+                          230                  726             116                       -              -            -             -              173.2          0.3
+                          370                  500             60                        -              -            -             -              125.6          0.3
+  250                     102                  684             77                        159            7            10.5          0.8            153.4          0.1
+  300                     23                   580             338                       165            16           13.6          1.7            175.2          1.1
+                          48                   579             134                       170            10           11.2          0.7            166.9          0.4
+                          102                  327*            19                        165            16           9.7           1.0            166.5          0.6
+                          324                  362             27                        167            45           7.9           2.0            164.4          0.0
+  350                     98                   304*            19                        165            15           9.6           1.4            167.5          0.6
+  *
+      Measured with Toho Technology FLX-2320-S.
+
+
+
+   The optical and structural characterization of these films revealed a               there was a negative correlation in the refractive index and chlorine
+drop around 250 ◦ C in refractive index and density, this is in line with              concentration with the increasing growth temperature.
+previous results [44]. At this temperature, AFM revealed a rough sur­                      A plot of the extinction coefficient as a function of the wavelength for
+face, with large grains and platelets. The rough layer characteristics                 film grown at 110 ◦ C, showed that film has zero k for wavelength range
+might explain the drop detected in refractive index and density.                       from 380 to 1645 nm, and also after post-ALD annealing at 450 ◦ C,
+Refractive index correlated well with the density at ALD temperatures                  meaning that film is not absorbing at this wavelength range. The film
+below 250 ◦ C. Both chlorine and hydrogen concentrations decreased                     grown at 300 ◦ C, had zero k value at wavelength range from 380 to 485
+with the increasing growth temperature, as reported earlier [28] and                   nm, and annealing at higher temperature (900 ◦ C) lead to rise in k. Film
+
+
+                                                                                   7
+O.M.E. Ylivaara et al.                                                                                                               Thin Solid Films 732 (2021) 138758
+
+
+                                                                                      work even for duplicated samples, the results agree well with most nu­
+                                                                                      merical results published [44,13,48] for ALD TiO2 on silicon, and sup­
+                                                                                      port the conclusion that the residual stress of the ALD TiO2 is a sensitive
+                                                                                      function of process parameters. Small fluctuations in temperature, film
+                                                                                      thickness and precursor doses most likely affect the crystallization and
+                                                                                      thereby the residual stress.
+                                                                                          The effect of post-ALD annealing has been studied on ALD TiO2 films
+                                                                                      mainly for structural properties [66] but also for residual stress [13]. For
+                                                                                      initially amorphous sample grown at 120 ◦ C post-ALD annealing has
+                                                                                      been reported to increase residual stress [13]. In this work, the residual
+                                                                                      stress decreased due to film cracking with increasing post-ALD anneal­
+                                                                                      ing temperatures for samples grown at 110 ◦ C. This is assumed to be
+                                                                                      caused by the crystallization and related increase in density upon
+                                                                                      annealing of the initially amorphous film. The film grown at 300 ◦ C and
+                                                                                      annealed at 900 ◦ C (Table 3), experienced a notable rise in the residual
+                                                                                      stress after annealing at 900 ◦ C, upon structural change from anatase to
+                                                                                      rutile. The residual stress remained unchanged during the repeated
+Fig. 7. Residual stress presented as a function of storage time. For samples          thermal cycling of sample grown at 300 ◦ C, indicating 500 ◦ C temper­
+grown at 110, 200 and 300 ◦ C measured using two different tools.
+                                                                                      ature was not high enough to initiate structural changes in the anatase
+                                                                                      film. The films grown at lower temperatures 110 and 200 ◦ C experienced
+grown at 200 ◦ C, was absorbing through the wavelength range, though                  non-reversible abrupt rise in residual stress already during the first
+at low levels.                                                                        heating cycle at temperatures of 440 and 260 ◦ C, respectively. In this
+     The TiO2 was detected to be amorphous at low growth temperatures.                sense results presented here were in line with Jõgi et al.[67] as ac­
+Anatase peak was detected in GIXRD for about 50 nm films grown at 200                 cording to their result the crystallization of the amorphous film to
+◦
+  C. At higher temperature, 300 ◦ C, anatase peaks were already present               anatase is easier than re-crystallization from anatase to rutile, as large
+for 10 nm thick film. These findings correlate with previously published              anatase grain size retards the phase transformation, and higher thermal
+results, but onset of crystallization has been slightly varying depending             activation energy is needed to initiate rutile nucleation [66,67].
+on the study [23,34–37,65,20]. The grain size correlates with the earlier
+findings for ALD TiO2 on silicon [32,65] as for polycrystalline samples,
+the grain size decreased with increasing ALD temperature.
+     The change in residual stress of ALD TiO2 is linked with changes in
+crystallinity detected by GIXRD and AFM. For the amorphous films, the
+residual stress was stable as a function of the film thickness, in accor­
+dance with findings made for other amorphous ALD materials: Al2O3
+[52], and Al2O3-TiO2 nanolaminates [54]. At 200 ◦ C, where the onset of
+crystallization was detected, elevated residual stress was measured. In
+addition, a large variation in residual stress was detected for duplicated
+samples grown at 200 ◦ C, and also different anatase peaks were observed
+in GIXRD. The finding of Lyytinen et al. [48] supports the observation
+that even between the duplicated samples the crystallization is not
+progressing in the same stage, as they detected the sample grown at 200
+ºC (sample included also in this study) to have an mixture of anatase
+agglomerates in an amorphous matrix. On base of these findings,
+probably random nucleation of anatase crystallites influence the
+nucleation phase and order of crystallinity between the duplicated
+                                                                                      Fig. 9. Comparison of published ALD TiO2 stress data as a function of ALD
+samples as different diffraction peaks were observed in GIXRD (Table 1).              temperature. Symbol (■) refers to results presented in this work and is the
+     The residual stress measured for TiO2 in this work is compared with              residual stress value; bars present calculated maximum measurement uncer­
+earlier results in Fig. 9. Considering the stress variation detected in this          tainty values.
+
+
+
+
+Fig. 8. Residual stress measured in-situ during the repeated post-ALD thermal cycling for films grown at (a) 110 (b) 200 and (c) 300◦ C. The heating ramp rate was 10
+◦
+  C/min and temperature range was from about room temperature up to 500 ◦ C and during the subsequent cooling back to about room temperature.
+
+                                                                                  8
+O.M.E. Ylivaara et al.                                                                                                                     Thin Solid Films 732 (2021) 138758
+
+
+Thickness change during the post-ALD annealing, was most probably                 Acknowledgment
+due to growth of interfacial SiO2, proposed already by Methapanon et al.
+[25] and McDonnell et al.[29]. Hydrogen was the only impurity that was               This work was carried out within the MECHALD project funded by
+detected to decrease upon thermal annealing; at a general level, Jõgi            Business Finland (Tekes) and is linked to the Finnish Centers of Excel­
+et al. [67] have reported the post-ALD annealing to decrease impurities           lence in Atomic Layer Deposition (ref. 251220) and Nuclear and
+and increase amount of crystalline phases.                                        Accelerator Based Physics (refs. 213503 and 251353) of the Academy of
+    Change in elastic modulus was mainly attributed to change in crys­            Finland.
+talline structure, as the highest elastic modulus values were measured
+around crystallization temperature. The elastic modulus values                    References
+measured with LSAW showed more temperature, and thickness de­
+pendency than the elastic modulus derived from nanoindentation                     [1] U. Diebold, The surface science of titanium dioxide, Surf. Sci. Rep. 48 (2003)
+                                                                                       53–229, https://doi.org/10.1016/S0167-5729(02)00100-0.
+measurements. In principle, the methods should yield the same values               [2] F. De Angelis, C. Di Valentin, S. Fantacci, A. Vittadini, A. Selloni, Theoretical
+for the isotropic films, but systematic differences may emerge as the                  studies on anatase and less common TiO2 phases: bulk, surfaces, and
+nanoindentation measurement may suffer from the substrate effect,                      nanomaterials, Chem. Rev. 114 (2014) 9708–9753, https://doi.org/10.1021/
+                                                                                       cr500055q.
+especially with the crystalline materials. For the LSAW measurement,               [3] M. Ritala, M. Leskelä, E. Nykänen, P. Soininen, L. Niinistö, Growth of titanium
+the surface roughness should not influence to the elastic modulus result,              dioxide thin films by atomic layer epitaxy, Thin Solid Films 225 (1993) 288–295,
+in the roughness range studied in this paper [68].                                     https://doi.org/10.1016/0040-6090(93)90172-L.
+                                                                                   [4] J. Aarik, A. Aidla, T. Uustare, V. Sammelselg, Morphology and structure of TiO2
+    There are several sources reporting mechanical properties of thin                  thin films grown by atomic layer deposition, J. Cryst. Growth 148 (1995) 268–275,
+films to have strong correlation with film density [69,70]. In this study,             https://doi.org/10.1016/0022-0248(94)00874-4.
+no linear correlation between density and hardness or residual stress              [5] V. Miikkulainen, M. Leskelä, M. Ritala, R.L. Puurunen, Crystallinity of inorganic
+                                                                                       films grown by atomic layer deposition: overview and general trends, J. Appl. Phys.
+was detected, but upon structural transition, changes in stress, elastic
+                                                                                       113 (2013), 021301, https://doi.org/10.1063/1.4757907.
+modulus and hardness were detected.                                                [6] J.-P. Niemelä, G. Marin, M. Karppinen, Titanium dioxide thin films by atomic layer
+                                                                                       deposition: a review, Semicond. Sci. Technol. 32 (2017), 093005, https://doi.org/
+5. Conclusions                                                                         10.1088/1361-6641/aa78ce.
+                                                                                   [7] S. Won, S. Go, W. Lee, K. Jeong, H. Jung, C. Lee, E. Lee, J. Lee, Effects of defects
+                                                                                       generated in ALD TiO2 films on electrical properties and interfacial reaction in
+    The purpose of this work was to gain better understanding of me­                   TiO2/SiO2/Si system upon annealing in vacuum, Met. Mater. Int. 14 (2008)
+chanical and system properties of ALD TiO2 and their dependency to the                 759–765, https://doi.org/10.1007/BF03027993.
+                                                                                   [8] T. Nabatame, A. Ohi, T. Chikyo, M. Kimura, H. Yamada, T. Ohishi, Electrical
+growth temperature and subsequent thermal steps. The structural                        properties of anatase TiO2 films by atomic layer deposition and low annealing
+transition from the amorphous to polycrystalline film upon higher                      temperature, J. Vac. Sci. Technol. B Nanotechnol. Microelectron. Mater. Process.
+growth temperature caused rise in the tensile residual stress, elastic                 Meas. Phenom. 32 (2014) 03D121, https://doi.org/10.1116/1.4869059.
+                                                                                   [9] C. Das, K. Henkel, M. Tallarida, D. Schmeißer, H. Gargouri, I. Kärkkänen,
+modulus and hardness of the as-deposited ALD TiO2. For crystalline                     J. Schneidewind, B. Gruska, M. Arens, Thermal and plasma enhanced atomic layer
+films, the post-ALD annealing increased tensile residual stress further,               deposition of TiO2 : comparison of spectroscopic and electric properties, J. Vac. Sci.
+while for amorphous films, the stress decreased slightly upon adhesion                 Technol. A 33 (2015) 01A144, https://doi.org/10.1116/1.4903938.
+                                                                                  [10] J. Aarik, A. Aidla, A.-A. Kiisler, T. Uustare, V. Sammelselg, Effect of crystal
+failure and loss of film integrity. The optical properties were dependent              structure on optical properties of TiO2 films grown by atomic layer deposition,
+on film morphology; the onset of crystallization likely caused an in­                  Thin Solid Films 305 (1997) 270–273, https://doi.org/10.1016/S0040-6090(97)
+crease in scattered light (not necessarily absorbed light) which resulted              00135-1.
+                                                                                  [11] Y.-Q. Hou, D.-M. Zhuang, G. Zhang, M. Zhao, M.-S. Wu, Influence of annealing
+in an increase of the extinction coefficient, while the amorphous film
+                                                                                       temperature on the properties of titanium oxide thin film, Appl. Surf. Sci. 218
+had zero extinction coefficient on wide wavelength range. Films grown                  (2003) 98–106, https://doi.org/10.1016/S0169-4332(03)00569-5.
+at 110 and 300 ◦ C were able to withstand post-ALD annealing up to 420            [12] A. Szeghalmi, M. Helgert, R. Brunner, F. Heyroth, U. Gösele, M. Knez, Atomic layer
+◦
+  C without major change in residual stress, refractive index or extinction            deposition of Al2O3 and TiO2 multilayers for applications as bandpass filters and
+                                                                                       antireflection coatings, Appl. Opt. 48 (2009) 1727–1732, https://doi.org/10.1364/
+coefficient, which is advantageous considering common post-ALD pro­                    AO.48.001727.
+cessing temperatures.                                                             [13] Y. Huang, G. Pandraud, P.M. Sarro, Characterization of low temperature deposited
+                                                                                       atomic layer deposition TiO2 for MEMS applications, J. Vac. Sci. Technol. A 31
+                                                                                       (2013) 01A148, https://doi.org/10.1116/1.4772664.
+Authors’ statement                                                                [14] D. Saha, R.S. Ajimsha, K. Rajiv, C. Mukherjee, M. Gupta, P. Misra, L.M. Kukreja,
+                                                                                       Spectroscopic ellipsometry characterization of amorphous and crystalline TiO2
+   Oili Ylivaara designed the experiments together with Andreas                        thin films grown by atomic layer deposition at different temperatures, Appl. Surf.
+                                                                                       Sci. 315 (2014) 116–123, https://doi.org/10.1016/j.apsusc.2014.07.098.
+Langner and Riikka Puurunen. Oili Ylivaara fabricated the samples and             [15] G.S. Sveshnikova, S.I. Kol’tsov, V.B. Aleskovskii, Interaction of titanium
+made the thickness, AFM and residual stress measurements, and carried                  tetrachloride with hydroxylated silicon surfaces, J. Appl. Chem. USSR 43 (1970)
+out related analysis under supervision of Riikka Puurunen. Andreas                     432–434.
+                                                                                  [16] R.L. Puurunen, A Short history of atomic layer deposition: Tuomo Suntola’s atomic
+Langner made the refractive index and extinction coefficient measure­                  layer epitaxy, Chem. Vap. Depos. 20 (2014) 332–344, https://doi.org/10.1002/
+ments. Xuwen Liu made the nanoindentation measurements and related                     cvde.201402012.
+data analysis under supervision of Simo-Pekka Hannula. Dieter                     [17] A.A. Malygin, V.E. Drozd, A.A. Malkov, V.M. Smirnov, From V. B. Aleskovskii’s
+                                                                                       “Framework” hypothesis to the method of molecular layering/atomic layer
+Schneider made LSAW measurements and related data analysis. Jaakko
+                                                                                       deposition, Chem. Vap. Depos. 21 (2015) 216–240, https://doi.org/10.1002/
+Julin and Kai Arstila made TOF-ERDA measurements and related data                      cvde.201502013.
+analysis under supervision of Timo Sajavaara. Sakari Sintonen and                 [18] E. Ahvenniemi, A.R. Akbashev, S. Ali, M. Bechelany, M. Berdova, S. Boyadjiev, D.
+                                                                                       C. Cameron, R. Chen, M. Chubarov, V. Cremers, A. Devi, V. Drozd, L. Elnikova,
+Saima Ali made the XRR and GIXRD measurements and the data analysis
+                                                                                       G. Gottardi, K. Grigoras, D.M. Hausmann, C.S. Hwang, S.-H. Jen, T. Kallio,
+under supervision of Harri Lipsanen. Project administration, supervision               J. Kanervo, I. Khmelnitskiy, D.H. Kim, L. Klibanov, Y. Koshtyal, A.O.I. Krause,
+and resource management was done by Riikka Puurunen. Different                         J. Kuhs, I. Kärkkänen, M.-L. Kääriäinen, T. Kääriäinen, L. Lamagna, A.A. Łapicki,
+measurements were done by persons mentioned in author statement. In                    M. Leskelä, H. Lipsanen, J. Lyytinen, A. Malkov, A. Malygin, A. Mennad,
+                                                                                       C. Militzer, J. Molarius, M. Norek, Ç. Özgit-Akgün, M. Panov, H. Pedersen,
+addition Oili Ylivaara did writing of the original draft and also writing              F. Piallat, G. Popov, R.L. Puurunen, G. Rampelberg, R.H.A. Ras, E. Rauwel,
+and editing of the review. All authors discussed the results and com­                  F. Roozeboom, T. Sajavaara, H. Salami, H. Savin, N. Schneider, T.E. Seidel,
+mented the manuscript by Oili Ylivaara.                                                J. Sundqvist, D.B. Suyatin, T. Törndahl, J.R. van Ommen, C. Wiemer, O.M.
+                                                                                       E. Ylivaara, O. Yurkevich, Review Article: Recommended reading list of early
+                                                                                       publications on atomic layer deposition—outcome of the “Virtual Project on the
+Declaration of Competing Interest                                                      History of ALD”, J. Vac. Sci. Technol. A 35 (2017) 010801, https://doi.org/
+                                                                                       10.1116/1.4971389, 010801.
+    None
+
+                                                                              9
+O.M.E. Ylivaara et al.                                                                                                                                      Thin Solid Films 732 (2021) 138758
+
+[19] J. Aarik, A. Aidla, V. Sammelselg, H. Siimon, T. Uustare, Control of thin film                      single crystal domains grown by atomic layer deposition, Cryst. Growth Des. 18
+     structure by reactant pressure in atomic layer deposition of TiO2, J. Cryst. Growth.                (2018) 4929–4936, https://doi.org/10.1021/acs.cgd.8b00170.
+     169 (1996) 496–502, https://doi.org/10.1016/S0022-0248(96)00423-X.                             [43] L. Borgese, E. Bontempi, M. Gelfi, L.E. Depero, P. Goudeau, G. Geandier,
+[20] V. Sammelselg, A. Rosental, A. Tarre, L. Niinistö, K. Heiskanen, K. Ilmonen, L.-                   D. Thiaudière, Microstructure and elastic properties of atomic layer deposited TiO2
+     S. Johansson, T. Uustare, TiO2 thin films by atomic layer deposition: a case of                     anatase thin films, Acta Mater. 59 (2011) 2891–2900, https://doi.org/10.1016/j.
+     uneven growth at low temperature, Appl. Surf. Sci. 134 (1998) 78–86, https://doi.                   actamat.2011.01.032.
+     org/10.1016/S0169-4332(98)00224-4.                                                             [44] R.L. Puurunen, J. Saarilahti, H. Kattelus, Implementing ALD layers in MEMS
+[21] J. Aarik, A. Aidla, H. Mändar, V. Sammelselg, Anomalous effect of temperature on                   processing, ECS Trans. 11 (2019) 3–14, https://doi.org/10.1149/1.2779063.
+     atomic layer deposition of titanium dioxide, J. Cryst. Growth 220 (2000) 531–537,              [45] E. Bontempi, P. Zanola, M. Gelfi, M. Zucca, L.E. Depero, B. Girault, P. Goudeau,
+     https://doi.org/10.1016/S0022-0248(00)00897-6.                                                      G. Geandier, E.L. Bourhis, P.-O. Renault, Elastic behaviour of titanium dioxide
+[22] J. Aarik, A. Aidla, H. Mändar, T. Uustare, Atomic layer deposition of titanium                     films on polyimide substrates studied by in situ tensile testing in a X-ray
+     dioxide from TiCl4 and H2O: investigation of growth mechanism, Appl. Surf. Sci.                     diffractometer, Nucl. Instrum. Methods Phys. Res. Sect. B Beam Interact. Mater.
+     172 (2001) 148–158, https://doi.org/10.1016/S0169-4332(00)00842-4.                                  Atoms 268 (2010) 365–369, https://doi.org/10.1016/j.nimb.2009.09.034.
+[23] K.S. Finnie, G. Triani, K.T. Short, D.R.G. Mitchell, D.J. Attard, J.R. Bartlett, C.            [46] L. Borgese, M. Gelfi, E. Bontempi, P. Goudeau, G. Geandier, D. Thiaudière, L.
+     J. Barbé, Influence of Si(100) surface pretreatment on the morphology of TiO2                      E. Depero, Young modulus and Poisson ratio measurements of TiO2 thin films
+     films grown by atomic layer deposition, Thin Solid Films 440 (2003) 109–116,                        deposited with atomic layer deposition, Surf. Coat. Technol. 206 (2012)
+     https://doi.org/10.1016/S0040-6090(03)00818-6.                                                      2459–2463, https://doi.org/10.1016/j.surfcoat.2011.10.050.
+[24] R.L. Puurunen, Formation of metal oxide particles in atomic layer deposition                   [47] J. Lyytinen, M. Berdova, P. Hirvonen, X.W. Liu, S. Franssila, Q. Zhou, J. Koskinen,
+     during the chemisorption of metal chlorides: a review, Chem. Vap. Depos. 11                         Interfacial mechanical testing of atomic layer deposited TiO2 and Al2O3 on a silicon
+     (2005) 79–90, https://doi.org/10.1002/cvde.200400021.                                               substrate by the use of embedded SiO2 microspheres, RSC Adv. 4 (2014)
+[25] R. Methaapanon, S.F. Bent, Comparative study of titanium dioxide atomic layer                       37320–37328, https://doi.org/10.1039/C4RA05807K.
+     deposition on silicon dioxide and hydrogen-terminated silicon, J. Phys. Chem. C                [48] J. Lyytinen, X. Liu, O.M.E. Ylivaara, S. Sintonen, A. Iyer, S. Ali, J. Julin,
+     114 (2010) 10498–10504, https://doi.org/10.1021/jp1013303.                                          H. Lipsanen, T. Sajavaara, R.L. Puurunen, J. Koskinen, Nanotribological,
+[26] G. Triani, J.A. Campbell, P.J. Evans, J. Davis, B.A. Latella, R.P. Burford, Low                     nanomechanical and interfacial characterization of atomic layer deposited TiO2 on
+     temperature atomic layer deposition of titania thin films, Thin Solid Films 518                     a silicon substrate, Wear 342–343 (2015) 270–278, https://doi.org/10.1016/j.
+     (2010) 3182–3189, https://doi.org/10.1016/j.tsf.2009.09.010.                                        wear.2015.09.001.
+[27] J. Dendooven, S. Pulinthanathu Sree, K. De Keyser, D. Deduytsche, J.A. Martens, K.             [49] L. Kilpi, O.M.E. Ylivaara, A. Vaajoki, X. Liu, V. Rontu, S. Sintonen, E. Haimi,
+     F. Ludwig, C. Detavernier, In situ X-ray fluorescence measurements during atomic                    J. Malm, M. Bosund, M. Tuominen, T. Sajavaara, H. Lipsanen, S.-P. Hannula, R.
+     layer deposition: nucleation and growth of TiO2 on planar substrates and in                         L. Puurunen, H. Ronkainen, Tribological properties of thin films made by atomic
+     nanoporous films, J. Phys. Chem. C. 115 (2011) 6605–6610, https://doi.org/                          layer deposition sliding against silicon, J. Vac. Sci. Technol. A 36 (2018) 01A122,
+     10.1021/jp111314b.                                                                                  https://doi.org/10.1116/1.5003729.
+[28] S.Y. Lee, C. Jeon, S.H. Kim, Y. Kim, W. Jung, K.-S. An, C.-Y. Park, In-situ X-ray              [50] Y.S. Mohammed, K. Zhang, P. Lin, H. Baumgart, A.A. Elmustafa, Investigation of
+     photoemission spectroscopy study of atomic layer deposition of TiO2 on silicon                      the nanomechanical properties of crystalline anatase titanium dioxide films
+     substrate, Jpn. J. Appl. Phys. 51 (2012), 031102, https://doi.org/10.1143/                          synthesized using atomic layer deposition, JOM (2020), https://doi.org/10.1007/
+     JJAP.51.031102.                                                                                     s11837-020-04347-6.
+[29] S. McDonnell, R.C. Longo, O. Seitz, J.B. Ballard, G. Mordi, D. Dick, J.H.G. Owen, J.           [51] V.K. Khanna, Adhesion–delamination phenomena at the surfaces and interfaces in
+     N. Randall, J. Kim, Y.J. Chabal, K. Cho, R.M. Wallace, Controlling the atomic layer                 microelectronics and MEMS structures and packaged devices, J. Phys. D. Appl.
+     deposition of titanium dioxide on silicon: dependence on surface termination,                       Phys. 44 (2011), 034004, https://doi.org/10.1088/0022-3727/44/3/034004.
+     J. Phys. Chem. C 117 (2013) 20250–20259, https://doi.org/10.1021/jp4060022.                    [52] O.M.E. Ylivaara, X. Liu, L. Kilpi, J. Lyytinen, D. Schneider, M. Laitinen, J. Julin,
+[30] I. Iatsunskyi, M. Jancelewicz, G. Nowaczyk, M. Kempiński, B. Peplińska, M. Jarek,                 S. Ali, S. Sintonen, M. Berdova, E. Haimi, T. Sajavaara, H. Ronkainen, H. Lipsanen,
+     K. Załęski, S. Jurga, V. Smyntyna, Atomic layer deposition TiO2 coated porous                       J. Koskinen, S.-P. Hannula, R.L. Puurunen, Aluminum oxide from
+     silicon surface: Structural characterization and morphological features, Thin Solid                 trimethylaluminum and water by atomic layer deposition: the temperature
+     Films 589 (2015) 303–308, https://doi.org/10.1016/j.tsf.2015.05.056.                                dependence of residual stress, elastic modulus, hardness and adhesion, Thin Solid
+[31] I. Kavre Piltaver, R. Peter, I. Šarić, K. Salamon, I. Jelovica Badovinac, K. Koshmak,             Films 552 (2014) 124–135, https://doi.org/10.1016/j.tsf.2013.11.112.
+     S. Nannarone, I. Delač Marion, M. Petravić, Controlling the grain size of                    [53] L. Kilpi, O.M.E. Ylivaara, A. Vaajoki, J. Malm, S. Sintonen, M. Tuominen, R.L.R.
+     polycrystalline TiO2 films grown by atomic layer deposition, Appl. Surf. Sci. 419                   L. Puurunen, H. Ronkainen, Microscratch testing method for systematic evaluation
+     (2017) 564–572, https://doi.org/10.1016/j.apsusc.2017.04.146.                                       of the adhesion of atomic layer deposited thin films on silicon, J. Vac. Sci. Technol.
+[32] D.R.G. Mitchell, D.J. Attard, G. Triani, Transmission electron microscopy studies of                A 34 (2016) 01A124, https://doi.org/10.1116/1.4935959.
+     atomic layer deposition TiO2 films grown on silicon, Thin Solid Films 441 (2003)               [54] O.M.E. Ylivaara, L. Kilpi, X. Liu, S. Sintonen, S. Ali, M. Laitinen, J. Julin, E. Haimi,
+     85–95, https://doi.org/10.1016/S0040-6090(03)00877-0.                                               T. Sajavaara, H. Lipsanen, S.-P. Hannula, H. Ronkainen, R.L. Puurunen, Aluminum
+[33] D.R.G. Mitchell, G. Triani, D.J. Attard, K.S. Finnie, P.J. Evans, C.J. Barbé, J.                   oxide/titanium dioxide nanolaminates grown by atomic layer deposition: growth
+     R. Bartlett, Atomic layer deposition of TiO2 and Al2O3 thin films and                               and mechanical properties, J. Vac. Sci. Technol. A 35 (2017) 01B105, https://doi.
+     nanolaminates, Smart Mater. Struct. 15 (2006), https://doi.org/10.1088/0964-                        org/10.1116/1.4966198.
+     1726/15/1/010. S57–S64.                                                                        [55] S. Sintonen, S. Ali, O.M.E. Ylivaara, R.L. Puurunen, H. Lipsanen, X-ray reflectivity
+[34] A. Niilisk, M. Moppel, M. Pärs, I. Sildos, T. Jantson, T. Avarmaa, R. Jaaniso,                     characterization of atomic layer deposition Al2O3/TiO2 nanolaminates with
+     J. Aarik, Structural study of TiO2 thin films by micro-Raman spectroscopy, Open                     ultrathin bilayers, J. Vac. Sci. Technol. A 32 (2014) 01A111, https://doi.org/
+     Phys. 4 (2006) 105–116, https://doi.org/10.1007/s11534-005-0009-3.                                  10.1116/1.4833556.
+[35] H.-E. Cheng, C.-C. Chen, Morphological and Photoelectrochemical Properties of                  [56] S. Ali, T. Juntunen, S. Sintonen, O.M.E. Ylivaara, R.L. Puurunen, H. Lipsanen,
+     ALD TiO2 Films, J. Electrochem. Soc. 155 (2008) D604, https://doi.org/10.1149/                      I. Tittonen, S.-P. Hannula, Thermal conductivity of amorphous Al2O3/TiO2
+     1.2952659.                                                                                          nanolaminates deposited by atomic layer deposition, Nanotechnology 27 (2016),
+[36] D.R.G. Mitchell, G. Triani, Z. Zhang, Hydrothermal crystallization of amorphous                     445704, https://doi.org/10.1088/0957-4484/27/44/445704.
+     titania films deposited using low temperature atomic layer deposition, Thin Solid              [57] U. Holzwarth, N. Gibson, The Scherrer equation versus the ‘Debye – Scherrer
+     Films 516 (2008) 8414–8423, https://doi.org/10.1016/j.tsf.2008.04.052.                              equation’, Nat. Nanotechnol. 6 (2011) 534, https://doi.org/10.1038/
+[37] R.L. Puurunen, T. Sajavaara, E. Santala, V. Miikkulainen, T. Saukkonen,                             nnano.2011.145.
+     M. Laitinen, M. Leskelä, Controlling the crystallinity and roughness of atomic layer          [58] M. Laitinen, T. Sajavaara, M. Rossi, J. Julin, R.L. Puurunen, T. Suni, T. Ishida,
+     deposited titanium dioxide films, J. Nanosci. Nanotechnol. 11 (2011) 8101–8107,                     H. Fujita, K. Arstila, B. Brijs, H.J. Whitlow, Depth profiling of Al2O3+TiO2
+     https://doi.org/10.1166/jnn.2011.5060.                                                              nanolaminates by means of a time-of-flight energy spectrometer, Nucl. Instrum.
+[38] M.D. McDaniel, A. Posadas, T. Wang, A.A. Demkov, J.G. Ekerdt, Growth and                            Methods Phys. Res. Sect. B Beam Interact. Mater. Atoms 269 (2011) 3021–3024,
+     characterization of epitaxial anatase TiO2(001) on SrTiO3-buffered Si(001) using                    https://doi.org/10.1016/j.nimb.2011.04.074.
+     atomic layer deposition, Thin Solid Films 520 (2012) 6525–6530, https://doi.org/               [59] G.G. Stoney, The tension of metallic films deposited by electrolysis, Proc. R. Soc.
+     10.1016/j.tsf.2012.06.061.                                                                          Lond. A 82 (1909) 172–175, https://doi.org/10.1098/rspa.1909.0021.
+[39] Q. Tao, K. Overhage, G. Jursich, C. Takoudis, On the initial growth of atomic layer            [60] S. Timoshenko, Analysis of Bi-Metal Thermostats, J. Opt. Soc. Am. 11 (1925)
+     deposited TiO2 films on silicon and copper surfaces, Thin Solid Films 520 (2012)                    233–255.
+     6752–6756, https://doi.org/10.1016/j.tsf.2012.07.004.                                          [61] S.K. Kim, S. Hoffmann-Eifert, M. Reiners, R. Waser, Relation between enhancement
+[40] D.C. Cameron, R. Krumpolec, T.V. Ivanova, T. Homola, M. Černák, Nucleation and                    in growth and thickness-dependent crystallization in ALD TiO2 thin films,
+     initial growth of atomic layer deposited titanium oxide determined by                               J. Electrochem. Soc. 158 (2011) D6, https://doi.org/10.1149/1.3507258.
+     spectroscopic ellipsometry and the effect of pretreatment by surface barrier                   [62] E. Langereis, S.B.S. Heil, H.C.M. Knoops, W. Keuning, M.C.M. van de Sanden, W.M.
+     discharge, Appl. Surf. Sci. 345 (2015) 216–222, https://doi.org/10.1016/j.                          M. Kessels, In situ spectroscopic ellipsometry as a versatile tool for studying atomic
+     apsusc.2015.03.135.                                                                                 layer deposition, J. Phys. D. Appl. Phys. 42 (2009), 073001, https://doi.org/
+[41] W. Chiappim, G.E. Testoni, R.S. Moraes, R.S. Pessoa, J.C. Sagás, F.D. Origo,                       10.1088/0022-3727/42/7/073001.
+     L. Vieira, H.S. Maciel, Structural, morphological, and optical properties of TiO2              [63] D.M. Hausmann, R.G. Gordon, Surface morphology and crystallinity control in the
+     thin films grown by atomic layer deposition on fluorine doped tin oxide conductive                  atomic layer deposition (ALD) of hafnium and zirconium oxide thin films, J. Cryst.
+     glass, Vacuum 123 (2016) 91–102, https://doi.org/10.1016/j.                                         Growth 249 (2003) 251–261, https://doi.org/10.1016/S0022-0248(02)02133-4.
+     vacuum.2015.10.019.                                                                            [64] C. Guerra-Nuñez, Y. Zhang, M. Li, V. Chawla, R. Erni, J. Michler, H.G. Park, I. Utke,
+[42] O.M. Ishchenko, G. Lamblin, D. Arl, N. Adjeroud, J. Guillot, P. Grysan, P. Nukala,                  Morphology and crystallinity control of ultrathin TiO2 layers deposited on carbon
+     J. Guyon, I. Fechete, F. Garin, P. Turek, D. Lenoble, Highly reactive TiO2 anatase
+
+
+                                                                                               10
+O.M.E. Ylivaara et al.                                                                                                                                    Thin Solid Films 732 (2021) 138758
+
+     nanotubes by temperature-step atomic layer deposition, Nanoscale 7 (2015)                            deposition on silicon substrates, Thin Solid Films 516 (2008) 4855–4862, https://
+     10622–10633, https://doi.org/10.1039/C5NR02106E.                                                     doi.org/10.1016/j.tsf.2007.09.008.
+[65] W.-J. Lee, M.-H. Hon, Space-limited crystal growth mechanism of TiO2 films by                   [68] D. Paehler, D. Schneider, M. Herben, Nondestructive characterization of sub-
+     atomic layer deposition, J. Phys. Chem. C 114 (2010) 6917–6921, https://doi.org/                     surface damage in rotational ground silicon wafers by laser acoustics,
+     10.1021/jp911210q.                                                                                   Microelectron. Eng. 84 (2007) 340–354, https://doi.org/10.1016/j.
+[66] J. Lee, S.J. Lee, W.B. Han, H. Jeon, J. Park, W. Jang, C.S. Yoon, H. Jeon, Deposition                mee.2006.11.001.
+     temperature dependence of titanium oxide thin films grown by remote-plasma                      [69] O. Anderson, C.R. Ottermann, R. Kuschnereit, P. Hess, K. Bange, Density and
+     atomic layer deposition, Phys. Status Solidi 210 (2013) 276–284, https://doi.org/                    Young’s modulus of thin TiO2 films, Fresenius. J. Anal. Chem. 358 (1997)
+     10.1002/pssa.201228671.                                                                              315–318, https://doi.org/10.1007/s002160050416.
+[67] I. Jõgi, M. Pärs, J. Aarik, A. Aidla, M. Laan, J. Sundqvist, L. Oberbeck, J. Heitmann,        [70] A. Bendavid, P.J. Martin, H. Takikawa, Deposition and modification of titanium
+     K. Kukli, Conformity and structure of titanium oxide films grown by atomic layer                     dioxide thin films by filtered arc deposition, Thin Solid Films 360 (2000) 241–249,
+                                                                                                          https://doi.org/10.1016/S0040-6090(99)00937-2.
+
+
+
+
+                                                                                                11
+

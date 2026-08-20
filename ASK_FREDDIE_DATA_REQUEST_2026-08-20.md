@@ -36,9 +36,12 @@ In rough priority order:
    sample sat on the electrode (center/edge, orientation).
 
 5. **The rinse/dry procedure** after etch: DI rinse? N2 blowdry? IPA? Time
-   between etch and imaging. (This matters because capillary forces at
-   drying are one of the two candidate mechanisms for the clustered
-   collapse.)
+   between etch and imaging. (We ran the published capillary pattern-collapse
+   criterion on the board geometry: intact full-height TiO2 pillars carry an
+   ~8-11x stiffness margin against drying collapse even at 80 nm and 0-degree
+   wetting — so if pillars fell, our prediction is they were already
+   weakened, e.g. mask-exhausted and top-thinned, necked, or base-damaged.
+   The rinse/dry details let us close that loop.)
 
 6. **SEMs, when you're ready to unseal them** — most diagnostic single shot:
    a tilted view **across the boundary of a collapse cluster**, where fallen

@@ -1,0 +1,184 @@
+Tutor55.doc: Version 8/10/06
+
+                                         T h e L i t h o g r a p h y E x p e r t (November 2006)
+
+
+Pattern Collapse
+Chris A. Mack, Austin, Texas
+
+Not long ago, defining what an acceptable resist profile looked like was relatively easy. First
+and foremost, the feature must have the correct critical dimension (CD) within some given
+tolerance. The more enlightened lithographers might also specify a minimum acceptable resist
+height and sidewall angle to ensure good pattern transfer. Today, for lithography below 100 nm,
+the simplicity of those days seems almost quaint. Two new problems bedevil the already
+overwhelmed lithographer: line edge roughness and pattern collapse. Saving line edge
+roughness of the next column, here we will discuss pattern collapse, develop a simple 1D model
+for collapse, and investigate the impact of collapse on the focus-exposure process window.
+
+        Pattern collapse occurs for tall, narrow resist lines when some force pushing against the
+top of the line causes the profile to bend and eventually break or peal off the substrate (Figure 1).
+As one might expect, the taller and narrower the line, the easier it would be to push it over. But
+where does this pushing force come from? After development, the wafer is rinsed with
+deionized water and then air-dried. As the water dries, surface tension from the receding water
+will pull on the top of the resist feature. Of course, if the water is symmetrically receding from
+both sides of the line, the two forces on each side will cancel. If, however, there is an asymmetry
+and the water from one side of the line dries off faster than the other side, the resultant force will
+not be zero.
+
+         Figure 2a shows what is probably the worst case for generating asymmetric surface
+tension forces during after-rinse drying: two isolated parallel lines with a small gap between
+them. The large open areas to each side of the pair quickly dry while the small space between
+them requires a much longer time for removal of the water. As a result, there will be a point in
+the drying cycle where the top meniscus of the water in the gap will line up with the top of the
+resist features, producing a capillary force, driven by the surface tension of water, that will pull
+the two resist lines towards each other (Figure 2b). If the force is great enough to cause the two
+resist tops to touch each other, these feature are said to have collapsed. Other patterns of lines
+and spaces (a five bar pattern, for example) will behave very similarly to this two-bar test pattern
+for at least the most outside lines.
+
+       Tanaka [1] developed a simple cantilever beam mechanical model for this pattern
+collapse situation. The capillary pressure (force per unit area) along the side of the resist line
+covered by water is equal to the surface tension σ of the water-air interface divided by the radius
+of curvature R of the meniscus. The radius of curvature in turn is determined by the contact
+angle θ of the water-resist interface and the spacewidth ws. Before any bending occurs, this
+curvature will be
+                                                      ws
+                                               R=                                          (1)
+                                                    2 cosθ
+
+For a resist thickness H, the resulting capillary force per unit length of line is
+
+                                               σH       2σH cosθ
+                                          F=        =                                      (2)
+                                                R          ws
+
+As the resist line starts to bend, however, this force increases. The radius of curvature of the
+meniscus decreases as the two resist lines come closer together, causing an increase in the
+capillary force.
+
+         Since the force caused by the surface tension is always perpendicular to the air-water
+interface, a contact angle of zero (very hydrophilic case) causes the maximum force pulling the
+resist line towards the center of the space. Resists tend to be somewhat hydrophobic, so that
+contact angles between water and resist are often in the 50 − 70º range (though these
+measurements are for unexposed resist, not the partially exposed and deblocked resist along the
+profile edge where the contact angle should be less). Note that the capillary force increases with
+the aspect ratio of the space (As = H/ws) and with the surface tension of water, which at room
+temperature is about 0.072 N/m (72 dyne/cm).
+
+       The bending of the resist line can be described as an elastic cantilever beam. The
+important resist material property of mechanical strength is the Young’s modulus, E, which is a
+measure of the stiffness of the resist and is higher for resists with high glass transition
+temperatures. Resists have been measured to have Young’s modulus values in the range of 2 – 6
+GPa with the high end of the range corresponding to Novolak resists and the low end of the
+range for ArF resists [1,2]. Applying a force F to a line of width wl causes that line to move
+(sway) into the space by an amount δ given by
+
+                                                               3
+                                               3 ⎛ F ⎞⎛ H ⎞
+                                            δ = ⎜⎜ ⎟⎟⎜⎜ ⎟⎟                                 (3)
+                                               2 ⎝ E ⎠⎝ wl ⎠
+
+Note that the amount of bending is proportional to the cube of the aspect ratio of the resist line,
+and thus will be very sensitive to this aspect ratio.
+
+        As the resist line bends, the pulling of the line by the capillary force is countered by a
+restoring force caused by the stiffness of the resist. Eventually a ‘tipping point’ is reached where
+the increasing capillary force exceeds the restoring force of the resist and the line collapses.
+Tanaka calculated this critical point to occur when
+
+                  E       4 3⎡                                                       ⎤
+                      ≤      Al ⎢3 As cosθ + sin θ + 9 As2 cos 2 θ + 6 As cosθ sin θ ⎥     (4)
+                 σ        ws    ⎣                                                    ⎦
+
+where As is the aspect ratio of the space and Al is the aspect ratio of the line (H/wl). If the contact
+angle is less than about 80º and the aspect ratio of the space is high (that is, we are in an
+interesting regime where pattern collapse is likely to be a problem), the square root can be
+approximated with the first terms of a Taylor series to give a somewhat more approachable
+result:
+
+                                            Al [3 As cosθ + sin θ ]
+                                 E       8 3
+                                     ≤                                                    (5)
+                                 σ       ws
+
+        Equation (5) tells us what affects pattern collapse and therefore what we can do to try to
+reduce pattern collapse. Resist chemists could make the resist stiffer by increasing the Young’s
+modulus E (similar to increasing Tg, the glass transition temperature), something that is hard to
+do without altering other very important resist properties. The water-air surface tension can be
+reduced by adding surfactant into the rinse liquid. Surfactants can easily reduce the surface
+tension by a factor of 2 or 3 [2]. Contact angle of water to the resist also influences collapse.
+The worst case (maximum value of 3Ascosθ + sinθ) occurs at an angle of tan-1(1/3As) which is
+generally less than 10º. Thus, hydrophilic resists produce greater pattern collapse. Making the
+resist more hydrophobic will help (this, incidentally, is also a goal for immersion lithography).
+The aspect ratio of the space is important, but is less so for hydrophobic resists (small cosθ).
+The space width has a direct impact on collapse, with smaller spaces increasing the capillary
+force and thus the likelihood of collapse. By far the most critical factor is the aspect ratio of the
+line. Since the tendency to collapse increases as the line aspect ratio cubed, small changes in this
+factor can have big consequences.
+
+         Putting some numbers into the equation, ArF resists will have E/σ in the range of about
+35 nm-1 assuming no surfactants in the water. Assuming a 60º water-resist contact angle,
+consider a 100 nm space with a space aspect ratio of 3. The maximum aspect ratio of the line
+will be 4.3 (a 70 nm linewidth before the line collapses). If the space were shrunk to 50 nm
+keeping the space aspect ratio at 3, the maximum line aspect ratio drops to 3.4 (a 44 nm
+linewidth). As another example, when printing a pair of 45 nm equal lines and spaces in a resist
+of thickness 141 nm, overexposure will cause the patterns to collapse before they reach a 10%
+CD error. Pattern collapse can become a process window limiter before CD, sidewall angle, or
+resist loss reach their specifications.
+
+        Equation (5) can also predict the tendency towards pattern collapse as a function of
+line/space duty cycle. To simplify, assume that the contact angle is small enough that ignoring
+the sinθ term in equation (5) produces very little error (this approximation is not so bad, even for
+a 60º contact angle). For this case, a given pitch equal to ws + wl will have the minimum
+tendency to collapse when the linewidth is 50% bigger than the spacewidth (a 3:2 linewidth to
+spacewidth ratio). All other duty cycles will have an increased chance of pattern collapse. For a
+fixed duty cycle, the likely hood of collapse goes as the resist thickness to the fourth power, and
+as one over the pitch to the third power.
+
+        The two-dimensional model used here is really a worst case since it assumes very long
+lines and spaces. For shorter lines that are connected to another resist feature at one or both
+ends, the other features can give support to the line, inhibiting the twisting that would be required
+to make the line collapse. However, it is likely that CMOS device levels like poly and metal 1
+will always have some patterns that will behave close to the worst case presented here. And the
+trend towards smaller feature sizes and constant or even greater aspect ratios will only make the
+problem of pattern collapse worse in the future.
+References
+
+1. T. Tanaka, et al., “Mechanism of Resist Pattern Collapse during Development Process”, Jpn.
+J. Appl. Phys., Vol. 32, Part 1, No. 12B (Dec. 1993) pp. 6059 – 6064.
+
+2. J. Simons, et al., “Image Collapse Issues in Photoresist”, Advances In Resist Technology and
+Processing XVIII, Proc., SPIE Vol. 4345 (2001) pp. 19 – 29.
+
+
+
+
+List of Figures
+
+Figure 1.    Examples of photoresist pattern collapse, both in cross-section (left) and top down (Courtesy
+             of Joe Ebihara of Canon).
+
+Figure 2.    Pattern collapse of a pair of isolated lines: a) drying after rinse leaves water between the
+             lines, and b) capillary forces caused by the surface tension of water pull the tops of the lines
+             towards each other, leading to collapse.
+Figure 1.   Examples of photoresist pattern collapse, both in cross-section (left) and top down (Courtesy
+            of Joe Ebihara of Canon).
+                              θ
+
+
+
+
+     H
+
+
+
+
+             wl
+                        ws
+
+                        (a)                                                   (b)
+
+Figure 2.   Pattern collapse of a pair of isolated lines: a) drying after rinse leaves water between the
+            lines, and b) capillary forces caused by the surface tension of water pull the tops of the lines
+            towards each other, leading to collapse.
+

@@ -1,0 +1,206 @@
+Mechanical properties and pattern collapse of chemically amplified
+photoresists
+          Long Que and Yogesh B. Gianchandania)
+          Center for Nano Technology, Department of Electrical and Computer Engineering, University of Wisconsin,
+          1415 Engineering Drive, Madison, Wisconsin 53706
+          共Received 1 June 2000; accepted 25 August 2000兲
+          The mechanical properties of positive tone chemically amplified resists UV6 and APEX-E are
+          measured and used in finite element analysis 共FEA兲 to determine the mechanical compliance of
+          photoresist lines as an indicator of the propensity for pattern collapse. Specifically, the residual
+          strain is determined by surface micromachined resist structures; the residual stress, expansion
+          coefficient, and glass transition temperatures are determined from wafer curvature measurements;
+          and the Young’s modulus is calculated from the stress and strain. The results indicate that UV-6 has
+          higher strain and a higher coefficient of thermal expansion than APEX-E. However, it has lower
+          residual stress because its Young’s modulus is 50%–70% lower than that of APEX-E. FEA
+          indicates that lines of UV6 have greater compliance than those of APEX-E, and are more easily
+          deformed by fluidic forces during develop and rinse steps. This is fully consistent with separate
+          reports that demonstrate a greater likelihood of pattern collapse in UV6 than APEX-E. © 2000
+          American Vacuum Society. 关S0734-211X共00兲08706-0兴
+
+
+
+I. INTRODUCTION                                                            highly sensitive microstructures that are simple to fabricate,
+    The progressive reduction of linewidths in lithography                 and provide high linearity and wide dynamic range.4,5 Each
+has led to increasing thickness-to-width aspect ratios in pho-             device consists of a pair of V-shaped suspended beams, with
+toresist features,1 requiring them to be treated as three-                 a vernier located at the apex 共Fig. 1兲. When the beams are
+dimensional mechanical structures for modeling failure                     released from the substrate by selectively etching away the
+modes. For example, evidence suggests that residual strain                 underlying sacrificial material, the residual strain in the
+may play a significant role in pattern distortion and resist               structural material, in this case photoresist, displaces the api-
+delamination in sub-100/nm features,2,3 exacerbating prob-                 ces, and can be read by the vernier. Device response is tai-
+lems caused by the forces in rinsing and drying. One mode                  lored by adjusting the length, width, and bending angle of
+of failure is caused by the lateral deflection of the top sur-             the beams. For example, a device of 200 ␮m length, 1.5 ␮m
+faces of two adjacent lines of photoresist to the extent that              width, and 0.2 radian bending angle, using a vernier with ⫾2
+they touch each other. They may remain in contact even after               ␮m range and 0.1 ␮m resolution, provides 100 ␮strain reso-
+the wafer is removed from the rinse and dried, resulting in a              lution over a range of ⫾2000 ␮strain.
+lithography defect. For a better understanding of scaling lim-                 The strain sensors were fabricated by a surface microma-
+its in lithography, the mechanical properties of the resist,               chining process using a single lithography step. A Ti sacri-
+such as the Young’s modulus, residual strain, residual stress,             ficial layer was first deposited on the Si substrate, followed
+coefficient of thermal expansion 共CTE兲, and the glass transi-              by structural photoresist which was processed and patterned
+tion temperature (T g ), are needed. Once these properties are             as described in Table I. The sacrificial layer was then selec-
+determined, the mechanical deformations of resist structures               tively etched away by a timed wet etch, releasing the beams
+which occur as a consequence of various forces encountered                 and verniers from the substrate while leaving the anchors
+in processing can be calculated. In this effort, we report on              attached. Vernier displacements were recorded using a mi-
+measurements of these five properties for the chemically am-               croscope without removing the sample from the final rinse
+plified positive tone Shipley resists UV6 and APEX-E and
+evaluate the lateral compliance of patterned photoresist lines
+using finite element analysis 共FEA兲 as an indicator of their
+propensity for collapse.
+
+II. EXPERIMENTAL RESULTS
+   The measurements of residual strain and subsequent cal-
+culations of Young’s modulus were facilitated by microma-
+chined strain sensors that were fabricated using the resist as a
+structural material. Bent beam strain sensors are small,
+
+a兲
+ Author to whom all correspondence should be addressed; electronic mail:
+ yogesh@engr.wisc.edu                                                                 FIG. 1. Schematic of the bent-beam strain sensor.
+
+
+3450    J. Vac. Sci. Technol. B 18„6…, NovÕDec 2000         0734-211XÕ2000Õ18„6…Õ3450Õ3Õ$17.00      ©2000 American Vacuum Society         3450
+3451        L. Que and Y. B. Gianchandani: Mechanical properties and pattern collapse                                                                  3451
+
+                                                                                 TABLE II. Fabrication sequence for stress measurements.
+
+                                                                                         Parameter                       UV6                   APEX-E
+
+                                                                                  Batch No.                         BH4411                  YJ4388
+                                                                                  Spin speed/No. coatings           1000 rpm/two            2000 rpm/two
+                                                                                  Resist thickness-1                27 740⫾20 Å             8677⫾210 Å
+                                                                                  Resist stress-1                   4.5–5.0 MPa             9.9–10.4 MPa
+                                                                                  PAB time/temp.                    60 s/130 °C             120 s/85 °C
+                                                                                  Resist thickness-2                14 450⫾20 Å             7,498⫾10 Å
+                                                                                  Resist stress-2                   8.5–9.2 MPa             15.5–16.1 MPa
+                                                                                  Exposure                          None                    None
+                                                                                  PEB time/temp.                    90 s/130 °C             120 s/85 °C
+                                                                                  Resist thickness-3                13 960⫾20 Å             7439⫾10 Å
+                                                                                  Resist stress-3                   10.2–11.0 MPa           16.5–117.0 MPa
+FIG. 2. Optical micrograph 共right-hand side兲 and a scanning electron micro-       Develop and nitrogen dry          MF 320, 60 s            MF 320, 60 s
+scope image 共left-hand side兲 of a fabricated strain sensor using resist as the    Resist thickness-4                13 420⫾20 Å             7290⫾210 Å
+structural material. Misalignment of the verniers, indicated by arrows, quan-     Resist stress-4                   10.0⫾0.2 MPa            14.5⫾0.1 MPa
+tifies the residual strain in the resist.
+
+
+
+                                                                                 water. This eliminated the possibility of device deformation
+                                                                                 due to capillary forces exerted on the structure while drying
+                                                                                 the sample. Micrographs of a fabricated device are shown in
+                                                                                 Fig. 2, with the misaligned verniers indicating a tensile
+                                                                                 stress. Measured results indicate that wet UV6 was in 1410
+                                                                                 ⫾300 ␮ strain tension, whereas APEX-E was in 670
+                                                                                 ⫾20 ␮ strain tension for the conditions tested.
+                                                                                     The residual stress of each resist was measured by deter-
+                                                                                 mining the change that it caused in the curvature of the sub-
+                                                                                 strate wafer as measured by a laser-based tool.6,7 The resist
+                                                                                 was processed in a manner similar to the strain sensors
+                                                                                 共Table II兲. The measurements showed that UV6 was in
+                                                                                 10.0⫾0.2 MPa tension whereas APEX-E was in 14.5
+                                                                                 ⫾0.1 MPa tension at ambient temperature. The ratio of mea-
+                                                                                 sured stress to strain provided the Young’s modulus at room
+                                                                                 temperature, yielding 7.0⫾0.5 GPa for UV6, and 21.5
+                                                                                 ⫾5.0 GPa for APEX-E. As the temperature was raised, the
+                                                                                 stress reduced. The thermal stress in the resist film is propor-
+FIG. 3. Measurements show that although the stress–temperature relation-         tional to the difference between its thermal expansion coef-
+ship of UV6 is altered by chemical reaction in the first heating ramp, sub-      ficient and that of the substrate. Since the thermal expansion
+sequent cooling, and heating cycles track each other. Using these, the T g is
+                                                                                 coefficient of the resist is a constant below its T g , the stress
+determined to be 143.0⫾2.5 °C and CTE 共below 143 °C兲 is 34.9
+⫾2.3 ppm/K.
+
+
+
+
+TABLE I. Fabrication sequence for strain measurements.
+
+Parameter                           UV6                      APEX-E
+
+Batch No.                    BH4411                  YJ4388
+Spin speed/No. coatings      1000 rpm/two            1000 and 1500 rpm/one
+Resist thickness 共final兲     1.34⫾0.02 ␮ m           0.7, 1.1 ␮m
+PAB time/temp.               60 s/130 °C             120 s/85 °C
+Exposure dose                18 ␮C/cm2               4.5 ␮C/cm2
+PEB time/temp.               90 s/130 °C             120 180 s/85 °C
+Develop                      MF 320, 60 s            MF 320, 60 s
+Final strain 共wet兲           1410⫾300 ␮ strain       670⫾20 ␮ strain
+                             共Unexposed resist兲      共Unexposed resist兲          FIG. 4. Schematic of the solid model used for FEA, and a contour plot of the
+                                                                                 calculated deformations.
+
+
+JVST B - Microelectronics and Nanometer Structures
+3452       L. Que and Y. B. Gianchandani: Mechanical properties and pattern collapse                                                        3452
+
+                                                                         TABLE III. Summary of measured properties.
+
+                                                                                   Property                      UV6                 APEX-E
+
+                                                                          Residual strain 共RT兲            1410⫾300 ␮ strain      670⫾20 ␮ strain
+                                                                          Residual stress 共RT兲            10.0⫾0.2 MPa           14.5⫾0.1 MPa
+                                                                          Young’s modulus 共RT兲            7.0⫾0.5 GPa            21.5⫾5.0 GPa
+                                                                          Coeff. of thermal expansion     34.9⫾2.3 ppm/K         11.0⫾2.5 ppm/K
+                                                                          Glass transition temperature    143.0⫾2.5 °C           118.0⫾2.0 °C
+
+
+
+                                                                         boundary conditions, and the maximum lateral displacement
+FIG. 5. Comparison of maximum lateral deflection in 5 ␮m long APEX-E     was obtained as shown in the contour plot in Fig. 4. The
+and UV6 lines with 0.2 ␮m linewidths and 5:2 and 1:1 height-to-width     variation of the maximum displacement with applied force
+aspect ratios. Lower compliance of APEX-E lines suggests that they are
+more resistant to collapse.                                              for the four structures simulated is shown in Fig. 5. The
+                                                                         lateral compliance is inversely related to the slope of the
+                                                                         lines in this figure. Clearly, APEX-E lines show smaller de-
+may be expected to change linearly with temperature. In the              flections, suggesting a lower likelihood of collapse. As ex-
+experiments, the first heating ramp showed some nonlinear-               pected, lines with larger thickness: width aspect ratios also
+ity which may be caused by structural changes in the resist              show greater lateral compliance. These trends are both in full
+共Fig. 3兲. One possible explanation is that the free volume that          agreement with experimental results on resist collapse that
+is lost in the polymer as the temperature increases cannot be            were recently reported by Cao and Nealey.9
+recovered once the resist begins to reflow in the vicinity of               In conclusion, we note that by combining a material char-
+T g . 8 Subsequent cooling and reheating cycles showed a lin-            acterization technique that uses simple microstructures with
+ear relationship 共Fig. 3兲. The slope of this line provided the           a conventional wafer curvature measurement technique, the
+CTE for resist, yielding 34.9⫾2.3 ppm/K for UV6 and 11.0                 stress, strain, Young’s modulus, thermal expansion coeffi-
+⫾2.5 ppm/K for APEX-E in the manner identified in Ref. 7.                cient, and T g of a photoresist can be rapidly characterized.
+As the temperature continued to rise, however, the linearity             The values determined for APEX-E and UV6 are summa-
+was eventually lost at T g , at which the thermal expansion              rized in Table III. FEA can then be used to predict trends in
+coefficient of the photoresist changes due to the phase                  pattern collapse.
+transition.8 This temperature was found to be 143.0
+⫾2.5 °C for UV6 共Fig. 3兲, and 118⫾2 °C for APEX-E.5 It                   ACKNOWLEDGMENTS
+should be noted that 1 °C/min heating and cooling rate was                  The authors thank Jaz Bansel for help with e-beam lithog-
+used to permit thermal equilibrium to be established for each            raphy, Professor Paul Nealey for correlating the FEA results
+data point. All the mechanical properties determined for both            with data on photoresist collapse, and Professor Franco Cer-
+resists as a result of these experiments are summarized in               rina for discussions. This work was funded in part by the
+Table III.                                                               Semiconductor Research Corporation Contract No. 98-LP-
+    In summary, the measurements indicate that UV-6 has                  452.005. The Center for NanoTechnology, University of
+higher strain and a higher coefficient of thermal expansion              Wisconsin–Madison, is supported in part by DARPA/ONR
+than APEX-E. However, it has lower residual stress because               Grant No. N00014-97-1-0460. The Synchrotron Radiation
+its Young’s modulus is 50%–70% lower than that of                        Center of University of Wisconsin–Madison, at which some
+APEX-E.                                                                  of the experimental facilities are located, is operated under
+                                                                         NSF Award No. DMR-95-31009
+III. ANALYSIS AND CONCLUSIONS
+                                                                          1
+   It is known2,3,9 that uneven fluidic forces associated with              H. H. Solak, D. He, W. Li, and F. Cerrina, J. Vac. Sci. Technol. B 17,
+                                                                            3052 共1999兲.
+the postdevelop rinse contribute to collapse in resist lines.             2
+                                                                            S. Mori, T. Morisawa, N. Matsuzawa, Y. Kaimoto, M. Endo, T. Matsuo,
+One factor that contributes to the propensity for collapse is               and M. Sasago, J. Vac. Sci. Technol. B 16, 3744 共1998兲.
+                                                                          3
+the lateral compliance of a line, which can be modeled by                   Z. G. Chen, Ph.D. thesis, University of Wisconsin–Madison, 1998.
+                                                                          4
+FEA given the material properties that are available from the               Y. B. Gianchandani and K. Najafi, J. Microelectromech. Syst. 5, 52
+                                                                            共1996兲.
+preceding measurements. Lateral deflections of 5 ␮m long                  5
+                                                                            L. Que, Y. Gianchandani, and F. Cerrina, J. Vac. Sci. Technol. B 17,
+photoresist lines with 0.2 ␮m width and thickness: width                    2719 共1999兲.
+                                                                          6
+aspect ratios of 1:1 and 5:2 were compared. A loading force                 Tencor™ FLX-2320 User Manual, KLA-Tencor Corporation, San Jose,
+                                                                            CA, 1995.
+was applied in a uniformly distributed manner along the top               7
+                                                                            J. F. Gaynor and S. B. Desu, J. Mater. Sci. Lett. 13, 236 共1994兲.
+edge of the structure, as shown in Fig. 4. The displacement               8
+                                                                            T. G. Fox and P. J. Flory, J. Appl. Phys. 21, 581 共1950兲.
+of the bottom and side surfaces was constrained to zero by                9
+                                                                            H. Cao, J. J. de Pablo, and P. M. Nealey 共submitted兲.
+
+
+
+
+J. Vac. Sci. Technol. B, Vol. 18, No. 6, NovÕDec 2000
+

@@ -47,6 +47,13 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - tuwien_rodrigues_2023_fc_silica.txt
 - wang_mingmei_phd_thesis.txt
 - zhang_yiting_phd_thesis.txt
+- chandra_2010_upenn_thesis_capillary_pillars.txt
+- ylivaara_2021_ald_tio2_mechanical.txt
+- iapws_r1_76_2014_water_surface_tension.txt
+- mack_2006_pattern_collapse_tutor55.txt
+- janczarek_2006_tio2_hydrophilicity.txt
+- tanaka_1993_jjap_iopscience_record.txt
+- que_gianchandani_2000_jvstb_resist_mechanics.txt
 
 ## digitized/
 - krueger_fig7a_simulated_aperture.csv / fig7b_experimental (aperture vs depth,

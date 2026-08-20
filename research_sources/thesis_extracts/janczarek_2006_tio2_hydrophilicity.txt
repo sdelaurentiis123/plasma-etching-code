@@ -1,0 +1,282 @@
+Physicochemical Problems of Mineral Processing, 40 (2006), 287-292
+Fizykochemiczne Problemy Mineralurgii, 40 (2006), 286-292
+
+
+
+
+Marcin JANCZAREK*, Jan HUPKA*, Horst KISCH**
+
+
+                 HYDROPHILICITY OF TiO2 EXPOSED
+                    TO UV AND VIS RADIATION
+
+                         Received March 15, 2006; reviewed; accepted May 15, 2006
+
+        Thin titania films can be used especially as a component of self-cleaning glass, utilizing
+    photoinduced hydrophilic properties of titanium dioxide surfaces. For the first time thin titania layer
+    on the Pilkington Glass ActivTM was modified with ammonia, thiourea and urea to introduce non-
+    metal elements into titania structure to shift absorption spectrum to visible light region. Contact
+    angles for water on Pilkington glass plates were measured for unmodified and modified titania
+    resulting in noticeable shift of absorption spectrum towards lower energy radiation.
+
+    Key words: titanium dioxide, thin films, photoinduced hydrophilicity
+
+                                            INTRODUCTION
+
+   Titanium dioxide has been widely used, due to its photocatalytic properties, for
+environmental purification. Another application area pertains to the effect of light on
+the properties of TiO2-modified surfaces (e.g. self-cleaning glass). Hydrophilicity of
+TiO2 surface can be induced by UV-irradiation (Wang, et al., 1997). Wang et al.
+(1999) examined changes of contact angles for different liquids on TiO2 single crystals
+(see Table 1).
+    Table 1. Contact angles of different liquids on the surface of single TiO2 crystal (Wang et al., 1999)
+
+                                                             Contact angles [deg]
+          TiO2 surface
+                                     Water           Ethylene glycol          Tetralin        Hexadecane
+     Before UV irradiation             74                  44                   12                 7
+      After UV irradiation              0                   0                    0                 0
+
+*
+   Department of Chemical Technology, Gdansk University of Technology, 80-952 Gdansk,
+   ul. Narutowicza 11/12, Poland.
+**
+   Institute of Inorganic Chemistry, University of Erlangen-Nürnberg, 91054 Erlangen, Egerlandstr. 1,
+   Germany.
+288                           M. Janczarek, J. Hupka, H. Kisch
+
+   As a result of UV illumination (40 mW/cm2 for 30 min) of TiO2 surfaces, contact
+angles of even 0° were reported. While the contact angle for oil did not change too
+much upon UV illumination, the contact angles for water and ethylene glycol changed
+significantly. The results of investigations reported in the literature show that contact
+angles for different liquids decrease during UV irradiation and the value of contact
+angle depends on time and intensity of irradiation. It was also reported that the light-
+induced hydrophilic surface can be reversed to a hydrophobic one when the catalyst
+was kept in the dark for a period of time (Wang et al., 1997; 1999; Miyauchi et al.,
+2000; 2002; Nakajima, et al., 2001, 2002; Sakai et al., 2001, 2003; Nakamura et al.,
+2002; Irie et al., 2003; Seki et al., 2004).
+
+       MECHANISM OF PHOTOINDUCTION OF HYDROPHILIC CONVERSION
+                         OF TITANIA SURFACE
+
+    Wang et al. (1998) and Sakai et al. (2001) postulated that electrons and holes
+produced by UV irradiation are trapped by surface and O2- ions, producing Ti3+ and
+oxygen vacancies, respectively. It results in adsorption of water molecules at the
+defect sites and hydrophilic domains are formed, whereas the rest of the surface
+remains oleophilic. On long-term storage in the dark, the chemisorbed hydroxyl
+groups are replaced with oxygen from air to change back the surface properties of
+TiO2 from hydrophilic to hydrophobic. Presence of O2 blocked the hydrophobic-to-
+hydrophilic surface wettability conversion. On the other hand, during long-term UV
+irradiation, when the hydrophilic domain size becomes larger, the oleophilic domain
+size is smaller. Therefore, the surface becomes relatively hydrophilic and oleophobic
+when exposed to UV light for a longer time (Wang et al., 1999).
+
+       VISIBLE LIGHT-INDUCED HYDROPHILICITY OF TITANIA SURFACE
+
+    TiO2 absorbs only UV light, therefore, it should not be possible to obtain
+hydrophilic properties of unmodified titania surface using visible light. Asahi et al.
+prepared TiO2-xNx films on which SiO2 was deposited to hold adsorbed water (Asahi,
+2001). Their results showed hydrophilic surface of the material which maintained
+contact angle equal to 6° even after 30 days, contrary to SiO2/TiO2 film, for which the
+contact angle gradually increased with time. Irie et al. (2003) prepared thin film of
+TiO2-xNx without SiO2 deposition. They observed a decrease of water contact angle
+from 20° to 7° after 4 h irradiation with visible light. The contact angle for unmodified
+titania film did not change at such conditions. Thus, the hydrophilic properties were
+enhanced by increasing the degree of nitrogen substitution. A decrease of water
+contact angle from 25° to 15° as a result of 30 min irradiation of TiO2-xNx
+polycrystalline thin film was observed. The hydrophilic conversion was enhanced by
+applying high anodic potentials. This could be due to efficient charge separation by
+the anodic potentials and led to better transformation of holes to the titania surface
+(Premkumar, 2004).
+                    Hydrophilicity of TiO2 exposed to UV and VIS radiation           289
+
+   The availability of commercial TiO2 nanofilm, in the form of the Pilkington self-
+cleaning glass, made it possible to examine the visible light photoinduced
+hydrophilicity of nitrogen-modified titania films. It is still not clear whether visible
+light irradiation could influence such phenomenon, similarly to photocatalytic
+properties of titania.
+   During research presented in this paper, urea, thiourea and ammonia gas were used
+to modify with nitrogen commercially-available self-cleaning glass covered with a
+very thin layer (15 µm) of TiO2. The Pilkington Glass ActivTM represents possible
+successor to Degussa P-25, especially as a reference for all other photocatalyst films
+that are being applied for light-enhanced air and water purification, and for self-
+cleaning purposes (Mills, 2003). Own modification procedure involved dip-coating
+step (to indroduce nitrogen, carbon and sulphur) using urea and thiourea solutions in
+water and ethanol. Another modification method was calcination in gaseous ammonia
+atmosphere.
+
+                                   EXPERIMENTAL
+
+    Glass plates (20x60x5 mm) with a thin layer of TiO2 (15 µm) deposited on one side
+of TiO2 were obtained from Pilkington (Pilkington ActivTM, self-cleaning glass).
+Similarly to powder catalyst preparation procedure, thiourea, urea and gaseous
+ammonia were used as the source of nitrogen. The concentration of these compounds
+was for thiourea: 0.1 M, 1 M; for urea: 1 M, 3 M; and ammonia gas flow: 10 and 45
+dm3/h. Ethanol, water and water-ethanol solutions: 1:1, 1:2, 2:1, 1:9, 9:1 were used.
+The dip-coating technique with 24, 60, 72 mm/min velocity of dipping was applied for
+the modification using self-made apparatus. Glass plates were washed thoroughly with
+2 M NaOH solution and subsequently with distilled water to remove impurities from
+glass surface. Glass plates were UV pre-irradiated before the dipping procedure.
+Catalyst samples were heated in air and argon at 250°C to 500°C – for dip-coating
+procedure from 500 to 600°C when gaseous ammonia was used. Heating a plate
+without TiO2 layer (blank sample) at 60°C in 2 M NaOH solution was carried out and
+allowed to remove titania layer completely for reference purposes. The contact angles
+for water on glass plates were measured by optical goniometer. Oriel 1000 W xenon
+arc lamp equipped with four optical cut-off filters: λ≥320 nm, 400 nm, 455 nm and
+495 nm was the light source. IR radiation was eliminated by water filter which was
+situated between lamp and cut-off filter. The radiation intensity (power flux) was 800
+mW/cm2.
+
+                            RESULTS AND DISCUSSION
+
+   In order to activate the Plikington glass plates in visible light modification were
+made. All modified samples were not active in visible light with respect to 4-
+chlorophenol (2.5·10-5 M). A noticeable shift of absorption spectra of thin titania layer
+290                                      M. Janczarek, J. Hupka, H. Kisch
+
+towards visible light was observed only for a sample modified with 0.1 M thiourea in
+etanol/water solution (9:1) - see Figure 1. This sample was used in measurements of
+water contact angles and signed as “modified”. The velocity of dipping was fixed at
+24 mm/min. After dipping the plate was dried and subsequently heated at 400°C for
+15 min in limited access of air.
+                                   0,6
+
+
+
+
+                                   0,4
+
+
+                            Abs.
+
+                                   0,2
+
+
+
+
+                                   0,0
+                                      300    400   500   600    700    800   900
+                                                     Wavelength [nm]
+
+
+
+ Fig. 1. Absorption spectra of unmodified (solid line) Pilkington titania layer and modified (dotted line)
+
+   Glass plates (blank, unmodified and modified) were irradiated for 15 min and 30
+min using four cut-off filters: λ≥320 nm, λ≥400 nm, λ≥455 nm and λ≥495 nm.
+Immediately after irradiation water contact angles were measured. The samples were
+stored in a dark place for 1 day and water contact angles were measured again. The
+results of the measurements are shown in Tables 2-5.
+
+            Table 2. Results of water contact angle measurements for λ≥320 nm cut-off filter
+
+                                                           Contact angle [deg]
+       Sample                                        Irradiation          Irradiation    Storage in dark -
+                             Initial
+                                                       15 min               30 min             24 h
+        Blank                      61                    58                   59                58
+      Unmodified                   58                    0                     0                54
+       Modified                    53                    0                     0                50
+
+            Table 3. Results of water contact angle measurements for λ≥400 nm cut-off filter
+
+                                                     Contact angle for water [deg]
+       Sample                                       Irradiation         Irradiation      Storage in dark -
+                             Initial
+                                                      15 min              30 min               24 h
+        Blank                      61                   58                   57                 60
+      Unmodified                   58                    36                   25                55
+       Modified                    53                    27                   19                53
+                      Hydrophilicity of TiO2 exposed to UV and VIS radiation                      291
+
+          Table 4. Results of water contact angle measurements for λ≥455 nm cut-off filter
+                                               Contact angle for water [deg]
+     Sample                                   Irradiation         Irradiation       Storage in dark -
+                           Initial
+                                                15 min              30 min                24 h
+     Blank                   61                   60                   57                  60
+   Unmodified                58                   40                   36                  56
+    Modified                 53                   31                   28                  51
+
+          Table 5. Results of water contact angle measurements for λ≥495 nm cut-off filter
+                                               Contact angle for water [deg]
+     Sample                                   Irradiation         Irradiation       Storage in dark -
+                           Initial
+                                                15 min              30 min                24 h
+     Blank                   61                   60                   57                  60
+   Unmodified                58                   52                   50                  54
+    Modified                 53                   45                   41                  50
+
+    For both samples (unmodified and modified), after UV illumination (λ≥320 nm)
+the contact angles decreased to 0° for two irradiation times contrary to glass plate
+without titania layer (blank sample), which is consistent with data available in the
+literature, pertaining to the Pilkington glass (Mills, 2003). Therefore, strong
+photoinduced hydrophilic effects of titania surface has a strong evidence for such a
+range of irradiation. After 1-day storage in dark the contact angles returned to almost
+initial values. The elimination of UV range using λ≥400 nm cut-off filter resulted in
+significantly greater values of water contact angle after irradiation. For unmodified
+titania layer the contact angle decreased from 58º to 36º (28 % of contact angle
+decrease) and 25º (57 %) after 15 and 30 min of irradiation. For the modified sample,
+a clear improvement was observed, not resulting from the experimental error: 53º to
+27º (49 %) and 19º (64 %). For λ≥455 nm cut-off filter the hydrophilic effect was
+smaller, especially the difference between 15 and 30 min of irradiation contained in
+experimental error. After 15 min of irradiation contact angles were comparable to that
+obtained for the cut-off filter used previously. Modification of catalysts did not result
+in a significant increase of the hydrophilic effect in this case. Restriction of light range
+to 495 nm resulted in a very small decrease of contact angles for both samples. For the
+modified sample contact angle decreased from 53º to 41º (23 %), and for unmodified
+from 58º to 51º (12 %) after 30 min of irradiation.
+
+                                  CONCLUDING REMARKS
+   For the first time titania coating on the Pilkington Glass ActivTM was modified with
+non-metal elements (nitrogen, carbon, sulphur) using thiourea as precursor. A small
+shift in the absorption spectrum was observed. The change in optical properties of the
+thin film is probably responsible for improvement of hydrophilic properties in
+comparison with unmodified sample under visible light irradiation.
+292                               M. Janczarek, J. Hupka, H. Kisch
+
+                                           REFERENCES
+
+IRIE, H.; WASHIZUKA, S.; YOSHINO, N.; HASHIMOTO, K. (2003), Visible-light induced
+   hydrophilicity on nitrogen-substituted titanium dioxide films, Chem. Comm., 1298-1299
+MILLS, A.; LEPRE, A.; ELLIOTT, N.; BHOPAL, S.; PARKIN, I.P.; O'NEILL, S.A. (2003),
+   Characterisation of the photocatalyst Pilkington Activ (TM): a reference film photocatalyst?, J.
+   Photochem. Photobiol. A: Chem, 160, 213-224
+MIYAUCHI, M.; NAKAJIMA, A.; FUJISHIMA, A.; HASHIMOTO, K.; WATANABE, T. (2000),
+   Photoinduced surface reactions on TiO2 and SrTiO3 films: photocatalytic oxidation and photoinduced
+   hydrophilicity, Chem. Mater., 12, 3-5
+MIYAUCHI, M.; KIEDA, N.; HISHITA, S.; MITSUHASHI, T.; NAKAJIMA, A.; WATANABE, T.;
+   HASHIMOTO, K. (2002), Reversible wettability control of TiO2 surface by light irradiation, Surf.
+   Sci., 511, 401-407
+NAKAJIMA, A.; KOIZUMI, S.; WATANABE, T.; HASHIMOTO, K. (2001), Effect of repeated photo-
+   illumination on the wettability conversion of titanium dioxide, J. Photochem. Photobiol. A:Chem.,
+   146, 129-132
+NAKAMURA, M.; SIRGHI, L.; AOKI, T.; HATANAKA, Y. (2002), Study on hydrophilic property of
+   hydroxy-oxygenated amorphous TiOx:OH thin films, Surf. Sci., 507-510, 778-782
+PREMKUMAR, J. (2004), Development of super-hydrophilicity on nitrogen-doped TiO2 thin film
+   surface by photoelectrochemical method under visible light, Chem. Mater., 16, 3980-3981
+SAKAI, N.; FUJISHIMA, A.; WATANABE, T.; HASHIMOTO, K. (2001), Enhancement of the
+   photoinduced conversion rate of TiO2 film electrode surfaces by anodic polarization, J. Phys. Chem.
+   B, 105, 3023-3026
+SAKAI, N.; FUJISHIMA, A.; WATANABE, T.; HASHIMOTO, K. (2003), Quantitative evaluation of
+   the photoinduced hydrophilic conversion properties of TiO2 thin film surfaces by the reciprocal of
+   contact angle, J. Phys. Chem. B, 107, 1028-1035
+SEKI, K.; TACHIYA, M. (2004), Kinetics of photoinduced hydrophilic conversion processes of TiO2
+   surfaces, J. Phys. Chem. B, 108, 4806-4810
+WANG, R.; HASHIMOTO, K.; FUJISHIMA, A. (1997), Light-induced amphiphilic surfaces, Nature,
+   388, 431-432
+WANG, R.; SAKAI, N.; FUJISHIMA, A.; WATANABE, T.; HASHIMOTO, K. (1999), Studies of
+   surface wettability conversion on TiO2 single-crystals surfaces, J. Phys. Chem. B, 103, 2188-2194
+
+Janczarek M., Hupka J., Kisch H., Hydrofilowość powierzchni TiO2 naświetlanej promieniowaniem
+UV i VIS. Physicochemical Problems of Mineral Processing, 40 (2006), 287-292 (w jęz. ang.).
+
+    Cienkie filmy tlenku tytanu (IV) mogą być używane szczególnie jako komponent szkieł
+samoczyszczących wykorzystując zjawisko fotoindukowanej hydrofilowości powierzchni TiO2. Po raz
+pierwszy cienka warstwa TiO2 znajdująca się na powierzchni Pilkington Glass ActivTM została poddana
+modyfikacji za pomocą amoniaku, tiomocznika i mocznika w celu wprowadzenia pierwiastków
+niemetalicznych do struktury TiO2 aby przesunąć widmo absorpcji w kierunku światła widzialnego. Kąty
+zwilżania dla wody zdemineralizowanej płytek szklanych Pilkington zostały zmierzone dla próbki
+niezmodyfikowanej i zmodyfikowanej, która odznaczała się zauważalnym przesunięciem spektrum
+absorpcyjnego w kierunku promieniowania o mniejszej energii.
+

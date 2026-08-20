@@ -1,0 +1,233 @@
+                                                                        IAPWS R1-76(2014)
+
+
+     The International Association for the Properties of Water and Steam
+
+                                        Moscow, Russia
+                                          June 2014
+
+       Revised Release on Surface Tension of Ordinary Water Substance
+
+             2014 International Association for the Properties of Water and Steam
+  Publication in whole or in part is allowed in all countries provided that attribution is given to
+              the International Association for the Properties of Water and Steam
+
+
+                                         President:
+                                  Professor Tamara Petrova
+                              Moscow Power Engineering Institute
+                                      Moscow, Russia
+
+                                      Executive Secretary:
+                                        Dr. R. B. Dooley
+                                 Structural Integrity Associates
+                                  Southport, Merseyside, UK
+                                 Email: bdooley@structint.com
+
+
+                This revised release contains 6 pages, including this cover page.
+
+This revised release has been authorized by the International Association for the Properties of
+Water and Steam (IAPWS) at its meeting in Moscow, Russia, 23-27 June, 2014, for issue by its
+Secretariat. The members of IAPWS are: Britain and Ireland, Canada, the Czech Republic,
+Germany, Japan, Russia, Scandinavia (Denmark, Finland, Norway and Sweden), and the United
+States of America, and Associate Members Argentina and Brazil, Australia, France, Greece,
+Italy, New Zealand and Switzerland.
+
+This release is a minor revision of the IAPWS release of 1994, to add information about the
+extrapolation of the formulation to temperatures below the triple point of water. The formulation
+itself is unchanged from the 1994 document.
+
+Further information about this release and other documents issued by IAPWS can be obtained
+from the Executive Secretary of IAPWS or from http://www.iapws.org.
+                                               2
+
+
+
+                                         Background
+
+In 1975, Working Group III (on Special Properties) of IAPS had critically examined the
+experimental results of the surface tension of the interface between the liquid and vapor phases
+of ordinary water and recommended a set of surface tension values and uncertainties associated
+with each value of the surface tension.
+
+IAPS issued a Release on the Surface Tension of Ordinary Water Substance in 1976, based on
+these recommended values and with temperatures expressed on the International Practical
+Temperature Scale of 1968 (IPTS-68). A mathematical formulation was adopted that reproduced
+the recommended tabulated values within their uncertainties. The technical details of this work
+are documented in [1]. A minor revision of this release was adopted in 1994 to provide adjusted
+values corresponding to temperatures on the International Temperature Scale of 1990 (ITS-90)
+and to use the critical temperature for water corresponding to that from the 1992 IAPWS Release
+on the Values of Temperature, Pressure and Density of Ordinary and Heavy Water Substances at
+their Respective Critical Points [2].
+
+Recent experimental work in two laboratories on the surface tension of supercooled water [3,4]
+has shown that the previously recommended surface tension formulation is also accurate in the
+supercooled region, down to at least 25 °C. This 2014 revision has been issued to state that the
+formulation may be extrapolated in that region.
+                                                3
+
+
+            Representation of the Surface Tension of Ordinary Water Substance
+
+Experimental values of surface tension of ordinary water substance
+
+In Table 1, recommended values of the surface tension () are given in column 2.             The
+corresponding uncertainty values () are given in column 3 of Table 1.
+
+
+Equation for the surface tension of ordinary water substance
+
+The following recommended interpolating equation gives values of surface tension within the
+stated uncertainty:
+
+                    = b)
+
+where            = surface tension
+                 = 1  T / Tc
+               T = absolute temperature
+               Tc = 647.096 K
+               B = 235.8 mN/m
+               b = 0.625
+                = 1.256
+This equation is valid between the triple point (0.01 °C) and reference temperature, Tc. It also
+provides reasonably accurate values when extrapolated into the supercooled region, to
+temperatures as low as 25 °C.
+Values of surface tension calculated from this equation are given in column 4 of Table 1.
+
+Notes: (i) T denotes absolute temperature, ITS-90.
+        (ii) The reference temperature is the critical point temperature given in the IAPWS
+        Release on the Values of Temperature, Pressure and Density of Ordinary and Heavy
+        Water Substances at their Respective Critical Points [2].
+        (iii) The values of the constants B, b, and  are those presented in the release of 1976.
+        Adjustment of the reference temperature produces values of surface tension from the
+        equation for ITS-90 temperatures with improved root-mean-square deviation compared
+        with the original equation and the surface tension values for the IPTS-68 temperatures in
+        the release of 1976.
+                                        4
+
+
+            Table 1 Surface Tension of Ordinary Water Substance
+   (1)          (2)          (3)                  (4)           (5)
+ Temp.    Surf. Tension   Uncertainty       Surf. Tension   difference
+  t, °C   experimental                       calculated
+                                             calc       calc
+             mN/m           mN/m               mN/m          mN/m
+
+  0.01       75.64           0.38              75.65         0.01
+
+  5          74.94           0.37              74.94         0.00
+ 10          74.23           0.37              74.22        0.01
+ 15          73.49           0.37              73.49        0.00
+ 20          72.74           0.36              72.74        0.00
+ 25          71.98           0.36              71.97        0.01
+
+ 30          71.19           0.36              71.19         0.00
+ 35          70.41           0.35              70.40        0.01
+ 40          69.59           0.35              69.60         0.01
+ 45          68.78           0.34              68.78        0.00
+ 50          67.93           0.34              67.94         0.01
+
+ 55          67.09           0.34              67.10         0.01
+ 60          66.24           0.33              66.24        0.00
+ 65          65.36           0.33              65.37         0.01
+ 70          64.47           0.32              64.48         0.01
+ 75          63.57           0.32              63.58         0.01
+
+ 80          62.68           0.31              62.67        0.01
+ 85          61.76           0.31              61.75        0.01
+ 90          60.82           0.30              60.82        0.00
+ 95          59.88           0.30              59.87        0.01
+100          58.92           0.29              58.91        0.01
+
+105          57.95           0.29              57.94        0.01
+110          56.97           0.28              56.96        0.01
+115          55.98           0.28              55.97        0.01
+120          54.97           0.27              54.97        0.00
+125          53.96           0.27              53.96        0.00
+
+130          52.94           0.26              52.93        0.01
+135          51.90           0.26              51.90        0.00
+140          50.86           0.25              50.86        0.00
+145          49.81           0.25              49.80        0.01
+150          48.75           0.24              48.74        0.01
+
+155          47.67           0.24              47.67         0.00
+160          46.58           0.23              46.59         0.01
+165          45.49           0.23              45.50         0.01
+170          44.40           0.22              44.41         0.01
+175          43.30           0.22              43.30         0.00
+
+180          42.19           0.22              42.19         0.00
+185          41.07           0.22              41.07         0.00
+190          39.95           0.22              39.95        0.00
+195          38.82           0.22              38.81        0.01
+200          37.68           0.22              37.67        0.01
+                                                      5
+
+
+                               Surface Tension of Ordinary Water Substance
+Table 1 continued
+
+      (1)                 (2)              (3)                  (4)              (5)
+  Temperature       Surf. Tension       Uncertainty       Surf. Tension      difference
+     t, °C          experimental                           calculated
+                                                           calc          calc
+                       mN/m                mN/m              mN/m             mN/m
+
+   205                 36.54               0.22              36.53           0.01
+   210                 35.40               0.22              35.38           0.02
+   215                 34.24               0.22              34.23           0.01
+   220                 33.09               0.22              33.07           0.02
+   225                 31.92               0.22              31.90           0.02
+
+   230                 30.76               0.22              30.74           0.02
+   235                 29.58               0.22              29.57           0.01
+   240                 28.40               0.22              28.39           0.01
+   245                 27.22               0.22              27.22           0.00
+   250                 26.05               0.22              26.04           0.01
+
+   255                 24.86               0.21              24.87            0.01
+   260                 23.66               0.21              23.69            0.03
+   265                 22.46               0.21              22.51            0.05
+   270                 21.29               0.20              21.34            0.05
+   275                 20.14               0.20              20.16            0.02
+
+   280                 18.93               0.20              18.99            0.06
+   285                 17.76               0.19              17.83            0.07
+   290                 16.60               0.19              16.66            0.06
+   295                 15.45               0.19              15.51            0.06
+   300                 14.30               0.18              14.36            0.06
+
+   305                 13.18               0.18              13.22            0.04
+   310                 12.04               0.17              12.09            0.05
+   315                 10.92               0.16              10.97            0.05
+   320                  9.81               0.16               9.86            0.05
+   325                  8.73               0.15               8.77            0.04
+
+   330                  7.66               0.14               7.70            0.04
+   335                  6.61               0.13               6.65            0.04
+   340                  5.59               0.12               5.63            0.04
+   345                  4.60               0.11               4.63            0.03
+   350                  3.64               0.10               3.67            0.03
+
+   355                  2.74               0.10               2.74            0.00
+   360                  1.89               0.10               1.88           0.01
+   365                  1.12               0.10               1.08           0.04
+   370                  0.45               0.10               0.39           0.06
+                                                6
+
+
+References
+
+[1] Vargaftik, N.B., Volkov, B.N., and Voljak, L.D., International Tables of the Surface Tension
+    of Water, J. Phys. Chem. Ref. Data 12, 817 (1983).
+[2] IAPWS, Release: Values of Temperature, Pressure, and Density of Ordinary and Heavy
+    Water Substance at their Respective Critical Points, available from http://www.iapws.org
+    (1992).
+[3] Hrubý, J., Vinš, V., Mareš, R., Hykl, J., and Kalová, J., Surface Tension of Supercooled
+    Water: No Inflection Point down to 25 °C, J. Phys. Chem. Lett. 5, 425 (2014).
+[4] Vinš, V., Fransen, M., Hykl, J., and Hrubý, J., Surface Tension of Supercooled Water
+    Determined by Using a Counterpressure Capillary Rise Method, J. Phys. Chem. B 119, 5567-
+    5575 (2015).
+
