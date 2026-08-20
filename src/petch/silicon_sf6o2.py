@@ -471,3 +471,104 @@ class BelenSiliconSF6O2Mechanism:
             transport_fixed_point_change=fixed_point_change,
             material_exchange=exchange,
             validity=validity)
+
+
+def belen_2005_reference_silicon_mechanism(
+        *, fluorine_sticking_probability=0.5,
+        oxygen_sticking_probability=1.0,
+        spontaneous_fluorine_removal_rate_m2_s=3.0e21,
+        oxygen_desorption_rate_m2_s=4.0e17,
+        physical_sputter_prefactor_per_sqrt_eV=0.0337,
+        ion_enhanced_prefactor_per_sqrt_eV=7.0,
+        oxygen_sputter_prefactor_per_sqrt_eV=3.0,
+        projectile_species=("ion",)):
+    """Build the provenance-bearing Belen/ViennaPS silicon reference law.
+
+    The factory lives beside the common mechanism so reactor and feature
+    drivers do not import a one-off validation script.  Values are the Belen
+    2005/ViennaPS reference closure already used by ``deboer_feature3d.py``;
+    moving it here changes no equations or defaults.  Literature-calibrated
+    inputs remain marked nonpredictive, while material constants and exact
+    SiF4 stoichiometry carry predictive evidence.
+    """
+    predictive = {
+        "site_density_m2": True,
+        "bulk_si_atom_density_m3": True,
+        "fluorine_atoms_per_removed_si": True,
+        "ion_enhanced_fluorine_release_per_si": True,
+    }
+    sources = {
+        "site_density_m2": "Si(100) surface-site density; material constant",
+        "bulk_si_atom_density_m3": "crystalline Si atomic density 5.0e28 m^-3",
+        "fluorine_sticking_probability": (
+            "Blauw et al., JVST B 18, 3453 (2000), DOI 10.1116/1.1313578; "
+            "effective cryogenic atomic-F reaction probability about 0.5"),
+        "oxygen_sticking_probability": (
+            "Belen et al., JVST A 23, 99 (2005), DOI 10.1116/1.1830495; "
+            "ViennaPS calibrated closure"),
+        "spontaneous_fluorine_removal_rate_m2_s": (
+            "Belen et al. 2005/ViennaPS k_sigma=300 in 1e15 cm^-2 s^-1 units"),
+        "oxygen_desorption_rate_m2_s": (
+            "Belen et al. 2005/ViennaPS beta_sigma=0.04 in 1e15 cm^-2 s^-1 units"),
+        "physical_sputter_yield": (
+            "Belen et al. 2005 calibration with Steinbruchel square-root energy law"),
+        "ion_enhanced_yield": (
+            "Belen et al. 2005 calibration with Steinbruchel square-root energy law"),
+        "oxygen_sputter_yield": (
+            "Belen et al. 2005 calibration with Steinbruchel square-root energy law"),
+        "fluorine_atoms_per_removed_si": "SiF4 chemical-product stoichiometry",
+        "ion_enhanced_fluorine_release_per_si": (
+            "Belen coupled-coverage equation coefficient"),
+    }
+    evidence = {
+        name: ParameterEvidence(
+            source=source,
+            evidence_type=(
+                "material_constant_or_stoichiometry" if predictive.get(name, False)
+                else "literature_calibrated_model_input"),
+            note="No target depth is used as evidence for this value.",
+            supports_prediction_within_declared_domain=predictive.get(name, False))
+        for name, source in sources.items()
+    }
+    bounds = {
+        "site_density_m2": (5.0e18, 8.0e18),
+        "bulk_si_atom_density_m3": (4.9e28, 5.1e28),
+        "fluorine_sticking_probability": (0.03, 0.7),
+        "oxygen_sticking_probability": (0.0, 1.0),
+        "spontaneous_fluorine_removal_rate_m2_s": (1.0e20, 1.0e22),
+        "oxygen_desorption_rate_m2_s": (1.0e16, 1.0e19),
+        "physical_sputter_yield": {
+            "prefactor_per_sqrt_eV": (0.0, 0.2),
+            "threshold_energy_eV": (5.0, 50.0),
+            "angular_parameter": (0.0, 15.0)},
+        "ion_enhanced_yield": {
+            "prefactor_per_sqrt_eV": (0.0, 15.0),
+            "threshold_energy_eV": (5.0, 50.0)},
+        "oxygen_sputter_yield": {
+            "prefactor_per_sqrt_eV": (0.0, 8.0),
+            "threshold_energy_eV": (5.0, 50.0)},
+        "fluorine_atoms_per_removed_si": (4.0, 4.0),
+        "ion_enhanced_fluorine_release_per_si": (2.0, 2.0),
+    }
+    return BelenSiliconSF6O2Mechanism(BelenSiliconParameters(
+        material_name="crystalline_Si", material_inventory_name="Si_atom",
+        fluorine_species="F", oxygen_species="O",
+        projectile_species=tuple(projectile_species),
+        site_density_m2=6.8e18, bulk_si_atom_density_m3=5.0e28,
+        fluorine_sticking_probability=fluorine_sticking_probability,
+        oxygen_sticking_probability=oxygen_sticking_probability,
+        spontaneous_fluorine_removal_rate_m2_s=(
+            spontaneous_fluorine_removal_rate_m2_s),
+        oxygen_desorption_rate_m2_s=oxygen_desorption_rate_m2_s,
+        physical_sputter_yield=SteinbruchelYield(
+            physical_sputter_prefactor_per_sqrt_eV, 20.0,
+            angular_model="kress_1999", angular_parameter=9.3),
+        ion_enhanced_yield=SteinbruchelYield(
+            ion_enhanced_prefactor_per_sqrt_eV, 15.0,
+            angular_model="chang_sawin_1997"),
+        oxygen_sputter_yield=SteinbruchelYield(
+            oxygen_sputter_prefactor_per_sqrt_eV, 10.0,
+            angular_model="chang_sawin_1997"),
+        fluorine_atoms_per_removed_si=4.0,
+        ion_enhanced_fluorine_release_per_si=2.0,
+        evidence=evidence, parameter_bounds=bounds))

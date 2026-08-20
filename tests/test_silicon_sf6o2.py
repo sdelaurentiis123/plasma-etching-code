@@ -5,6 +5,7 @@ from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
 from petch.feature_step_3d import FeatureGeometry3D, advance_feature_step_3d
 from petch.silicon_sf6o2 import (
     BelenSiliconParameters, BelenSiliconSF6O2Mechanism, BelenSiliconState,
+    belen_2005_reference_silicon_mechanism,
 )
 from petch.surface_kinetics import (
     EnergeticFlux, ParameterEvidence, SteinbruchelYield, SurfaceFluxes,
@@ -187,3 +188,19 @@ def test_common_engine_refuses_fixed_point_request_for_non_quasisteady_mechanism
             object(), object(), {}, NotQuasiSteady(), etchable_material_ids=(1,),
             duration_s=0.0, source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
             neutral_radiosity_options={}, neutral_surface_fixed_point_tolerance=1e-4)
+
+
+def test_belen_reference_factory_preserves_the_existing_production_defaults():
+    mechanism = belen_2005_reference_silicon_mechanism()
+    parameters = mechanism.parameters
+
+    assert parameters.site_density_m2 == 6.8e18
+    assert parameters.bulk_si_atom_density_m3 == 5.0e28
+    assert parameters.spontaneous_fluorine_removal_rate_m2_s == 3.0e21
+    assert parameters.oxygen_desorption_rate_m2_s == 4.0e17
+    assert parameters.physical_sputter_yield.prefactor_per_sqrt_eV == 0.0337
+    assert parameters.ion_enhanced_yield.prefactor_per_sqrt_eV == 7.0
+    assert parameters.oxygen_sputter_yield.prefactor_per_sqrt_eV == 3.0
+    assert not mechanism.advance(
+        mechanism.initial_state(), SurfaceFluxes({"F": 1.0e20}), 0.0
+    ).validity.parameter_evidence_supports_prediction
