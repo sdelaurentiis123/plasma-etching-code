@@ -55,8 +55,12 @@ def _direct_ratios() -> dict[str, float]:
 
 
 def _condition(current: dict[str, float], condition: dict[str, float]) -> dict:
-    required = {"total_positive_ion_current", "Ar+", "CF+", "CF2+", "CF3+"}
-    if set(current) != required:
+    # A tuple, not a set: the resolved-current sum below must run in one
+    # declared order.  Iterating a set literal made the float summation order
+    # follow PYTHONHASHSEED, so the committed exact-replay board differed by
+    # one ulp on some interpreter launches.
+    required = ("Ar+", "CF+", "CF2+", "CF3+", "total_positive_ion_current")
+    if set(current) != set(required):
         raise RuntimeError(f"incomplete Benck board at {condition}")
     resolved = sum(current[name] for name in required if name != "total_positive_ion_current")
     total = current["total_positive_ion_current"]
