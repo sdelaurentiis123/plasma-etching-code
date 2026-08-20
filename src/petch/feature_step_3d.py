@@ -2,10 +2,10 @@
 
 Each step transfers surface state material-by-material with an area-conservative, bounded remap. Smooth
 CFL-limited motion can be iterated. By default every topology change is refused; an explicit policy may
-continue only periodic gas-cavity enclosure/opening while solid/material component counts and domain
-breakthrough remain unchanged. Material appearance/disappearance, excessive remap distance, impossible
-coverage compression, and every other topology event remain refusals. This makes the multi-step loop
-explicit about the domain in which surface history is numerically supported.
+continue periodic gas-cavity enclosure/opening and, under a separate explicit policy, strict extinction
+of an already vanishing material layer. Material appearance, partial or hidden material loss, excessive
+remap distance, impossible coverage compression, and every other topology event remain refusals. This
+makes the multi-step loop explicit about the domain in which surface history is numerically supported.
 """
 from __future__ import annotations
 
@@ -64,6 +64,7 @@ from .feature_geometry_state_3d import (
     FeatureGeometry3D,
     face_material_ids_3d as _face_material_ids,
 )
+from .material_mechanism_3d import MaterialSurfaceState3D
 from .feature_geometry_backend_3d import UniformFeatureGeometryBackend3D
 from .surface_mesh_3d import TriangleSurface3D
 from .surface_transfer_3d import build_surface_transfer_3d
@@ -565,6 +566,90 @@ def _periodic_material_component_sizes(geometry, etchable_material_ids):
             solid & (core_material == material)))
         for material in materials
     )
+
+
+def _retire_strictly_extinguished_material_levelsets(
+        material_levelsets, material_id):
+    """Drop only registered layers with no owner or resolved positive volume.
+
+    Marching level sets remain useful while a material owns any resolved or subcell
+    solid.  Once its field is strictly negative everywhere, however, keeping the key
+    would make the geometry contract claim that a material still exists even though
+    no node can be labeled with it.  Signed-distance/redistance arithmetic may
+    leave zero-crossing residues at O(machine epsilon); those are projected to
+    extinction only when they do not support all eight corners of any physical
+    volume cell and their maximum is below an explicit roundoff bound.  A larger
+    or resolved hidden layer remains an ownership defect and is refused.
+    """
+    if material_levelsets is None:
+        return None, (), {}
+    layers = {
+        int(key): np.asarray(value, dtype=float)
+        for key, value in material_levelsets.items()}
+    labeled = {
+        int(value) for value in np.unique(np.asarray(material_id, dtype=int))
+        if int(value) > 0}
+    missing = tuple(sorted(set(layers) - labeled))
+    diagnostics = {}
+    hidden = {}
+    for key in missing:
+        value = layers[key]
+        scale = max(float(np.max(np.abs(value), initial=0.0)), 1.0)
+        tolerance = 512.0 * np.finfo(float).eps * scale
+        support = value >= 0.0
+        resolved_cell = (
+            support[:-1, :-1, :-1]
+            & support[1:, :-1, :-1]
+            & support[:-1, 1:, :-1]
+            & support[1:, 1:, :-1]
+            & support[:-1, :-1, 1:]
+            & support[1:, :-1, 1:]
+            & support[:-1, 1:, 1:]
+            & support[1:, 1:, 1:])
+        diagnostics[int(key)] = dict(
+            minimum=float(np.min(layers[key])),
+            maximum=float(np.max(layers[key])),
+            nonnegative_node_count=int(np.count_nonzero(layers[key] >= 0.0)),
+            resolved_nonnegative_cell_count=int(np.count_nonzero(resolved_cell)),
+            extinction_roundoff_tolerance=float(tolerance),
+            classification="roundoff_projected_material_extinction",
+        )
+        if np.any(resolved_cell) or float(np.max(value)) > tolerance:
+            hidden[int(key)] = diagnostics[int(key)]
+    if hidden:
+        raise ValueError(
+            "material layer lost every owner while retaining resolved or "
+            "above-roundoff nonnegative support; "
+            f"hidden_materials={hidden}")
+    for key in missing:
+        layers.pop(int(key))
+    return layers, missing, diagnostics
+
+
+def _is_strict_material_extinction(old_topology, new_topology, retired_ids):
+    """Recognize only count-to-zero material retirement with all other topology fixed."""
+    if len(old_topology) != 4 or len(new_topology) != 4:
+        return False
+    if tuple(old_topology[:3]) != tuple(new_topology[:3]):
+        return False
+    retired = {int(value) for value in retired_ids}
+    if not retired:
+        return False
+    old_material = dict(old_topology[3])
+    new_material = dict(new_topology[3])
+    if set(old_material) != set(new_material):
+        return False
+    for material_id in old_material:
+        old_count = int(old_material[material_id])
+        new_count = int(new_material[material_id])
+        if material_id in retired:
+            if old_count <= 0 or new_count != 0:
+                return False
+        elif new_count != old_count:
+            return False
+    return retired == {
+        int(material_id) for material_id in old_material
+        if int(old_material[material_id]) > 0 and int(new_material[material_id]) == 0}
 
 
 def _periodic_physical_volume_topology_signature(
@@ -1511,6 +1596,90 @@ def _remap_surface_state_with_indexed_transfer(
         materials=material_diagnostics)
 
 
+def _prepare_material_extinction_state_remap(
+        state, old_surface, new_surface, mechanism, retired_material_ids, *,
+        mesh_length_unit_m):
+    """Restrict routed state to surviving materials and receipt retired inventory.
+
+    A material-local transfer cannot map a disappeared material onto a different
+    solid.  Its final exposed surface inventory is therefore retired explicitly,
+    while every surviving material uses the unchanged remap backend.  Namespaced
+    fields belonging to a retired material must be zero on surviving faces; this
+    prevents a malformed router state from being silently discarded.
+    """
+    if not isinstance(state, MaterialSurfaceState3D):
+        raise TypeError(
+            "material extinction requires a MaterialSurfaceState3D router state")
+    retired = {int(value) for value in retired_material_ids}
+    new_materials = {
+        int(value) for value in np.unique(new_surface.face_material_id)}
+    if not retired or retired & new_materials:
+        raise ValueError("invalid retired material set for state remap")
+    old_material = np.asarray(old_surface.face_material_id, dtype=int)
+    survivor_face = np.isin(old_material, tuple(sorted(new_materials)))
+    retired_face = np.isin(old_material, tuple(sorted(retired)))
+    if not np.any(survivor_face) or not np.any(retired_face):
+        raise ValueError("material extinction state remap lacks survivor or retired faces")
+
+    fresh = mechanism.initial_state_by_material(new_surface.face_material_id)
+    if not isinstance(fresh, MaterialSurfaceState3D):
+        raise TypeError("material router did not return MaterialSurfaceState3D")
+    fields = dict(state.fields)
+    expected = set(fresh.fields)
+    if not expected.issubset(fields):
+        raise ValueError(
+            "surviving material state fields are missing after material extinction")
+    old_only = set(fields) - expected
+    allowed_old_only = {
+        name for name in fields
+        if any(name.startswith(f"m{material_id}__") for material_id in retired)}
+    if old_only != allowed_old_only:
+        raise ValueError(
+            "material extinction state fields do not match retired materials; "
+            f"old_only={sorted(old_only)} expected_retired={sorted(allowed_old_only)}")
+
+    tolerance = 256.0 * np.finfo(float).eps
+    for name in old_only:
+        values = np.asarray(fields[name], dtype=float)
+        scale = max(float(np.max(np.abs(values), initial=0.0)), 1.0)
+        if np.any(np.abs(values[survivor_face]) > tolerance * scale):
+            raise ValueError(
+                f"retired field {name!r} has nonzero inventory on surviving material faces")
+
+    survivor_state = MaterialSurfaceState3D(
+        {name: np.asarray(fields[name], dtype=float)[survivor_face]
+         for name in sorted(expected)},
+        {name: fresh.upper_bounds[name] for name in sorted(expected)},
+        {name: fresh.remap_modes[name] for name in sorted(expected)},
+    )
+    survivor_surface = TriangleSurface3D(
+        old_surface.vertices, old_surface.faces[survivor_face],
+        old_surface.face_material_id[survivor_face],
+        periodic_lengths=old_surface.periodic_lengths,
+        periodic_origin=old_surface.periodic_origin,
+    )
+    physical_area_scale = float(mesh_length_unit_m) ** 2
+    retirement = {}
+    for material_id in sorted(retired):
+        selected = old_material == material_id
+        field_integrals = {}
+        for name in sorted(old_only):
+            if name.startswith(f"m{material_id}__"):
+                field_integrals[name] = float(np.dot(
+                    np.asarray(fields[name], dtype=float)[selected],
+                    old_surface.face_area[selected])) * physical_area_scale
+        retirement[int(material_id)] = dict(
+            old_face_count=int(np.count_nonzero(selected)),
+            retired_area_m2=float(
+                np.sum(old_surface.face_area[selected]) * physical_area_scale),
+            retired_field_integrals=field_integrals,
+            field_remap_modes={
+                name: state.remap_modes[name] for name in field_integrals},
+            lifecycle="strict_levelset_extinction",
+        )
+    return survivor_state, survivor_surface, retirement
+
+
 def _remap_surface_state_with_overlap_transfer(
         state, newly_exposed_state, transfer, *, maximum_distance,
         mesh_length_unit_m, method):
@@ -2144,9 +2313,12 @@ def advance_feature_step_3d(
     of diffuse neutral radiosity.  ``None`` preserves the historical behavior by inheriting the
     radiosity periodic setting; an explicit boolean is the preferred production declaration.
     ``topology_change_policy='continue_gas_cavity'`` is deliberately narrow: only the periodic
-    physical-volume signature's gas-cavity count may change. The existing material-local conservative
-    remap then transfers surface history; solid components, per-material components, and domain
-    breakthrough must remain invariant.
+    physical-volume signature's gas-cavity count may change.  The separate
+    ``'continue_gas_cavity_and_material_extinction'`` policy additionally permits a registered
+    material to retire only after its owner count reaches zero, it supports no resolved volume,
+    any remaining positive level-set value is bounded by floating-point roundoff, and every other
+    topology component remains invariant.  Surviving surface history uses a conservative remap;
+    retired-material state is recorded rather than transferred onto another solid.
     """
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
@@ -2221,9 +2393,12 @@ def advance_feature_step_3d(
         raise ValueError("ballistic_transport must be 'forward' or 'face_gather'")
     if reinitialization_method not in ("skfmm", "fsm", "cr2"):
         raise ValueError("reinitialization_method must be 'skfmm', 'fsm', or 'cr2'")
-    if topology_change_policy not in ("refuse", "continue_gas_cavity"):
+    if topology_change_policy not in (
+            "refuse", "continue_gas_cavity",
+            "continue_gas_cavity_and_material_extinction"):
         raise ValueError(
-            "topology_change_policy must be 'refuse' or 'continue_gas_cavity'")
+            "topology_change_policy must be 'refuse', 'continue_gas_cavity', "
+            "or 'continue_gas_cavity_and_material_extinction'")
     if surface_state_remap_backend not in (
             "legacy_knn", "indexed_knn", "partitioned_overlap", "common_refinement"):
         raise ValueError(
@@ -2919,6 +3094,10 @@ def advance_feature_step_3d(
         phi, correction = _project_periodic_lateral_endpoints(phi)
         periodic_seam_projection = max(periodic_seam_projection, correction)
 
+    (material_levelsets, retired_material_ids,
+     material_extinction_geometry) = (
+        _retire_strictly_extinguished_material_levelsets(
+            material_levelsets, output_material_id))
     output_geometry = FeatureGeometry3D(
         phi, output_material_id, geometry.dx, geometry.mesh_length_unit_m,
         geometry.mesh_origin_m, material_levelsets=material_levelsets)
@@ -2975,40 +3154,72 @@ def advance_feature_step_3d(
             old_mesh_topology=old_mesh_topology,
             new_mesh_topology=next_mesh_topology,
             changed_slice_topology=changed_slice_topology)
-        permitted_event = (
-            topology_change_policy == "continue_gas_cavity"
+        cavity_event = (
+            topology_change_policy in (
+                "continue_gas_cavity",
+                "continue_gas_cavity_and_material_extinction")
             and profile_periodic_lateral
             and topology_error.event_kind in (
                 "gas_cavity_enclosed", "gas_cavity_opened"))
+        extinction_event = (
+            topology_change_policy
+            == "continue_gas_cavity_and_material_extinction"
+            and profile_periodic_lateral
+            and _is_strict_material_extinction(
+                old_topology, next_topology, retired_material_ids))
+        permitted_event = cavity_event or extinction_event
         if not permitted_event:
             raise topology_error
         topology_event = {
             "accepted": True,
             "policy": str(topology_change_policy),
-            "kind": topology_error.event_kind,
+            "kind": (
+                "material_extinction" if extinction_event
+                else topology_error.event_kind),
             "method": str(topology_method),
             "old_topology": tuple(old_topology),
             "new_topology": tuple(next_topology),
             "old_mesh_topology": tuple(old_mesh_topology),
             "new_mesh_topology": tuple(next_mesh_topology),
             "changed_slice_topology": dict(changed_slice_topology),
+            "retired_material_ids": tuple(retired_material_ids),
+            "material_extinction_geometry": material_extinction_geometry,
             "conservative_surface_state_remap_required": True,
         }
+    elif retired_material_ids:
+        raise RuntimeError(
+            "material level set retired without a physical-volume topology event")
     remap_maximum_distance = displacement + 1.5 * geometry.dx
     remap_periodic_lengths = (
         tuple(((np.asarray(geometry.phi.shape) - 1) * geometry.dx)[:2]) + (None,)
         if profile_periodic_lateral else (None, None, None))
-    if surface_state_remap_backend in (
+    old_surface = TriangleSurface3D(
+        verts, faces[active_face], face_material[active_face],
+        periodic_lengths=remap_periodic_lengths)
+    new_surface = TriangleSurface3D(
+        next_verts, next_faces[next_active_face], next_face_material[next_active_face],
+        periodic_lengths=remap_periodic_lengths)
+    remap_state = surface.state
+    material_retirement = {}
+    if retired_material_ids:
+        remap_state, old_surface, material_retirement = (
+            _prepare_material_extinction_state_remap(
+                surface.state, old_surface, new_surface, mechanism,
+                retired_material_ids,
+                mesh_length_unit_m=geometry.mesh_length_unit_m))
+    effective_remap_backend = str(surface_state_remap_backend)
+    if (retired_material_ids
+            and effective_remap_backend in ("legacy_knn", "indexed_knn")):
+        # Extinction exposes substrate that had no predecessor face while it was
+        # covered by the final mask layer.  Nearest-neighbor remap cannot distinguish
+        # newly exposed area from excessive motion; common refinement carries an
+        # explicit fresh-surface ledger and is therefore the required event operator.
+        effective_remap_backend = "common_refinement"
+    if effective_remap_backend in (
             "indexed_knn", "partitioned_overlap", "common_refinement"):
-        old_surface = TriangleSurface3D(
-            verts, faces[active_face], face_material[active_face],
-            periodic_lengths=remap_periodic_lengths)
-        new_surface = TriangleSurface3D(
-            next_verts, next_faces[next_active_face], next_face_material[next_active_face],
-            periodic_lengths=remap_periodic_lengths)
-        if surface_state_remap_backend == "indexed_knn":
+        if effective_remap_backend == "indexed_knn":
             next_surface_state, remap_diagnostics = _remap_surface_state_with_indexed_transfer(
-                surface.state, old_surface, new_surface, neighbor_count=4,
+                remap_state, old_surface, new_surface, neighbor_count=4,
                 maximum_distance=remap_maximum_distance,
                 mesh_length_unit_m=geometry.mesh_length_unit_m)
         else:
@@ -3019,21 +3230,21 @@ def advance_feature_step_3d(
                 newly_exposed_state = mechanism.initial_state((next_active_face.size,))
             overlap_remap = (
                 _remap_surface_state_with_partitioned_overlap
-                if surface_state_remap_backend == "partitioned_overlap"
+                if effective_remap_backend == "partitioned_overlap"
                 else _remap_surface_state_with_common_refinement)
             next_surface_state, remap_diagnostics = (
                 overlap_remap(
-                    surface.state, newly_exposed_state, old_surface, new_surface,
+                    remap_state, newly_exposed_state, old_surface, new_surface,
                     maximum_distance=remap_maximum_distance,
                     mesh_length_unit_m=geometry.mesh_length_unit_m))
     else:
         next_surface_state, remap_diagnostics = conservative_remap_surface_state(
-            surface.state, centroids[active_face], areas[active_face],
-            face_material[active_face], next_centroids[next_active_face],
-            next_areas[next_active_face], next_face_material[next_active_face],
+            remap_state, old_surface.face_centroid, old_surface.face_area,
+            old_surface.face_material_id, new_surface.face_centroid,
+            new_surface.face_area, new_surface.face_material_id,
             dx=geometry.dx, mesh_length_unit_m=geometry.mesh_length_unit_m,
             maximum_distance=remap_maximum_distance,
-            old_triangles=verts[faces[active_face]],
+            old_triangles=old_surface.triangles,
             periodic_lengths=(
                 remap_periodic_lengths if profile_periodic_lateral else None))
     next_mesh_fingerprint = _surface_mesh_fingerprint(
@@ -3044,7 +3255,9 @@ def advance_feature_step_3d(
         topology_method=topology_method,
         old_mesh_topology=old_mesh_topology, new_mesh_topology=next_mesh_topology,
         next_active_face_count=int(next_active_face.size),
-        surface_state_remap_backend=str(surface_state_remap_backend),
+        retired_materials=material_retirement,
+        requested_surface_state_remap_backend=str(surface_state_remap_backend),
+        surface_state_remap_backend=str(effective_remap_backend),
         topology_change_policy=str(topology_change_policy),
         topology_event=topology_event)
     reasons = []
@@ -3085,11 +3298,18 @@ def advance_feature_step_3d(
             "transport is enabled") + (
                 "redeposition v1 permits same-material growth only; cross-material films are refused",
             )
-    topology_limitation = (
-        "physical volume-topology-changing surface steps are refused"
-        if topology_change_policy == "refuse" else
-        "only periodic gas-cavity enclosure/opening may continue through an explicit "
-        "conservative state remap; all other physical volume-topology changes are refused")
+    if topology_change_policy == "refuse":
+        topology_limitation = (
+            "physical volume-topology-changing surface steps are refused")
+    elif topology_change_policy == "continue_gas_cavity":
+        topology_limitation = (
+            "only periodic gas-cavity enclosure/opening may continue through an explicit "
+            "conservative state remap; all other physical volume-topology changes are refused")
+    else:
+        topology_limitation = (
+            "periodic gas-cavity events and strict count-to-zero material extinction may "
+            "continue with conservative survivor remap and an explicit retirement ledger; "
+            "material appearance, partial ownership loss, and all other topology events refuse")
     validity = FeatureStepValidity(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
