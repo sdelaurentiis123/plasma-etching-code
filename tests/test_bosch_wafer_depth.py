@@ -8,6 +8,7 @@ from petch.bosch_wafer_depth import (
     build_bosch_reference_surface_mechanisms,
     predict_bosch_wafer_depth,
 )
+from petch.bosch_wafer_depth_fast import predict_bosch_wafer_depth_batch_fast
 from petch.reactor_global.bosch_spts_reduced import (
     BoschSPTSReducedParameters,
     DeterministicBoschSPTSReactorToWafer,
@@ -50,3 +51,28 @@ def test_reported_wafer_means_are_exact_annular_area_means(default_prediction):
     assert prediction.wafer_mean_oxide_loss_m == pytest.approx(
         np.dot(prediction.oxide_loss_m, area) / np.sum(area), rel=2.0e-15)
     assert np.any(area == 0.0)
+
+
+def test_fused_batch_path_is_numerically_identical_to_canonical_mechanisms():
+    traces = load_bosch_process_traces(
+        DATA / "Process_data.nc", DATA / "Dictionary_process.nc")
+    model = DeterministicBoschSPTSReactorToWafer(BoschSPTSReducedParameters())
+    boundaries = tuple(model.solve(trace) for trace in (traces[0], traces[1]))
+    silicon, oxide = build_bosch_reference_surface_mechanisms()
+    canonical = tuple(
+        predict_bosch_wafer_depth(boundary, silicon, oxide)
+        for boundary in boundaries)
+    fused = predict_bosch_wafer_depth_batch_fast(boundaries, silicon, oxide)
+
+    for expected, actual in zip(canonical, fused):
+        assert actual.silicon_depth_m == pytest.approx(
+            expected.silicon_depth_m, rel=2.0e-15, abs=1.0e-20)
+        assert actual.oxide_loss_m == pytest.approx(
+            expected.oxide_loss_m, rel=2.0e-15, abs=1.0e-20)
+        assert actual.remaining_film_units_m2 == pytest.approx(
+            expected.remaining_film_units_m2, rel=2.0e-15, abs=1.0)
+        assert actual.wafer_mean_silicon_depth_m == pytest.approx(
+            expected.wafer_mean_silicon_depth_m, rel=2.0e-15)
+        assert actual.wafer_mean_oxide_loss_m == pytest.approx(
+            expected.wafer_mean_oxide_loss_m, rel=2.0e-15)
+        assert actual.provenance["target_depth_used"] is False
