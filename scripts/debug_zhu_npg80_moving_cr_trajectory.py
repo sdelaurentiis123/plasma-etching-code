@@ -18,6 +18,8 @@ import signal
 import sys
 from time import monotonic
 
+import numpy as np
+
 from scripts import audit_zhu_npg80_moving_cr_profiles as board
 
 
@@ -68,6 +70,10 @@ def main() -> None:
         "--stack-interval-s", type=float, default=180.0,
         help="seconds between automatic all-thread Python stack dumps",
     )
+    parser.add_argument(
+        "--trace-symmetry-shapes", action="store_true",
+        help="print sparse-event and expanded-event counts before strip projection",
+    )
     args = parser.parse_args()
     if args.stack_interval_s <= 0.0:
         parser.error("--stack-interval-s must be positive")
@@ -80,6 +86,36 @@ def main() -> None:
     faulthandler.dump_traceback_later(
         args.stack_interval_s, repeat=True, file=sys.stderr, exit=False
     )
+
+    if args.trace_symmetry_shapes:
+        # Patch only the diagnostic process.  The wrapper reports the exact
+        # cardinality presented to the unchanged production implementation.
+        # `symmetrize_transport_across_strips` resolves this private helper
+        # through its defining module's globals, so this also observes the
+        # function imported by feature_step_3d.
+        from petch import boundary_transport_3d as boundary_transport
+
+        real_symmetrize = boundary_transport._symmetrize_face_resolved
+
+        def traced_symmetrize(population, areas, groups):
+            event_face = np.asarray(population.event_face, dtype=int)
+            group_size_by_face = np.ones(population.face_count, dtype=np.int64)
+            for members in groups.values():
+                group_size_by_face[np.asarray(members, dtype=int)] = len(members)
+            expanded = int(np.sum(
+                group_size_by_face[event_face], dtype=np.int64
+            ))
+            largest = max((len(members) for members in groups.values()), default=0)
+            print(
+                "SYMMETRY_SHAPE "
+                f"population={population.name} faces={population.face_count} "
+                f"events={event_face.size} groups={len(groups)} "
+                f"largest_group={largest} expanded_events={expanded}",
+                flush=True,
+            )
+            return real_symmetrize(population, areas, groups)
+
+        boundary_transport._symmetrize_face_resolved = traced_symmetrize
 
     job = _production_job(
         width_nm=args.width_nm,
