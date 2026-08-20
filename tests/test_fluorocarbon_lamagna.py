@@ -134,10 +134,27 @@ def test_existing_polymer_is_removed_before_substrate_recession():
 
     assert result.state.polymer_film_units_m2 == 0.0
     assert result.removed_polymer_units_m2 == initial.polymer_film_units_m2
+    assert 0.0 < result.substrate_exposure_fraction < 1.0
     assert result.removed_formula_units_m2 > 0.0
     assert result.etch_velocity_m_s > (
         result.removed_polymer_units_m2 / mechanism.parameters.polymer_unit_density_m3)
     assert result.material_exchange.residual_units_m2("fluorocarbon_film_unit") == 0.0
+
+
+def test_substrate_exposure_clock_has_exact_bare_blocked_and_zero_duration_limits():
+    mechanism = _mechanism()
+    bare_fluxes = SurfaceFluxes({"etchant": 2.0e20}, (_ions(),))
+    blocked_fluxes = SurfaceFluxes({"polymer": 5.0e18})
+
+    assert mechanism.advance(
+        mechanism.initial_state(), bare_fluxes, 1.0
+    ).substrate_exposure_fraction == 1.0
+    assert mechanism.advance(
+        mechanism.initial_state(), blocked_fluxes, 1.0
+    ).substrate_exposure_fraction == 0.0
+    assert mechanism.advance(
+        mechanism.initial_state(), bare_fluxes, 0.0
+    ).substrate_exposure_fraction == 1.0
 
 
 def test_neutral_transport_can_reproduce_viennaps_or_use_species_specific_sticking():

@@ -309,6 +309,7 @@ class LaMagnaFluorocarbonStepResult:
     physical_sputter_rate_m2_s: np.ndarray
     polymer_deposition_rate_m2_s: np.ndarray
     polymer_removal_rate_m2_s: np.ndarray
+    substrate_exposure_fraction: np.ndarray
     removed_formula_units_m2: np.ndarray
     deposited_polymer_units_m2: np.ndarray
     removed_polymer_units_m2: np.ndarray
@@ -328,7 +329,8 @@ class LaMagnaFluorocarbonStepResult:
             "polymer_coverage", "etchant_on_polymer_coverage",
             "chemical_removal_rate_m2_s", "ion_enhanced_removal_rate_m2_s",
             "physical_sputter_rate_m2_s", "polymer_deposition_rate_m2_s",
-            "polymer_removal_rate_m2_s", "removed_formula_units_m2",
+            "polymer_removal_rate_m2_s", "substrate_exposure_fraction",
+            "removed_formula_units_m2",
             "deposited_polymer_units_m2", "removed_polymer_units_m2",
         }
         for name in (
@@ -341,6 +343,8 @@ class LaMagnaFluorocarbonStepResult:
                 raise ValueError(f"invalid La Magna result field: {name}")
             value.setflags(write=False)
             object.__setattr__(self, name, value)
+        if np.any(self.substrate_exposure_fraction > 1.0):
+            raise ValueError("substrate exposure fraction must lie in [0, 1]")
         if not isinstance(self.material_exchange, SurfaceMaterialExchange):
             raise TypeError("La Magna result requires a material-exchange ledger")
         if not isinstance(self.validity, MechanismValidity):
@@ -574,6 +578,9 @@ class LaMagnaGarozzoFluorocarbonMechanism:
         substrate_time = np.where(
             film_present & (depletion_time < dt) & ~substrate["saturated"],
             dt - depletion_time, substrate_time)
+        substrate_exposure_fraction = np.where(
+            dt > 0.0, substrate_time / max(dt, np.finfo(float).tiny),
+            (~film_present & ~substrate["saturated"]).astype(float))
         removed_formula = substrate["substrate_removal"] * substrate_time
 
         if dt > 0.0:
@@ -639,6 +646,7 @@ class LaMagnaGarozzoFluorocarbonMechanism:
             physical_sputter_rate_m2_s=end["sputter"],
             polymer_deposition_rate_m2_s=growth_rate,
             polymer_removal_rate_m2_s=film_removal_rate,
+            substrate_exposure_fraction=substrate_exposure_fraction,
             removed_formula_units_m2=removed_formula,
             deposited_polymer_units_m2=deposited_polymer,
             removed_polymer_units_m2=removed_polymer,
