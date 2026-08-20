@@ -13,11 +13,14 @@ The script is intentionally operationally bounded:
 * every checkpoint contains the geometry and conservative material-surface state;
 * ``--topology-change-policy continue_gas_cavity`` accepts only resolved periodic cavity
   enclosure/opening and records every event; the default still refuses every topology change;
+* ``--blind-execution`` excludes experimental observables from runtime audits and plots so a
+  frozen forecast can be generated before a separate scorer opens the answer key;
 * no charging solve, parameter fitting, or target-dependent velocity scaling occurs.
 """
 from __future__ import annotations
 
 import argparse
+import csv
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -47,14 +50,31 @@ from petch.reactor_boundary import (
 
 
 DATA = ROOT / "data" / "experimental" / "krueger_2024"
-TARGET = {
-    "mask_opening_nm": 45.0,
-    "top_feature_width_nm": 90.0,
-    "maximum_feature_width_nm": 90.0,
-    "etch_depth_nm": 825.0,
-    "remaining_mask_thickness_nm": 850.0,
-    "asymmetry_cell_count": 0.0,
-}
+
+
+def _load_experimental_target(path=DATA / "base_case_metrics.csv"):
+    """Open the answer key only for an explicitly unblinded execution."""
+    names = {
+        "mask_opening": "mask_opening_nm",
+        "top_feature_width": "top_feature_width_nm",
+        "maximum_feature_width": "maximum_feature_width_nm",
+        "etch_depth": "etch_depth_nm",
+        "remaining_mask_thickness": "remaining_mask_thickness_nm",
+        "asymmetry": "asymmetry_cell_count",
+    }
+    with Path(path).open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    target = {
+        names[row["metric"]]: float(row["value"])
+        for row in rows if row["metric"] in names
+    }
+    if set(target) != set(names.values()):
+        raise ValueError("Krueger base target table is incomplete")
+    return target
+
+
+def _target_for_execution(*, blind_execution):
+    return None if blind_execution else _load_experimental_target()
 
 
 def _jsonable(value):
@@ -497,7 +517,7 @@ def _write_json(path, payload):
 
 def _plot(
         output_directory, initial_geometry, final_geometry, history, *,
-        substrate_top_um, mask_thickness_um):
+        substrate_top_um, mask_thickness_um, experimental_target):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -537,10 +557,14 @@ def _plot(
     )
     for axis, (field, label) in zip(axes, fields):
         axis.plot(time, [row["metrics"][field] for row in history], "o-", ms=3)
-        axis.axhline(TARGET[field], color="#d95f02", ls="--", label="experiment")
+        if experimental_target is not None:
+            axis.axhline(
+                experimental_target[field], color="#d95f02", ls="--",
+                label="experiment")
         axis.set_ylabel(label)
         axis.grid(alpha=0.25)
-    axes[0].legend()
+    if experimental_target is not None:
+        axes[0].legend()
     axes[-1].set_xlabel("Etch time (s)")
     figure.savefig(output_directory / "metric_trajectory.png", dpi=180)
     plt.close(figure)
@@ -557,6 +581,36 @@ def _git_state():
         return {"revision": revision, "dirty": dirty}
     except (OSError, subprocess.CalledProcessError):
         return {"revision": None, "dirty": None}
+
+
+def _experimental_comparison(final_metrics, *, experimental_target):
+    """Return target fields only when the execution is explicitly unblinded."""
+    if experimental_target is None:
+        return {"experimental_outcomes_read": False}
+    return {
+        "experimental_outcomes_read": True,
+        "target": experimental_target,
+        "target_error": {
+            name: final_metrics[name] - target
+            for name, target in experimental_target.items()
+        },
+    }
+
+
+def _scientific_status(args):
+    if str(args.surface_model) == "guo_tml":
+        return (
+            "no-fit Guo/Kwon finite-fluence surface transfer under the published "
+            "aggregate Krueger boundary; ion composition, stable C4F6 flux, "
+            "high-energy surface support, and mask coefficients remain physically "
+            "unidentified"
+        )
+    return (
+        "calibrated development transfer only; the aggregate energetic ion mixture "
+        "is unresolved, 3-D ion azimuth uses the R1.5 axisymmetric closure certified "
+        "at 16 versus 32 nodes, and reduced chemistry omits explicit species-resolved "
+        "crosslinking/redeposition channels"
+    )
 
 
 def _configuration(args):
@@ -655,6 +709,12 @@ def _configuration(args):
     if str(args.surface_model) == "guo_tml":
         configuration["guo_translating_layer_thickness_nm"] = float(
             args.guo_translating_layer_thickness_nm)
+    if bool(args.blind_execution):
+        # Omitted in the legacy/default mode so existing checkpoint hashes remain
+        # byte-for-byte compatible.  A blind run is intentionally a distinct operator
+        # provenance because it cannot be resumed from an audit that already opened the
+        # experimental target table.
+        configuration["blind_execution"] = True
     if args.radiosity_backend == "deterministic_extruded_2d":
         configuration["deterministic_exchange"] = {
             "exchange_method": str(args.exchange_method),
@@ -845,6 +905,8 @@ def run(args):
     config = _configuration(args)
     config_hash = sha256(
         json.dumps(config, sort_keys=True).encode("utf-8")).hexdigest()
+    experimental_target = _target_for_execution(
+        blind_execution=bool(args.blind_execution))
 
     geometry = make_rectangular_trench_geometry_3d(
         cell_width=0.13, cell_length=0.02,
@@ -1243,7 +1305,6 @@ def run(args):
             "status": status,
             "config_hash": config_hash,
             "configuration": config,
-            "target": TARGET,
             "history": history,
             "topology_events": topology_events,
             "resume_configuration_transitions": resume_transitions,
@@ -1252,12 +1313,11 @@ def run(args):
             "git": _git_state(),
             "wall_time_s": elapsed,
             "extrusion_projection_max_deviation_mesh_units": maximum_projection_deviation,
-            "scientific_status": (
-                "calibrated development transfer only; the aggregate energetic ion mixture "
-                "is unresolved, 3-D ion azimuth uses the R1.5 axisymmetric closure certified "
-                "at 16 versus 32 nodes, and reduced chemistry omits explicit species-resolved "
-                "crosslinking/redeposition channels"),
+            "scientific_status": _scientific_status(args),
         }
+        payload.update(_experimental_comparison(
+            history[-1]["metrics"],
+            experimental_target=experimental_target))
         _write_json(audit_path, payload)
         print(
             f"step={accepted_step} t={physical_time:.3f}s dt={step_duration:.4g}s "
@@ -1276,7 +1336,6 @@ def run(args):
         payload = {
             "config_hash": config_hash,
             "configuration": config,
-            "target": TARGET,
             "history": history,
             "topology_events": topology_events,
             "resume_configuration_transitions": resume_transitions,
@@ -1284,18 +1343,22 @@ def run(args):
             "mechanism_provenance": mechanism.provenance,
             "git": _git_state(),
         }
+        payload.update(_experimental_comparison(
+            history[-1]["metrics"],
+            experimental_target=experimental_target))
     payload["status"] = status
     payload["wall_time_s"] = perf_counter() - run_started
     payload["final_metrics"] = history[-1]["metrics"]
-    payload["target_error"] = {
-        name: history[-1]["metrics"][name] - target
-        for name, target in TARGET.items()}
+    payload.update(_experimental_comparison(
+        history[-1]["metrics"],
+        experimental_target=experimental_target))
     payload["terminal_event"] = terminal_event
     payload["topology_events"] = topology_events
     _write_json(audit_path, payload)
     _plot(
         output, initial_geometry, geometry, history,
-        substrate_top_um=float(args.substrate_top_um), mask_thickness_um=0.85)
+        substrate_top_um=float(args.substrate_top_um), mask_thickness_um=0.85,
+        experimental_target=experimental_target)
     return payload
 
 
@@ -1476,6 +1539,11 @@ def parse_args():
     parser.add_argument("--benchmark-only", action="store_true")
     parser.add_argument("--no-radiosity", action="store_true")
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument(
+        "--blind-execution", action="store_true",
+        help=(
+            "exclude experimental targets and target errors from audits and plots; "
+            "the frozen result is graded later by a separate scorer"))
     return parser.parse_args()
 
 
