@@ -1,5 +1,11 @@
 # Codex takeover — absolute depth and Oxford blind profiles
 
+> **SUPERSEDED FOR LIVE STATE:** Read
+> `CODEX_TAKEOVER_FULL_STACK_2026-08-20.md` first.  The Oxford v5 board has
+> progressed, the Krueger forecasts have progressed, and a tested SPTS Bosch
+> measured-waveform reactor-to-depth scaffold now exists.  This file remains
+> useful as the earlier detailed Oxford/Krueger record.
+
 Status snapshot: 2026-08-20 15:58 EDT
 
 Repository: `plasma-etching-code`
