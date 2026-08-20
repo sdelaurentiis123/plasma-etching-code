@@ -49,6 +49,11 @@ CYLINDRICAL_PREREGISTRATION = (
     / "zenodo_bosch_cylindrical_depth_extension_v2"
     / "preregistration.json"
 )
+SPECIES_RADIAL_PREREGISTRATION = (
+    ROOT / "results" / "curated"
+    / "zenodo_bosch_species_radial_depth_extension_v3"
+    / "preregistration.json"
+)
 
 
 @pytest.fixture(scope="module")
@@ -187,4 +192,19 @@ def test_cylindrical_v2_is_frozen_before_fit_and_keeps_v1_surface_and_gates():
     assert payload["model_form_audit"]["sha256"] == audit_hash
     assert payload["model_extension"]["harmonic_source"]["maximum_order"] == 4
     assert payload["selection_and_seal"]["sealed_prediction_required_before_heldout_reveal"] is True
+    assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False
+
+
+def test_species_radial_v3_is_narrowly_frozen_before_fit():
+    payload = json.loads(SPECIES_RADIAL_PREREGISTRATION.read_text())
+
+    assert payload["calibration_exposure"]["heldout_outcomes_examined"] is False
+    assert payload["calibration_exposure"]["species_resolved_radial_fit_started_before_this_freeze"] is False
+    assert payload["frozen_from_v1_and_v2"]["acceptance_gates_unchanged"] is True
+    assert payload["frozen_from_v1_and_v2"]["surface_laws_unchanged"] == [
+        "Belen SF6 silicon removal",
+        "La Magna/Garozzo C4F8 film and SiO2 removal",
+    ]
+    assert payload["model_extension"]["new_free_parameter_count"] == 4
+    assert payload["frozen_code_parent"]["species_resolved_radial_source_response_implemented"] is False
     assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False

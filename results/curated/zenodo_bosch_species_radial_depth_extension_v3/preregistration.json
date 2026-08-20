@@ -1,0 +1,102 @@
+{
+  "calibration_exposure": {
+    "heldout_outcomes_examined": false,
+    "species_resolved_radial_fit_started_before_this_freeze": false,
+    "status": "second calibration-visible model-form extension; chronological heldout firewall remains closed"
+  },
+  "frozen_from_v1_and_v2": {
+    "acceptance_gates_unchanged": true,
+    "calibration_and_heldout_keys_unchanged": true,
+    "conditioning_law_unchanged": true,
+    "cylindrical_transport_operator_unchanged": true,
+    "surface_laws_unchanged": [
+      "Belen SF6 silicon removal",
+      "La Magna/Garozzo C4F8 film and SiO2 removal"
+    ],
+    "v1_preregistration_sha256": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+    "v2_preregistration_sha256": "66f681abbe54d7785965e5e949a23f7562c3cad18d4105752b964eba59b93555"
+  },
+  "model_extension": {
+    "allowed_change": "replace one shared annular ring radius and width with one radius and width per effective species",
+    "physical_reason": "electron-impact dissociation, heavy fluorocarbon fragmentation, and positive-ion production need not share one radial power-deposition moment; their diffusion lengths and production channels differ",
+    "species": [
+      "F",
+      "C4F8_film_precursor",
+      "positive_ion"
+    ],
+    "species_ring_radius_m_bounds": [
+      0.05,
+      0.15
+    ],
+    "species_radial_width_m_bounds": [
+      0.01,
+      0.08
+    ],
+    "new_free_parameter_count": 4,
+    "unchanged_positive_form": "each source remains a normalized nonnegative Gaussian radial moment times the positive exponential Fourier azimuthal modulation",
+    "not_allowed": [
+      "one free source value per measured coordinate",
+      "wafer-specific radial moments",
+      "species-specific surface-yield changes"
+    ]
+  },
+  "selection_order": [
+    "fit bounded species radial radii/widths with all azimuthal harmonics zero",
+    "select the radial model by leave-one-lot-out calibration",
+    "only then add complete azimuthal Fourier orders sequentially under the v2 complexity rule",
+    "retain the lowest total model complexity meeting every calibration margin",
+    "hash-seal heldout predictions before parsing any heldout outcome"
+  ],
+  "v2_calibration_failure_evidence": {
+    "algorithm": "bounded local least squares with batched finite-difference Jacobian",
+    "cylindrical_fit_resolution": [
+      24,
+      16,
+      24
+    ],
+    "evaluation_scope": "shared normalized 89-point calibration map using the first measured waveform; no heldout outcomes",
+    "initial_si_shape_rmse_percent": 7.214414067747213,
+    "joint_shared_radial_best_si_shape_rmse_percent": 4.849240566855059,
+    "joint_shared_radial_best_oxide_shape_rmse_percent": 7.410206718188489,
+    "optimizer_function_evaluations": 58,
+    "selected_diffusion_coefficient_m2_s": [
+      0.05000816,
+      0.13042823,
+      6.33196892
+    ],
+    "selected_shared_ring_radius_m": 0.11001812,
+    "selected_shared_radial_width_m": 0.01000114,
+    "selected_source_central_fraction": [
+      4.40479485e-13,
+      4.68706513e-12,
+      0.00255939443
+    ],
+    "status": "exploratory bounded failure, not an exhaustive mathematical lower bound",
+    "boundary_saturation": [
+      "F diffusion approximately at lower bound",
+      "shared radial width approximately at lower bound",
+      "F and film central fractions approximately zero"
+    ],
+    "interpretation": "v2 materially improves the radial response but misses the 1.8 percent calibration margin; boundary saturation motivates the narrowly scoped species-radial extension"
+  },
+  "forbidden_shortcuts": [
+    "opening heldout outcomes before a hash-sealed prediction",
+    "changing the Belen or La Magna/Garozzo surface laws",
+    "adding per-wafer, per-lot, or target-depth multipliers",
+    "changing the coordinate frame or acceptance gates",
+    "adding higher radial basis functions unless v3 is first frozen and graded as a calibration failure"
+  ],
+  "frozen_code_parent": {
+    "git_commit": "02ec3da",
+    "shared_radial_source_response_implemented": true,
+    "species_resolved_radial_source_response_implemented": false
+  },
+  "schema": "petch-zenodo-bosch-species-radial-depth-extension-preregistration-v3",
+  "target_firewall": {
+    "calibration_asset_only": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+    "calibration_asset_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "heldout_numeric_fields_may_be_parsed_only_after_prediction_seal": true,
+    "heldout_outcomes_read_at_freeze": false,
+    "mixed_outcome_csv_forbidden_to_fit_process": true
+  }
+}
