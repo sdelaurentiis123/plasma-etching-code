@@ -1,9 +1,12 @@
 # Multiphysics / absolute-depth progress state — 2026-08-20
 
-Status timestamp: 2026-08-20 14:57 EDT  
-Repository: `plasma-etching-code`  
-Branch: `codex/validation-first-multiphysics`  
-Current pushed checkpoint: `44956d0`  
+Status timestamp: 2026-08-20 15:23 EDT
+
+Repository: `plasma-etching-code`
+
+Branch: `codex/validation-first-multiphysics`
+
+Current pushed checkpoint: `242177b`
 
 This is the authoritative handoff for the Oxford/Freddie moving-mask work and
 the broader reactor-to-feature absolute-depth mission.  It supersedes
@@ -21,8 +24,8 @@ The Oxford board exposed two numerical defects and one missing lifecycle
 capability.  The numerical defects are now reproduced, fixed, regression
 tested, committed, and pushed.  The material lifecycle is now implemented and
 tested.  A complete corrected v4 board has landed as a forensic/conditional
-receipt, and an exact v5 trajectory is live to prove continuation through Cr
-extinction to the requested process endpoint.
+receipt.  The exact v5 acceptance trajectory has now continued through Cr
+extinction to its physical/requested endpoints, and the full v5 board is live.
 
 No target SEM, target depth, or target-derived coefficient has been used.
 Therefore the Oxford calculation remains a blind conditional prediction.  It
@@ -183,9 +186,9 @@ hidden support and any resolved hidden volume also refuse.  The focused
 lifecycle/remap/feature group is `138 passed`; the v5 driver/core group is
 `118 passed`.
 
-## Live v5 exact continuation
+## Passed v5 exact continuation
 
-The exact hard cell is running now:
+The exact hard cell completed successfully:
 
 - width `320 nm`;
 - selectivity `14`;
@@ -194,18 +197,53 @@ The exact hard cell is running now:
 - requested duration `1200 s`;
 - 10 nm grid;
 - model revision `two-material-moving-tio2-cr-dose-factorization-v5`;
-- Python PID `8404`;
 - log `/root/w320_v5.log`;
-- intended cache
+- wall time `1405.950 s`;
+- cache
   `w320_s14.000_ion_low_tail_0p0_593697ba778b8990.json`.
+
+Its retrieved cache hash matches the remote receipt:
+
+`4feeec492c52af860298495bd190e50106370306d208acd8fe24a7170cd1647f`.
+
+The Cr layer retired once at reference time `560.429 s`.  Its maximum residual
+level-set value was `1.937e-14` mesh units, the roundoff gate was
+`1.137e-13`, and the support contained zero resolved volume cells.  The event
+used common refinement, retired 2,284 final Cr surface faces, and resumed
+ordinary indexed remap afterward.  Particle balance remained exactly zero and
+the maximum remap residual was `7.166e-16`.
+
+The two no-target-fit conditional endpoints are:
+
+- `34.125 nm/min` surface-rate axis: requested `1200 s` reached, predicted
+  etched depth `646.856 nm`, middle/bottom CD `313.08/321.78 nm`, and sidewall
+  angle `76.03 degrees` from the wafer;
+- `43.4667 nm/min` axis: physical domain-gas breakthrough at
+  `951.764 s`, preceding the requested 1200 s, with last accepted etched depth
+  `653.356 nm`, middle/bottom CD `312.05/321.73 nm`, and sidewall angle
+  `76.17 degrees`.
+
+The zero top-CD metric after mask loss means the original top reference no
+longer intersects a surviving pillar; it must not be described as a normal
+trapezoidal top CD.  The eventual SEM grade must compare the full profile and
+terminal class, not cherry-pick one CD.
+
+## Live full v5 board
+
+The full 56-cell v5 campaign is now running with eight deterministic workers:
+
+- parent PID `8980`;
+- log `/root/zhu_v5_board.log`;
+- pid file `/root/zhu_v5_board.pid`;
+- the passed exact cell is content-addressed and reused;
+- the remaining 55 cells are new v5 computations.
 
 The live box is Vast instance `48177892`, RTX 3090, at
 `$0.2011111111/hour`.  Repository tree is `/root/petch-4b656fd` and the venv is
 `/root/petch-venv`.  Only this project instance is in scope; unrelated Vast
 instances must not be touched.
 
-The first v5 trajectory is the acceptance test.  A full v5 board must not be
-launched until it proves:
+The first v5 trajectory proved:
 
 - Cr extinction is accepted exactly once;
 - newly exposed TiO2 remap balances;
@@ -320,19 +358,17 @@ known from an incomplete recipe.
 
 ## Required next sequence
 
-1. Monitor PID `8404`; inspect `/root/w320_v5.log` at and after Cr extinction.
-2. If the exact v5 cell reaches its endpoint, pull and locally inspect its
-   content-addressed cache and lifecycle ledger.
-3. If it fails, fix only the evidenced general operator; add a manufactured
-   gate before rerunning.
-4. Launch the 56-cell v5 board only after the exact cell passes.
-5. Assemble/check/pull the v5 audit, run the full local suite, commit and push.
-6. Destroy Vast instance `48177892` after every needed artifact is safe.
-7. Run the full deterministic Guo/Krueger feature forecast and grade its domain
+1. Monitor v5 board parent PID `8980` and count only v5 content-addressed
+   caches; old v1-v4 files are not completion evidence.
+2. Assemble/check/pull the v5 audit and every v5 trajectory, then run the local
+   native check against identical code.
+3. Rerun the full local suite, commit and push the complete board.
+4. Destroy Vast instance `48177892` after every needed artifact is safe.
+5. Run the full deterministic Guo/Krueger feature forecast and grade its domain
    of validity without selecting from the 825 nm target.
-8. Promote at least two additional chemistries from surface evidence to formal
+6. Promote at least two additional chemistries from surface evidence to formal
    held-out feature-depth/profile gates.
-9. Ask Freddie for self-bias, blanket TiO2 loss, remaining Cr, exact GDS/sample
+7. Ask Freddie for self-bias, blanket TiO2 loss, remaining Cr, exact GDS/sample
    position, rinse/dry history, and then the SEM answer key.
 
 ## Version-control and validation state
@@ -346,10 +382,11 @@ Pushed checkpoints relevant to this handoff:
 - `f65a445` — add no-cache post-mask exploration;
 - `d8a8d02` — fix unequal-area strip flux amplification.
 
-The last full repository suite after the transport correction and before the
-new lifecycle was `2128 passed, 7 skipped`.  Focused lifecycle and driver suites
-are green as listed above.  A new full suite is mandatory after the v5 run and
-artifact landing.
+The full repository suite with the new lifecycle produced `2131 passed, 7
+skipped` plus one expected stale v4 cache-filename assertion.  Commit `242177b`
+updates that assertion to the v5 content hash; its debug/driver sentinel group
+is `9 passed`.  A final full suite rerun remains mandatory after the complete
+v5 board lands.
 
 The only untracked local paths are pre-existing unrelated user artifacts and
 remain untouched:
@@ -357,4 +394,3 @@ remain untouched:
 - `results/curated/mixed_layer_feature_v1/ml20-bonds-12s.log`;
 - `results/curated/mouth_equilibrium_probe_dx/`;
 - `scratch_ignore_calc.py`.
-
