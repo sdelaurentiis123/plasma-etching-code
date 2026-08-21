@@ -64,6 +64,9 @@ WALL_CONDITIONING_PREREGISTRATION = (
     / "zenodo_bosch_wall_conditioning_depth_extension_v5"
     / "preregistration.json"
 )
+WALL_CONDITIONING_CALIBRATION_FIT = (
+    WALL_CONDITIONING_PREREGISTRATION.parent / "calibration_fit.json"
+)
 
 
 @pytest.fixture(scope="module")
@@ -254,3 +257,19 @@ def test_wall_conditioning_v5_is_frozen_before_fit_without_depth_offsets():
     )
     assert payload["frozen_code_parent"]["conditioning_operator_implemented"] is False
     assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False
+
+
+def test_wall_conditioning_calibration_receipt_remains_unsealed_and_target_free():
+    payload = json.loads(WALL_CONDITIONING_CALIBRATION_FIT.read_text())
+
+    assert payload["heldout_outcomes_read"] is False
+    assert payload["heldout_prediction_written"] is False
+    assert payload["surface_laws_changed"] is False
+    assert payload["per_lot_or_per_wafer_depth_offsets"] is False
+    assert payload["all_absolute_gates_pass"] is True
+    assert payload["leave_one_lot_out_physics_refits_completed"] is False
+    assert payload["certification_grid_refinement_completed"] is False
+    assert payload["eligible_for_prediction_seal"] is False
+    assert not all(payload["in_sample_physics_beats_empirical_baseline"].values())
+    assert payload["input_hashes"]["calibration_measurements"] == sha256(
+        CALIBRATION_MEASUREMENTS.read_bytes()).hexdigest()

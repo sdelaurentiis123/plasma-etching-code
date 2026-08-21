@@ -1,0 +1,196 @@
+{
+  "absolute_gate_pass": {
+    "normalized_shape_rmse_percent": true,
+    "oxide_mean_mae_um": true,
+    "selectivity_mape_percent": true,
+    "silicon_mean_mae_um": true,
+    "silicon_mean_mape_percent": true,
+    "silicon_point_rmse_um": true
+  },
+  "all_absolute_gates_pass": true,
+  "base_cylindrical_parameters": {
+    "azimuthal_cell_count": 16,
+    "ion_edge_focus_amplitude": 0.5,
+    "ion_edge_focus_onset_radius_m": 0.0907157698,
+    "ion_edge_focus_width_m": 0.00705256433,
+    "source_cosine_coefficients": [
+      [
+        -0.0356084449
+      ],
+      [
+        -0.273223495
+      ],
+      [
+        0.000805789873
+      ]
+    ],
+    "source_sine_coefficients": [
+      [
+        -0.405495811
+      ],
+      [
+        -1.49999895
+      ],
+      [
+        -0.0191321177
+      ]
+    ]
+  },
+  "base_reduced_parameters": {
+    "absorbed_source_power_fraction": 0.75,
+    "axial_cell_count": 24,
+    "c4f8_fragment_energy_cost_eV": 120.0,
+    "calibration_status": "defaults are physically bounded initialization values; tool-transfer parameters are not certified until calibration receipt is sealed",
+    "central_source_radial_power": 2.0,
+    "central_source_radial_scale_m": 0.06,
+    "collisional_ion_energy_transmission": 0.7,
+    "diffusion_coefficient_m2_s": [
+      2.0,
+      1.0,
+      10.0
+    ],
+    "effective_positive_ion_mass_amu": 127.0,
+    "electron_temperature_eV": 4.0,
+    "equipment_evidence": {
+      "process_record": "https://zenodo.org/records/17122442",
+      "reactor_model_precedent": "AVS 2017 Quantemol/SPTS Rapier HPEM equipment and feature simulation",
+      "tool_architecture": "SPTS Rapier dual ICP sources and dual gas inlets; second source is measured zero in this dataset",
+      "tool_architecture_source": "https://www.epfl.ch/research/facilities/cmi/equipment/etching/spts-rapier/"
+    },
+    "f_atoms_per_power_limited_dissociation": 2.0,
+    "f_reference_lifetime_s": 0.412333985,
+    "film_precursor_reference_lifetime_s": 2.99382399e-05,
+    "film_units_per_power_limited_fragmentation": 1.0,
+    "gas_temperature_K": 300.0,
+    "ion_pair_energy_cost_eV": 250.0,
+    "lifetime_reference_pressure_torr": 0.04,
+    "lower_wall_velocity_m_s": [
+      120.0,
+      45.0,
+      1700.0
+    ],
+    "neutral_lifetime_pressure_exponent": 1.0,
+    "neutral_wall_loss_multiplier": 1.0,
+    "plasma_potential_per_electron_temperature": 4.0,
+    "positive_ion_reference_lifetime_s": 0.000153294139,
+    "pressure_channel_to_torr": 1.0,
+    "radial_cell_count": 24,
+    "reactor_length_m": 0.18,
+    "reactor_radius_m": 0.16,
+    "reactor_volume_m3": 0.014476458947741766,
+    "schema": "petch-spts-bosch-reduced-parameters-v1",
+    "sf6_dissociation_energy_cost_eV": 80.0,
+    "sheath_bias_fraction_of_vpp": 0.25,
+    "side_wall_velocity_m_s": [
+      55.0,
+      25.0,
+      650.0
+    ],
+    "source_axial_skin_depth_m": 0.045,
+    "source_central_fraction": [
+      0.0,
+      0.0,
+      0.07954333
+    ],
+    "source_radial_width_m": 0.02,
+    "source_ring_radius_m": 0.12,
+    "upper_wall_velocity_m_s": [
+      45.0,
+      20.0,
+      500.0
+    ],
+    "wafer_radius_m": 0.1
+  },
+  "calibration_metrics": {
+    "normalized_shape_rmse_percent": 1.6545734604918756,
+    "oxide_mean_correlation": 0.07291246342734121,
+    "oxide_mean_mae_um": 0.0395676934623256,
+    "oxide_mean_mape_percent": 6.269409076323409,
+    "predicted_oxide_mean_range_um": [
+      0.6490258288259677,
+      0.662382736964321
+    ],
+    "predicted_silicon_mean_range_um": [
+      43.06206945446199,
+      43.99820784948522
+    ],
+    "selectivity_mape_percent": 5.993638396554872,
+    "silicon_mean_correlation": 0.0605177521302579,
+    "silicon_mean_mae_um": 0.3755964021421074,
+    "silicon_mean_mape_percent": 0.8606731616189767,
+    "silicon_point_rmse_um": 0.8411636921368251
+  },
+  "calibration_wafer_count": 75,
+  "certification_grid_refinement_completed": false,
+  "conditioning_coefficients": {
+    "log_carbon_cycle": 0.00044863162197757313,
+    "silicon_oxide_precondition": 0.009115850761205696,
+    "silicon_precondition": 0.01542428567403537
+  },
+  "conditioning_multipliers_by_declared_type": {
+    "1C": 0.9995072492285669,
+    "1C-Si": 1.0150434439115186,
+    "3C": 1.0,
+    "3C-Si": 1.015543853928966,
+    "3C-SiO2": 1.0091575266696176,
+    "9C": 1.0004929936944562,
+    "9C-Si": 1.016044510645397
+  },
+  "eligible_for_prediction_seal": false,
+  "frozen_absolute_gates": {
+    "normalized_shape_rmse_percent": 2.0,
+    "oxide_mean_mae_um": 0.08,
+    "selectivity_mape_percent": 12.0,
+    "silicon_mean_mae_um": 1.0,
+    "silicon_mean_mape_percent": 3.0,
+    "silicon_point_rmse_um": 1.5
+  },
+  "heldout_outcomes_read": false,
+  "heldout_prediction_written": false,
+  "implementation_hashes": {
+    "calibration_driver": "bcd35c549f6dc46d1cc2525c3807607e7d5fdac6d46e0d6b53a1d04814f0b097",
+    "cylindrical_transfer": "a6904537f6674815505a15795e5cd78b8ae0d05c6685756faf6e58fdbf0e5391",
+    "fused_surface_recurrence": "da837c8c37ee33dc3ecf2bdd226af1fbd520fe432d2e95c60878760644e04745",
+    "reduced_reactor": "f62b9f1573e87273879627e9695ff3dbcee55ea2d82833648c1905919675f6ce"
+  },
+  "in_sample_physics_beats_empirical_baseline": {
+    "global_mean_depth_mae": false,
+    "mean_map_normalized_shape_rmse": false,
+    "mean_map_point_rmse": false
+  },
+  "input_hashes": {
+    "calibration_measurements": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "process_data": "fd304fbc08a9641f182f71f11064b8fe00a01c24a100ae8211536ad0cd404f49",
+    "process_dictionary": "51c9bebfad14f0a0558bf8e5831579b6a3308a2ff5b330ae5b8f8f32bc4b4302",
+    "v1_preregistration": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+    "v2_preregistration": "66f681abbe54d7785965e5e949a23f7562c3cad18d4105752b964eba59b93555",
+    "v5_preregistration": "ccd83b5e4aaab4743432117fedf62a1a9e6ddc899e330b3adcf40092551bdb6a"
+  },
+  "leave_one_lot_out_empirical_baselines": {
+    "global_mean": {
+      "silicon_mean_mae_um": 0.3384860882259995,
+      "silicon_mean_mape_percent": 0.7754341244771714
+    },
+    "mean_map": {
+      "normalized_shape_rmse_percent": 0.6366189140525332,
+      "silicon_point_rmse_um": 0.48658530285598817
+    }
+  },
+  "leave_one_lot_out_physics_refits_completed": false,
+  "optimizer": {
+    "coefficient_bounds": [
+      -1.5,
+      1.5
+    ],
+    "cost": 0.7587807666652642,
+    "message": "`ftol` termination condition is satisfied.",
+    "nfev": 3,
+    "status": 2,
+    "success": true
+  },
+  "per_lot_or_per_wafer_depth_offsets": false,
+  "points_per_wafer": 89,
+  "schema": "petch-zenodo-bosch-wall-conditioning-calibration-fit-v1",
+  "status": "calibration-only exploratory fit; not a heldout prediction seal",
+  "surface_laws_changed": false
+}
