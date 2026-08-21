@@ -67,6 +67,10 @@ WALL_CONDITIONING_PREREGISTRATION = (
 WALL_CONDITIONING_CALIBRATION_FIT = (
     WALL_CONDITIONING_PREREGISTRATION.parent / "calibration_fit.json"
 )
+WALL_CONDITIONING_RESIDUAL_FEATURE_AUDIT = (
+    WALL_CONDITIONING_PREREGISTRATION.parent
+    / "calibration_residual_feature_audit.json"
+)
 
 
 @pytest.fixture(scope="module")
@@ -273,3 +277,17 @@ def test_wall_conditioning_calibration_receipt_remains_unsealed_and_target_free(
     assert not all(payload["in_sample_physics_beats_empirical_baseline"].values())
     assert payload["input_hashes"]["calibration_measurements"] == sha256(
         CALIBRATION_MEASUREMENTS.read_bytes()).hexdigest()
+
+
+def test_wall_conditioning_residual_discovery_remains_unsealed_and_target_free():
+    payload = json.loads(WALL_CONDITIONING_RESIDUAL_FEATURE_AUDIT.read_text())
+
+    assert payload["heldout_outcomes_read"] is False
+    assert payload["eligible_for_prediction_seal"] is False
+    assert payload["feature_source_contains_outcomes"] is False
+    assert payload["input_hashes"]["conditioning_fit"] == sha256(
+        WALL_CONDITIONING_CALIBRATION_FIT.read_bytes()).hexdigest()
+    silicon = payload["residual_feature_rankings"]["silicon_mean_residual_um"]
+    assert silicon[0]["feature"] == "wafer_number"
+    assert silicon[0]["within_lot_pearson"] > 0.9
+    assert "selected after comparing" in payload["selection_bias_warning"]

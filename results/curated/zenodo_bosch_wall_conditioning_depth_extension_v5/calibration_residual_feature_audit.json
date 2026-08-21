@@ -1,0 +1,709 @@
+{
+  "calibration_wafer_count": 75,
+  "candidate_feature_count": 131,
+  "conditioning_fit_used": "results/curated/zenodo_bosch_wall_conditioning_depth_extension_v5/calibration_fit.json",
+  "eligible_for_prediction_seal": false,
+  "exploratory_univariate_leave_one_lot_out_corrections": {
+    "oxide_mean": [
+      {
+        "corrected_mae": 0.03392112202519933,
+        "corrected_mape_percent": 5.318302363263316,
+        "feature": "sf6_platen_dc_bias_mean"
+      },
+      {
+        "corrected_mae": 0.03498242916244798,
+        "corrected_mape_percent": 5.5053782297851654,
+        "feature": "sf6_pressure_q10"
+      },
+      {
+        "corrected_mae": 0.03831854415693651,
+        "corrected_mape_percent": 6.028875190652766,
+        "feature": "c4f8_source_reflected_power_q90"
+      },
+      {
+        "corrected_mae": 0.04138988554121585,
+        "corrected_mape_percent": 6.526119207134457,
+        "feature": "c4f8_source_reflected_power_q50"
+      },
+      {
+        "corrected_mae": 0.0421896114899528,
+        "corrected_mape_percent": 6.654943658707597,
+        "feature": "c4f8_source_reflected_power_q10"
+      },
+      {
+        "corrected_mae": 0.043185009355908965,
+        "corrected_mape_percent": 6.831261973251054,
+        "feature": "sf6_platen_reflected_power_mean"
+      },
+      {
+        "corrected_mae": 0.043491727520971864,
+        "corrected_mape_percent": 6.85045290960395,
+        "feature": "sf6_platen_load_power_std"
+      },
+      {
+        "corrected_mae": 0.04369270550124595,
+        "corrected_mape_percent": 6.89983502662259,
+        "feature": "c4f8_pressure_q10"
+      },
+      {
+        "corrected_mae": 0.04389213170033315,
+        "corrected_mape_percent": 6.938916701033136,
+        "feature": "sf6_helium_backside_pressure_q50"
+      },
+      {
+        "corrected_mae": 0.04417099919429161,
+        "corrected_mape_percent": 6.981627584166851,
+        "feature": "c4f8_source_load_power_std"
+      },
+      {
+        "corrected_mae": 0.044262828562594905,
+        "corrected_mape_percent": 6.995577617287556,
+        "feature": "c4f8_source_load_power_mean"
+      },
+      {
+        "corrected_mae": 0.04428661914362977,
+        "corrected_mape_percent": 6.999166280748617,
+        "feature": "c4f8_source_load_power_rms"
+      },
+      {
+        "corrected_mae": 0.04429090221699293,
+        "corrected_mape_percent": 6.998262391507656,
+        "feature": "c4f8_platen_reflected_power_std"
+      },
+      {
+        "corrected_mae": 0.04433464718367396,
+        "corrected_mape_percent": 7.004649243016918,
+        "feature": "c4f8_source_load_power_q90"
+      },
+      {
+        "corrected_mae": 0.04442455137034872,
+        "corrected_mape_percent": 7.02203304299519,
+        "feature": "sf6_platen_peak_to_peak_q90"
+      },
+      {
+        "corrected_mae": 0.044424986446459626,
+        "corrected_mape_percent": 7.0173180125434715,
+        "feature": "c4f8_helium_backside_pressure_q10"
+      },
+      {
+        "corrected_mae": 0.04446767800270223,
+        "corrected_mape_percent": 7.024910449207207,
+        "feature": "c4f8_platen_reflected_power_rms"
+      },
+      {
+        "corrected_mae": 0.044528628132085114,
+        "corrected_mape_percent": 7.038133996871568,
+        "feature": "sf6_platen_reflected_power_rms"
+      },
+      {
+        "corrected_mae": 0.04453881985185063,
+        "corrected_mape_percent": 7.027230334035414,
+        "feature": "sf6_platen_reflected_power_q90"
+      },
+      {
+        "corrected_mae": 0.04456135459633574,
+        "corrected_mape_percent": 7.032976830775992,
+        "feature": "sf6_helium_backside_pressure_rms"
+      }
+    ],
+    "silicon_mean": [
+      {
+        "corrected_mae": 0.12997844685654011,
+        "corrected_mape_percent": 0.29808199368288557,
+        "feature": "wafer_number"
+      },
+      {
+        "corrected_mae": 0.19167898190375268,
+        "corrected_mape_percent": 0.4387987550219525,
+        "feature": "c4f8_platen_reflected_power_q90"
+      },
+      {
+        "corrected_mae": 0.20365617000829123,
+        "corrected_mape_percent": 0.46714790126291383,
+        "feature": "sf6_platen_peak_to_peak_q50"
+      },
+      {
+        "corrected_mae": 0.20914404213682844,
+        "corrected_mape_percent": 0.47936267948882705,
+        "feature": "c4f8_platen_reflected_power_mean"
+      },
+      {
+        "corrected_mae": 0.2153139617045891,
+        "corrected_mape_percent": 0.4930641941515031,
+        "feature": "c4f8_platen_peak_to_peak_q90"
+      },
+      {
+        "corrected_mae": 0.2542062854561831,
+        "corrected_mape_percent": 0.582600112311837,
+        "feature": "sf6_platen_peak_to_peak_rms"
+      },
+      {
+        "corrected_mae": 0.2543474558487717,
+        "corrected_mape_percent": 0.5827423985533187,
+        "feature": "sf6_source_reflected_power_q50"
+      },
+      {
+        "corrected_mae": 0.2617834533731776,
+        "corrected_mape_percent": 0.5996572356931943,
+        "feature": "c4f8_platen_peak_to_peak_rms"
+      },
+      {
+        "corrected_mae": 0.26324871130057126,
+        "corrected_mape_percent": 0.6031681948212347,
+        "feature": "c4f8_pressure_std"
+      },
+      {
+        "corrected_mae": 0.26525122369708415,
+        "corrected_mape_percent": 0.6078500737943653,
+        "feature": "sf6_platen_peak_to_peak_mean"
+      },
+      {
+        "corrected_mae": 0.2757977550677011,
+        "corrected_mape_percent": 0.6319092284642286,
+        "feature": "c4f8_platen_peak_to_peak_mean"
+      },
+      {
+        "corrected_mae": 0.277070649968859,
+        "corrected_mape_percent": 0.6346968003918674,
+        "feature": "c4f8_platen_peak_to_peak_q50"
+      },
+      {
+        "corrected_mae": 0.2803518261600423,
+        "corrected_mape_percent": 0.642640675551874,
+        "feature": "c4f8_platen_load_power_q10"
+      },
+      {
+        "corrected_mae": 0.2870130340298966,
+        "corrected_mape_percent": 0.6571587818187729,
+        "feature": "c4f8_platen_load_power_q90"
+      },
+      {
+        "corrected_mae": 0.29146212005110744,
+        "corrected_mape_percent": 0.6674987461134619,
+        "feature": "sf6_platen_load_power_q10"
+      },
+      {
+        "corrected_mae": 0.2933263012471,
+        "corrected_mape_percent": 0.6714310948738637,
+        "feature": "sf6_source_load_power_q10"
+      },
+      {
+        "corrected_mae": 0.29371088566636605,
+        "corrected_mape_percent": 0.6727219416216896,
+        "feature": "sf6_source_reflected_power_q90"
+      },
+      {
+        "corrected_mae": 0.2939420145678412,
+        "corrected_mape_percent": 0.6736427270123138,
+        "feature": "c4f8_source_reflected_power_q10"
+      },
+      {
+        "corrected_mae": 0.29930644649456883,
+        "corrected_mape_percent": 0.6847179431629009,
+        "feature": "c4f8_platen_peak_to_peak_q10"
+      },
+      {
+        "corrected_mae": 0.3018807297174813,
+        "corrected_mape_percent": 0.6913369885237701,
+        "feature": "c4f8_platen_dc_bias_q10"
+      }
+    ]
+  },
+  "feature_source_contains_outcomes": false,
+  "heldout_outcomes_read": false,
+  "input_hashes": {
+    "conditioning_fit": "3c8b3bc98c22818895d34640cfc8390f06925e0ea5ed71a0e86123fc0021d25f",
+    "process_summary": "62543f987e62cff4931c6aef24932696ad4d2e452a9a02cc939bd4777c926f7f"
+  },
+  "residual_feature_rankings": {
+    "normalized_shape_rmse_percent": [
+      {
+        "feature": "c4f8_helium_backside_pressure_std",
+        "feature_maximum": 0.11913058287238992,
+        "feature_minimum": 0.1020856735133686,
+        "raw_pearson": -0.4327041475538486,
+        "raw_spearman": -0.5671977240398294,
+        "within_lot_pearson": -0.47105910355234915
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q90",
+        "feature_maximum": 733.7374572753906,
+        "feature_minimum": 710.4800415039062,
+        "raw_pearson": -0.3979502768718215,
+        "raw_spearman": -0.8052775708353463,
+        "within_lot_pearson": -0.4180312726980214
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_q50",
+        "feature_maximum": 464.5985412597656,
+        "feature_minimum": 444.71954345703125,
+        "raw_pearson": -0.29641569999170325,
+        "raw_spearman": -0.5256284435605696,
+        "within_lot_pearson": -0.39964883428989595
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_mean",
+        "feature_maximum": 14.975112559271198,
+        "feature_minimum": 14.973678056489337,
+        "raw_pearson": 0.34141695793894783,
+        "raw_spearman": 0.37550497866287336,
+        "within_lot_pearson": 0.39877516498918664
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_rms",
+        "feature_maximum": 14.975504917450685,
+        "feature_minimum": 14.97415195045001,
+        "raw_pearson": 0.327195653212261,
+        "raw_spearman": 0.3417638691322901,
+        "within_lot_pearson": 0.3849912530880058
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_rms",
+        "feature_maximum": 643.534317555529,
+        "feature_minimum": 626.9533265149638,
+        "raw_pearson": -0.3315296605223867,
+        "raw_spearman": -0.7158748221906117,
+        "within_lot_pearson": -0.35959167572668554
+      },
+      {
+        "feature": "c4f8_above_threshold_s",
+        "feature_maximum": 141.40003371238708,
+        "feature_minimum": 140.4000334739685,
+        "raw_pearson": 0.30230493980646334,
+        "raw_spearman": 0.23937597393475873,
+        "within_lot_pearson": 0.3536182895697002
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_mean",
+        "feature_maximum": 6.609010491620564,
+        "feature_minimum": 4.636133333451771,
+        "raw_pearson": 0.3812521317536449,
+        "raw_spearman": 0.6425035561877667,
+        "within_lot_pearson": 0.35042511224206074
+      },
+      {
+        "feature": "c4f8_pressure_q50",
+        "feature_maximum": 0.04609999805688858,
+        "feature_minimum": 0.04364999942481518,
+        "raw_pearson": 0.3932531980540169,
+        "raw_spearman": 0.309397379553522,
+        "within_lot_pearson": 0.3501392910579189
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q50",
+        "feature_maximum": 663.3884887695312,
+        "feature_minimum": 644.1618041992188,
+        "raw_pearson": -0.28937758095594873,
+        "raw_spearman": -0.6378126941678919,
+        "within_lot_pearson": -0.3479201515610203
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_q90",
+        "feature_maximum": 23.15439376831055,
+        "feature_minimum": 11.947996139526367,
+        "raw_pearson": 0.3389827568310135,
+        "raw_spearman": 0.6385808689712881,
+        "within_lot_pearson": 0.3461589958132549
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_mean",
+        "feature_maximum": 616.5402604449879,
+        "feature_minimum": 600.4623747346751,
+        "raw_pearson": -0.3173401839495253,
+        "raw_spearman": -0.6882503556187767,
+        "within_lot_pearson": -0.3414998191355645
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_std",
+        "feature_maximum": 192.7224722605005,
+        "feature_minimum": 186.00438054970766,
+        "raw_pearson": 0.28783971870632263,
+        "raw_spearman": 0.14620199146514937,
+        "within_lot_pearson": 0.3363129223419688
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_mean",
+        "feature_maximum": 527.8974671456634,
+        "feature_minimum": 516.5118487854145,
+        "raw_pearson": -0.22607984075488674,
+        "raw_spearman": -0.3815362731152205,
+        "within_lot_pearson": -0.3313478113564705
+      },
+      {
+        "feature": "c4f8_flow_dose_machine_units_s",
+        "feature_maximum": 46993.10849071061,
+        "feature_minimum": 46186.505798525075,
+        "raw_pearson": 0.2742392624888187,
+        "raw_spearman": 0.1879089615931721,
+        "within_lot_pearson": 0.3291563571674889
+      },
+      {
+        "feature": "c4f8_pressure_mean",
+        "feature_maximum": 0.04171647759292021,
+        "feature_minimum": 0.041325815881318444,
+        "raw_pearson": 0.36936183450954824,
+        "raw_spearman": 0.36614509246088195,
+        "within_lot_pearson": 0.3246387285636507
+      },
+      {
+        "feature": "sf6_source_current_mean",
+        "feature_maximum": 10.000360325013338,
+        "feature_minimum": 9.997143372782954,
+        "raw_pearson": -0.2816273876842595,
+        "raw_spearman": -0.5579516358463726,
+        "within_lot_pearson": -0.31506766144743165
+      },
+      {
+        "feature": "sf6_source_current_rms",
+        "feature_maximum": 10.000362711216768,
+        "feature_minimum": 9.997145553623131,
+        "raw_pearson": -0.28152633194386156,
+        "raw_spearman": -0.5578662873399716,
+        "within_lot_pearson": -0.31499145894282565
+      },
+      {
+        "feature": "c4f8_platen_load_power_q10",
+        "feature_maximum": 39.09421157836914,
+        "feature_minimum": 37.9635009765625,
+        "raw_pearson": -0.14523978356268025,
+        "raw_spearman": -0.48367327958994893,
+        "within_lot_pearson": -0.3136127039179402
+      },
+      {
+        "feature": "wafer_number",
+        "feature_maximum": 10.0,
+        "feature_minimum": 1.0,
+        "raw_pearson": -0.2832693750151489,
+        "raw_spearman": -0.6621287907715632,
+        "within_lot_pearson": -0.31143513001424106
+      }
+    ],
+    "oxide_mean_residual_um": [
+      {
+        "feature": "c4f8_source_load_power_q50",
+        "feature_maximum": 2792.046875,
+        "feature_minimum": 2789.361328125,
+        "raw_pearson": -0.0922559324614986,
+        "raw_spearman": 0.03165032947505377,
+        "within_lot_pearson": -0.3845129423620198
+      },
+      {
+        "feature": "sf6_source_load_power_q10",
+        "feature_maximum": 2785.83642578125,
+        "feature_minimum": 2783.654296875,
+        "raw_pearson": -0.05411293103921423,
+        "raw_spearman": -0.17712559989513568,
+        "within_lot_pearson": -0.3508338533776846
+      },
+      {
+        "feature": "c4f8_pressure_q50",
+        "feature_maximum": 0.04609999805688858,
+        "feature_minimum": 0.04364999942481518,
+        "raw_pearson": -0.017970143148393132,
+        "raw_spearman": -0.007918213203123735,
+        "within_lot_pearson": 0.311682953026952
+      },
+      {
+        "feature": "sf6_pressure_rms",
+        "feature_maximum": 0.04254224583694488,
+        "feature_minimum": 0.04242839478058686,
+        "raw_pearson": 0.22253605967305495,
+        "raw_spearman": 0.12711237553342816,
+        "within_lot_pearson": -0.28745695033353463
+      },
+      {
+        "feature": "sf6_pressure_mean",
+        "feature_maximum": 0.04217257948041017,
+        "feature_minimum": 0.04207613472969196,
+        "raw_pearson": 0.21582265322753674,
+        "raw_spearman": 0.11143669985775248,
+        "within_lot_pearson": -0.28620462154631043
+      },
+      {
+        "feature": "sf6_source_load_power_q90",
+        "feature_maximum": 2799.0966796875,
+        "feature_minimum": 2797.250244140625,
+        "raw_pearson": 0.0026256535449341485,
+        "raw_spearman": -0.10267973515857726,
+        "within_lot_pearson": 0.24863625229408695
+      },
+      {
+        "feature": "sf6_pressure_std",
+        "feature_maximum": 0.005640715533378702,
+        "feature_minimum": 0.0054323278073659725,
+        "raw_pearson": 0.20318939459489135,
+        "raw_spearman": 0.18108108108108106,
+        "within_lot_pearson": -0.23499483823235165
+      },
+      {
+        "feature": "c4f8_pressure_mean",
+        "feature_maximum": 0.04171647759292021,
+        "feature_minimum": 0.041325815881318444,
+        "raw_pearson": -0.0791468384682666,
+        "raw_spearman": 0.020398293029871978,
+        "within_lot_pearson": 0.22237568232859065
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q90",
+        "feature_maximum": 14.988861083984375,
+        "feature_minimum": 14.987640380859375,
+        "raw_pearson": -0.06681717575527578,
+        "raw_spearman": -0.020037426739781514,
+        "within_lot_pearson": -0.20940544453860563
+      },
+      {
+        "feature": "c4f8_above_threshold_s",
+        "feature_maximum": 141.40003371238708,
+        "feature_minimum": 140.4000334739685,
+        "raw_pearson": -0.1546861923544821,
+        "raw_spearman": -0.20592945280008895,
+        "within_lot_pearson": 0.19962246617333537
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_q10",
+        "feature_maximum": 14.985809326171875,
+        "feature_minimum": 14.983977317810059,
+        "raw_pearson": -0.15472750834286245,
+        "raw_spearman": -0.1524317595317021,
+        "within_lot_pearson": -0.19410428870607538
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_q10",
+        "feature_maximum": 341.60284423828125,
+        "feature_minimum": 332.3465576171875,
+        "raw_pearson": 0.10913092126268453,
+        "raw_spearman": -0.04645603911574949,
+        "within_lot_pearson": -0.19250367924387948
+      },
+      {
+        "feature": "c4f8_pressure_rms",
+        "feature_maximum": 0.0426972993110137,
+        "feature_minimum": 0.04228525971147993,
+        "raw_pearson": -0.06067148553223537,
+        "raw_spearman": 0.038492176386913234,
+        "within_lot_pearson": 0.18176122859811156
+      },
+      {
+        "feature": "sf6_source_reflected_power_q10",
+        "feature_maximum": 28.87051010131836,
+        "feature_minimum": 24.719993591308594,
+        "raw_pearson": -0.03107247890088656,
+        "raw_spearman": 0.04059573198455738,
+        "within_lot_pearson": 0.17124253730567437
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_rms",
+        "feature_maximum": 14.987623745735894,
+        "feature_minimum": 14.98697711404438,
+        "raw_pearson": -0.25200861178386175,
+        "raw_spearman": -0.26759601706970126,
+        "within_lot_pearson": -0.16251420862664936
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_mean",
+        "feature_maximum": 14.987623660624083,
+        "feature_minimum": 14.986977014820168,
+        "raw_pearson": -0.2519981100430715,
+        "raw_spearman": -0.2678805120910384,
+        "within_lot_pearson": -0.1625126138949646
+      },
+      {
+        "feature": "c4f8_source_current_q90",
+        "feature_maximum": 10.0126953125,
+        "feature_minimum": 10.00665283203125,
+        "raw_pearson": 0.01099231785397592,
+        "raw_spearman": 0.053102682798992586,
+        "within_lot_pearson": 0.16223470017845806
+      },
+      {
+        "feature": "c4f8_pressure_std",
+        "feature_maximum": 0.009180885937634407,
+        "feature_minimum": 0.008796745600478776,
+        "raw_pearson": 0.08821084598593548,
+        "raw_spearman": 0.18566145092460884,
+        "within_lot_pearson": -0.1564929358501602
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_q90",
+        "feature_maximum": 835.2199096679688,
+        "feature_minimum": 819.193115234375,
+        "raw_pearson": -0.13917361941178644,
+        "raw_spearman": -0.12842744676036508,
+        "within_lot_pearson": -0.15249723270223986
+      },
+      {
+        "feature": "sf6_source_current_q50",
+        "feature_maximum": 10.0006103515625,
+        "feature_minimum": 9.99859619140625,
+        "raw_pearson": 0.008029298579888532,
+        "raw_spearman": -0.01698463869606435,
+        "within_lot_pearson": 0.14444126808888397
+      }
+    ],
+    "silicon_mean_residual_um": [
+      {
+        "feature": "wafer_number",
+        "feature_maximum": 10.0,
+        "feature_minimum": 1.0,
+        "raw_pearson": 0.9350555059656718,
+        "raw_spearman": 0.9425180949542311,
+        "within_lot_pearson": 0.9563129030060422
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_q90",
+        "feature_maximum": 23.15439376831055,
+        "feature_minimum": 11.947996139526367,
+        "raw_pearson": -0.8573548929134065,
+        "raw_spearman": -0.8574822370205236,
+        "within_lot_pearson": -0.8909330650974187
+      },
+      {
+        "feature": "c4f8_pressure_q90",
+        "feature_maximum": 0.05079999938607216,
+        "feature_minimum": 0.0502999983727932,
+        "raw_pearson": 0.5554379379672753,
+        "raw_spearman": 0.5296879867174518,
+        "within_lot_pearson": 0.8719101698460454
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_mean",
+        "feature_maximum": 6.609010491620564,
+        "feature_minimum": 4.636133333451771,
+        "raw_pearson": -0.8125611771474055,
+        "raw_spearman": -0.797923186344239,
+        "within_lot_pearson": -0.856987433051759
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q90",
+        "feature_maximum": 733.7374572753906,
+        "feature_minimum": 710.4800415039062,
+        "raw_pearson": 0.8061234736385163,
+        "raw_spearman": 0.8170987593630393,
+        "within_lot_pearson": 0.8521084992686225
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_q50",
+        "feature_maximum": 464.5985412597656,
+        "feature_minimum": 444.71954345703125,
+        "raw_pearson": 0.8023753106543953,
+        "raw_spearman": 0.7529768293065223,
+        "within_lot_pearson": 0.8479576094744157
+      },
+      {
+        "feature": "c4f8_platen_load_power_q10",
+        "feature_maximum": 39.09421157836914,
+        "feature_minimum": 37.9635009765625,
+        "raw_pearson": 0.6741653155888213,
+        "raw_spearman": 0.6557358826566528,
+        "within_lot_pearson": 0.8247231738543381
+      },
+      {
+        "feature": "c4f8_source_reflected_power_q90",
+        "feature_maximum": 484.8628234863281,
+        "feature_minimum": 451.7044677734375,
+        "raw_pearson": 0.4966996632624967,
+        "raw_spearman": 0.4688469090633992,
+        "within_lot_pearson": 0.8045738843062534
+      },
+      {
+        "feature": "c4f8_source_reflected_power_q50",
+        "feature_maximum": 412.6407775878906,
+        "feature_minimum": 392.8342590332031,
+        "raw_pearson": 0.5567560752116323,
+        "raw_spearman": 0.5183441293760224,
+        "within_lot_pearson": 0.8028848492650509
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_rms",
+        "feature_maximum": 560.7030515089151,
+        "feature_minimum": 551.1258041951371,
+        "raw_pearson": 0.7191207835000322,
+        "raw_spearman": 0.6752204836415362,
+        "within_lot_pearson": 0.7734095704511897
+      },
+      {
+        "feature": "c4f8_source_reflected_power_q10",
+        "feature_maximum": 390.7895202636719,
+        "feature_minimum": 376.6289367675781,
+        "raw_pearson": 0.5809946405313517,
+        "raw_spearman": 0.5666621767201497,
+        "within_lot_pearson": 0.7683444593429916
+      },
+      {
+        "feature": "c4f8_pressure_std",
+        "feature_maximum": 0.009180885937634407,
+        "feature_minimum": 0.008796745600478776,
+        "raw_pearson": 0.6699467083575438,
+        "raw_spearman": 0.6658890469416785,
+        "within_lot_pearson": 0.7482771737416363
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_mean",
+        "feature_maximum": 527.8974671456634,
+        "feature_minimum": 516.5118487854145,
+        "raw_pearson": 0.6982580671115663,
+        "raw_spearman": 0.632176386913229,
+        "within_lot_pearson": 0.7446166837240619
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_rms",
+        "feature_maximum": 643.534317555529,
+        "feature_minimum": 626.9533265149638,
+        "raw_pearson": 0.6970553919255559,
+        "raw_spearman": 0.6677098150782361,
+        "within_lot_pearson": 0.7295769174532989
+      },
+      {
+        "feature": "c4f8_platen_dc_bias_std",
+        "feature_maximum": 11.227912784345069,
+        "feature_minimum": 1.6700057741371037,
+        "raw_pearson": -0.5845836296636611,
+        "raw_spearman": -0.6259174964438122,
+        "within_lot_pearson": -0.7227697970671422
+      },
+      {
+        "feature": "c4f8_platen_dc_bias_rms",
+        "feature_maximum": 11.681076492431451,
+        "feature_minimum": 1.6892357995675433,
+        "raw_pearson": -0.5692090104103774,
+        "raw_spearman": -0.6118349928876243,
+        "within_lot_pearson": -0.7077700115178427
+      },
+      {
+        "feature": "sf6_platen_reflected_power_q90",
+        "feature_maximum": 6.7293314933776855,
+        "feature_minimum": 4.394665241241455,
+        "raw_pearson": 0.5345496770717527,
+        "raw_spearman": 0.581183929977161,
+        "within_lot_pearson": 0.7072226270020332
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q50",
+        "feature_maximum": 663.3884887695312,
+        "feature_minimum": 644.1618041992188,
+        "raw_pearson": 0.6657667937501272,
+        "raw_spearman": 0.6599901852511229,
+        "within_lot_pearson": 0.6869134620513071
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_mean",
+        "feature_maximum": 616.5402604449879,
+        "feature_minimum": 600.4623747346751,
+        "raw_pearson": 0.6522734799215925,
+        "raw_spearman": 0.6267994310099573,
+        "within_lot_pearson": 0.6863483003763066
+      },
+      {
+        "feature": "sf6_platen_dc_bias_std",
+        "feature_maximum": 16.497813310883213,
+        "feature_minimum": 6.883983172824595,
+        "raw_pearson": -0.555629858144811,
+        "raw_spearman": -0.5704125177809388,
+        "within_lot_pearson": -0.6806297196066845
+      }
+    ]
+  },
+  "schema": "petch-zenodo-bosch-calibration-residual-feature-audit-v1",
+  "selection_bias_warning": "the best feature was selected after comparing all extracted machine summaries on calibration outcomes; a physical feature family must be frozen before any formal refit or heldout reveal",
+  "status": "calibration-only exploratory model-form discovery; not a prediction seal"
+}
