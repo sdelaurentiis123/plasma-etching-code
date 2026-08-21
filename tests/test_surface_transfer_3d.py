@@ -5,7 +5,10 @@ import numpy as np
 import pytest
 
 from petch.surface_mesh_3d import TriangleSurface3D
-from petch.surface_transfer_3d import build_surface_transfer_3d
+from petch.surface_transfer_3d import (
+    _normalize_nonnegative_weights,
+    build_surface_transfer_3d,
+)
 
 
 class _MixedRemapState:
@@ -149,6 +152,39 @@ def test_rows_close_are_material_local_and_sparse_arrays_are_immutable():
         assert not array.flags.writeable
         with pytest.raises(ValueError):
             array.flat[0] = 9
+
+
+def test_row_closure_preserves_a_tiny_positive_tail_without_negative_roundoff():
+    # Exact binary64 witness captured from the failure class. The historical
+    # final-entry closure produces -2.22e-16 even though every raw weight is
+    # positive.
+    raw = np.array([
+        80513463366.02206,
+        758073282.2955991,
+        5.924681595697332e-16,
+    ])
+    historical = raw / float(np.sum(raw))
+    assert 1.0 - float(np.sum(historical[:-1])) < 0.0
+
+    closed = _normalize_nonnegative_weights(raw)
+
+    assert np.all(closed >= 0.0)
+    assert closed[-1] > 0.0
+    assert float(np.sum(closed)) == 1.0
+    np.testing.assert_allclose(
+        closed, historical, rtol=3.0e-16, atol=0.0)
+
+
+def test_row_closure_is_nonnegative_across_extreme_dynamic_range():
+    generator = np.random.default_rng(20260821)
+    for count in range(1, 9):
+        raw = 10.0 ** generator.uniform(-250.0, 250.0, (500, count))
+        for row in raw:
+            closed = _normalize_nonnegative_weights(row)
+            assert np.all(np.isfinite(closed))
+            assert np.all(closed >= 0.0)
+            assert float(np.sum(closed)) == pytest.approx(
+                1.0, rel=0.0, abs=8e-16)
 
 
 def test_sparse_contract_names_the_exact_rejected_invariant():

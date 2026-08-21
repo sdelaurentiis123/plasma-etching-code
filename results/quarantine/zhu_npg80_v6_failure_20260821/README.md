@@ -30,9 +30,21 @@ advance_feature_step_3d
 The aggregate v6 parent did not write a failed-cell checkpoint. A narrow
 reproducer was launched separately after commit `48b78d4` added diagnostics
 that name the exact rejected invariant without changing acceptance criteria.
-Do not promote these caches into the curated board until that reproduction
-determines whether the numerical change is diagnostics-only/bitwise-equivalent
-or requires a model-revision bump and full recomputation.
+That reproduction produced:
+
+- `zhu_v6_w120_failure_checkpoint.npz`, SHA-256
+  `1fbd52695a1df0379c67d22d9743d8e74bee29f2322142fd41737cafd7881dd6`;
+- `zhu_v6_w120_diagnostic.log`, SHA-256
+  `6683045c63d1efd0978a46d8940325043d758bb8c5a5aaac446c5bf092fc9a16`.
+
+The checkpoint reproduces on both the remote x86_64 CUDA host and local arm64
+CPU. The exact rejected invariant is one negative coefficient at CSR entry
+24516 with value `-2.2204460492503131e-16`. The value is created by assigning
+the entire binary64 row-closure residual to a physically tiny final
+coefficient. V7 closes through the largest positive coefficient instead.
+Because this changes valid stored row weights and fingerprints at roundoff
+scale, all 23 v6 caches remain quarantine evidence and the 56-cell board must
+be recomputed under v7.
 
 The unfiltered local copy of all 175 remote files is intentionally not part of
 this evidence package because it duplicates already committed historical

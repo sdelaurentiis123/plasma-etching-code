@@ -69,6 +69,14 @@ OUTPUT = (
     / "audit.json"
 )
 CACHE_DIR = OUTPUT.parent / "trajectories"
+# v7: indexed sparse surface transfer closes each normalized predecessor row
+# through its largest positive coefficient. V6 closed through the final
+# coefficient; one production row had a physical O(1e-27) final tail while the
+# preceding binary64 sum rounded to 1 + 2.22e-16, creating a negative weight.
+# The v7 operator remains nonnegative and unit-sum without relaxing the
+# validator. Although the change is only at roundoff scale, stored weights and
+# fingerprints can change, so no v6 trajectory cache is eligible for reuse.
+#
 # v5: the common engine continues through certified final Cr extinction.  A
 # mask layer is retired only when it owns no material, supports no resolved
 # volume cell, and has at most roundoff-scale positive level-set residue.
@@ -88,7 +96,7 @@ CACHE_DIR = OUTPUT.parent / "trajectories"
 # geometrically degenerate first and the marching-cubes topology certifier
 # correctly refused the mesh ("unmatched interior edges").  The certifier is
 # untouched; the trajectory now stops before the mesh can degenerate.
-MODEL_REVISION = "two-material-moving-tio2-cr-owner-projection-v6"
+MODEL_REVISION = "two-material-moving-tio2-cr-positive-row-closure-v7"
 PRODUCTION_MESH_SPACING_NM = 10.0
 CHROMIUM_MOLAR_MASS_KG_MOL = 51.9961e-3
 CHROMIUM_REFERENCE_DENSITY_KG_M3 = 7190.0

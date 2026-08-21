@@ -42,6 +42,42 @@ def _digest_text(digest, name, value):
     _digest_array(digest, name, np.frombuffer(encoded, dtype=np.uint8), "u1")
 
 
+def _normalize_nonnegative_weights(raw):
+    """Normalize one sparse row without sacrificing a tiny tail to closure.
+
+    Closing a probability row by replacing its final entry with
+    ``1 - sum(previous)`` is unsafe when that final entry is tiny: ordinary
+    binary64 normalization can make the preceding sum one ulp larger than
+    unity. The resulting negative coefficient is numerical bookkeeping, but
+    accepting it would violate the interpolation contract. Instead, put the
+    closure residual into the largest coefficient. Its pre-closure value is at
+    least ``1 / len(row)``, so roundoff cannot change its sign.
+    """
+    weight = np.array(raw, dtype=float, copy=True, order="C")
+    if weight.ndim != 1 or len(weight) == 0:
+        raise ValueError(
+            "surface-transfer weight row must be nonempty and one dimensional")
+    if np.any(~np.isfinite(weight)) or np.any(weight < 0.0):
+        raise ValueError(
+            "raw surface-transfer weights must be finite and nonnegative")
+    total = float(np.sum(weight))
+    if not np.isfinite(total) or total <= 0.0:
+        raise ValueError(
+            "raw surface-transfer weight sum must be positive and finite")
+
+    weight /= total
+    closure_index = int(np.argmax(weight))
+    weight[closure_index] = 0.0
+    complement = float(np.sum(weight))
+    weight[closure_index] = 1.0 - complement
+    if weight[closure_index] < 0.0:
+        raise RuntimeError("nonnegative surface-transfer row closure failed")
+    if not np.allclose(
+            float(np.sum(weight)), 1.0, rtol=0.0, atol=8e-16):
+        raise RuntimeError("surface-transfer row closure did not sum to unity")
+    return weight
+
+
 def _conserve_nonnegative_density(raw, target_integral, new_area, *, upper_bound):
     """Match the legacy nonnegative per-material area-integral correction."""
     raw = np.maximum(np.asarray(raw, dtype=float), 0.0)
@@ -467,13 +503,13 @@ def build_surface_transfer_3d(
                     selected_shift = selected_shift[:1]
                     selected_weight = np.ones(1, dtype=float)
                 else:
-                    selected_weight = (
+                    raw_weight = (
                         old_surface.face_area[selected_source]
                         / np.maximum(selected_distance ** 2, distance_floor ** 2))
-                    selected_weight /= float(np.sum(selected_weight))
-                    # Close the CSR row deterministically instead of carrying a
-                    # normalization ulp into downstream conservation audits.
-                    selected_weight[-1] = 1.0 - float(np.sum(selected_weight[:-1]))
+                    # Close through the largest positive coefficient. The
+                    # former final-entry closure could turn an O(1e-27) tail
+                    # into -2.22e-16 when preceding weights rounded above one.
+                    selected_weight = _normalize_nonnegative_weights(raw_weight)
                 row_source[new_face] = selected_source
                 row_weight[new_face] = selected_weight
                 row_shift[new_face] = selected_shift

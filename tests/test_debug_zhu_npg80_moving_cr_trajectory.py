@@ -4,7 +4,7 @@ from scripts import audit_zhu_npg80_moving_cr_profiles as board
 from scripts.debug_zhu_npg80_moving_cr_trajectory import _production_job
 
 
-def test_debug_driver_selects_exact_missing_production_cell():
+def test_debug_driver_selects_exact_v7_production_cell():
     job = _production_job(
         width_nm=320.0,
         scenario_name="ion_low_tail_0p0",
@@ -18,7 +18,7 @@ def test_debug_driver_selects_exact_missing_production_cell():
     assert spec["duration_s"] == 1200.0
     assert spec["mesh_spacing_nm"] == 10.0
     assert board._cache_path(spec).name == (
-        "w320_s14.000_ion_low_tail_0p0_fc78a59b6429cba7.json"
+        "w320_s14.000_ion_low_tail_0p0_c9b10e259e2c5b39.json"
     )
 
 

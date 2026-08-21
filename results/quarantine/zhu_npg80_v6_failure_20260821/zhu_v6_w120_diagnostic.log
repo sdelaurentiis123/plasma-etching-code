@@ -1,0 +1,28 @@
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.0
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 3.09 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 1.79 ms  (cached)
+Traceback (most recent call last):
+  File "/root/petch-4b656fd/scripts/reproduce_zhu_npg80_moving_cr_cell.py", line 195, in <module>
+    main()
+  File "/root/petch-4b656fd/scripts/reproduce_zhu_npg80_moving_cr_cell.py", line 180, in main
+    profiles = _run_trajectory(
+  File "/root/petch-4b656fd/scripts/audit_zhu_npg80_moving_cr_profiles.py", line 401, in _run_trajectory
+    step = advance_feature_step_3d(
+  File "/root/petch-4b656fd/src/petch/feature_step_3d.py", line 3319, in advance_feature_step_3d
+    next_surface_state, remap_diagnostics = _remap_surface_state_with_indexed_transfer(
+  File "/root/petch-4b656fd/src/petch/feature_step_3d.py", line 1632, in _remap_surface_state_with_indexed_transfer
+    transfer = build_surface_transfer_3d(
+  File "/root/petch-4b656fd/src/petch/surface_transfer_3d.py", line 520, in build_surface_transfer_3d
+    return SurfaceTransferWeights3D(
+  File "<string>", line 17, in __init__
+  File "/root/petch-4b656fd/src/petch/surface_transfer_3d.py", line 204, in __post_init__
+    invalid(
+  File "/root/petch-4b656fd/src/petch/surface_transfer_3d.py", line 140, in invalid
+    raise ValueError(
+ValueError: invalid sparse surface-transfer weights: negative_weights count=1, first_entry=24516, minimum=-2.2204460492503131e-16

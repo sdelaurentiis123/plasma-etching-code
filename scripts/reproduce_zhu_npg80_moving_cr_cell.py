@@ -165,6 +165,7 @@ def main() -> None:
             surface_state_remap_backend="indexed_knn",
             reinitialization_method="cr2",
             transport_device=args.transport_device)
+        remap_materials = step.state_remap_diagnostics["materials"]
         print(json.dumps({
             "status": "checkpoint step passed",
             "elapsed_s_before_step": metadata["elapsed_s"],
@@ -172,6 +173,11 @@ def main() -> None:
             "step_duration_s": metadata["step_duration_s"],
             "next_surface_state_mesh_fingerprint": (
                 step.next_surface_state_mesh_fingerprint),
+            "surface_state_transfer_fingerprint": (
+                step.state_remap_diagnostics["transfer_fingerprint"]),
+            "maximum_state_remap_relative_conservation_residual": max(
+                float(item["max_relative_conservation_residual"])
+                for item in remap_materials.values()),
             "reassigned_unresolved_material_nodes": step.diagnostics[
                 "reassigned_unresolved_material_nodes"],
         }, indent=2, sort_keys=True))
