@@ -868,6 +868,14 @@ def _restore_unresolved_material_ownership(
             prior_layer[restore] = np.maximum(
                 np.abs(prior_layer[restore]), float(dx))
             affected.add(prior)
+    # The locally repaired regional owner is authoritative. Redistancing each
+    # material independently preserves its sign but can reorder two positive
+    # material fields at their shared interface. That argmax change created the
+    # moving ring of one-node Cr owners in the Oxford v5 checkpoint. Freeze the
+    # repaired discrete owner before reconstructing distance magnitudes.
+    _, repaired_owner = _material_union_and_owner(updated)
+    if np.any(repair & (repaired_owner == candidate)):
+        raise RuntimeError("subcell material ownership repair did not retire the island")
     for material in sorted(affected):
         updated[material] = _redistance_feature_field(
             updated[material], dx, reinitialization_method,
@@ -876,9 +884,8 @@ def _restore_unresolved_material_ownership(
         updated = {
             material: _project_periodic_lateral_endpoints(levelset)[0]
             for material, levelset in updated.items()}
-    combined, owner = _material_union_and_owner(updated)
-    if np.any(repair & (owner == candidate)):
-        raise RuntimeError("subcell material ownership repair did not retire the island")
+    updated, combined, owner = _project_material_owner_preserving_union(
+        updated, repaired_owner)
     return updated, combined, owner
 
 
@@ -1043,6 +1050,65 @@ def _material_union_and_owner(material_levelsets):
     if np.any((owner > 0) & (selected_value < 0.0)):
         raise RuntimeError("material union produced an unsupported solid owner")
     return combined, owner
+
+
+def _project_material_owner_preserving_union(
+        material_levelsets, desired_material_id):
+    """Restore a regional material owner without moving the solid/gas union.
+
+    Independent signed-distance reconstruction preserves each material's sign,
+    but it does not preserve the ordering of two nonnegative fields at a
+    material-material seam. Material identity is the regional level-set argmax,
+    so an ordering change can manufacture a disconnected subcell owner even
+    though no material support changed.
+
+    ``desired_material_id`` is the authoritative owner immediately after a
+    local topology repair. At every solid node, retain the exact redistanced
+    union value for the desired field and move competing ties one floating-point
+    value below it. The solid/gas interface and union distance remain bitwise
+    unchanged, while the regional owner becomes exact. Reapplying this
+    projection is idempotent.
+    """
+    desired = np.asarray(desired_material_id, dtype=int)
+    updated = {
+        int(material_id): np.asarray(levelset, dtype=float).copy()
+        for material_id, levelset in material_levelsets.items()
+    }
+    combined, _ = _material_union_and_owner(updated)
+    if desired.shape != combined.shape or np.any(desired < 0):
+        raise ValueError(
+            "material-owner projection requires a matching nonnegative owner")
+    material_ids = tuple(sorted(updated))
+    invalid = (
+        set(int(value) for value in np.unique(desired))
+        - ({0} | set(material_ids))
+    )
+    if invalid:
+        raise ValueError(
+            f"material-owner projection references unknown ids {sorted(invalid)}")
+    if np.any((desired > 0) != (combined >= 0.0)):
+        raise RuntimeError(
+            "material-owner projection cannot change the solid/gas partition")
+
+    below_union = np.nextafter(combined, -np.inf)
+    for material_id in material_ids:
+        selected = desired == material_id
+        if not np.any(selected):
+            continue
+        updated[material_id][selected] = combined[selected]
+        for competitor_id in material_ids:
+            if competitor_id == material_id:
+                continue
+            competitor = updated[competitor_id]
+            competitor[selected] = np.minimum(
+                competitor[selected], below_union[selected])
+
+    projected_union, projected_owner = _material_union_and_owner(updated)
+    if not np.array_equal(projected_union, combined):
+        raise RuntimeError("material-owner projection moved the authoritative union")
+    if not np.array_equal(projected_owner, desired):
+        raise RuntimeError("material-owner projection did not realize the desired owner")
+    return updated, projected_union, projected_owner
 
 
 def _project_periodic_lateral_endpoints(field):

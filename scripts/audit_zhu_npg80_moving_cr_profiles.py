@@ -88,7 +88,7 @@ CACHE_DIR = OUTPUT.parent / "trajectories"
 # geometrically degenerate first and the marching-cubes topology certifier
 # correctly refused the mesh ("unmatched interior edges").  The certifier is
 # untouched; the trajectory now stops before the mesh can degenerate.
-MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v5"
+MODEL_REVISION = "two-material-moving-tio2-cr-owner-projection-v6"
 PRODUCTION_MESH_SPACING_NM = 10.0
 CHROMIUM_MOLAR_MASS_KG_MOL = 51.9961e-3
 CHROMIUM_REFERENCE_DENSITY_KG_M3 = 7190.0

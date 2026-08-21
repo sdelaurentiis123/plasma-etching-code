@@ -2149,3 +2149,32 @@ def test_material_cleanup_preserves_exact_authoritative_union():
     for material_id, levelset in layers.items():
         assert np.all(levelset[owner == material_id] >= 0.0)
     assert not np.any((owner > 0) & (exact_union < 0.0))
+
+
+def test_material_owner_projection_preserves_union_and_is_idempotent():
+    first = np.asarray([
+        [[-0.4, 0.2], [0.8, 0.5]],
+        [[-0.3, 0.7], [0.4, 0.9]],
+    ])
+    second = np.asarray([
+        [[-0.2, 0.6], [0.7, 0.3]],
+        [[-0.5, 0.1], [0.9, 0.8]],
+    ])
+    desired = np.asarray([
+        [[0, 1], [1, 1]],
+        [[0, 1], [2, 2]],
+    ])
+    original_union = np.maximum(first, second)
+
+    layers, combined, owner = (
+        feature_step_module._project_material_owner_preserving_union(
+            {1: first, 2: second}, desired))
+
+    assert np.array_equal(combined, original_union)
+    assert np.array_equal(owner, desired)
+    repeated, repeated_union, repeated_owner = (
+        feature_step_module._project_material_owner_preserving_union(
+            layers, desired))
+    assert np.array_equal(repeated_union, combined)
+    assert np.array_equal(repeated_owner, owner)
+    assert all(np.array_equal(repeated[key], layers[key]) for key in layers)
