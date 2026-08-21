@@ -1,0 +1,175 @@
+{
+  "schema": "petch-zenodo-bosch-wafer-boundary-map-depth-extension-preregistration-v8",
+  "calibration_exposure": {
+    "calibration_outcomes_examined": true,
+    "v7_calibration_fit_examined": true,
+    "v7_spatial_residual_discovery_examined": true,
+    "machine_feature_family_search_examined": true,
+    "v8_operator_implemented_before_this_freeze": false,
+    "v8_response_table_started_before_this_freeze": false,
+    "v8_fit_started_before_this_freeze": false,
+    "heldout_outcomes_examined": false,
+    "status": "calibration-visible physical model-form freeze; chronological heldout outcome firewall remains closed"
+  },
+  "scientific_hypothesis": {
+    "dominant_missing_term": "one stable machine-specific positive-ion wafer-transmission fingerprint",
+    "dynamic_missing_term": "a lower-amplitude Vpp-dependent edge-focusing mode",
+    "physical_components": [
+      "powered-electrode and chamber geometry",
+      "focus-ring geometry and dielectric/electrical state",
+      "wafer-edge sheath curvature",
+      "measured C4F8-phase platen voltage"
+    ],
+    "not_a_surface_yield_correction": true,
+    "not_an_output_depth_correction": true
+  },
+  "discovery_record": {
+    "path": "results/curated/zenodo_bosch_recipe_path_memory_depth_extension_v7/spatial_residual_discovery.json",
+    "sha256": "8a7c4e5389ce4e776a8cc1da17aae7d2f4fc05f37362a824668ba8b639d04fa2",
+    "fraction_of_squared_residual_in_fixed_mean_map": 0.8620180872474941,
+    "v7_raw_normalized_shape_rmse_percent": 1.6649870904874655,
+    "all_calibration_fixed_map_residual_rmse_percent": 0.6184747177075774,
+    "shared_map_proxy_shape_rmse_percent": 0.6334735331121012,
+    "shared_map_proxy_point_rmse_um": 0.4055134146837346,
+    "vpp_proxy_shape_rmse_percent": 0.6203403014598341,
+    "vpp_proxy_point_rmse_um": 0.3996709767505046,
+    "vpp_slope_map_edge_basis_pearson": 0.8048587177549859,
+    "warning": "output-space proxies establish topology and capacity only; they are not physical boundary fits"
+  },
+  "wafer_boundary_operator": {
+    "wafer_radius_m": 0.1,
+    "coordinate_frame": "official calibration CSV x-y coordinates with rho=hypot(x,y)/0.1 and phi=atan2(y,x)",
+    "basis": "complete real Zernike basis on the unit disk excluding piston",
+    "static_maximum_order_candidates": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "static_nonpiston_coefficient_counts": [2, 5, 9, 14, 20, 27, 35, 44, 54, 65],
+    "dynamic_maximum_order_candidates": [0, 2],
+    "dynamic_nonpiston_coefficient_counts": [0, 5],
+    "dynamic_input": "z=(C4F8 platen peak-to-peak RMS - 637.4409584828442 V)/3.816305957878358 V",
+    "dynamic_voltage_domain_V": [626.9533265149638, 643.534317555529],
+    "raw_log_field": "g=sum(a_k Z_k)+z*sum(b_l Z_l)",
+    "raw_positive_transmission": "u=exp(g)",
+    "current_normalization": "T=u*integral(Jion_base dA)/integral(Jion_base*u dA)",
+    "normalization_quadrature": "deterministic cylindrical finite-volume wafer cells weighted by baseline positive-ion current density",
+    "physical_action": "multiply positive-ion point flux by T before the unchanged surface recurrence",
+    "unchanged_channels": [
+      "wafer-average positive-ion current",
+      "positive-ion energy",
+      "neutral F flux",
+      "neutral film-precursor flux",
+      "v7 wall-memory law",
+      "Belen silicon surface law",
+      "La Magna/Garozzo oxide and film surface law"
+    ],
+    "maximum_relative_total_ion_current_residual": 2e-14,
+    "positive_by_construction": true,
+    "forward_clipping_allowed": false,
+    "target_depth_used": false
+  },
+  "parameter_domain": {
+    "coefficient_bounds_log_units": [-0.1, 0.1],
+    "maximum_absolute_raw_log_field_on_dense_disk_over_voltage_domain": 0.6931471805599453,
+    "out_of_voltage_domain_application_allowed": false,
+    "per_lot_parameters": false,
+    "per_wafer_parameters": false,
+    "fitted_initial_state": false,
+    "tool_transfer_scope": "same SPTS tool, wafer coordinate frame, electrode/focus-ring configuration, and measurement convention"
+  },
+  "wall_model_separation": {
+    "full_calibration": "hold the already identified full-calibration v7 wall coefficients fixed while fitting v8 map coefficients",
+    "whole_lot_fold": "refit v7 coefficients using only training lots, freeze them, then fit only v8 map coefficients using the same training lots",
+    "joint_wall_map_tradeoff_allowed": false,
+    "v7_recipe_path_validity_domain_retained": true
+  },
+  "candidate_selection": {
+    "rule": "choose the lowest total coefficient count passing every gate",
+    "tie_break": "lower static order, then omit the dynamic field",
+    "no_passing_candidate_action": "fail v8 and keep heldout sealed",
+    "maximum_static_order": 10,
+    "maximum_dynamic_order": 2,
+    "selection_exposure_warning": "all-calibration capacity and a 131-feature ranking were examined before freeze; C4F8 platen Vpp RMS is now the only allowed dynamic feature"
+  },
+  "frozen_acceptance_gates": {
+    "absolute_gates_unchanged_from_v7": true,
+    "whole_lot_silicon_mean_mae_um_below": 0.338486,
+    "whole_lot_silicon_point_rmse_um_below": 0.486585,
+    "whole_lot_normalized_shape_rmse_percent_below": 0.636619,
+    "within_lot_slope_mae_um_per_wafer_at_most": 0.082903,
+    "all_candidates_scored_on_complete_whole_lot_folds": true
+  },
+  "identifiability_and_stability_gates": {
+    "selected_map_jacobian_full_column_rank": true,
+    "maximum_selected_map_jacobian_condition_number": 1000000.0,
+    "maximum_pairwise_parameter_correlation_magnitude": 0.995,
+    "bound_contact_fraction_of_span": 0.001,
+    "maximum_zernike_design_condition_number": 1000.0,
+    "maximum_median_fold_coefficient_standard_deviation": 0.005,
+    "maximum_fold_coefficient_range": 0.05,
+    "failure_action": "refuse prediction seal and do not open heldout outcomes"
+  },
+  "deterministic_acceleration": {
+    "allowed_only_for_calibration_search": true,
+    "wall_log_multiplier_domain": [-1.3862943611198906, 1.3862943611198906],
+    "local_ion_log_factor_domain": [-1.3862943611198906, 1.3862943611198906],
+    "wall_chebyshev_node_count": 13,
+    "local_ion_chebyshev_node_count": 13,
+    "surface_table_shape": "wall node x local-ion node x wafer x 89 points",
+    "point_independence_basis": "unchanged local surface recurrences have no lateral coupling once the reactor boundary is supplied",
+    "independent_midpoint_maximum_error_fraction_of_each_frozen_gate": 0.05,
+    "final_selected_fit_exact_replay_required": true,
+    "depth_correction_forbidden": true
+  },
+  "refinement_and_seal": {
+    "cylindrical_and_zernike_grid_refinement_maximum_gate_fraction": 0.25,
+    "full_selected_parameter_exact_replay_required": true,
+    "whole_lot_exact_replay_required_for_reported_seal_scores": true,
+    "code_data_parameter_fold_and_prediction_hashes_required": true,
+    "experimental_outcomes_read_false_runtime_audit_required": true,
+    "heldout_numeric_fields_may_be_parsed_only_after_all_prerequisites_pass": true
+  },
+  "forbidden_shortcuts": [
+    "additive or multiplicative corrections applied directly to predicted depth",
+    "changing Belen or La Magna/Garozzo surface coefficients",
+    "changing total positive-ion current or positive-ion energy",
+    "normalizing only over the 89 outcome measurement points",
+    "per-lot, per-wafer, per-point, or heldout-specific map coefficients",
+    "using wafer number, experiment key, lot number, date, or outcome as a map input",
+    "substituting another machine feature after v8 scoring",
+    "opening heldout outcomes from output-space proxy performance",
+    "weakening absolute, baseline, identifiability, stability, interpolation, replay, or refinement gates"
+  ],
+  "input_hashes": {
+    "v7_preregistration_json": "16a4461e559bf383f32a5ff2869f445a14203ce5951cea8ecf774046dde1d565",
+    "v7_calibration_fit": "b521ce464766b92bdde893b39e260e0f3093d19fc8f6eb5083dd12618db29a5d",
+    "v7_exact_response_table": "4583a4ae17ad93fd13f79b4c854cebc8ca31eae366bef65ed62173c0c03b67cd",
+    "v7_spatial_residual_discovery": "8a7c4e5389ce4e776a8cc1da17aae7d2f4fc05f37362a824668ba8b639d04fa2",
+    "process_data": "fd304fbc08a9641f182f71f11064b8fe00a01c24a100ae8211536ad0cd404f49",
+    "process_dictionary": "51c9bebfad14f0a0558bf8e5831579b6a3308a2ff5b330ae5b8f8f32bc4b4302",
+    "calibration_measurements": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb"
+  },
+  "frozen_code_parent": {
+    "git_commit": "bb075efd8a2ca70f149f51dc5d7db91500583c10",
+    "bosch_cylindrical_reactor_sha256": "a6904537f6674815505a15795e5cd78b8ae0d05c6685756faf6e58fdbf0e5391",
+    "bosch_reduced_reactor_sha256": "9aecd21d38545b0eb414a129a9e13ee8eee5c769c2c3cde516c56987dfe0e462",
+    "bosch_fast_surface_sha256": "da837c8c37ee33dc3ecf2bdd226af1fbd520fe432d2e95c60878760644e04745",
+    "v8_operator_implemented": false
+  },
+  "target_firewall": {
+    "calibration_asset_only": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+    "heldout_outcomes_read_at_freeze": false,
+    "heldout_prediction_written_at_freeze": false,
+    "eligible_for_prediction_seal_at_freeze": false,
+    "mixed_outcome_csv_forbidden_to_fit_process": true
+  },
+  "literature_topology_support": [
+    {
+      "citation": "Babaeva and Kushner, J. Phys. D 41 062004 (2008)",
+      "doi": "10.1088/0022-3727/41/6/062004",
+      "use": "focus-ring gap geometry and electrical properties alter sheath, ion energy/angular distributions, and wafer-edge flux; no numerical coefficient imported"
+    },
+    {
+      "citation": "Seong et al., Nanomaterials 12 3963 (2022)",
+      "doi": "10.3390/nano12223963",
+      "use": "experimental focus-ring height changes wafer-edge sheath curvature and etch profile; no numerical coefficient imported"
+    }
+  ]
+}
