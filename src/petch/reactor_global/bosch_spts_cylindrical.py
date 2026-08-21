@@ -322,6 +322,10 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
             base.lower_wall_velocity_m_s,
             base.upper_wall_velocity_m_s,
             base.side_wall_velocity_m_s))
+        # Chamber conditioning changes neutral recombination on non-wafer
+        # walls.  Lower-endcap collection is deliberately unchanged so this
+        # equipment closure cannot mutate the frozen wafer surface law.
+        wall[:2, 1:] *= base.neutral_wall_loss_multiplier
         self._lift = DeterministicCylindricalIndependentInventoryLift(
             grid=grid, species_names=_SPECIES,
             diffusion_coefficient_m2_s=base.diffusion_coefficient_m2_s,

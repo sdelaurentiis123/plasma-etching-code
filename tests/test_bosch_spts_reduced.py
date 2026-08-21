@@ -8,7 +8,8 @@ from petch.bosch_process_data import (
     load_bosch_process_traces,
 )
 from petch.reactor_global.bosch_spts_reduced import (
-    BoschSPTSReducedParameters, DeterministicBoschSPTSReactorToWafer,
+    BoschSPTSReducedParameters, BoschSPTSWallConditioningLaw,
+    DeterministicBoschSPTSReactorToWafer, conditioned_bosch_spts_parameters,
     solve_bosch_spts_reduced_reactor,
 )
 
@@ -124,3 +125,41 @@ def test_species_resolved_dual_zone_source_changes_radial_shapes_conservatively(
     assert np.array_equal(
         split_solution.reactor.volume_average_density_m3,
         annular_solution.reactor.volume_average_density_m3)
+
+
+def test_shared_wall_conditioning_law_uses_only_declared_lot_features():
+    law = BoschSPTSWallConditioningLaw(
+        log_carbon_cycle_coefficient=0.4,
+        silicon_precondition_coefficient=-0.2,
+        silicon_oxide_precondition_coefficient=0.3,
+    )
+
+    assert law.multiplier("3C") == 1.0
+    assert law.multiplier("9C") == pytest.approx(np.exp(0.4 * np.log(3.0)))
+    assert law.multiplier("3C-Si") == pytest.approx(np.exp(-0.2))
+    assert law.multiplier("3C-SiO2") == pytest.approx(np.exp(0.3))
+    with pytest.raises(ValueError, match="undeclared"):
+        law.multiplier("custom-lot")
+    with pytest.raises(ValueError, match="invalid"):
+        BoschSPTSWallConditioningLaw(log_carbon_cycle_coefficient=1.6)
+
+
+def test_conditioning_changes_neutral_reactor_state_but_not_ions(trace):
+    base_parameters = BoschSPTSReducedParameters()
+    law = BoschSPTSWallConditioningLaw(
+        silicon_precondition_coefficient=np.log(2.0))
+    conditioned_parameters = conditioned_bosch_spts_parameters(
+        base_parameters, law, "3C-Si")
+    base = solve_bosch_spts_reduced_reactor(trace, base_parameters)
+    conditioned = solve_bosch_spts_reduced_reactor(trace, conditioned_parameters)
+
+    assert conditioned_parameters.neutral_wall_loss_multiplier == pytest.approx(2.0)
+    assert np.all(
+        np.mean(conditioned.volume_average_density_m3[:, :2], axis=0)
+        < np.mean(base.volume_average_density_m3[:, :2], axis=0)
+    )
+    assert np.array_equal(
+        conditioned.volume_average_density_m3[:, 2],
+        base.volume_average_density_m3[:, 2],
+    )
+    assert np.array_equal(conditioned.ion_energy_eV, base.ion_energy_eV)

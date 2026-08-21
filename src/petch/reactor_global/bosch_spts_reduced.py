@@ -22,7 +22,7 @@ calibration lots.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from types import MappingProxyType
 import math
 
@@ -52,6 +52,86 @@ _SPECIES = ("F", "C4F8_film_precursor", "positive_ion")
 
 
 @dataclass(frozen=True)
+class BoschSPTSWallConditioningLaw:
+    """Shared declared-lot preparation to neutral wall-loss closure."""
+
+    log_carbon_cycle_coefficient: float = 0.0
+    silicon_precondition_coefficient: float = 0.0
+    silicon_oxide_precondition_coefficient: float = 0.0
+    coefficient_bound: float = 1.5
+    minimum_multiplier: float = 0.25
+    maximum_multiplier: float = 4.0
+
+    def __post_init__(self):
+        coefficients = (
+            self.log_carbon_cycle_coefficient,
+            self.silicon_precondition_coefficient,
+            self.silicon_oxide_precondition_coefficient,
+        )
+        if (
+            not math.isfinite(self.coefficient_bound)
+            or self.coefficient_bound <= 0.0
+            or any(
+                not math.isfinite(value)
+                or abs(value) > self.coefficient_bound
+                for value in coefficients
+            )
+            or not math.isfinite(self.minimum_multiplier)
+            or not math.isfinite(self.maximum_multiplier)
+            or not 0.0 < self.minimum_multiplier <= 1.0
+            or not 1.0 <= self.maximum_multiplier
+            or self.minimum_multiplier >= self.maximum_multiplier
+        ):
+            raise ValueError("invalid Bosch wall-conditioning law")
+
+    @staticmethod
+    def _lot_features(lot_type):
+        label = str(lot_type).strip()
+        declared = {
+            "1C": (1.0, 0.0, 0.0),
+            "3C": (3.0, 0.0, 0.0),
+            "9C": (9.0, 0.0, 0.0),
+            "1C-Si": (1.0, 1.0, 0.0),
+            "3C-Si": (3.0, 1.0, 0.0),
+            "9C-Si": (9.0, 1.0, 0.0),
+            "1C-SiO2": (1.0, 0.0, 1.0),
+            "3C-SiO2": (3.0, 0.0, 1.0),
+            "9C-SiO2": (9.0, 0.0, 1.0),
+        }
+        if label not in declared:
+            raise ValueError(f"undeclared Bosch conditioning lot type: {label!r}")
+        return declared[label]
+
+    def multiplier(self, lot_type):
+        carbon_count, silicon, silicon_oxide = self._lot_features(lot_type)
+        log_multiplier = (
+            self.log_carbon_cycle_coefficient * math.log(carbon_count / 3.0)
+            + self.silicon_precondition_coefficient * silicon
+            + self.silicon_oxide_precondition_coefficient * silicon_oxide
+        )
+        return float(np.clip(
+            math.exp(log_multiplier),
+            self.minimum_multiplier,
+            self.maximum_multiplier,
+        ))
+
+    def manifest(self):
+        return {
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "log_carbon_cycle_coefficient": self.log_carbon_cycle_coefficient,
+            "silicon_precondition_coefficient": (
+                self.silicon_precondition_coefficient),
+            "silicon_oxide_precondition_coefficient": (
+                self.silicon_oxide_precondition_coefficient),
+            "coefficient_bound": self.coefficient_bound,
+            "wall_loss_multiplier_bounds": [
+                self.minimum_multiplier, self.maximum_multiplier],
+            "reference_lot_type": "3C",
+            "target_depth_used": False,
+        }
+
+
+@dataclass(frozen=True)
 class BoschSPTSReducedParameters:
     """Physical and equipment-transfer inputs for one Rapier configuration."""
 
@@ -72,6 +152,7 @@ class BoschSPTSReducedParameters:
     positive_ion_reference_lifetime_s: float = 2.0e-5
     lifetime_reference_pressure_torr: float = 0.04
     neutral_lifetime_pressure_exponent: float = 1.0
+    neutral_wall_loss_multiplier: float = 1.0
     pressure_channel_to_torr: float = 1.0
     sheath_bias_fraction_of_vpp: float = 0.25
     collisional_ion_energy_transmission: float = 0.70
@@ -113,6 +194,8 @@ class BoschSPTSReducedParameters:
                 or not 0.0 < self.collisional_ion_energy_transmission <= 1.0
                 or not math.isfinite(self.neutral_lifetime_pressure_exponent)
                 or not 0.0 <= self.neutral_lifetime_pressure_exponent <= 2.0
+                or not math.isfinite(self.neutral_wall_loss_multiplier)
+                or not 0.25 <= self.neutral_wall_loss_multiplier <= 4.0
                 or int(self.radial_cell_count) != self.radial_cell_count
                 or int(self.axial_cell_count) != self.axial_cell_count
                 or min(self.radial_cell_count, self.axial_cell_count) < 4):
@@ -155,6 +238,21 @@ class BoschSPTSReducedParameters:
                 "defaults are physically bounded initialization values; tool-transfer "
                 "parameters are not certified until calibration receipt is sealed"),
         }
+
+
+def conditioned_bosch_spts_parameters(
+        parameters: BoschSPTSReducedParameters,
+        law: BoschSPTSWallConditioningLaw,
+        lot_type: str) -> BoschSPTSReducedParameters:
+    """Apply one shared conditioning law inside the reduced reactor state."""
+    if not isinstance(parameters, BoschSPTSReducedParameters):
+        raise TypeError("parameters must be BoschSPTSReducedParameters")
+    if not isinstance(law, BoschSPTSWallConditioningLaw):
+        raise TypeError("law must be BoschSPTSWallConditioningLaw")
+    return replace(
+        parameters,
+        neutral_wall_loss_multiplier=law.multiplier(lot_type),
+    )
 
 
 @dataclass(frozen=True)
@@ -331,8 +429,10 @@ def solve_bosch_spts_reduced_reactor(
             ** parameters.neutral_lifetime_pressure_exponent,
             0.25, 4.0)
         lifetimes = (
-            parameters.f_reference_lifetime_s * neutral_scale,
-            parameters.film_precursor_reference_lifetime_s * neutral_scale,
+            parameters.f_reference_lifetime_s * neutral_scale
+            / parameters.neutral_wall_loss_multiplier,
+            parameters.film_precursor_reference_lifetime_s * neutral_scale
+            / parameters.neutral_wall_loss_multiplier,
             parameters.positive_ion_reference_lifetime_s,
         )
         for species, lifetime in enumerate(lifetimes):
@@ -372,6 +472,9 @@ def solve_bosch_spts_reduced_reactor(
             "equation": "exact piecewise-constant dn/dt=S-n/tau",
             "production_limit": "minimum of absorbed-power and inlet-particle supply",
             "source2_measured_off_required": True,
+            "neutral_wall_conditioning": (
+                "shared multiplier increases neutral loss frequency; positive-ion "
+                "state and energy are unchanged"),
             "parameters": parameters.manifest(),
         })
 
@@ -408,6 +511,7 @@ class DeterministicBoschSPTSReactorToWafer:
             parameters.lower_wall_velocity_m_s,
             parameters.upper_wall_velocity_m_s,
             parameters.side_wall_velocity_m_s))
+        wall[:2, 1:] *= parameters.neutral_wall_loss_multiplier
         self._lift = DeterministicAxisymmetricInventoryLift(
             grid=grid, species_names=_SPECIES,
             diffusion_coefficient_m2_s=np.asarray(

@@ -191,3 +191,27 @@ def test_edge_sheath_focus_is_positive_and_conserves_total_ion_current(trace):
     assert focused_ratio > base_ratio
     assert np.all(focused.unit_point_flux_per_density_m_s >= 0.0)
     assert focused.provenance["total_wafer_ion_current_conserved"] is True
+
+
+def test_wall_conditioning_changes_only_neutral_nonwafer_transfer(trace):
+    base_reduced = BoschSPTSReducedParameters(
+        radial_cell_count=10, axial_cell_count=8)
+    conditioned_reduced = replace(
+        base_reduced, neutral_wall_loss_multiplier=2.0)
+    x = np.array([0.0, 0.04, 0.08, -0.08])
+    y = np.zeros_like(x)
+    base = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=base_reduced, azimuthal_cell_count=8)).source_response(
+                x_m=x, y_m=y)
+    conditioned = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=conditioned_reduced, azimuthal_cell_count=8)).source_response(
+                x_m=x, y_m=y)
+
+    assert not np.array_equal(
+        conditioned.unit_point_flux_per_density_m_s[:2],
+        base.unit_point_flux_per_density_m_s[:2],
+    )
+    assert conditioned.unit_point_flux_per_density_m_s[2] == pytest.approx(
+        base.unit_point_flux_per_density_m_s[2], rel=2e-14, abs=1e-16)
