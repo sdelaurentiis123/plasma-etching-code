@@ -1,0 +1,86 @@
+{
+  "schema": "petch-zenodo-bosch-wall-conditioning-depth-extension-preregistration-v5",
+  "calibration_exposure": {
+    "calibration_outcomes_examined": true,
+    "conditioning_fit_started_before_this_freeze": false,
+    "heldout_outcomes_examined": false,
+    "status": "calibration-visible physical conditioning closure; execution-heldout outcome firewall remains closed"
+  },
+  "frozen_from_prior_versions": {
+    "acceptance_gates_unchanged": true,
+    "calibration_and_heldout_keys_unchanged": true,
+    "heldout_baselines_unchanged": true,
+    "surface_laws_unchanged": [
+      "Belen SF6 silicon removal",
+      "La Magna/Garozzo C4F8 film and SiO2 removal"
+    ],
+    "cylindrical_v2_preregistration": "results/curated/zenodo_bosch_cylindrical_depth_extension_v2/preregistration.json",
+    "cylindrical_v2_preregistration_sha256": "66f681abbe54d7785965e5e949a23f7562c3cad18d4105752b964eba59b93555",
+    "edge_sheath_v4_preregistration": "results/curated/zenodo_bosch_edge_sheath_depth_extension_v4/preregistration.json",
+    "edge_sheath_v4_preregistration_sha256": "0a23532b4450c7129972293e5c80b37e953ab2503bb15555e4aff746e1211625"
+  },
+  "conditioning_law": {
+    "declared_lot_type_pattern": "{1|3|9}C[-Si|-SiO2 optional]",
+    "log_wall_loss_multiplier": "b_C*log(carbon_cycle_count/3) + b_Si*I[-Si] + b_SiO2*I[-SiO2]",
+    "free_coefficients": [
+      "b_C",
+      "b_Si",
+      "b_SiO2"
+    ],
+    "coefficient_bounds_each": [
+      -1.5,
+      1.5
+    ],
+    "wall_loss_multiplier": "clip(exp(log_wall_loss_multiplier), 0.25, 4.0)",
+    "wall_loss_multiplier_bounds": [
+      0.25,
+      4.0
+    ],
+    "reference_state": "3C with no Si or SiO2 suffix has multiplier 1 exactly",
+    "maximum_free_coefficients": 3,
+    "physical_action": {
+      "zero_dimensional_neutral_state": "divide F and C4F8-film-precursor reference lifetimes by the wall-loss multiplier",
+      "cylindrical_neutral_transfer": "multiply upper and sidewall F and film-precursor loss velocities by the same multiplier",
+      "lower_wafer_collection": "unchanged",
+      "positive_ion_state_and_transfer": "unchanged",
+      "surface_kinetics_and_yields": "unchanged"
+    },
+    "bound_rationale": "the existing reduced reactor already clips pressure-conditioned neutral lifetime scaling to a factor-four interval; the same conservative interval is frozen for unmeasured wall-state transfer",
+    "metadata_source": "data/experimental/zenodo_17122442/Lot_status.xlsx",
+    "metadata_source_sha256": "f7d85345ac51a20944fe52d7b846bc387bc52c79169d4c4b419361ccbc317b05"
+  },
+  "selection_and_seal": {
+    "fold_unit": "entire lot/date",
+    "fit_scope": "one shared coefficient triplet across every calibration wafer",
+    "objective": "sum of squared aggregate leave-one-lot-out errors normalized by the corresponding frozen gate",
+    "required_before_heldout_reveal": [
+      "all absolute calibration gates pass",
+      "leave-one-lot-out physics prediction beats global-mean depth baseline",
+      "leave-one-lot-out physics prediction beats shared mean-map baseline",
+      "certification-grid refinement changes each acceptance observable by less than 0.25 of its frozen gate",
+      "code, data, parameter, fold-score, and heldout-prediction hashes are sealed",
+      "experimental_outcomes_read=false runtime audit"
+    ]
+  },
+  "forbidden_shortcuts": [
+    "independent per-lot or per-wafer coefficients",
+    "additive or multiplicative corrections applied directly to predicted depth",
+    "changing Belen or La Magna/Garozzo surface coefficients",
+    "changing positive-ion energy or flux through the conditioning law",
+    "using heldout outcomes to choose conditioning signs, bounds, or coefficients",
+    "weakening the v1 acceptance gates or empirical-baseline requirements"
+  ],
+  "frozen_code_parent": {
+    "git_commit": "01abf02df46a7156f9641be83a119adaa1bd8fef",
+    "bosch_reduced_reactor_sha256": "455e79b7873bf1b8f584cce9f7e32c23de7f4a815583a1d8cc991ef7bed9c113",
+    "bosch_cylindrical_transfer_sha256": "63992ec1c159a7616b52b268c6f005175a38e771a1593df2afae5a540c49a398",
+    "conditioning_operator_implemented": false
+  },
+  "target_firewall": {
+    "calibration_asset_only": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+    "calibration_asset_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "heldout_numeric_fields_may_be_parsed_only_after_prediction_seal": true,
+    "heldout_outcomes_read_at_freeze": false,
+    "mixed_outcome_csv_forbidden_to_fit_process": true
+  }
+}
