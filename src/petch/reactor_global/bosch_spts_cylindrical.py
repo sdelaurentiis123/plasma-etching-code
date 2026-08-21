@@ -21,6 +21,11 @@ from .geometry import CylindricalReactor
 
 _SPECIES = ("F", "C4F8_film_precursor", "positive_ion")
 _GAUSS_X, _GAUSS_W = np.polynomial.legendre.leggauss(128)
+_LOG_TWO = math.log(2.0)
+_TRANSMISSION_COEFFICIENT_BOUND = 0.1
+_TRANSMISSION_VPP_REFERENCE_V = 637.4409584828442
+_TRANSMISSION_VPP_SCALE_V = 3.816305957878358
+_TRANSMISSION_VPP_DOMAIN_V = (626.9533265149638, 643.534317555529)
 
 
 @dataclass(frozen=True)
@@ -99,6 +104,188 @@ class BoschSPTSCylindricalParameters:
                 list(row) for row in self.source_sine_coefficients],
             "azimuthal_source_form": (
                 "positive exponential Fourier modulation of each species source"),
+        }
+
+
+def bosch_real_zernike_modes(maximum_order):
+    """Return the frozen complete real-Zernike ordering without a piston."""
+    maximum_order = int(maximum_order)
+    if not 0 <= maximum_order <= 10:
+        raise ValueError("Bosch Zernike maximum order must be in [0, 10]")
+    modes = []
+    for radial_order in range(1, maximum_order + 1):
+        for azimuthal_order in range(
+                radial_order % 2, radial_order + 1, 2):
+            if azimuthal_order == 0:
+                modes.append((radial_order, azimuthal_order, "cos"))
+            else:
+                modes.extend((
+                    (radial_order, azimuthal_order, "cos"),
+                    (radial_order, azimuthal_order, "sin"),
+                ))
+    return tuple(modes)
+
+
+def _zernike_radial(radial_order, azimuthal_order, radius):
+    radius = np.asarray(radius, dtype=float)
+    output = np.zeros_like(radius)
+    for index in range((radial_order - azimuthal_order) // 2 + 1):
+        output += (
+            (-1) ** index * math.factorial(radial_order - index)
+            / (
+                math.factorial(index)
+                * math.factorial(
+                    (radial_order + azimuthal_order) // 2 - index)
+                * math.factorial(
+                    (radial_order - azimuthal_order) // 2 - index)
+            )
+            * radius ** (radial_order - 2 * index)
+        )
+    return output
+
+
+def bosch_real_zernike_design(maximum_order, radius_fraction, phi_rad):
+    """Evaluate the complete frozen real-Zernike basis on the unit disk."""
+    radius = np.asarray(radius_fraction, dtype=float)
+    phi = np.asarray(phi_rad, dtype=float)
+    radius, phi = np.broadcast_arrays(radius, phi)
+    if (
+        np.any(~np.isfinite(radius))
+        or np.any(~np.isfinite(phi))
+        or np.any(radius < 0.0)
+        or np.any(radius > 1.0 + 2.0e-14)
+    ):
+        raise ValueError("Bosch Zernike coordinates must lie on the unit disk")
+    radius = np.minimum(radius, 1.0)
+    columns = []
+    for radial_order, azimuthal_order, phase in bosch_real_zernike_modes(
+            maximum_order):
+        radial = _zernike_radial(
+            radial_order, azimuthal_order, radius)
+        if phase == "cos":
+            columns.append(
+                radial * np.cos(azimuthal_order * phi))
+        else:
+            columns.append(
+                radial * np.sin(azimuthal_order * phi))
+    if not columns:
+        return np.empty(radius.shape + (0,), dtype=float)
+    return np.stack(columns, axis=-1)
+
+
+@dataclass(frozen=True)
+class BoschSPTSWaferIonTransmissionLaw:
+    """Positive current-conserving tool fingerprint on the ion boundary."""
+
+    static_maximum_order: int
+    static_coefficients: tuple[float, ...]
+    dynamic_maximum_order: int = 0
+    dynamic_coefficients: tuple[float, ...] = ()
+    vpp_reference_V: float = _TRANSMISSION_VPP_REFERENCE_V
+    vpp_scale_V: float = _TRANSMISSION_VPP_SCALE_V
+    vpp_domain_V: tuple[float, float] = _TRANSMISSION_VPP_DOMAIN_V
+    coefficient_bound: float = _TRANSMISSION_COEFFICIENT_BOUND
+    maximum_absolute_log_field: float = _LOG_TWO
+
+    def __post_init__(self):
+        static_order = int(self.static_maximum_order)
+        dynamic_order = int(self.dynamic_maximum_order)
+        static = tuple(float(value) for value in self.static_coefficients)
+        dynamic = tuple(float(value) for value in self.dynamic_coefficients)
+        voltage_domain = tuple(float(value) for value in self.vpp_domain_V)
+        if (
+            static_order != self.static_maximum_order
+            or not 1 <= static_order <= 10
+            or dynamic_order != self.dynamic_maximum_order
+            or dynamic_order not in (0, 2)
+            or len(static) != len(bosch_real_zernike_modes(static_order))
+            or len(dynamic) != len(bosch_real_zernike_modes(dynamic_order))
+            or len(voltage_domain) != 2
+            or not voltage_domain[0] < voltage_domain[1]
+            or not math.isfinite(self.vpp_reference_V)
+            or not math.isfinite(self.vpp_scale_V)
+            or self.vpp_scale_V <= 0.0
+            or not math.isfinite(self.coefficient_bound)
+            or self.coefficient_bound <= 0.0
+            or not math.isfinite(self.maximum_absolute_log_field)
+            or self.maximum_absolute_log_field <= 0.0
+            or any(not math.isfinite(value) for value in static + dynamic)
+            or any(abs(value) > self.coefficient_bound
+                   for value in static + dynamic)
+        ):
+            raise ValueError("invalid Bosch wafer ion-transmission law")
+        object.__setattr__(self, "static_maximum_order", static_order)
+        object.__setattr__(self, "dynamic_maximum_order", dynamic_order)
+        object.__setattr__(self, "static_coefficients", static)
+        object.__setattr__(self, "dynamic_coefficients", dynamic)
+        object.__setattr__(self, "vpp_domain_V", voltage_domain)
+        maximum = self._certification_maximum_absolute_log_field()
+        if maximum > self.maximum_absolute_log_field + 2.0e-14:
+            raise ValueError(
+                "Bosch ion-transmission log field exceeds its frozen bound")
+
+    def standardized_vpp(self, vpp_rms_V):
+        value = float(vpp_rms_V)
+        if (
+            not math.isfinite(value)
+            or value < self.vpp_domain_V[0]
+            or value > self.vpp_domain_V[1]
+        ):
+            raise ValueError("C4F8 platen Vpp RMS lies outside the frozen domain")
+        return (value - self.vpp_reference_V) / self.vpp_scale_V
+
+    def log_field(self, radius_fraction, phi_rad, standardized_vpp):
+        standardized_vpp = float(standardized_vpp)
+        if not math.isfinite(standardized_vpp):
+            raise ValueError("standardized Vpp must be finite")
+        static = bosch_real_zernike_design(
+            self.static_maximum_order, radius_fraction, phi_rad)
+        output = np.einsum(
+            "...k,k->...", static, np.asarray(self.static_coefficients))
+        if self.dynamic_coefficients:
+            dynamic = bosch_real_zernike_design(
+                self.dynamic_maximum_order, radius_fraction, phi_rad)
+            output = output + standardized_vpp * np.einsum(
+                "...k,k->...", dynamic,
+                np.asarray(self.dynamic_coefficients))
+        if np.any(~np.isfinite(output)):
+            raise RuntimeError("Bosch ion-transmission field is nonfinite")
+        return output
+
+    def _certification_maximum_absolute_log_field(self):
+        radius = np.linspace(0.0, 1.0, 129)
+        phi = np.linspace(0.0, 2.0 * np.pi, 256, endpoint=False)
+        rho, angle = np.meshgrid(radius, phi, indexing="ij")
+        values = []
+        for voltage in self.vpp_domain_V:
+            values.append(np.max(np.abs(self.log_field(
+                rho, angle, self.standardized_vpp(voltage)))))
+        return float(max(values, default=0.0))
+
+    def manifest(self):
+        return {
+            "schema": "petch-spts-bosch-wafer-ion-transmission-law-v1",
+            "basis": "complete real Zernike basis excluding piston",
+            "static_maximum_order": self.static_maximum_order,
+            "static_modes": [list(item) for item in bosch_real_zernike_modes(
+                self.static_maximum_order)],
+            "static_coefficients": list(self.static_coefficients),
+            "dynamic_maximum_order": self.dynamic_maximum_order,
+            "dynamic_modes": [list(item) for item in bosch_real_zernike_modes(
+                self.dynamic_maximum_order)],
+            "dynamic_coefficients": list(self.dynamic_coefficients),
+            "dynamic_input": "standardized C4F8 platen peak-to-peak RMS",
+            "vpp_reference_V": self.vpp_reference_V,
+            "vpp_scale_V": self.vpp_scale_V,
+            "vpp_domain_V": list(self.vpp_domain_V),
+            "coefficient_bound": self.coefficient_bound,
+            "maximum_absolute_log_field": self.maximum_absolute_log_field,
+            "certified_maximum_absolute_log_field": (
+                self._certification_maximum_absolute_log_field()),
+            "positive_form": "exp(static Zernike field + z*dynamic field)",
+            "current_normalization": (
+                "baseline-ion-current-weighted finite-volume wafer integral"),
+            "target_depth_used": False,
         }
 
 
@@ -259,13 +446,18 @@ def _wafer_area_weights(grid, wafer_radius_m):
     return area_weights
 
 
-def _ion_edge_focus_point_factor(unit_lower, grid, parameters, point_radius_m):
+def _ion_edge_focus_factors(unit_lower, grid, parameters, point_radius_m):
     """Resolve a sub-grid wafer-edge ion layer at fixed total ion current."""
     unit_lower = np.asarray(unit_lower, dtype=float)
     point_radius = np.asarray(point_radius_m, dtype=float)
     amplitude = float(parameters.ion_edge_focus_amplitude)
     if amplitude == 0.0:
-        return np.ones_like(point_radius), 1.0, 1.0
+        return (
+            np.ones_like(point_radius),
+            np.ones((grid.radial_cell_count, grid.azimuthal_cell_count)),
+            1.0,
+            1.0,
+        )
     onset = float(parameters.ion_edge_focus_onset_radius_m)
     width = float(parameters.ion_edge_focus_width_m)
     wafer_radius = float(parameters.reduced.wafer_radius_m)
@@ -301,7 +493,89 @@ def _ion_edge_focus_point_factor(unit_lower, grid, parameters, point_radius_m):
         * current_correction)
     if np.any(~np.isfinite(point_factor)) or np.any(point_factor <= 0.0):
         raise RuntimeError("ion edge focus produced an invalid point factor")
-    return point_factor, continuous_area_mean, current_correction
+    grid_factor = area_normalized * current_correction
+    return (
+        point_factor,
+        np.broadcast_to(
+            grid_factor,
+            (grid.radial_cell_count, grid.azimuthal_cell_count)).copy(),
+        continuous_area_mean,
+        current_correction,
+    )
+
+
+def _ion_edge_focus_point_factor(unit_lower, grid, parameters, point_radius_m):
+    point, _grid, continuous_mean, correction = _ion_edge_focus_factors(
+        unit_lower, grid, parameters, point_radius_m)
+    return point, continuous_mean, correction
+
+
+def _wafer_ion_transmission_point_factor(
+        unit_lower, grid, parameters, point_x_m, point_y_m,
+        edge_focus_grid_factor, law, c4f8_platen_vpp_rms_V):
+    """Evaluate a positive Zernike map with exact grid-current normalization."""
+    if not isinstance(law, BoschSPTSWaferIonTransmissionLaw):
+        raise TypeError("invalid Bosch wafer ion-transmission law")
+    x = np.asarray(point_x_m, dtype=float)
+    y = np.asarray(point_y_m, dtype=float)
+    point_radius = np.hypot(x, y)
+    wafer_radius = float(parameters.reduced.wafer_radius_m)
+    if np.any(point_radius > wafer_radius + 2.0e-14):
+        raise ValueError("ion-transmission point lies outside the wafer")
+    standardized_vpp = law.standardized_vpp(c4f8_platen_vpp_rms_V)
+
+    radial = grid.radial_centers_m[:, None]
+    angle = grid.azimuthal_centers_rad[None, :]
+    on_wafer = radial <= wafer_radius
+    grid_log_field = np.zeros(
+        (grid.radial_cell_count, grid.azimuthal_cell_count))
+    if np.any(on_wafer):
+        rho = np.broadcast_to(
+            radial / wafer_radius, grid_log_field.shape)[on_wafer.repeat(
+                grid.azimuthal_cell_count, axis=1)]
+        phi = np.broadcast_to(angle, grid_log_field.shape)[on_wafer.repeat(
+            grid.azimuthal_cell_count, axis=1)]
+        grid_log_field[on_wafer.repeat(
+            grid.azimuthal_cell_count, axis=1)] = law.log_field(
+                rho, phi, standardized_vpp)
+    raw_grid_factor = np.exp(grid_log_field)
+    area_weights = _wafer_area_weights(grid, wafer_radius)
+    baseline_grid_current = (
+        np.asarray(unit_lower, dtype=float)[2]
+        * np.asarray(edge_focus_grid_factor, dtype=float))
+    initial_current = float(np.sum(baseline_grid_current * area_weights))
+    candidate_current = float(np.sum(
+        baseline_grid_current * raw_grid_factor * area_weights))
+    if initial_current <= 0.0 or candidate_current <= 0.0:
+        raise RuntimeError("ion-transmission map encountered zero wafer current")
+    current_correction = initial_current / candidate_current
+    final_current = float(np.sum(
+        baseline_grid_current * raw_grid_factor * current_correction
+        * area_weights))
+    current_residual = abs(final_current - initial_current) / initial_current
+    if current_residual > 2.0e-14:
+        raise RuntimeError("ion-transmission map failed current conservation")
+
+    point_phi = np.arctan2(y, x)
+    point_log_field = law.log_field(
+        np.minimum(point_radius / wafer_radius, 1.0),
+        point_phi,
+        standardized_vpp,
+    )
+    point_factor = np.exp(point_log_field) * current_correction
+    if np.any(~np.isfinite(point_factor)) or np.any(point_factor <= 0.0):
+        raise RuntimeError("ion-transmission map produced an invalid factor")
+    return point_factor, {
+        "standardized_c4f8_platen_vpp_rms": standardized_vpp,
+        "exact_current_correction": current_correction,
+        "relative_total_ion_current_residual": current_residual,
+        "minimum_point_factor": float(np.min(point_factor)),
+        "maximum_point_factor": float(np.max(point_factor)),
+        "minimum_grid_factor": float(np.min(
+            raw_grid_factor * current_correction)),
+        "maximum_grid_factor": float(np.max(
+            raw_grid_factor * current_correction)),
+    }
 
 
 class DeterministicBoschSPTSCylindricalReactorToWafer:
@@ -346,10 +620,16 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
             species_source_radial_width_m=None,
             ion_edge_focus_amplitude=None,
             ion_edge_focus_onset_radius_m=None,
-            ion_edge_focus_width_m=None):
+            ion_edge_focus_width_m=None,
+            ion_transmission_law=None,
+            c4f8_platen_vpp_rms_V=None):
         if ((source_cosine_coefficients is None)
                 != (source_sine_coefficients is None)):
             raise ValueError("cosine and sine source coefficients must be paired")
+        if ((ion_transmission_law is None)
+                != (c4f8_platen_vpp_rms_V is None)):
+            raise ValueError(
+                "ion-transmission law and C4F8 Vpp RMS must be paired")
         if (source_ring_radius_m is not None
                 and species_source_ring_radius_m is not None):
             raise ValueError("shared and species ring radii are mutually exclusive")
@@ -433,10 +713,34 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
         unit_point_flux = np.einsum("srp,qrp->sq", unit_lower, weights)
         point_radius = np.sqrt(
             np.asarray(x_m, dtype=float) ** 2 + np.asarray(y_m, dtype=float) ** 2)
-        point_factor, continuous_area_mean, current_correction = (
-            _ion_edge_focus_point_factor(
-                unit_lower, self._grid, parameters, point_radius))
+        (point_factor, edge_grid_factor, continuous_area_mean,
+         current_correction) = _ion_edge_focus_factors(
+            unit_lower, self._grid, parameters, point_radius)
         unit_point_flux[2] *= point_factor
+        if ion_transmission_law is None:
+            transmission_provenance = {
+                "enabled": False,
+                "relative_total_ion_current_residual": 0.0,
+            }
+        else:
+            transmission_factor, transmission_provenance = (
+                _wafer_ion_transmission_point_factor(
+                    unit_lower,
+                    self._grid,
+                    parameters,
+                    np.asarray(x_m, dtype=float),
+                    np.asarray(y_m, dtype=float),
+                    edge_grid_factor,
+                    ion_transmission_law,
+                    c4f8_platen_vpp_rms_V,
+                ))
+            unit_point_flux[2] *= transmission_factor
+            transmission_provenance = {
+                "enabled": True,
+                "law": ion_transmission_law.manifest(),
+                "c4f8_platen_vpp_rms_V": float(c4f8_platen_vpp_rms_V),
+                **transmission_provenance,
+            }
         area_weights = _wafer_area_weights(
             self._grid, parameters.reduced.wafer_radius_m)
         unit_average_flux = np.einsum(
@@ -453,6 +757,7 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
                 "transport_factorization_reused": reused_factorization,
                 "ion_edge_focus_continuous_area_mean": continuous_area_mean,
                 "ion_edge_focus_exact_current_correction": current_correction,
+                "wafer_ion_transmission": transmission_provenance,
                 "total_wafer_ion_current_conserved": True,
                 "target_depth_used": False,
             })

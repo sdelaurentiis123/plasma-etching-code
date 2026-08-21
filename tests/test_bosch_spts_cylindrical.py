@@ -7,7 +7,10 @@ import pytest
 from petch.bosch_process_data import load_bosch_process_traces
 from petch.reactor_global.bosch_spts_cylindrical import (
     BoschSPTSCylindricalParameters,
+    BoschSPTSWaferIonTransmissionLaw,
     DeterministicBoschSPTSCylindricalReactorToWafer,
+    bosch_real_zernike_design,
+    bosch_real_zernike_modes,
 )
 from petch.reactor_global.bosch_spts_reduced import (
     BoschSPTSReducedParameters, DeterministicBoschSPTSReactorToWafer,
@@ -215,3 +218,110 @@ def test_wall_conditioning_changes_only_neutral_nonwafer_transfer(trace):
     )
     assert conditioned.unit_point_flux_per_density_m_s[2] == pytest.approx(
         base.unit_point_flux_per_density_m_s[2], rel=2e-14, abs=1e-16)
+
+
+def test_real_zernike_basis_has_frozen_complete_ordering():
+    assert [len(bosch_real_zernike_modes(order)) for order in range(1, 11)] == [
+        2, 5, 9, 14, 20, 27, 35, 44, 54, 65,
+    ]
+    design = bosch_real_zernike_design(
+        2, np.array([0.0]), np.array([1.234]))
+
+    assert bosch_real_zernike_modes(2) == (
+        (1, 1, "cos"),
+        (1, 1, "sin"),
+        (2, 0, "cos"),
+        (2, 2, "cos"),
+        (2, 2, "sin"),
+    )
+    assert design[0] == pytest.approx([0.0, 0.0, -1.0, 0.0, 0.0])
+
+
+def test_wafer_ion_transmission_is_positive_and_conserves_current(trace):
+    reduced = BoschSPTSReducedParameters(
+        radial_cell_count=18, axial_cell_count=10)
+    x = np.array([0.0, 0.04, -0.06, 0.08, -0.095])
+    y = np.array([0.0, 0.03, 0.02, -0.04, 0.0])
+    model = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=16,
+            ion_edge_focus_amplitude=0.25,
+            ion_edge_focus_onset_radius_m=0.09,
+            ion_edge_focus_width_m=0.003))
+    base = model.source_response(x_m=x, y_m=y)
+    law = BoschSPTSWaferIonTransmissionLaw(
+        static_maximum_order=2,
+        static_coefficients=(0.015, -0.01, 0.025, 0.008, -0.006),
+        dynamic_maximum_order=2,
+        dynamic_coefficients=(0.001, -0.002, 0.004, 0.001, -0.001),
+    )
+    mapped = model.source_response(
+        x_m=x,
+        y_m=y,
+        ion_transmission_law=law,
+        c4f8_platen_vpp_rms_V=637.4409584828442,
+    )
+
+    assert mapped.unit_wafer_average_flux_per_density_m_s == pytest.approx(
+        base.unit_wafer_average_flux_per_density_m_s,
+        rel=2.0e-14,
+        abs=1.0e-16,
+    )
+    assert mapped.unit_point_flux_per_density_m_s[:2] == pytest.approx(
+        base.unit_point_flux_per_density_m_s[:2],
+        rel=2.0e-14,
+        abs=1.0e-16,
+    )
+    assert np.all(mapped.unit_point_flux_per_density_m_s > 0.0)
+    assert not np.allclose(
+        mapped.unit_point_flux_per_density_m_s[2],
+        base.unit_point_flux_per_density_m_s[2],
+    )
+    provenance = mapped.provenance["wafer_ion_transmission"]
+    assert provenance["enabled"] is True
+    assert provenance["relative_total_ion_current_residual"] <= 2.0e-14
+    assert mapped.provenance["total_wafer_ion_current_conserved"] is True
+
+
+def test_wafer_ion_transmission_voltage_is_smooth_and_domain_bounded(trace):
+    reduced = BoschSPTSReducedParameters(
+        radial_cell_count=14, axial_cell_count=9)
+    x = np.array([0.0, 0.04, 0.08, -0.095])
+    y = np.zeros_like(x)
+    model = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=12))
+    law = BoschSPTSWaferIonTransmissionLaw(
+        static_maximum_order=1,
+        static_coefficients=(0.0, 0.0),
+        dynamic_maximum_order=2,
+        dynamic_coefficients=(0.0, 0.0, 0.01, 0.0, 0.0),
+    )
+    low = model.source_response(
+        x_m=x, y_m=y, ion_transmission_law=law,
+        c4f8_platen_vpp_rms_V=626.9533265149638)
+    high = model.source_response(
+        x_m=x, y_m=y, ion_transmission_law=law,
+        c4f8_platen_vpp_rms_V=643.534317555529)
+    low_edge_center = (
+        low.unit_point_flux_per_density_m_s[2, -1]
+        / low.unit_point_flux_per_density_m_s[2, 0])
+    high_edge_center = (
+        high.unit_point_flux_per_density_m_s[2, -1]
+        / high.unit_point_flux_per_density_m_s[2, 0])
+
+    assert high_edge_center > low_edge_center
+    with pytest.raises(ValueError, match="outside the frozen domain"):
+        model.source_response(
+            x_m=x, y_m=y, ion_transmission_law=law,
+            c4f8_platen_vpp_rms_V=650.0)
+    with pytest.raises(ValueError, match="must be paired"):
+        model.source_response(x_m=x, y_m=y, ion_transmission_law=law)
+
+
+def test_wafer_ion_transmission_rejects_excessive_log_field():
+    with pytest.raises(ValueError, match="exceeds its frozen bound"):
+        BoschSPTSWaferIonTransmissionLaw(
+            static_maximum_order=10,
+            static_coefficients=(0.1,) * 65,
+        )
