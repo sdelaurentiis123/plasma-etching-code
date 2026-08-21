@@ -2108,3 +2108,44 @@ def test_shed_fragment_repair_does_not_restore_its_retired_owner():
     assert layers[2][3, 3, 3] < 0.0
     assert combined[3, 3, 3] < 0.0
     assert owner[3, 3, 3] == 0
+
+
+def test_material_cleanup_preserves_exact_authoritative_union():
+    """A cleanup result cannot contain a solid absent from every material.
+
+    Independently redistancing the combined field used to shift its zero
+    contour after the authoritative material fields had already been
+    redistanced.  That made ghost owners which the Oxford moving-mask cleanup
+    could chase indefinitely.  The combined sign and owner now come directly
+    from the exact inside-positive material union.
+    """
+    shape = (7, 7, 7)
+    material_1 = -np.ones(shape)
+    material_2 = -np.ones(shape)
+    material_1[1:6, 1:6, 1:4] = 0.4
+    material_2[3:5, 3:5, 3:6] = 0.3
+    material_2[5, 5, 5] = 0.05
+    candidate = np.zeros(shape, dtype=int)
+    candidate[material_1 >= 0.0] = 1
+    candidate[material_2 >= 0.0] = 2
+    previous = candidate.copy()
+    repair = np.zeros(shape, dtype=bool)
+    repair[5, 5, 5] = True
+
+    layers, combined, owner = (
+        feature_step_module._restore_unresolved_material_ownership(
+            {1: material_1, 2: material_2},
+            repair,
+            candidate,
+            previous,
+            0.1,
+            "cr2",
+            False,
+        )
+    )
+
+    exact_union = np.maximum.reduce(tuple(layers.values()))
+    assert np.array_equal(combined, exact_union)
+    for material_id, levelset in layers.items():
+        assert np.all(levelset[owner == material_id] >= 0.0)
+    assert not np.any((owner > 0) & (exact_union < 0.0))

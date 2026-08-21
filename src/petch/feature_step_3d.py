@@ -876,14 +876,7 @@ def _restore_unresolved_material_ownership(
         updated = {
             material: _project_periodic_lateral_endpoints(levelset)[0]
             for material, levelset in updated.items()}
-    combined = np.maximum.reduce(tuple(updated.values()))
-    combined = _redistance_feature_field(
-        combined, dx, reinitialization_method,
-        periodic_lateral=periodic_lateral)
-    material_ids = np.asarray(sorted(updated), dtype=int)
-    stack = np.stack([updated[int(material)] for material in material_ids])
-    owner = material_ids[np.argmax(stack, axis=0)]
-    owner = np.where(combined >= 0.0, owner, 0)
+    combined, owner = _material_union_and_owner(updated)
     if np.any(repair & (owner == candidate)):
         raise RuntimeError("subcell material ownership repair did not retire the island")
     return updated, combined, owner
@@ -974,14 +967,7 @@ def _apply_subcell_cleanup_to_material_levelsets(
         updated = {
             material_id: _project_periodic_lateral_endpoints(levelset)[0]
             for material_id, levelset in updated.items()}
-    combined = np.maximum.reduce(tuple(updated.values()))
-    combined = _redistance_feature_field(
-        combined, dx, reinitialization_method,
-        periodic_lateral=periodic_lateral)
-    material_ids = np.asarray(sorted(updated), dtype=int)
-    material_stack = np.stack([updated[int(material_id)] for material_id in material_ids])
-    combined_owner = material_ids[np.argmax(material_stack, axis=0)]
-    combined_owner = np.where(combined >= 0.0, combined_owner, 0)
+    combined, combined_owner = _material_union_and_owner(updated)
     return updated, combined, combined_owner
 
 
@@ -1016,14 +1002,47 @@ def _apply_subcell_gas_fill_to_material_levelsets(
         updated = {
             material_id: _project_periodic_lateral_endpoints(levelset)[0]
             for material_id, levelset in updated.items()}
-    combined = np.maximum.reduce(tuple(updated.values()))
-    combined = _redistance_feature_field(
-        combined, dx, reinitialization_method,
-        periodic_lateral=periodic_lateral)
-    material_stack = np.stack([updated[int(material_id)] for material_id in material_ids])
-    combined_owner = material_ids[np.argmax(material_stack, axis=0)]
-    combined_owner = np.where(combined >= 0.0, combined_owner, 0)
+    combined, combined_owner = _material_union_and_owner(updated)
     return updated, combined, combined_owner
+
+
+def _material_union_and_owner(material_levelsets):
+    """Return the exact material union and an ownership-consistent label field.
+
+    Material level sets use the inside-positive convention, so their union is
+    the pointwise maximum.  Redistancing that maximum independently can move
+    its zero contour away from every authoritative material field.  The result
+    is a ghost solid node: ``combined >= 0`` while every material level set is
+    negative.  Assigning an owner to that node manufactures an unresolved
+    material island, and repeated cleanup can chase those manufactured owners
+    without reaching a fixed point.
+
+    Each material field has already been redistanced before this helper is
+    called.  Preserve their exact Boolean union and choose the maximizing
+    material only where that union is solid.  This makes the ownership
+    postcondition structural rather than tolerance-dependent.
+    """
+    if not material_levelsets:
+        raise ValueError("material union requires at least one level-set field")
+    material_ids = np.asarray(sorted(
+        int(material_id) for material_id in material_levelsets), dtype=int)
+    if np.any(material_ids <= 0):
+        raise ValueError("material union requires positive material ids")
+    stack = np.stack([
+        np.asarray(material_levelsets[int(material_id)], dtype=float)
+        for material_id in material_ids
+    ])
+    if stack.ndim != 4 or np.any(~np.isfinite(stack)):
+        raise ValueError("material union requires matching finite 3-D fields")
+    combined = np.max(stack, axis=0)
+    maximizing_index = np.argmax(stack, axis=0)
+    owner = material_ids[maximizing_index]
+    owner = np.where(combined >= 0.0, owner, 0)
+    selected_value = np.take_along_axis(
+        stack, maximizing_index[None, ...], axis=0)[0]
+    if np.any((owner > 0) & (selected_value < 0.0)):
+        raise RuntimeError("material union produced an unsupported solid owner")
+    return combined, owner
 
 
 def _project_periodic_lateral_endpoints(field):
