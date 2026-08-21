@@ -1,0 +1,41 @@
+{
+  "calibration_rows_copied": false,
+  "heldout_outcomes_revealed_after_seal": true,
+  "missing_heldout_process_keys": [
+    "2024-08-21_09",
+    "2024-08-22_05",
+    "2024-08-22_06",
+    "2024-08-22_07",
+    "2024-08-22_08",
+    "2024-08-22_09",
+    "2024-08-22_10"
+  ],
+  "numeric_outcome_fields_parsed_by_broker": false,
+  "output_experiment_key_count": 13,
+  "output_file": "revealed_heldout_Si_Oxide_etch_89_points.csv",
+  "output_row_count": 1157,
+  "output_sha256": "5e0747a37ad315349b0213f712cfd24d0eaabbacfc98bd35029ed9390e9d05f7",
+  "prediction_committed_before_reveal": true,
+  "prediction_seal_sha256": "c6fbf151cbd9bf60075256c839c88094651d774dc9ecb918e3ce4d571ce0525e",
+  "prediction_sha256": "56ed2429832fe77280762fbca86cb6ffa4de3fd9687aa84f3b5cfd4ca99a3b1a",
+  "preregistration_sha256": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+  "revealed_experiment_keys": [
+    "2024-08-21_01",
+    "2024-08-21_02",
+    "2024-08-21_03",
+    "2024-08-21_04",
+    "2024-08-21_05",
+    "2024-08-21_06",
+    "2024-08-21_07",
+    "2024-08-21_08",
+    "2024-08-21_10",
+    "2024-08-22_01",
+    "2024-08-22_02",
+    "2024-08-22_03",
+    "2024-08-22_04"
+  ],
+  "schema": "petch-bosch-heldout-measurement-reveal-v1",
+  "source_file": "Si_Oxide_etch_89_points.csv",
+  "source_md5": "446e75b040eea37b634eeb8f763a62fc",
+  "source_row_count": 7832
+}

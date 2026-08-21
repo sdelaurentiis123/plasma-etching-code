@@ -76,21 +76,39 @@ Increasing the cylindrical grid from 24x24x16 to 32x32x24 changes no observable
 by more than 0.043559 of its frozen gate; the denser Zernike certification grid
 also preserves the field bound. The refinement gate passes.
 
-## Target firewall and remaining step
+## Chronological heldout result
 
-The chronological heldout outcome remains unopened:
+The 20-record chronological prediction was generated from process inputs only,
+hashed, committed, and pushed before the heldout numeric outcomes were parsed.
+The sealed prediction SHA-256 is
+`56ed2429832fe77280762fbca86cb6ffa4de3fd9687aa84f3b5cfd4ca99a3b1a`.
+A separate post-seal extractor then found measured 89-point wafer maps for 13
+of the 20 heldout process records.  Seven process records have no measurement
+in the source asset and are reported as missing rather than imputed.
 
-```text
-heldout_outcomes_read = false
-heldout_prediction_written = false
-eligible_for_prediction_seal = false
-```
+On the 13 measured heldout wafers:
 
-The next step is to construct and hash the chronological heldout prediction
-from process inputs only, commit it with all code/data/parameter/fold hashes,
-and only then allow a separate scorer to parse the heldout numeric outcome.
-If that heldout score loses the frozen baselines, v8 fails despite its
-calibration and whole-lot results.
+- silicon wafer-mean MAE: 0.238906 um;
+- silicon wafer-mean MAPE: 0.541245%;
+- silicon 89-point RMSE: 0.329751 um;
+- normalized radial-shape RMSE: 0.261855%;
+- oxide wafer-mean MAE: 0.023908 um;
+- selectivity MAPE: 3.161040%;
+- silicon wafer-mean correlation: 0.873410.
+
+The frozen absolute gates all pass.  The physics prediction also beats the
+calibration-global mean depth baseline (0.400599 um mean MAE), the frozen
+calibration mean-map point baseline (0.477852 um point RMSE), and its radial
+shape baseline (0.294344%).  At the wafer-bootstrap level, the depth and point
+advantages remain positive across the 95% intervals.  The shape advantage is
+smaller: its bootstrap interval crosses zero, so it is a point-estimate win,
+not evidence of a statistically resolved shape improvement.  The predicted
+within-lot depth drift also beats a zero-slope baseline.
+
+The target firewall records that the prediction did not change after reveal.
+This is a successful heldout validation of absolute reactor/wafer depth,
+selectivity, radial transfer, and drift for one Bosch tool.  It does not by
+itself validate feature charging, sidewall angle, scallop geometry, or ARDE.
 
 ## Artifacts
 
@@ -99,4 +117,8 @@ calibration and whole-lot results.
 - `full_calibration_capacity.json`: all 20 full-calibration candidates;
 - `calibration_fit.json`: whole-lot fits, stability, and selection;
 - `interpolation_validation.json`: independent tensor-midpoint audit;
-- `exact_replay.json`: exact full/whole-lot replay and refinement receipt.
+- `exact_replay.json`: exact full/whole-lot replay and refinement receipt;
+- `heldout_prediction.json` and `heldout_prediction_seal.json`: pre-reveal
+  prediction and cryptographic seal;
+- `heldout_score.json`: post-seal heldout score, baselines, bootstrap, drift,
+  missing-outcome ledger, and target-firewall receipt.

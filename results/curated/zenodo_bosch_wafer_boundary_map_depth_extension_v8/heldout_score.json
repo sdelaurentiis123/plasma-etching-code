@@ -1,0 +1,180 @@
+{
+  "absolute_gates": {
+    "normalized_shape_rmse_percent": true,
+    "oxide_mean_mae_um": true,
+    "selectivity_mape_percent": true,
+    "silicon_mean_mae_um": true,
+    "silicon_mean_mape_percent": true,
+    "silicon_point_rmse_um": true
+  },
+  "all_absolute_gates_pass": true,
+  "all_empirical_baseline_gates_pass": true,
+  "all_frozen_heldout_gates_pass": true,
+  "claim_boundary": "This gate validates reactor/wafer absolute depth, selectivity, radial transfer, and drift for one Bosch tool. It does not by itself validate feature charging, sidewall angle, scallop geometry, or ARDE.",
+  "empirical_baselines": {
+    "calibration_mean_map": {
+      "normalized_shape_rmse_percent": 0.2943441861610326,
+      "silicon_point_rmse_um": 0.47785164881207864
+    },
+    "gates": {
+      "physics_mean_beats_global_mean": true,
+      "physics_point_beats_calibration_mean_map": true,
+      "physics_shape_beats_calibration_mean_map": true
+    },
+    "global_mean_depth": {
+      "silicon_mean_mae_um": 0.40059896793143135,
+      "silicon_mean_mape_percent": 0.9093152336795982
+    },
+    "physics_improvement": {
+      "mean_mae_um": 0.16169337865982616,
+      "point_rmse_um": 0.1481001560874471,
+      "shape_rmse_percentage_points": 0.032489110381625996
+    }
+  },
+  "frozen_absolute_thresholds": {
+    "normalized_radial_shape_rmse_percent_max": 2.0,
+    "pointwise_si_depth_rmse_um_max": 1.5,
+    "selectivity_mape_percent_max": 12.0,
+    "wafer_mean_oxide_loss_mae_um_max": 0.08,
+    "wafer_mean_si_depth_mae_um_max": 1.0,
+    "wafer_mean_si_depth_mape_percent_max": 3.0
+  },
+  "input_hashes": {
+    "heldout_prediction": "56ed2429832fe77280762fbca86cb6ffa4de3fd9687aa84f3b5cfd4ca99a3b1a",
+    "heldout_prediction_seal": "c6fbf151cbd9bf60075256c839c88094651d774dc9ecb918e3ce4d571ce0525e",
+    "reveal_manifest": "1f6d0bcbf1951044d1ac02384c60b56139ca795d8623355cd6cc5e287b20db5e",
+    "revealed_heldout_outcomes": "5e0747a37ad315349b0213f712cfd24d0eaabbacfc98bd35029ed9390e9d05f7",
+    "v1_preregistration": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75"
+  },
+  "measured_heldout_wafer_count": 13,
+  "missing_heldout_process_keys": [
+    "2024-08-21_09",
+    "2024-08-22_05",
+    "2024-08-22_06",
+    "2024-08-22_07",
+    "2024-08-22_08",
+    "2024-08-22_09",
+    "2024-08-22_10"
+  ],
+  "physics_metrics": {
+    "normalized_shape_rmse_percent": 0.2618550757794066,
+    "oxide_mean_correlation": 0.015561203659986625,
+    "oxide_mean_mae_um": 0.023907936623413915,
+    "oxide_mean_mape_percent": 3.5554237770540897,
+    "predicted_oxide_mean_range_um": [
+      0.6545707262642789,
+      0.6619033237970889
+    ],
+    "predicted_silicon_mean_range_um": [
+      43.29378438455435,
+      44.009282151619765
+    ],
+    "selectivity_mape_percent": 3.161040334086155,
+    "silicon_mean_correlation": 0.873409656032205,
+    "silicon_mean_mae_um": 0.23890558927160518,
+    "silicon_mean_mape_percent": 0.5412450143740503,
+    "silicon_point_rmse_um": 0.32975149272463156
+  },
+  "revealed_experiment_keys": [
+    "2024-08-21_01",
+    "2024-08-21_02",
+    "2024-08-21_03",
+    "2024-08-21_04",
+    "2024-08-21_05",
+    "2024-08-21_06",
+    "2024-08-21_07",
+    "2024-08-21_08",
+    "2024-08-21_10",
+    "2024-08-22_01",
+    "2024-08-22_02",
+    "2024-08-22_03",
+    "2024-08-22_04"
+  ],
+  "schema": "petch-zenodo-bosch-v8-heldout-score-v1",
+  "status": "PASS: sealed v8 physics beats every absolute and empirical heldout gate",
+  "target_firewall": {
+    "execution_heldout_not_preexposure_blind": true,
+    "heldout_outcomes_read": true,
+    "heldout_prediction_changed_after_reveal": false,
+    "prediction_committed_and_pushed_before_numeric_reveal": true,
+    "prediction_sha256": "56ed2429832fe77280762fbca86cb6ffa4de3fd9687aa84f3b5cfd4ca99a3b1a"
+  },
+  "unmeasured_heldout_process_record_count": 7,
+  "wafer_bootstrap": {
+    "intervals": {
+      "mean_baseline_improvement_um": {
+        "median": 0.16043421749536518,
+        "p2p5": 0.11501585950811485,
+        "p97p5": 0.21181990405236154
+      },
+      "normalized_shape_rmse_percent": {
+        "median": 0.26128522508498775,
+        "p2p5": 0.2296770365514129,
+        "p97p5": 0.2934728666280803
+      },
+      "oxide_mean_mae_um": {
+        "median": 0.02375912535761451,
+        "p2p5": 0.020896237019175732,
+        "p97p5": 0.027784814153466616
+      },
+      "point_baseline_improvement_um": {
+        "median": 0.14635077307729408,
+        "p2p5": 0.09652866850390554,
+        "p97p5": 0.20828970781608805
+      },
+      "selectivity_mape_percent": {
+        "median": 3.133556866259905,
+        "p2p5": 2.607220052823253,
+        "p97p5": 3.8826621160033494
+      },
+      "shape_baseline_improvement_percentage_points": {
+        "median": 0.03145574874321605,
+        "p2p5": -0.011814669870570834,
+        "p97p5": 0.07136802811380338
+      },
+      "silicon_mean_mae_um": {
+        "median": 0.23803837610145898,
+        "p2p5": 0.14219929223210862,
+        "p97p5": 0.34454220064049107
+      },
+      "silicon_mean_mape_percent": {
+        "median": 0.5392461748429338,
+        "p2p5": 0.32355041970950904,
+        "p97p5": 0.7790697580228612
+      },
+      "silicon_point_rmse_um": {
+        "median": 0.32703199671296235,
+        "p2p5": 0.2210810081763396,
+        "p97p5": 0.4235207363876404
+      }
+    },
+    "percentile_interval": [
+      2.5,
+      97.5
+    ],
+    "replicates": 20000,
+    "seed": 20260821,
+    "unit": "wafer"
+  },
+  "within_lot_depth_drift": {
+    "lots": [
+      {
+        "measured_wafer_count": 9,
+        "observed_um_per_wafer": -0.1321406832185557,
+        "predicted_um_per_wafer": -0.05458124991678654,
+        "process_date": "2024-08-21",
+        "residual_um_per_wafer": 0.07755943330176918
+      },
+      {
+        "measured_wafer_count": 4,
+        "observed_um_per_wafer": -0.1281604605505528,
+        "predicted_um_per_wafer": -0.03829475388994863,
+        "process_date": "2024-08-22",
+        "residual_um_per_wafer": 0.08986570666060417
+      }
+    ],
+    "physics_beats_zero_slope_baseline": true,
+    "physics_slope_mae_um_per_wafer": 0.08371256998118667,
+    "zero_slope_baseline_mae_um_per_wafer": 0.13015057188455426
+  }
+}

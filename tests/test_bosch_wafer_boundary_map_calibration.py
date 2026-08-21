@@ -21,6 +21,7 @@ V8 = (
     ROOT / "results" / "curated"
     / "zenodo_bosch_wafer_boundary_map_depth_extension_v8"
 )
+REVEAL = ROOT / "data" / "experimental" / "zenodo_17122442"
 
 
 def _json(name):
@@ -240,3 +241,45 @@ def test_committed_v8_heldout_prediction_is_hash_sealed_and_unrevealed():
     assert seal["eligible_for_separate_outcome_score_after_commit"] is True
     assert seal["code_hashes"]["prediction_writer"] == sha256(
         seal_v8.SCRIPT.read_bytes()).hexdigest()
+
+
+def test_committed_v8_postseal_reveal_and_score_preserve_the_firewall():
+    score = _json("heldout_score.json")
+    prediction_hash = _hash("heldout_prediction.json")
+    reveal_csv = REVEAL / "revealed_heldout_Si_Oxide_etch_89_points.csv"
+    reveal_manifest = REVEAL / (
+        "revealed_heldout_Si_Oxide_etch_89_points_manifest.json")
+
+    assert prediction_hash == (
+        "56ed2429832fe77280762fbca86cb6ffa4de3fd9687aa84f3b5cfd4ca99a3b1a")
+    assert score["input_hashes"]["heldout_prediction"] == prediction_hash
+    assert score["input_hashes"]["revealed_heldout_outcomes"] == sha256(
+        reveal_csv.read_bytes()).hexdigest()
+    assert score["input_hashes"]["reveal_manifest"] == sha256(
+        reveal_manifest.read_bytes()).hexdigest()
+    firewall = score["target_firewall"]
+    assert firewall["prediction_committed_and_pushed_before_numeric_reveal"] is True
+    assert firewall["heldout_prediction_changed_after_reveal"] is False
+    assert firewall["prediction_sha256"] == prediction_hash
+
+
+def test_committed_v8_postseal_heldout_score_passes_every_frozen_gate():
+    score = _json("heldout_score.json")
+
+    assert score["measured_heldout_wafer_count"] == 13
+    assert score["unmeasured_heldout_process_record_count"] == 7
+    assert score["all_absolute_gates_pass"] is True
+    assert score["all_empirical_baseline_gates_pass"] is True
+    assert score["all_frozen_heldout_gates_pass"] is True
+    assert all(score["absolute_gates"].values())
+    assert all(score["empirical_baselines"]["gates"].values())
+    metrics = score["physics_metrics"]
+    assert metrics["silicon_mean_mae_um"] < 1.0
+    assert metrics["silicon_mean_mape_percent"] < 3.0
+    assert metrics["silicon_point_rmse_um"] < 1.5
+    assert metrics["normalized_shape_rmse_percent"] < 2.0
+    assert metrics["oxide_mean_mae_um"] < 0.08
+    assert metrics["selectivity_mape_percent"] < 12.0
+    assert score["within_lot_depth_drift"][
+        "physics_beats_zero_slope_baseline"] is True
+    assert score["wafer_bootstrap"]["replicates"] == 20000
