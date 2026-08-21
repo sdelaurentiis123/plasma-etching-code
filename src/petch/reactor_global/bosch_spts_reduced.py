@@ -337,6 +337,164 @@ def advance_bosch_spts_dynamic_wall(
 
 
 @dataclass(frozen=True)
+class BoschSPTSRecipePathWallLaw:
+    """Identifiable net wall memory along the measured Bosch recipe path.
+
+    The Sayyed calibration traces do not vary SF6 and C4F8 doses independently
+    enough to identify deposition and cleaning rates.  This law therefore
+    carries only cumulative normalized C4F8 production exposure and refuses
+    traces outside the preregistered SF6/C4F8 dose-ratio domain.
+    """
+
+    log_wall_loss_per_reference_wafer: float
+    c4f8_reference_dose_machine_units_s: float = 46564.09778054932
+    minimum_sf6_to_c4f8_dose_ratio: float = 5.635257777059961
+    maximum_sf6_to_c4f8_dose_ratio: float = 5.737394214801463
+    maximum_absolute_log_response_per_reference_wafer: float = (
+        math.log(4.0) / 10.0)
+    minimum_multiplier: float = 0.25
+    maximum_multiplier: float = 4.0
+
+    def __post_init__(self):
+        if (
+            not math.isfinite(self.log_wall_loss_per_reference_wafer)
+            or abs(self.log_wall_loss_per_reference_wafer)
+            > self.maximum_absolute_log_response_per_reference_wafer
+            or not math.isfinite(self.c4f8_reference_dose_machine_units_s)
+            or self.c4f8_reference_dose_machine_units_s <= 0.0
+            or not math.isfinite(self.minimum_sf6_to_c4f8_dose_ratio)
+            or not math.isfinite(self.maximum_sf6_to_c4f8_dose_ratio)
+            or self.minimum_sf6_to_c4f8_dose_ratio <= 0.0
+            or self.minimum_sf6_to_c4f8_dose_ratio
+            >= self.maximum_sf6_to_c4f8_dose_ratio
+            or not math.isfinite(
+                self.maximum_absolute_log_response_per_reference_wafer)
+            or self.maximum_absolute_log_response_per_reference_wafer <= 0.0
+            or not math.isfinite(self.minimum_multiplier)
+            or not math.isfinite(self.maximum_multiplier)
+            or not 0.0 < self.minimum_multiplier <= 1.0
+            or not 1.0 <= self.maximum_multiplier
+            or self.minimum_multiplier >= self.maximum_multiplier
+        ):
+            raise ValueError("invalid Bosch recipe-path wall law")
+
+    def manifest(self):
+        return {
+            "schema": "petch-spts-bosch-recipe-path-wall-law-v1",
+            "log_wall_loss_per_reference_wafer": (
+                self.log_wall_loss_per_reference_wafer),
+            "c4f8_reference_dose_machine_units_s": (
+                self.c4f8_reference_dose_machine_units_s),
+            "sf6_to_c4f8_dose_ratio_domain": [
+                self.minimum_sf6_to_c4f8_dose_ratio,
+                self.maximum_sf6_to_c4f8_dose_ratio,
+            ],
+            "maximum_absolute_log_response_per_reference_wafer": (
+                self.maximum_absolute_log_response_per_reference_wafer),
+            "wall_loss_multiplier_bounds": [
+                self.minimum_multiplier, self.maximum_multiplier],
+            "interpretation": (
+                "net wall memory along the measured fixed-ratio recipe path; "
+                "not separately identified deposition and cleaning kinetics"),
+            "target_depth_used": False,
+            "wafer_number_used": False,
+            "per_lot_initial_state_fitted": False,
+            "out_of_domain_extrapolation_allowed": False,
+        }
+
+
+@dataclass(frozen=True)
+class BoschSPTSRecipePathWallState:
+    """Cumulative normalized production exposure since conditioning."""
+
+    cumulative_reference_wafer_exposure: float = 0.0
+
+    def __post_init__(self):
+        if (
+            not math.isfinite(self.cumulative_reference_wafer_exposure)
+            or self.cumulative_reference_wafer_exposure < 0.0
+        ):
+            raise ValueError("invalid Bosch recipe-path wall state")
+
+
+@dataclass(frozen=True)
+class BoschSPTSRecipePathWallStep:
+    """One exact additive recipe-path update and applied neutral multiplier."""
+
+    start_state: BoschSPTSRecipePathWallState
+    mean_reference_wafer_exposure: float
+    end_state: BoschSPTSRecipePathWallState
+    normalized_c4f8_dose: float
+    sf6_to_c4f8_dose_ratio: float
+    static_wall_loss_multiplier: float
+    combined_wall_loss_multiplier: float
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.start_state, BoschSPTSRecipePathWallState)
+            or not isinstance(self.end_state, BoschSPTSRecipePathWallState)
+            or not math.isfinite(self.mean_reference_wafer_exposure)
+            or self.mean_reference_wafer_exposure < 0.0
+            or not math.isfinite(self.normalized_c4f8_dose)
+            or self.normalized_c4f8_dose <= 0.0
+            or not math.isfinite(self.sf6_to_c4f8_dose_ratio)
+            or self.sf6_to_c4f8_dose_ratio <= 0.0
+            or not math.isfinite(self.static_wall_loss_multiplier)
+            or not 0.25 <= self.static_wall_loss_multiplier <= 4.0
+            or not math.isfinite(self.combined_wall_loss_multiplier)
+            or not 0.25 <= self.combined_wall_loss_multiplier <= 4.0
+        ):
+            raise ValueError("invalid Bosch recipe-path wall step")
+
+
+def advance_bosch_spts_recipe_path_wall(
+        trace: BoschProcessTrace,
+        law: BoschSPTSRecipePathWallLaw,
+        state: BoschSPTSRecipePathWallState,
+        *, static_wall_loss_multiplier=1.0) -> BoschSPTSRecipePathWallStep:
+    """Advance the preregistered, target-free fixed-recipe wall memory."""
+    if not isinstance(trace, BoschProcessTrace):
+        raise TypeError("trace must be BoschProcessTrace")
+    if not isinstance(law, BoschSPTSRecipePathWallLaw):
+        raise TypeError("law must be BoschSPTSRecipePathWallLaw")
+    if not isinstance(state, BoschSPTSRecipePathWallState):
+        raise TypeError("state must be BoschSPTSRecipePathWallState")
+    static = float(static_wall_loss_multiplier)
+    if not math.isfinite(static) or not 0.25 <= static <= 4.0:
+        raise ValueError("invalid static Bosch wall-loss multiplier")
+    c4f8_dose = float(np.trapz(
+        np.maximum(trace.channels[C4F8_FLOW_CHANNEL], 0.0), trace.elapsed_s))
+    sf6_dose = float(np.trapz(
+        np.maximum(trace.channels[SF6_FLOW_CHANNEL], 0.0), trace.elapsed_s))
+    if c4f8_dose <= 0.0 or not math.isfinite(c4f8_dose):
+        raise ValueError("Bosch recipe-path wall law requires positive C4F8 dose")
+    ratio = sf6_dose / c4f8_dose
+    if (
+        not math.isfinite(ratio)
+        or ratio < law.minimum_sf6_to_c4f8_dose_ratio
+        or ratio > law.maximum_sf6_to_c4f8_dose_ratio
+    ):
+        raise ValueError("Bosch recipe-path trace is outside dose-ratio domain")
+    normalized = c4f8_dose / law.c4f8_reference_dose_machine_units_s
+    start = state.cumulative_reference_wafer_exposure
+    mean = start + 0.5 * normalized
+    end = start + normalized
+    combined_log = float(np.clip(
+        math.log(static) + law.log_wall_loss_per_reference_wafer * mean,
+        math.log(law.minimum_multiplier), math.log(law.maximum_multiplier),
+    ))
+    return BoschSPTSRecipePathWallStep(
+        start_state=state,
+        mean_reference_wafer_exposure=mean,
+        end_state=BoschSPTSRecipePathWallState(end),
+        normalized_c4f8_dose=normalized,
+        sf6_to_c4f8_dose_ratio=ratio,
+        static_wall_loss_multiplier=static,
+        combined_wall_loss_multiplier=math.exp(combined_log),
+    )
+
+
+@dataclass(frozen=True)
 class BoschSPTSReducedParameters:
     """Physical and equipment-transfer inputs for one Rapier configuration."""
 

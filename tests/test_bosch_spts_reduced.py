@@ -9,9 +9,11 @@ from petch.bosch_process_data import (
 )
 from petch.reactor_global.bosch_spts_reduced import (
     BoschSPTSDynamicWallLaw, BoschSPTSDynamicWallState,
+    BoschSPTSRecipePathWallLaw, BoschSPTSRecipePathWallState,
     BoschSPTSReducedParameters, BoschSPTSWallConditioningLaw,
     DeterministicBoschSPTSReactorToWafer, _bosch_dynamic_wall_interval,
-    advance_bosch_spts_dynamic_wall, conditioned_bosch_spts_parameters,
+    advance_bosch_spts_dynamic_wall, advance_bosch_spts_recipe_path_wall,
+    conditioned_bosch_spts_parameters,
     solve_bosch_spts_reduced_reactor,
 )
 
@@ -256,3 +258,55 @@ def test_dynamic_wall_law_rejects_nonphysical_rates_and_states():
         )
     with pytest.raises(ValueError, match="invalid Bosch dynamic wall state"):
         BoschSPTSDynamicWallState(1.01)
+
+
+def test_recipe_path_wall_state_is_additive_target_free_and_carried(trace):
+    law = BoschSPTSRecipePathWallLaw(
+        log_wall_loss_per_reference_wafer=np.log(4.0) / 20.0)
+    state = BoschSPTSRecipePathWallState()
+    steps = []
+    for _ in range(10):
+        step = advance_bosch_spts_recipe_path_wall(trace, law, state)
+        steps.append(step)
+        state = step.end_state
+
+    assert steps[0].mean_reference_wafer_exposure == pytest.approx(
+        0.5 * steps[0].normalized_c4f8_dose)
+    assert steps[1].start_state == steps[0].end_state
+    assert steps[-1].end_state.cumulative_reference_wafer_exposure == (
+        pytest.approx(10.0 * steps[0].normalized_c4f8_dose))
+    assert all(
+        right.combined_wall_loss_multiplier
+        > left.combined_wall_loss_multiplier
+        for left, right in zip(steps, steps[1:])
+    )
+    manifest = law.manifest()
+    assert manifest["target_depth_used"] is False
+    assert manifest["wafer_number_used"] is False
+    assert manifest["out_of_domain_extrapolation_allowed"] is False
+
+
+def test_recipe_path_wall_refuses_out_of_domain_trace(trace):
+    channels = {
+        name: np.array(value, copy=True) for name, value in trace.channels.items()
+    }
+    channels[SF6_FLOW_CHANNEL] *= 0.5
+    off_path = BoschProcessTrace(
+        experiment_key="manufactured_off_path_trace",
+        source_group=trace.source_group,
+        process_date=trace.process_date,
+        wafer_number=trace.wafer_number,
+        elapsed_s=trace.elapsed_s,
+        channels=channels,
+    )
+    law = BoschSPTSRecipePathWallLaw(log_wall_loss_per_reference_wafer=0.0)
+    with pytest.raises(ValueError, match="outside dose-ratio domain"):
+        advance_bosch_spts_recipe_path_wall(
+            off_path, law, BoschSPTSRecipePathWallState())
+
+
+def test_recipe_path_wall_rejects_nonphysical_law_and_state():
+    with pytest.raises(ValueError, match="invalid Bosch recipe-path wall law"):
+        BoschSPTSRecipePathWallLaw(log_wall_loss_per_reference_wafer=0.2)
+    with pytest.raises(ValueError, match="invalid Bosch recipe-path wall state"):
+        BoschSPTSRecipePathWallState(-0.1)
