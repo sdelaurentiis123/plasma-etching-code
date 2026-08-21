@@ -3015,6 +3015,7 @@ def advance_feature_step_3d(
         # topology gate below.
         repaired_material_mask = np.zeros_like(phi, dtype=bool)
         maximum_material_cleanup_passes = 12
+        material_cleanup_history = []
         for _material_cleanup_pass in range(maximum_material_cleanup_passes):
             unresolved_material_mask, unresolved_material_nodes = (
                 _new_unresolved_subcell_material_component_mask(
@@ -3022,6 +3023,17 @@ def advance_feature_step_3d(
                     periodic_lateral=profile_periodic_lateral))
             if not unresolved_material_nodes:
                 break
+            coordinates = tuple(
+                tuple(int(value) for value in index)
+                for index in np.argwhere(unresolved_material_mask)[:12])
+            owners = tuple(
+                int(output_material_id[index]) for index in coordinates)
+            material_cleanup_history.append({
+                "pass": int(_material_cleanup_pass),
+                "node_count": int(unresolved_material_nodes),
+                "owners": owners,
+                "coordinates": coordinates,
+            })
             repaired_material_mask |= unresolved_material_mask
             material_levelsets, phi, output_material_id = (
                 _restore_unresolved_material_ownership(
@@ -3035,7 +3047,8 @@ def advance_feature_step_3d(
             raise RuntimeError(
                 "subcell material-island cleanup did not reach a fixed point; "
                 f"passes={maximum_material_cleanup_passes}; "
-                f"coordinates={remaining_coordinates}")
+                f"coordinates={remaining_coordinates}; "
+                f"history={material_cleanup_history}")
         reassigned_unresolved_material_nodes = int(np.count_nonzero(
             repaired_material_mask))
     if duration_s == 0.0:

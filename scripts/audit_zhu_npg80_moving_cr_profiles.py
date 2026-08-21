@@ -335,7 +335,8 @@ def _snapshot(
 
 def _run_trajectory(
         *, width_nm, scenario, rates_nm_min, selectivity, duration_s, dx_nm,
-        preregistration, maximum_step_s=None, transport_device="cpu"):
+        preregistration, maximum_step_s=None, transport_device="cpu",
+        pre_step_callback=None):
     rates = sorted(set(float(value) for value in rates_nm_min))
     reference_rate = max(rates)
     targets = [{
@@ -387,6 +388,15 @@ def _run_trajectory(
         interior_minimum_nm = _mask_interior_minimum_thickness_nm(
             geometry, pitch_nm=pitch_nm, width_nm=width_nm)
         step_duration = min(float(maximum_step_s), remaining)
+        if pre_step_callback is not None:
+            pre_step_callback({
+                "geometry": geometry,
+                "surface_state": state,
+                "surface_state_mesh_fingerprint": fingerprint,
+                "elapsed_s": float(elapsed),
+                "accepted_steps": int(accepted_steps),
+                "step_duration_s": float(step_duration),
+            })
         try:
             step = advance_feature_step_3d(
                 geometry,
