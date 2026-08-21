@@ -218,3 +218,25 @@ def test_v8_prediction_builder_cannot_open_the_mixed_outcome_asset(
     assert firewall["mixed_outcome_csv_opened"] is False
     assert firewall["heldout_numeric_outcomes_read"] is False
     assert firewall["eligible_for_separate_outcome_score_after_hash_commit"] is True
+
+
+def test_committed_v8_heldout_prediction_is_hash_sealed_and_unrevealed():
+    prediction = _json("heldout_prediction.json")
+    seal = _json("heldout_prediction_seal.json")
+    prediction_hash = _hash("heldout_prediction.json")
+    firewall = prediction["target_firewall"]
+    assert prediction["heldout_process_record_count"] == 20
+    assert len(prediction["predictions"]) == 20
+    assert len(set(prediction["heldout_experiment_keys"])) == 20
+    assert firewall["mixed_outcome_csv_opened"] is False
+    assert firewall["heldout_numeric_outcomes_read"] is False
+    assert firewall["heldout_outcomes_read"] is False
+    assert firewall["heldout_prediction_written"] is True
+    assert firewall["target_depth_used"] is False
+    assert firewall["target_radial_map_used"] is False
+    assert seal["prediction_sha256"] == prediction_hash
+    assert seal["heldout_outcomes_read"] is False
+    assert seal["heldout_prediction_written"] is True
+    assert seal["eligible_for_separate_outcome_score_after_commit"] is True
+    assert seal["code_hashes"]["prediction_writer"] == sha256(
+        seal_v8.SCRIPT.read_bytes()).hexdigest()

@@ -1,0 +1,26 @@
+{
+  "artifact_hashes": {
+    "v8_calibration_fit": "d48f7bdd89a3168416d3fd184a3827b40b4e1bd719487aed099eae1b103cc7b9",
+    "v8_exact_replay": "78381d505cdb5e9d6f1e2be340642fc4948b3342d6f67ef76a4a04f60c139b33",
+    "v8_full_capacity": "8f233cb1e19af7de38079e993c36f58eecc47547c444d1d4f0c69164d96c953e",
+    "v8_interpolation": "62956e063a404356b26cdd1ad9c44557c4cb38b445f300831a7843cf1feac64b",
+    "v8_preregistration": "9cd2d3cf2bbd30636e9db58ba4fba026adad1199a8e3f586bfe5a2fc61f40b93",
+    "v8_response_table": "d27104f3bfdf4e72279fffcb1ed78ecb3ca600b8ba95edd3a9b28e39da5d3b4e"
+  },
+  "code_hashes": {
+    "cylindrical_reactor": "22a3342ca512a1b47b4a33160c8ff02fc5a01ab8637350c1b1c544d81f1e74dc",
+    "prediction_writer": "c4a874c23c4528e74b0f8a124c1a55b19514e31c502e40fb769971ace92cd53f",
+    "surface_recurrence": "da837c8c37ee33dc3ecf2bdd226af1fbd520fe432d2e95c60878760644e04745",
+    "v8_calibration_audit": "95aea683ff9657d3c95a99eb3543347c3d86cee8e052f057f60117e65805f4de"
+  },
+  "eligible_for_separate_outcome_score_after_commit": true,
+  "heldout_outcomes_read": false,
+  "heldout_prediction_written": true,
+  "prediction_file": "results/curated/zenodo_bosch_wafer_boundary_map_depth_extension_v8/heldout_prediction.json",
+  "prediction_sha256": "56ed2429832fe77280762fbca86cb6ffa4de3fd9687aa84f3b5cfd4ca99a3b1a",
+  "schema": "petch-zenodo-bosch-v8-heldout-prediction-seal-v1",
+  "scoring_authority": {
+    "mixed_outcome_csv_may_be_opened_only_after_this_seal_and_prediction_are_committed_and_pushed": true,
+    "model_or_prediction_changes_after_outcome_reveal_forbidden": true
+  }
+}
