@@ -1,0 +1,212 @@
+{
+  "schema": "petch-zenodo-bosch-dynamic-wall-depth-extension-preregistration-v6",
+  "calibration_exposure": {
+    "calibration_outcomes_examined": true,
+    "v5_residual_audit_examined": true,
+    "dynamic_wall_fit_started_before_this_freeze": false,
+    "dynamic_wall_operator_implemented_before_this_freeze": false,
+    "heldout_outcomes_examined": false,
+    "status": "calibration-visible dynamic model-form freeze; execution-heldout outcome firewall remains closed"
+  },
+  "source_semantics_correction": {
+    "source_statement": "C, Si, and SiO2 refer to conditioning on the system chuck, a blank silicon wafer, and a blank silicon-dioxide wafer, respectively",
+    "source": "data/experimental/zenodo_17122442/Readme.pdf",
+    "source_sha256": "7c2690954532617d8681c6c48d65ffb960d8e745c16b0dd12b76c64b1b167336",
+    "visual_audit_completed": true,
+    "correction": "the v5 symbol log_carbon_cycle_coefficient was semantically misnamed; its numeric feature was the logarithm of conditioning-repeat count, so the old fit arithmetic is unchanged while v6 names it conditioning-repeat count",
+    "experiment_sequence": [
+      "two minutes O2 plasma",
+      "two minutes O2/SF6 plasma",
+      "declared conditioning sequence repeated 1, 3, or 9 times on chuck, blank Si, or blank SiO2",
+      "ten production Bosch wafers processed sequentially without intermediate cleaning and with one-minute inter-wafer breaks"
+    ]
+  },
+  "model_form_discovery_record": {
+    "source_receipt": "results/curated/zenodo_bosch_wall_conditioning_depth_extension_v5/calibration_residual_feature_audit.json",
+    "source_receipt_sha256": "b32b4ee9d0a49e6e2d9fabf0eeb0726f6f0ff847df5139a776e990e1fb747089",
+    "calibration_only": true,
+    "observed_silicon_depth_slope_um_per_wafer_range": [
+      -0.16046202961048497,
+      -0.05576079117739017
+    ],
+    "all_eight_observed_lot_slopes_negative": true,
+    "static_v5_predicted_slope_um_per_wafer_range": [
+      -0.010676908593923734,
+      0.06379311401307816
+    ],
+    "all_eight_static_residual_slopes_positive": true,
+    "top_sequence_detrended_silicon_residual_feature": "sf6_platen_peak_to_peak_q50",
+    "top_sequence_detrended_partial_pearson": 0.588362929633167,
+    "interpretation": "a between-wafer chamber state is missing, and an electrical impedance/sheath residual may remain after that state is modeled",
+    "selection_bias_disclosure": "the dynamic model form was selected after examining calibration residuals and cannot be called pre-exposure blind"
+  },
+  "frozen_from_prior_versions": {
+    "v1_preregistration": "results/curated/zenodo_bosch_reactor_depth_holdout_v1/preregistration.json",
+    "v1_preregistration_sha256": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+    "v2_preregistration": "results/curated/zenodo_bosch_cylindrical_depth_extension_v2/preregistration.json",
+    "v2_preregistration_sha256": "66f681abbe54d7785965e5e949a23f7562c3cad18d4105752b964eba59b93555",
+    "v5_preregistration": "results/curated/zenodo_bosch_wall_conditioning_depth_extension_v5/preregistration.json",
+    "v5_preregistration_sha256": "ccd83b5e4aaab4743432117fedf62a1a9e6ddc899e330b3adcf40092551bdb6a",
+    "v5_calibration_fit": "results/curated/zenodo_bosch_wall_conditioning_depth_extension_v5/calibration_fit.json",
+    "v5_calibration_fit_sha256": "3c8b3bc98c22818895d34640cfc8390f06925e0ea5ed71a0e86123fc0021d25f",
+    "acceptance_gates_unchanged": true,
+    "calibration_and_heldout_keys_unchanged": true,
+    "empirical_baselines_unchanged": true,
+    "surface_laws_unchanged": [
+      "Belen SF6 silicon removal",
+      "La Magna/Garozzo C4F8 film and SiO2 removal"
+    ],
+    "positive_ion_source_energy_and_transfer_unchanged_in_v6": true,
+    "static_lot_preparation_law_retained": true
+  },
+  "dynamic_state": {
+    "name": "incremental fluorocarbon wall occupancy relative to the declared post-conditioning state",
+    "symbol": "q",
+    "domain": [
+      0.0,
+      1.0
+    ],
+    "lot_initial_state": "q_start=0 exactly after every declared conditioning sequence; this is a relative state definition, while the retained static lot-preparation multiplier represents the nonzero absolute post-conditioning wall response",
+    "inter_wafer_transport": "q_end from one production wafer is q_start for the next wafer in the same lot",
+    "inter_wafer_break": "q is held constant during the recorded one-minute plasma-off break because no wall-temperature or desorption diagnostic is available",
+    "lot_boundary": "q resets only at a declared conditioning sequence, never from wafer number, date, target depth, or a fitted per-lot value",
+    "deposition_drive": "D_C4F8 = integral of the measured C4F8-flow channel divided by the frozen calibration median",
+    "cleaning_drive": "D_SF6 = integral of the measured SF6-flow channel divided by the frozen calibration median",
+    "c4f8_reference_dose_machine_units_s": 46564.0977805,
+    "sf6_reference_dose_machine_units_s": 264830.251437,
+    "rate_equation": "dq/ds = k_dep*D_C4F8*(1-q) - k_clean*D_SF6*q over one normalized wafer interval",
+    "exact_update": {
+      "a": "k_dep*D_C4F8",
+      "c": "k_clean*D_SF6",
+      "lambda": "a+c",
+      "q_infinity": "a/lambda",
+      "q_end": "q_infinity + (q_start-q_infinity)*exp(-lambda)",
+      "q_mean": "q_infinity + (q_start-q_infinity)*(1-exp(-lambda))/lambda",
+      "zero_rate_limit": "q_end=q_mean=q_start when lambda=0"
+    },
+    "conservation_and_monotonicity": [
+      "the analytic update preserves 0<=q_start,q_mean,q_end<=1 for nonnegative rates",
+      "with k_clean=0 and positive C4F8 dose, q cannot decrease",
+      "with k_dep=0 and positive SF6 dose, q cannot increase",
+      "the same recurrence is used in fitting, exact replay, and heldout prediction"
+    ]
+  },
+  "wall_response": {
+    "static_log_multiplier": "b_repeat*log(conditioning_repeat_count/3) + b_Si*I[blank Si] + b_SiO2*I[blank SiO2]",
+    "dynamic_multiplier": "exp(b_q*q_mean)",
+    "combined_multiplier": "clip(exp(static_log_multiplier + b_q*q_mean), 0.25, 4.0)",
+    "physical_action": {
+      "zero_dimensional_neutral_state": "divide F and C4F8-film-precursor reference lifetimes by the combined wall-loss multiplier",
+      "cylindrical_neutral_transfer": "multiply upper and sidewall F and film-precursor loss velocities by the combined wall-loss multiplier",
+      "lower_wafer_collection": "unchanged",
+      "positive_ion_state_and_transfer": "unchanged",
+      "surface_kinetics_and_yields": "unchanged"
+    },
+    "literature_topology_support": [
+      {
+        "source": "Sayyed et al. dataset README (2025)",
+        "doi": "10.5281/zenodo.17122442",
+        "role": "primary target-tool protocol explicitly designed to induce prior-chamber-state and within-lot process drift"
+      },
+      {
+        "source": "Schaepkens et al., JVST A 16, 2099-2107 (1998)",
+        "doi": "10.1116/1.581316",
+        "role": "independent primary fluorocarbon-ICP evidence that reactor-wall conditions alter fluorocarbon loss and etch behavior; no numeric rate is imported"
+      }
+    ]
+  },
+  "free_parameters": {
+    "maximum_total_count": 6,
+    "static_parameters": [
+      "b_repeat",
+      "b_Si",
+      "b_SiO2"
+    ],
+    "static_bounds_each": [
+      -1.5,
+      1.5
+    ],
+    "dynamic_parameters": [
+      "log(k_dep)",
+      "log(k_clean)",
+      "b_q"
+    ],
+    "k_dep_and_k_clean_bounds_per_reference_wafer": [
+      0.001,
+      3.0
+    ],
+    "b_q_bounds": [
+      -1.3862943611198906,
+      1.3862943611198906
+    ],
+    "no_free_initial_state": true,
+    "no_per_lot_or_per_wafer_parameter": true,
+    "bound_rationale": "one reference wafer may change an unoccupied or occupied state by 0.1 percent to 95 percent before the competing process; the response remains inside the already frozen factor-four wall-loss interval"
+  },
+  "identifiability_gate": {
+    "required": true,
+    "jacobian_unit": "six fitted shared coefficients against calibration residual vector",
+    "full_column_rank_required": true,
+    "maximum_singular_value_condition_number": 1000000.0,
+    "maximum_pairwise_parameter_correlation_magnitude": 0.995,
+    "bound_contact_rule": "a dynamic coefficient within 0.1 percent of a bound fails identification unless a profile-likelihood interval closes inside the bound",
+    "failure_action": "refuse the prediction seal and report the non-identifiable combination; do not choose a convenient rate or open heldout outcomes"
+  },
+  "calibration_and_selection": {
+    "fold_unit": "entire lot/date",
+    "fit_scope": "one shared six-coefficient law across calibration lots",
+    "whole_lot_leave_one_out_refits_required": true,
+    "heldout_lot_dynamic_initialization": "q=0 after its declared conditioning sequence, with no fitted heldout initial state",
+    "objective": "the frozen v5 aggregate residual vector, with mean Si depth, mean oxide loss, selectivity, and normalized radial shape scaled by their unchanged gates",
+    "required_before_heldout_reveal": [
+      "all unchanged absolute calibration gates pass",
+      "aggregate whole-lot leave-one-out physics scores beat the global-mean depth baseline",
+      "aggregate whole-lot leave-one-out physics scores beat the shared mean-map point and normalized-shape baselines",
+      "the dynamic model improves the signed within-lot depth-slope error over v5",
+      "the six-parameter identifiability gate passes",
+      "certification-grid refinement changes each acceptance observable by less than 0.25 of its frozen gate",
+      "code, data, parameter, fold-score, and heldout-prediction hashes are sealed",
+      "experimental_outcomes_read=false runtime audit"
+    ]
+  },
+  "deterministic_acceleration": {
+    "allowed_only_for_calibration_search": true,
+    "method": "precompute exact species-resolved reactor-to-surface responses on fixed log wall-multiplier nodes, then use a shape-preserving differentiable one-dimensional interpolant",
+    "wall_multiplier_domain": [
+      0.25,
+      4.0
+    ],
+    "minimum_exact_nodes": 9,
+    "interpolation_validation": "independent midpoint nodes not used to build the interpolant",
+    "maximum_error_fraction_of_each_frozen_gate": 0.05,
+    "final_fit_replay": "all calibration and fold scores used for a seal must be recomputed through the exact reactor, cylindrical transfer, and surface path at the selected coefficients",
+    "depth_correction_forbidden": true
+  },
+  "forbidden_shortcuts": [
+    "using wafer number, experiment key, lot number, date, or target depth as a model input",
+    "independent per-lot, per-wafer, or heldout initial wall states",
+    "additive or multiplicative corrections applied directly to predicted depth",
+    "changing Belen or La Magna/Garozzo surface coefficients",
+    "changing positive-ion energy, flux, or radial transfer in the dynamic-wall iteration",
+    "using heldout outcomes to choose recurrence signs, bounds, rates, interpolation nodes, or coefficients",
+    "weakening the v1 acceptance gates, empirical baselines, identifiability gate, or grid-refinement requirement",
+    "calling C a carbon-conditioning indicator; the source defines C as the bare system chuck"
+  ],
+  "frozen_code_parent": {
+    "git_commit": "e6e1b2561cac4e9c3bd8a006eb276f2676b590c6",
+    "bosch_reduced_reactor_sha256": "f62b9f1573e87273879627e9695ff3dbcee55ea2d82833648c1905919675f6ce",
+    "bosch_cylindrical_transfer_sha256": "a6904537f6674815505a15795e5cd78b8ae0d05c6685756faf6e58fdbf0e5391",
+    "v5_calibration_driver_sha256": "bcd35c549f6dc46d1cc2525c3807607e7d5fdac6d46e0d6b53a1d04814f0b097",
+    "dynamic_wall_operator_implemented": false
+  },
+  "target_firewall": {
+    "calibration_asset_only": "data/experimental/zenodo_17122442/calibration_Si_Oxide_etch_89_points.csv",
+    "calibration_asset_sha256": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "process_data_sha256": "fd304fbc08a9641f182f71f11064b8fe00a01c24a100ae8211536ad0cd404f49",
+    "process_dictionary_sha256": "51c9bebfad14f0a0558bf8e5831579b6a3308a2ff5b330ae5b8f8f32bc4b4302",
+    "lot_status_sha256": "f7d85345ac51a20944fe52d7b846bc387bc52c79169d4c4b419361ccbc317b05",
+    "heldout_numeric_fields_may_be_parsed_only_after_prediction_seal": true,
+    "heldout_outcomes_read_at_freeze": false,
+    "mixed_outcome_csv_forbidden_to_fit_process": true
+  }
+}

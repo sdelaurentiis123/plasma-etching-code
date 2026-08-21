@@ -569,3 +569,13 @@ runs, and improve only closures supported by independent observables. The
 wrong behavior is to treat a conditional 679 nm Oxford trajectory, a partial
 240 nm Krueger prefix, or an in-sample Bosch pass as the requested general
 absolute-depth breakthrough.
+
+## Source-semantics correction after the snapshot
+
+The Bosch source README was visually audited after this report's 13:00 UTC
+snapshot. In the lot labels, `C` means conditioning on the bare system
+**chuck**, not a carbon cycle. The v5 static calculation used the numerical
+repeat count correctly, but its `log_carbon_cycle` variable and this report's
+earlier wording were semantically wrong. The authoritative v6 preregistration
+uses `conditioning_repeat_count` and records the actual O2 then O2/SF6
+conditioning sequence.
