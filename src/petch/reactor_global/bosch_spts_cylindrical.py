@@ -290,6 +290,134 @@ class BoschSPTSWaferIonTransmissionLaw:
 
 
 @dataclass(frozen=True)
+class BoschSPTSWaferIonTransmissionGeometry:
+    """Precomputed differentiable geometry for repeated v8 calibration."""
+
+    x_m: np.ndarray
+    y_m: np.ndarray
+    static_maximum_order: int
+    dynamic_maximum_order: int
+    static_point_design: np.ndarray
+    static_grid_design: np.ndarray
+    dynamic_point_design: np.ndarray
+    dynamic_grid_design: np.ndarray
+    normalized_baseline_grid_current_weight: np.ndarray
+
+    def __post_init__(self):
+        x = np.asarray(self.x_m, dtype=float).copy()
+        y = np.asarray(self.y_m, dtype=float).copy()
+        static_point = np.asarray(self.static_point_design, dtype=float).copy()
+        static_grid = np.asarray(self.static_grid_design, dtype=float).copy()
+        dynamic_point = np.asarray(self.dynamic_point_design, dtype=float).copy()
+        dynamic_grid = np.asarray(self.dynamic_grid_design, dtype=float).copy()
+        weight = np.asarray(
+            self.normalized_baseline_grid_current_weight, dtype=float).copy()
+        static_count = len(bosch_real_zernike_modes(self.static_maximum_order))
+        dynamic_count = len(bosch_real_zernike_modes(self.dynamic_maximum_order))
+        if (
+            x.ndim != 1
+            or y.shape != x.shape
+            or x.size < 4
+            or static_point.shape != (x.size, static_count)
+            or dynamic_point.shape != (x.size, dynamic_count)
+            or static_grid.ndim != 2
+            or static_grid.shape[1] != static_count
+            or dynamic_grid.shape != (static_grid.shape[0], dynamic_count)
+            or weight.shape != (static_grid.shape[0],)
+            or any(np.any(~np.isfinite(value)) for value in (
+                x, y, static_point, static_grid,
+                dynamic_point, dynamic_grid, weight))
+            or np.any(weight <= 0.0)
+            or not math.isclose(
+                float(np.sum(weight)), 1.0, rel_tol=2.0e-14, abs_tol=2.0e-14)
+        ):
+            raise ValueError("invalid Bosch ion-transmission geometry")
+        for value in (
+            x, y, static_point, static_grid,
+            dynamic_point, dynamic_grid, weight,
+        ):
+            value.setflags(write=False)
+        object.__setattr__(self, "x_m", x)
+        object.__setattr__(self, "y_m", y)
+        object.__setattr__(self, "static_point_design", static_point)
+        object.__setattr__(self, "static_grid_design", static_grid)
+        object.__setattr__(self, "dynamic_point_design", dynamic_point)
+        object.__setattr__(self, "dynamic_grid_design", dynamic_grid)
+        object.__setattr__(
+            self, "normalized_baseline_grid_current_weight", weight)
+
+    @property
+    def coefficient_count(self):
+        return (
+            self.static_point_design.shape[1]
+            + self.dynamic_point_design.shape[1])
+
+    def log_factor_and_jacobian(
+            self, coefficients, c4f8_platen_vpp_rms_V):
+        coefficient = np.asarray(coefficients, dtype=float)
+        voltage = np.asarray(c4f8_platen_vpp_rms_V, dtype=float)
+        if (
+            coefficient.shape != (self.coefficient_count,)
+            or np.any(~np.isfinite(coefficient))
+            or np.any(np.abs(coefficient) > _TRANSMISSION_COEFFICIENT_BOUND)
+            or voltage.ndim != 1
+            or voltage.size == 0
+            or np.any(~np.isfinite(voltage))
+            or np.any(voltage < _TRANSMISSION_VPP_DOMAIN_V[0])
+            or np.any(voltage > _TRANSMISSION_VPP_DOMAIN_V[1])
+        ):
+            raise ValueError("invalid Bosch ion-transmission calibration query")
+        z = (
+            (voltage - _TRANSMISSION_VPP_REFERENCE_V)
+            / _TRANSMISSION_VPP_SCALE_V)
+        static_count = self.static_point_design.shape[1]
+        static_coefficient = coefficient[:static_count]
+        dynamic_coefficient = coefficient[static_count:]
+        point_log = self.static_point_design @ static_coefficient
+        grid_log = self.static_grid_design @ static_coefficient
+        point_log = np.broadcast_to(
+            point_log, (voltage.size, point_log.size)).copy()
+        grid_log = np.broadcast_to(
+            grid_log, (voltage.size, grid_log.size)).copy()
+        if dynamic_coefficient.size:
+            point_log += z[:, None] * (
+                self.dynamic_point_design @ dynamic_coefficient)[None]
+            grid_log += z[:, None] * (
+                self.dynamic_grid_design @ dynamic_coefficient)[None]
+
+        raw_weight = (
+            np.exp(grid_log)
+            * self.normalized_baseline_grid_current_weight[None])
+        denominator = np.sum(raw_weight, axis=1)
+        normalized_weight = raw_weight / denominator[:, None]
+        log_factor = point_log - np.log(denominator)[:, None]
+
+        static_grid_mean = normalized_weight @ self.static_grid_design
+        static_jacobian = (
+            self.static_point_design[None]
+            - static_grid_mean[:, None])
+        if dynamic_coefficient.size:
+            dynamic_grid_mean = normalized_weight @ self.dynamic_grid_design
+            dynamic_jacobian = z[:, None, None] * (
+                self.dynamic_point_design[None]
+                - dynamic_grid_mean[:, None])
+            jacobian = np.concatenate((static_jacobian, dynamic_jacobian), axis=2)
+        else:
+            jacobian = static_jacobian
+        if (
+            np.any(~np.isfinite(log_factor))
+            or np.any(~np.isfinite(jacobian))
+        ):
+            raise RuntimeError("Bosch ion-transmission calibration became nonfinite")
+        return log_factor, jacobian
+
+    def factors(self, coefficients, c4f8_platen_vpp_rms_V):
+        log_factor, _jacobian = self.log_factor_and_jacobian(
+            coefficients, c4f8_platen_vpp_rms_V)
+        return np.exp(log_factor)
+
+
+@dataclass(frozen=True)
 class BoschSPTSCylindricalSourceResponse:
     species_names: tuple[str, ...]
     x_m: np.ndarray
@@ -526,20 +654,18 @@ def _wafer_ion_transmission_point_factor(
 
     radial = grid.radial_centers_m[:, None]
     angle = grid.azimuthal_centers_rad[None, :]
-    on_wafer = radial <= wafer_radius
+    area_weights = _wafer_area_weights(grid, wafer_radius)
+    on_wafer = area_weights > 0.0
     grid_log_field = np.zeros(
         (grid.radial_cell_count, grid.azimuthal_cell_count))
     if np.any(on_wafer):
         rho = np.broadcast_to(
-            radial / wafer_radius, grid_log_field.shape)[on_wafer.repeat(
-                grid.azimuthal_cell_count, axis=1)]
-        phi = np.broadcast_to(angle, grid_log_field.shape)[on_wafer.repeat(
-            grid.azimuthal_cell_count, axis=1)]
-        grid_log_field[on_wafer.repeat(
-            grid.azimuthal_cell_count, axis=1)] = law.log_field(
+            np.minimum(radial / wafer_radius, 1.0),
+            grid_log_field.shape)[on_wafer]
+        phi = np.broadcast_to(angle, grid_log_field.shape)[on_wafer]
+        grid_log_field[on_wafer] = law.log_field(
                 rho, phi, standardized_vpp)
     raw_grid_factor = np.exp(grid_log_field)
-    area_weights = _wafer_area_weights(grid, wafer_radius)
     baseline_grid_current = (
         np.asarray(unit_lower, dtype=float)[2]
         * np.asarray(edge_focus_grid_factor, dtype=float))
@@ -611,6 +737,64 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
         self._maximum_ledger = self._lift.maximum_unit_ledger_relative_residual
         self._maximum_linear = (
             self._lift.maximum_unit_linear_system_relative_residual)
+
+    def ion_transmission_geometry(
+            self, *, x_m, y_m, static_maximum_order,
+            dynamic_maximum_order=0):
+        """Precompute the exact current-normalized v8 calibration geometry."""
+        x = np.asarray(x_m, dtype=float)
+        y = np.asarray(y_m, dtype=float)
+        _point_interpolation_weights(self._grid, x, y)
+        point_radius = np.hypot(x, y)
+        wafer_radius = float(self.parameters.reduced.wafer_radius_m)
+        if np.any(point_radius > wafer_radius + 2.0e-14):
+            raise ValueError("ion-transmission point lies outside the wafer")
+        unit_lower = self._lift.unit_lower_flux_per_density_m_s
+        (_point_factor, edge_grid_factor, _continuous_mean,
+         _edge_correction) = _ion_edge_focus_factors(
+            unit_lower, self._grid, self.parameters, point_radius)
+        area_weights = _wafer_area_weights(self._grid, wafer_radius)
+        baseline_weight = unit_lower[2] * edge_grid_factor * area_weights
+        radial, angle = np.meshgrid(
+            self._grid.radial_centers_m,
+            self._grid.azimuthal_centers_rad,
+            indexing="ij",
+        )
+        on_wafer = (area_weights > 0.0) & (baseline_weight > 0.0)
+        weight = baseline_weight[on_wafer]
+        weight /= np.sum(weight)
+        point_phi = np.arctan2(y, x)
+        static_point = bosch_real_zernike_design(
+            static_maximum_order,
+            np.minimum(point_radius / wafer_radius, 1.0),
+            point_phi,
+        )
+        dynamic_point = bosch_real_zernike_design(
+            dynamic_maximum_order,
+            np.minimum(point_radius / wafer_radius, 1.0),
+            point_phi,
+        )
+        static_grid = bosch_real_zernike_design(
+            static_maximum_order,
+            np.minimum(radial[on_wafer] / wafer_radius, 1.0),
+            angle[on_wafer],
+        )
+        dynamic_grid = bosch_real_zernike_design(
+            dynamic_maximum_order,
+            np.minimum(radial[on_wafer] / wafer_radius, 1.0),
+            angle[on_wafer],
+        )
+        return BoschSPTSWaferIonTransmissionGeometry(
+            x_m=x,
+            y_m=y,
+            static_maximum_order=static_maximum_order,
+            dynamic_maximum_order=dynamic_maximum_order,
+            static_point_design=static_point,
+            static_grid_design=static_grid,
+            dynamic_point_design=dynamic_point,
+            dynamic_grid_design=dynamic_grid,
+            normalized_baseline_grid_current_weight=weight,
+        )
 
     def source_response(
             self, *, x_m, y_m, source_cosine_coefficients=None,

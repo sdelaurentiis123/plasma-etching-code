@@ -261,6 +261,13 @@ def test_wafer_ion_transmission_is_positive_and_conserves_current(trace):
         ion_transmission_law=law,
         c4f8_platen_vpp_rms_V=637.4409584828442,
     )
+    geometry = model.ion_transmission_geometry(
+        x_m=x, y_m=y, static_maximum_order=2,
+        dynamic_maximum_order=2)
+    coefficients = np.asarray(
+        law.static_coefficients + law.dynamic_coefficients)
+    accelerated_factor = geometry.factors(
+        coefficients, np.array([637.4409584828442]))[0]
 
     assert mapped.unit_wafer_average_flux_per_density_m_s == pytest.approx(
         base.unit_wafer_average_flux_per_density_m_s,
@@ -277,10 +284,35 @@ def test_wafer_ion_transmission_is_positive_and_conserves_current(trace):
         mapped.unit_point_flux_per_density_m_s[2],
         base.unit_point_flux_per_density_m_s[2],
     )
+    assert accelerated_factor == pytest.approx(
+        mapped.unit_point_flux_per_density_m_s[2]
+        / base.unit_point_flux_per_density_m_s[2],
+        rel=2.0e-14,
+        abs=2.0e-14,
+    )
     provenance = mapped.provenance["wafer_ion_transmission"]
     assert provenance["enabled"] is True
     assert provenance["relative_total_ion_current_residual"] <= 2.0e-14
     assert mapped.provenance["total_wafer_ion_current_conserved"] is True
+
+    log_factor, jacobian = geometry.log_factor_and_jacobian(
+        coefficients, np.array([637.4409584828442]))
+    epsilon = 1.0e-6
+    finite_difference = np.empty_like(jacobian)
+    for index in range(coefficients.size):
+        perturbation = np.zeros_like(coefficients)
+        perturbation[index] = epsilon
+        plus = np.log(geometry.factors(
+            coefficients + perturbation,
+            np.array([637.4409584828442])))
+        minus = np.log(geometry.factors(
+            coefficients - perturbation,
+            np.array([637.4409584828442])))
+        finite_difference[:, :, index] = (plus - minus) / (2.0 * epsilon)
+    assert np.exp(log_factor) == pytest.approx(
+        accelerated_factor[None], rel=2.0e-14, abs=2.0e-14)
+    assert jacobian == pytest.approx(
+        finite_difference, rel=2.0e-8, abs=2.0e-10)
 
 
 def test_wafer_ion_transmission_voltage_is_smooth_and_domain_bounded(trace):
