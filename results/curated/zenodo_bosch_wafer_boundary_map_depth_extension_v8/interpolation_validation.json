@@ -1,0 +1,3193 @@
+{
+  "frozen_maximum_error_fraction": 0.05,
+  "heldout_outcomes_read": false,
+  "independent_tensor_midpoint_count": 144,
+  "input_hashes": {
+    "preregistration": "9cd2d3cf2bbd30636e9db58ba4fba026adad1199a8e3f586bfe5a2fc61f40b93",
+    "response_table": "d27104f3bfdf4e72279fffcb1ed78ecb3ca600b8ba95edd3a9b28e39da5d3b4e"
+  },
+  "local_ion_midpoint_count": 12,
+  "maximum_error_by_metric": {
+    "normalized_shape_rmse_percent": 0.009199442881460707,
+    "oxide_mean_mae_um": 0.0017079567404253914,
+    "selectivity_mape_percent": 0.08392329361115743,
+    "silicon_mean_mae_um": 0.03698788648478285,
+    "silicon_mean_mape_percent": 0.06745052023571585,
+    "silicon_point_rmse_um": 0.03712506756775992
+  },
+  "maximum_error_fraction_of_any_frozen_gate": 0.03698788648478285,
+  "passes": true,
+  "rows": [
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00020114696675554194,
+        "oxide_mean_mae_um": 1.6221499814195185e-05,
+        "selectivity_mape_percent": 0.004770705311438602,
+        "silicon_mean_mae_um": 0.000998059354846769,
+        "silicon_mean_mape_percent": 0.005004618333299682,
+        "silicon_point_rmse_um": 0.0010021943345635228
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00010057348337777097,
+        "oxide_mean_mae_um": 0.0002027687476774398,
+        "selectivity_mape_percent": 0.0003975587759532169,
+        "silicon_mean_mae_um": 0.000998059354846769,
+        "silicon_mean_mape_percent": 0.001668206111099894,
+        "silicon_point_rmse_um": 0.0006681295563756819
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 9.682642061633293e-05,
+        "oxide_mean_mae_um": 6.065320420939694e-06,
+        "selectivity_mape_percent": 0.0012398272336898348,
+        "silicon_mean_mae_um": 0.00043869549635095005,
+        "silicon_mean_mape_percent": 0.0020883288820344368,
+        "silicon_point_rmse_um": 0.00044076833072470475
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 4.841321030816646e-05,
+        "oxide_mean_mae_um": 7.581650526174617e-05,
+        "selectivity_mape_percent": 0.00010331893614081957,
+        "silicon_mean_mae_um": 0.00043869549635095005,
+        "silicon_mean_mape_percent": 0.0006961096273448123,
+        "silicon_point_rmse_um": 0.00029384555381646983
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00022830081668993006,
+        "oxide_mean_mae_um": 2.0118302670943575e-05,
+        "selectivity_mape_percent": 0.0033406987023744486,
+        "silicon_mean_mae_um": 0.0013716629853853135,
+        "silicon_mean_mape_percent": 0.005871980320188541,
+        "silicon_point_rmse_um": 0.0013779124042599383
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00011415040834496503,
+        "oxide_mean_mae_um": 0.0002514787833867947,
+        "selectivity_mape_percent": 0.00027839155853120405,
+        "silicon_mean_mae_um": 0.0013716629853853135,
+        "silicon_mean_mape_percent": 0.0019573267733961805,
+        "silicon_point_rmse_um": 0.0009186082695066255
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003831776235808884,
+        "oxide_mean_mae_um": 4.9093746736590395e-05,
+        "selectivity_mape_percent": 0.005471592042790648,
+        "silicon_mean_mae_um": 0.0032801535040475945,
+        "silicon_mean_mape_percent": 0.01193742823692201,
+        "silicon_point_rmse_um": 0.0032947004502349893
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0001915888117904442,
+        "oxide_mean_mae_um": 0.0006136718342073799,
+        "selectivity_mape_percent": 0.0004559660035658873,
+        "silicon_mean_mae_um": 0.0032801535040475945,
+        "silicon_mean_mape_percent": 0.00397914274564067,
+        "silicon_point_rmse_um": 0.002196466966823326
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0004679107611222892,
+        "oxide_mean_mae_um": 9.880243559933074e-05,
+        "selectivity_mape_percent": 0.00660009281411981,
+        "silicon_mean_mae_um": 0.0064915096321209375,
+        "silicon_mean_mape_percent": 0.019022145593241706,
+        "silicon_point_rmse_um": 0.0065192687972944405
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0002339553805611446,
+        "oxide_mean_mae_um": 0.0012350304449916343,
+        "selectivity_mape_percent": 0.0005500077345099841,
+        "silicon_mean_mae_um": 0.0064915096321209375,
+        "silicon_mean_mape_percent": 0.0063407151977472355,
+        "silicon_point_rmse_um": 0.004346179198196294
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0004003350063071495,
+        "oxide_mean_mae_um": 0.00016802226647564923,
+        "selectivity_mape_percent": 0.0065705134576935125,
+        "silicon_mean_mae_um": 0.010714418589785358,
+        "silicon_mean_mape_percent": 0.02417648045277332,
+        "silicon_point_rmse_um": 0.01075745042467056
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00020016750315357475,
+        "oxide_mean_mae_um": 0.0021002783309456152,
+        "selectivity_mape_percent": 0.0005475427881411261,
+        "silicon_mean_mae_um": 0.010714418589785358,
+        "silicon_mean_mape_percent": 0.008058826817591106,
+        "silicon_point_rmse_um": 0.007171633616447039
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00024674106392142997,
+        "oxide_mean_mae_um": 0.00023954774479002517,
+        "selectivity_mape_percent": 0.00615450391508121,
+        "silicon_mean_mae_um": 0.01442284617139857,
+        "silicon_mean_mape_percent": 0.02441279397691254,
+        "silicon_point_rmse_um": 0.014474946570913399
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00012337053196071499,
+        "oxide_mean_mae_um": 0.0029943468098753145,
+        "selectivity_mape_percent": 0.0005128753262567675,
+        "silicon_mean_mae_um": 0.01442284617139857,
+        "silicon_mean_mape_percent": 0.00813759799230418,
+        "silicon_point_rmse_um": 0.009649964380608932
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00032443641736139007,
+        "oxide_mean_mae_um": 0.00027921752405897076,
+        "selectivity_mape_percent": 0.005934517875775036,
+        "silicon_mean_mae_um": 0.015166143339345694,
+        "silicon_mean_mape_percent": 0.01922703427680054,
+        "silicon_point_rmse_um": 0.015212707883706579
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00016221820868069504,
+        "oxide_mean_mae_um": 0.0034902190507371342,
+        "selectivity_mape_percent": 0.0004945431563145863,
+        "silicon_mean_mae_um": 0.015166143339345694,
+        "silicon_mean_mape_percent": 0.00640901142560018,
+        "silicon_point_rmse_um": 0.010141805255804387
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0004338053650273039,
+        "oxide_mean_mae_um": 0.0002556657133640113,
+        "selectivity_mape_percent": 0.005441798799650973,
+        "silicon_mean_mae_um": 0.011746447388409251,
+        "silicon_mean_mape_percent": 0.011429376457764501,
+        "silicon_point_rmse_um": 0.011776895974472144
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00021690268251365195,
+        "oxide_mean_mae_um": 0.003195821417050141,
+        "selectivity_mape_percent": 0.0004534832333042478,
+        "silicon_mean_mae_um": 0.011746447388409251,
+        "silicon_mean_mape_percent": 0.003809792152588167,
+        "silicon_point_rmse_um": 0.00785126398298143
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003386850204545756,
+        "oxide_mean_mae_um": 0.00017206587073016402,
+        "selectivity_mape_percent": 0.0038253726809169093,
+        "silicon_mean_mae_um": 0.006361575920680593,
+        "silicon_mean_mape_percent": 0.004980189547070246,
+        "silicon_point_rmse_um": 0.006378778409047186
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0001693425102272878,
+        "oxide_mean_mae_um": 0.00215082338412705,
+        "selectivity_mape_percent": 0.00031878105674307576,
+        "silicon_mean_mae_um": 0.006361575920680593,
+        "silicon_mean_mape_percent": 0.0016600631823567487,
+        "silicon_point_rmse_um": 0.00425251893936479
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00011540085139581844,
+        "oxide_mean_mae_um": 7.259053427695506e-05,
+        "selectivity_mape_percent": 0.0012813157783410447,
+        "silicon_mean_mae_um": 0.0027142860340120477,
+        "silicon_mean_mape_percent": 0.0018226108536820718,
+        "silicon_point_rmse_um": 0.0027201080683686187
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 5.770042569790922e-05,
+        "oxide_mean_mae_um": 0.0009073816784619382,
+        "selectivity_mape_percent": 0.00010677631486175373,
+        "silicon_mean_mae_um": 0.0027142860340120477,
+        "silicon_mean_mape_percent": 0.0006075369512273573,
+        "silicon_point_rmse_um": 0.0018134053789124124
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0002769737661514911,
+        "oxide_mean_mae_um": 0.0002111921347805712,
+        "selectivity_mape_percent": 0.003251425477884299,
+        "silicon_mean_mae_um": 0.008022716425000832,
+        "silicon_mean_mape_percent": 0.004977487323654846,
+        "silicon_point_rmse_um": 0.008047763661903564
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00013848688307574556,
+        "oxide_mean_mae_um": 0.00263990168475714,
+        "selectivity_mape_percent": 0.0002709521231570249,
+        "silicon_mean_mae_um": 0.008022716425000832,
+        "silicon_mean_mape_percent": 0.001659162441218282,
+        "silicon_point_rmse_um": 0.005365175774602376
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": -1.3626759436822484,
+      "wall_multiplier": 0.25597488528201584
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0002136985052729733,
+        "oxide_mean_mae_um": 1.6495687394804116e-05,
+        "selectivity_mape_percent": 0.004844039929914186,
+        "silicon_mean_mae_um": 0.0010113456153191672,
+        "silicon_mean_mape_percent": 0.005082766629556534,
+        "silicon_point_rmse_um": 0.0010157520742581387
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00010684925263648665,
+        "oxide_mean_mae_um": 0.00020619609243505146,
+        "selectivity_mape_percent": 0.0004036699941595155,
+        "silicon_mean_mae_um": 0.0010113456153191672,
+        "silicon_mean_mape_percent": 0.0016942555431855115,
+        "silicon_point_rmse_um": 0.0006771680495054258
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 6.730658157241895e-05,
+        "oxide_mean_mae_um": 5.769175284865424e-06,
+        "selectivity_mape_percent": 0.0011826449945465298,
+        "silicon_mean_mae_um": 0.0004147353770310265,
+        "silicon_mean_mape_percent": 0.0019788570450189153,
+        "silicon_point_rmse_um": 0.0004163253050272617
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 3.3653290786209474e-05,
+        "oxide_mean_mae_um": 7.21146910608178e-05,
+        "selectivity_mape_percent": 9.855374954554415e-05,
+        "silicon_mean_mae_um": 0.0004147353770310265,
+        "silicon_mean_mape_percent": 0.0006596190150063051,
+        "silicon_point_rmse_um": 0.0002775502033515078
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0001997432526184424,
+        "oxide_mean_mae_um": 1.978232470517057e-05,
+        "selectivity_mape_percent": 0.0033193863989178967,
+        "silicon_mean_mae_um": 0.0013349145208578742,
+        "silicon_mean_mape_percent": 0.0057288074444485915,
+        "silicon_point_rmse_um": 0.0013405792680504295
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 9.98716263092212e-05,
+        "oxide_mean_mae_um": 0.00024727905881463214,
+        "selectivity_mape_percent": 0.00027661553324315804,
+        "silicon_mean_mae_um": 0.0013349145208578742,
+        "silicon_mean_mape_percent": 0.0019096024814828638,
+        "silicon_point_rmse_um": 0.0008937195120336197
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003500599722395356,
+        "oxide_mean_mae_um": 4.871258774977738e-05,
+        "selectivity_mape_percent": 0.005528787856038313,
+        "silicon_mean_mae_um": 0.0032137875254875797,
+        "silicon_mean_mape_percent": 0.011727959932736749,
+        "silicon_point_rmse_um": 0.0032274465207906785
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0001750299861197678,
+        "oxide_mean_mae_um": 0.0006089073468722173,
+        "selectivity_mape_percent": 0.00046073232133652607,
+        "silicon_mean_mae_um": 0.0032137875254875797,
+        "silicon_mean_mape_percent": 0.003909319977578916,
+        "silicon_point_rmse_um": 0.0021516310138604525
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0004286078198745811,
+        "oxide_mean_mae_um": 9.84006205655034e-05,
+        "selectivity_mape_percent": 0.006806686557313609,
+        "silicon_mean_mae_um": 0.0063583156188819125,
+        "silicon_mean_mape_percent": 0.018691198466930754,
+        "silicon_point_rmse_um": 0.006384521110338488
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00021430390993729055,
+        "oxide_mean_mae_um": 0.0012300077570687924,
+        "selectivity_mape_percent": 0.000567223879776134,
+        "silicon_mean_mae_um": 0.0063583156188819125,
+        "silicon_mean_mape_percent": 0.006230399488976918,
+        "silicon_point_rmse_um": 0.004256347406892325
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003665210900610807,
+        "oxide_mean_mae_um": 0.00016763800000230294,
+        "selectivity_mape_percent": 0.007030946775262207,
+        "silicon_mean_mae_um": 0.010430522753180184,
+        "silicon_mean_mape_percent": 0.02362731708425366,
+        "silicon_point_rmse_um": 0.010470614661874482
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00018326054503054034,
+        "oxide_mean_mae_um": 0.0020954750000287867,
+        "selectivity_mape_percent": 0.0005859122312718506,
+        "silicon_mean_mae_um": 0.010430522753180184,
+        "silicon_mean_mape_percent": 0.007875772361417887,
+        "silicon_point_rmse_um": 0.006980409774582988
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00032913027198759875,
+        "oxide_mean_mae_um": 0.00023920540191275504,
+        "selectivity_mape_percent": 0.006976496592891125,
+        "silicon_mean_mae_um": 0.013835478702356832,
+        "silicon_mean_mape_percent": 0.023533611987976915,
+        "silicon_point_rmse_um": 0.013882567079106602
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00016456513599379937,
+        "oxide_mean_mae_um": 0.002990067523909438,
+        "selectivity_mape_percent": 0.0005813747160742604,
+        "silicon_mean_mae_um": 0.013835478702356832,
+        "silicon_mean_mape_percent": 0.007844537329325638,
+        "silicon_point_rmse_um": 0.009255044719404401
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0005459622875218446,
+        "oxide_mean_mae_um": 0.0002789289774666296,
+        "selectivity_mape_percent": 0.007169164052105289,
+        "silicon_mean_mae_um": 0.014076785032167815,
+        "silicon_mean_mape_percent": 0.017958251862618603,
+        "silicon_point_rmse_um": 0.014117711564288146
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0002729811437609223,
+        "oxide_mean_mae_um": 0.00348661221833287,
+        "selectivity_mape_percent": 0.0005974303376754408,
+        "silicon_mean_mae_um": 0.014076785032167815,
+        "silicon_mean_mape_percent": 0.005986083954206201,
+        "silicon_point_rmse_um": 0.009411807709525431
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007006036395865048,
+        "oxide_mean_mae_um": 0.0002554630916233336,
+        "selectivity_mape_percent": 0.00701986458112384,
+        "silicon_mean_mae_um": 0.010027073147698124,
+        "silicon_mean_mape_percent": 0.009833896552341828,
+        "silicon_point_rmse_um": 0.010059817271054374
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0003503018197932524,
+        "oxide_mean_mae_um": 0.0031932886452916698,
+        "selectivity_mape_percent": 0.0005849887150936533,
+        "silicon_mean_mae_um": 0.010027073147698124,
+        "silicon_mean_mape_percent": 0.0032779655174472763,
+        "silicon_point_rmse_um": 0.0067065448473695825
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0006236551300382193,
+        "oxide_mean_mae_um": 0.0001720529178874397,
+        "selectivity_mape_percent": 0.0055934943569326085,
+        "silicon_mean_mae_um": 0.004060924290834577,
+        "silicon_mean_mape_percent": 0.003209781845809149,
+        "silicon_point_rmse_um": 0.004121128636063406
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00031182756501910966,
+        "oxide_mean_mae_um": 0.0021506614735929963,
+        "selectivity_mape_percent": 0.00046612452974438404,
+        "silicon_mean_mae_um": 0.004060924290834577,
+        "silicon_mean_mape_percent": 0.001069927281936383,
+        "silicon_point_rmse_um": 0.0027474190907089374
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00040905535512249653,
+        "oxide_mean_mae_um": 7.293935817283289e-05,
+        "selectivity_mape_percent": 0.0031137604366868743,
+        "silicon_mean_mae_um": 9.488715415197172e-06,
+        "silicon_mean_mape_percent": 6.453370611965899e-06,
+        "silicon_point_rmse_um": 0.0006024160098981355
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00020452767756124827,
+        "oxide_mean_mae_um": 0.0009117419771604112,
+        "selectivity_mape_percent": 0.0002594800363905729,
+        "silicon_mean_mae_um": 9.488715415197172e-06,
+        "silicon_mean_mape_percent": 2.1511235373219663e-06,
+        "silicon_point_rmse_um": 0.00040161067326542366
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 2.0396487419485466e-05,
+        "oxide_mean_mae_um": 0.00021053657126194854,
+        "selectivity_mape_percent": 0.0015819759428238693,
+        "silicon_mean_mae_um": 0.01054535499924782,
+        "silicon_mean_mape_percent": 0.006620339363696104,
+        "silicon_point_rmse_um": 0.010579392299084537
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 1.0198243709742733e-05,
+        "oxide_mean_mae_um": 0.0026317071407743566,
+        "selectivity_mape_percent": 0.00013183132856865577,
+        "silicon_mean_mae_um": 0.01054535499924782,
+        "silicon_mean_mape_percent": 0.0022067797878987014,
+        "silicon_point_rmse_um": 0.007052928199389691
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": -1.2698118300487748,
+      "wall_multiplier": 0.2808844708230974
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00023373384484651945,
+        "oxide_mean_mae_um": 1.65881489251396e-05,
+        "selectivity_mape_percent": 0.005014357127192781,
+        "silicon_mean_mae_um": 0.0009789678456922956,
+        "silicon_mean_mape_percent": 0.00494486407120102,
+        "silicon_point_rmse_um": 0.0009836740363295985
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00011686692242325973,
+        "oxide_mean_mae_um": 0.00020735186156424498,
+        "selectivity_mape_percent": 0.00041786309393273174,
+        "silicon_mean_mae_um": 0.0009789678456922956,
+        "silicon_mean_mape_percent": 0.0016482880237336734,
+        "silicon_point_rmse_um": 0.000655782690886399
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 6.803943351514825e-05,
+        "oxide_mean_mae_um": 5.655814735786949e-06,
+        "selectivity_mape_percent": 0.0010212440927143498,
+        "silicon_mean_mae_um": 0.00043186783320777524,
+        "silicon_mean_mape_percent": 0.0020712887526762223,
+        "silicon_point_rmse_um": 0.0004332477123411472
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 3.4019716757574124e-05,
+        "oxide_mean_mae_um": 7.069768419733687e-05,
+        "selectivity_mape_percent": 8.510367439286248e-05,
+        "silicon_mean_mae_um": 0.00043186783320777524,
+        "silicon_mean_mape_percent": 0.0006904295842254074,
+        "silicon_point_rmse_um": 0.00028883180822743146
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00018153387840772468,
+        "oxide_mean_mae_um": 1.9632937870378565e-05,
+        "selectivity_mape_percent": 0.003163439957391952,
+        "silicon_mean_mae_um": 0.0013437542314393624,
+        "silicon_mean_mape_percent": 0.005798693995935504,
+        "silicon_point_rmse_um": 0.0013489477499177187
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 9.076693920386234e-05,
+        "oxide_mean_mae_um": 0.00024541172337973205,
+        "selectivity_mape_percent": 0.00026361999644932934,
+        "silicon_mean_mae_um": 0.0013437542314393624,
+        "silicon_mean_mape_percent": 0.001932897998645168,
+        "silicon_point_rmse_um": 0.0008992984999451458
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00032615903751388693,
+        "oxide_mean_mae_um": 4.85246252233081e-05,
+        "selectivity_mape_percent": 0.005423261727457144,
+        "silicon_mean_mae_um": 0.0031968817612643835,
+        "silicon_mean_mape_percent": 0.011738255809975229,
+        "silicon_point_rmse_um": 0.0032097397420926253
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00016307951875694346,
+        "oxide_mean_mae_um": 0.0006065578152913512,
+        "selectivity_mape_percent": 0.00045193847728809537,
+        "silicon_mean_mae_um": 0.0031968817612643835,
+        "silicon_mean_mape_percent": 0.00391275193665841,
+        "silicon_point_rmse_um": 0.0021398264947284167
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003993716665380461,
+        "oxide_mean_mae_um": 9.82344182765904e-05,
+        "selectivity_mape_percent": 0.006883400992231022,
+        "silicon_mean_mae_um": 0.006260973178610906,
+        "silicon_mean_mape_percent": 0.018537657152667936,
+        "silicon_point_rmse_um": 0.006285411684334834
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00019968583326902305,
+        "oxide_mean_mae_um": 0.00122793022845738,
+        "selectivity_mape_percent": 0.0005736167493525852,
+        "silicon_mean_mae_um": 0.006260973178610906,
+        "silicon_mean_mape_percent": 0.006179219050889312,
+        "silicon_point_rmse_um": 0.004190274456223222
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00039136851426705696,
+        "oxide_mean_mae_um": 0.0001675636542093854,
+        "selectivity_mape_percent": 0.007486346460965057,
+        "silicon_mean_mae_um": 0.010120661967303211,
+        "silicon_mean_mape_percent": 0.023127506659866924,
+        "silicon_point_rmse_um": 0.010157003846027775
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00019568425713352848,
+        "oxide_mean_mae_um": 0.0020945456776173175,
+        "selectivity_mape_percent": 0.0006238622050804215,
+        "silicon_mean_mae_um": 0.010120661967303211,
+        "silicon_mean_mape_percent": 0.007709168886622308,
+        "silicon_point_rmse_um": 0.00677133589735185
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0005807955835840677,
+        "oxide_mean_mae_um": 0.00023929244613934457,
+        "selectivity_mape_percent": 0.008037442195827063,
+        "silicon_mean_mae_um": 0.013059399466854037,
+        "silicon_mean_mape_percent": 0.02246124595696397,
+        "silicon_point_rmse_um": 0.013100720926365291
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00029039779179203387,
+        "oxide_mean_mae_um": 0.002991155576741807,
+        "selectivity_mape_percent": 0.0006697868496522553,
+        "silicon_mean_mae_um": 0.013059399466854037,
+        "silicon_mean_mape_percent": 0.007487081985654657,
+        "silicon_point_rmse_um": 0.008733813950910194
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000958576445484106,
+        "oxide_mean_mae_um": 0.0002792722710826438,
+        "selectivity_mape_percent": 0.008940856504825234,
+        "silicon_mean_mae_um": 0.012523175563962922,
+        "silicon_mean_mape_percent": 0.01620401262986615,
+        "silicon_point_rmse_um": 0.01256387444557832
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.000479288222742053,
+        "oxide_mean_mae_um": 0.0034909033885330474,
+        "selectivity_mape_percent": 0.0007450713754021029,
+        "silicon_mean_mae_um": 0.012523175563962922,
+        "silicon_mean_mape_percent": 0.005401337543288716,
+        "silicon_point_rmse_um": 0.008375916297052213
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0011878124412746695,
+        "oxide_mean_mae_um": 0.0002564619034183065,
+        "selectivity_mape_percent": 0.009372196414174194,
+        "silicon_mean_mae_um": 0.007553487322690368,
+        "silicon_mean_mape_percent": 0.007540831046205436,
+        "silicon_point_rmse_um": 0.007632209662604092
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005939062206373347,
+        "oxide_mean_mae_um": 0.0032057737927288312,
+        "selectivity_mape_percent": 0.0007810163678478496,
+        "silicon_mean_mae_um": 0.007553487322690368,
+        "silicon_mean_mape_percent": 0.0025136103487351453,
+        "silicon_point_rmse_um": 0.005088139775069395
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0011375090074815526,
+        "oxide_mean_mae_um": 0.00017408135249790272,
+        "selectivity_mape_percent": 0.008230245107909559,
+        "silicon_mean_mae_um": 0.0008348482980238714,
+        "silicon_mean_mape_percent": 0.0006742180405587087,
+        "silicon_point_rmse_um": 0.001616147663819801
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005687545037407763,
+        "oxide_mean_mae_um": 0.002176016906223784,
+        "selectivity_mape_percent": 0.0006858537589924632,
+        "silicon_mean_mae_um": 0.0008348482980238714,
+        "silicon_mean_mape_percent": 0.0002247393468529029,
+        "silicon_point_rmse_um": 0.0010774317758798673
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0009334379522819719,
+        "oxide_mean_mae_um": 7.536068993360345e-05,
+        "selectivity_mape_percent": 0.00578032642232514,
+        "silicon_mean_mae_um": 0.0036782659913281654,
+        "silicon_mean_mape_percent": 0.0025591545176766317,
+        "silicon_point_rmse_um": 0.003962445701450451
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00046671897614098594,
+        "oxide_mean_mae_um": 0.0009420086241700431,
+        "selectivity_mape_percent": 0.00048169386852709497,
+        "silicon_mean_mae_um": 0.0036782659913281654,
+        "silicon_mean_mape_percent": 0.0008530515058922106,
+        "silicon_point_rmse_um": 0.002641630467633634
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0005108703994594345,
+        "oxide_mean_mae_um": 0.00020813134029527448,
+        "selectivity_mape_percent": 0.0006871500281858307,
+        "silicon_mean_mae_um": 0.013645278495307214,
+        "silicon_mean_mape_percent": 0.008794160030245468,
+        "silicon_point_rmse_um": 0.013729988416812736
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00025543519972971723,
+        "oxide_mean_mae_um": 0.002601641753690931,
+        "selectivity_mape_percent": 5.726250234881923e-05,
+        "silicon_mean_mae_um": 0.013645278495307214,
+        "silicon_mean_mape_percent": 0.0029313866767484895,
+        "silicon_point_rmse_um": 0.00915332561120849
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": -1.0904121386607455,
+      "wall_multiplier": 0.33607795444195104
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003841812180730672,
+        "oxide_mean_mae_um": 1.667207357956483e-05,
+        "selectivity_mape_percent": 0.004632991250358209,
+        "silicon_mean_mae_um": 0.0010495370062676083,
+        "silicon_mean_mape_percent": 0.005350112393025816,
+        "silicon_point_rmse_um": 0.0010563106317407424
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0001920906090365336,
+        "oxide_mean_mae_um": 0.00020840091974456038,
+        "selectivity_mape_percent": 0.00038608260419651746,
+        "silicon_mean_mae_um": 0.0010495370062676083,
+        "silicon_mean_mape_percent": 0.0017833707976752718,
+        "silicon_point_rmse_um": 0.0007042070878271615
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0002991913317890026,
+        "oxide_mean_mae_um": 5.553192877815194e-06,
+        "selectivity_mape_percent": 0.0014722592551597025,
+        "silicon_mean_mae_um": 0.0003214859930314636,
+        "silicon_mean_mape_percent": 0.0015565009451735297,
+        "silicon_point_rmse_um": 0.00032789475573260455
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0001495956658945013,
+        "oxide_mean_mae_um": 6.941491097268992e-05,
+        "selectivity_mape_percent": 0.00012268827126330853,
+        "silicon_mean_mae_um": 0.0003214859930314636,
+        "silicon_mean_mape_percent": 0.0005188336483911766,
+        "silicon_point_rmse_um": 0.00021859650382173636
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00034169533122708785,
+        "oxide_mean_mae_um": 1.9498425770741643e-05,
+        "selectivity_mape_percent": 0.0036952067535572417,
+        "silicon_mean_mae_um": 0.0011895328867512944,
+        "silicon_mean_mape_percent": 0.005185461586422117,
+        "silicon_point_rmse_um": 0.0011955626084233682
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00017084766561354392,
+        "oxide_mean_mae_um": 0.00024373032213427054,
+        "selectivity_mape_percent": 0.00030793389612977014,
+        "silicon_mean_mae_um": 0.0011895328867512944,
+        "silicon_mean_mape_percent": 0.001728487195474039,
+        "silicon_point_rmse_um": 0.0007970417389489121
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0004568694799902491,
+        "oxide_mean_mae_um": 4.838086421987834e-05,
+        "selectivity_mape_percent": 0.006190722984566725,
+        "silicon_mean_mae_um": 0.0029317571797674684,
+        "silicon_mean_mape_percent": 0.01088741529443471,
+        "silicon_point_rmse_um": 0.002943808813335728
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00022843473999512455,
+        "oxide_mean_mae_um": 0.0006047608027484792,
+        "selectivity_mape_percent": 0.0005158935820472271,
+        "silicon_mean_mae_um": 0.0029317571797674684,
+        "silicon_mean_mape_percent": 0.003629138431478237,
+        "silicon_point_rmse_um": 0.0019625392088904853
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0006165119919185118,
+        "oxide_mean_mae_um": 9.817863347458895e-05,
+        "selectivity_mape_percent": 0.008210188687421146,
+        "silicon_mean_mae_um": 0.0057186484410504095,
+        "silicon_mean_mape_percent": 0.017157909410489225,
+        "silicon_point_rmse_um": 0.0057404898014724445
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0003082559959592559,
+        "oxide_mean_mae_um": 0.0012272329184323618,
+        "selectivity_mape_percent": 0.0006841823906184289,
+        "silicon_mean_mae_um": 0.0057186484410504095,
+        "silicon_mean_mape_percent": 0.005719303136829741,
+        "silicon_point_rmse_um": 0.0038269932009816297
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0009161648177724343,
+        "oxide_mean_mae_um": 0.00016778533963750656,
+        "selectivity_mape_percent": 0.009868344274444347,
+        "silicon_mean_mae_um": 0.008934661755740573,
+        "silicon_mean_mape_percent": 0.020750642149566605,
+        "silicon_point_rmse_um": 0.008967448347415127
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00045808240888621716,
+        "oxide_mean_mae_um": 0.002097316745468832,
+        "selectivity_mape_percent": 0.0008223620228703623,
+        "silicon_mean_mae_um": 0.008934661755740573,
+        "silicon_mean_mape_percent": 0.006916880716522202,
+        "silicon_point_rmse_um": 0.0059782988982767515
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0014454737254736437,
+        "oxide_mean_mae_um": 0.0002401862736958475,
+        "selectivity_mape_percent": 0.011991252201564755,
+        "silicon_mean_mae_um": 0.010593716790817685,
+        "silicon_mean_mape_percent": 0.018595229460266555,
+        "silicon_point_rmse_um": 0.010641780312455
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007227368627368218,
+        "oxide_mean_mae_um": 0.0030023284211980936,
+        "selectivity_mape_percent": 0.000999271016797063,
+        "silicon_mean_mae_um": 0.010593716790817685,
+        "silicon_mean_mape_percent": 0.006198409820088852,
+        "silicon_point_rmse_um": 0.007094520208303333
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0019623151417137922,
+        "oxide_mean_mae_um": 0.00028188053865161916,
+        "selectivity_mape_percent": 0.014635937506517779,
+        "silicon_mean_mae_um": 0.008080175026716839,
+        "silicon_mean_mape_percent": 0.01072792449986911,
+        "silicon_point_rmse_um": 0.00820187720703116
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0009811575708568961,
+        "oxide_mean_mae_um": 0.0035235067331452394,
+        "selectivity_mape_percent": 0.0012196614588764817,
+        "silicon_mean_mae_um": 0.008080175026716839,
+        "silicon_mean_mape_percent": 0.0035759748332897033,
+        "silicon_point_rmse_um": 0.005467918138020773
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0021267605541011717,
+        "oxide_mean_mae_um": 0.00026104761917790614,
+        "selectivity_mape_percent": 0.0162751351587002,
+        "silicon_mean_mae_um": 0.0009046382222220472,
+        "silicon_mean_mape_percent": 0.0009325809871931768,
+        "silicon_point_rmse_um": 0.0022341465069087565
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0010633802770505859,
+        "oxide_mean_mae_um": 0.003263095239723827,
+        "selectivity_mape_percent": 0.0013562612632250165,
+        "silicon_mean_mae_um": 0.0009046382222220472,
+        "silicon_mean_mape_percent": 0.00031086032906439226,
+        "silicon_point_rmse_um": 0.0014894310046058377
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0018837706035007252,
+        "oxide_mean_mae_um": 0.0001771689478847301,
+        "selectivity_mape_percent": 0.015382565554883303,
+        "silicon_mean_mae_um": 0.007536885234164098,
+        "silicon_mean_mape_percent": 0.006322911770059983,
+        "silicon_point_rmse_um": 0.00793714839921973
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0009418853017503626,
+        "oxide_mean_mae_um": 0.002214611848559126,
+        "selectivity_mape_percent": 0.001281880462906942,
+        "silicon_mean_mae_um": 0.007536885234164098,
+        "silicon_mean_mape_percent": 0.002107637256686661,
+        "silicon_point_rmse_um": 0.005291432266146486
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0014864671745498,
+        "oxide_mean_mae_um": 7.269209869875818e-05,
+        "selectivity_mape_percent": 0.012574595424106327,
+        "silicon_mean_mae_um": 0.013033322623417689,
+        "silicon_mean_mape_percent": 0.009467930593298016,
+        "silicon_point_rmse_um": 0.01327115994516181
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007432335872749,
+        "oxide_mean_mae_um": 0.0009086512337344772,
+        "selectivity_mape_percent": 0.0010478829520088606,
+        "silicon_mean_mae_um": 0.013033322623417689,
+        "silicon_mean_mape_percent": 0.003155976864432672,
+        "silicon_point_rmse_um": 0.008847439963441206
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0009201184971697132,
+        "oxide_mean_mae_um": 0.00021633090634627075,
+        "selectivity_mape_percent": 0.006565883335339991,
+        "silicon_mean_mae_um": 0.022214350775473502,
+        "silicon_mean_mape_percent": 0.014990331408424169,
+        "silicon_point_rmse_um": 0.02234059562524165
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0004600592485848566,
+        "oxide_mean_mae_um": 0.0027041363293283842,
+        "selectivity_mape_percent": 0.0005471569446116659,
+        "silicon_mean_mae_um": 0.022214350775473502,
+        "silicon_mean_mape_percent": 0.00499677713614139,
+        "silicon_point_rmse_um": 0.014893730416827768
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": -0.8367026620142464,
+      "wall_multiplier": 0.4331363683913426
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0015853310963100213,
+        "oxide_mean_mae_um": 1.6341682959079377e-05,
+        "selectivity_mape_percent": 0.0021087164918718315,
+        "silicon_mean_mae_um": 0.002290291226629743,
+        "silicon_mean_mape_percent": 0.011869554824277095,
+        "silicon_point_rmse_um": 0.0023172917918345237
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007926655481550107,
+        "oxide_mean_mae_um": 0.00020427103698849222,
+        "selectivity_mape_percent": 0.00017572637432265262,
+        "silicon_mean_mae_um": 0.002290291226629743,
+        "silicon_mean_mape_percent": 0.0039565182747590315,
+        "silicon_point_rmse_um": 0.0015448611945563491
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0016097730280685972,
+        "oxide_mean_mae_um": 5.915545591521262e-06,
+        "selectivity_mape_percent": 0.008572394030956184,
+        "silicon_mean_mae_um": 0.001087002621028527,
+        "silicon_mean_mape_percent": 0.005353747566944141,
+        "silicon_point_rmse_um": 0.0011382499196355242
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0008048865140342986,
+        "oxide_mean_mae_um": 7.394431989401577e-05,
+        "selectivity_mape_percent": 0.0007143661692463487,
+        "silicon_mean_mae_um": 0.001087002621028527,
+        "silicon_mean_mape_percent": 0.0017845825223147137,
+        "silicon_point_rmse_um": 0.0007588332797570162
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0016850047528597929,
+        "oxide_mean_mae_um": 1.99637196217665e-05,
+        "selectivity_mape_percent": 0.011406433577518213,
+        "silicon_mean_mae_um": 0.0005255685234694833,
+        "silicon_mean_mape_percent": 0.0023333541571498215,
+        "silicon_point_rmse_um": 0.0006503059699649014
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0008425023764298964,
+        "oxide_mean_mae_um": 0.0002495464952720812,
+        "selectivity_mape_percent": 0.000950536131459851,
+        "silicon_mean_mae_um": 0.0005255685234694833,
+        "silicon_mean_mape_percent": 0.0007777847190499405,
+        "silicon_point_rmse_um": 0.00043353731330993426
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0018378515740540477,
+        "oxide_mean_mae_um": 4.911170200751528e-05,
+        "selectivity_mape_percent": 0.015058059453607164,
+        "silicon_mean_mae_um": 0.0005926350431363403,
+        "silicon_mean_mape_percent": 0.0022464220261172825,
+        "silicon_point_rmse_um": 0.0007676644269689423
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0009189257870270239,
+        "oxide_mean_mae_um": 0.000613896275093941,
+        "selectivity_mape_percent": 0.001254838287800597,
+        "silicon_mean_mae_um": 0.0005926350431363403,
+        "silicon_mean_mape_percent": 0.0007488073420390942,
+        "silicon_point_rmse_um": 0.0005117762846459616
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0020912050527280832,
+        "oxide_mean_mae_um": 9.962153529371983e-05,
+        "selectivity_mape_percent": 0.019020560757579446,
+        "silicon_mean_mae_um": 0.0021747799767735877,
+        "silicon_mean_mape_percent": 0.006682298029982251,
+        "silicon_point_rmse_um": 0.0022828245422962267
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0010456025263640416,
+        "oxide_mean_mae_um": 0.001245269191171498,
+        "selectivity_mape_percent": 0.0015850467297982872,
+        "silicon_mean_mae_um": 0.0021747799767735877,
+        "silicon_mean_mape_percent": 0.00222743267666075,
+        "silicon_point_rmse_um": 0.0015218830281974844
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0023975234090267577,
+        "oxide_mean_mae_um": 0.00017126012673250943,
+        "selectivity_mape_percent": 0.02344828126809606,
+        "silicon_mean_mae_um": 0.0032502806737802342,
+        "silicon_mean_mape_percent": 0.007768801517785916,
+        "silicon_point_rmse_um": 0.003402968146244282
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0011987617045133789,
+        "oxide_mean_mae_um": 0.0021407515841563676,
+        "selectivity_mape_percent": 0.001954023439008005,
+        "silicon_mean_mae_um": 0.0032502806737802342,
+        "silicon_mean_mape_percent": 0.002589600505928639,
+        "silicon_point_rmse_um": 0.0022686454308295215
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0025246903349480467,
+        "oxide_mean_mae_um": 0.00024758458252853574,
+        "selectivity_mape_percent": 0.028311247737018725,
+        "silicon_mean_mae_um": 0.0017540050252047004,
+        "silicon_mean_mape_percent": 0.003190149365765116,
+        "silicon_point_rmse_um": 0.002229655510366292
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0012623451674740234,
+        "oxide_mean_mae_um": 0.0030948072816066965,
+        "selectivity_mape_percent": 0.0023592706447515604,
+        "silicon_mean_mae_um": 0.0017540050252047004,
+        "silicon_mean_mape_percent": 0.0010633831219217054,
+        "silicon_point_rmse_um": 0.0014864370069108612
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0021258388940759727,
+        "oxide_mean_mae_um": 0.00028846211399095265,
+        "selectivity_mape_percent": 0.03156827998441909,
+        "silicon_mean_mae_um": 0.004057269580625681,
+        "silicon_mean_mape_percent": 0.005627778725243744,
+        "silicon_point_rmse_um": 0.004370775725102401
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0010629194470379863,
+        "oxide_mean_mae_um": 0.003605776424886908,
+        "selectivity_mape_percent": 0.002630689998701591,
+        "silicon_mean_mae_um": 0.004057269580625681,
+        "silicon_mean_mape_percent": 0.0018759262417479149,
+        "silicon_point_rmse_um": 0.002913850483401601
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0011571145561604277,
+        "oxide_mean_mae_um": 0.000248505972791356,
+        "selectivity_mape_percent": 0.03043257134330135,
+        "silicon_mean_mae_um": 0.012933713726410664,
+        "silicon_mean_mape_percent": 0.014057680718102686,
+        "silicon_point_rmse_um": 0.013023797964640703
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005785572780802139,
+        "oxide_mean_mae_um": 0.00310632465989195,
+        "selectivity_mape_percent": 0.0025360476119417794,
+        "silicon_mean_mae_um": 0.012933713726410664,
+        "silicon_mean_mape_percent": 0.004685893572700895,
+        "silicon_point_rmse_um": 0.008682531976427136
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00047838724416646915,
+        "oxide_mean_mae_um": 0.00014077647151266546,
+        "selectivity_mape_percent": 0.02551716608006801,
+        "silicon_mean_mae_um": 0.020527105950150143,
+        "silicon_mean_mape_percent": 0.018320231040342527,
+        "silicon_point_rmse_um": 0.020576326909417467
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00023919362208323457,
+        "oxide_mean_mae_um": 0.001759705893908318,
+        "selectivity_mape_percent": 0.002126430506672334,
+        "silicon_mean_mae_um": 0.020527105950150143,
+        "silicon_mean_mape_percent": 0.0061067436801141755,
+        "silicon_point_rmse_um": 0.013717551272944979
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0012668071022760576,
+        "oxide_mean_mae_um": 3.310931281671259e-05,
+        "selectivity_mape_percent": 0.019847532688661573,
+        "silicon_mean_mae_um": 0.02368746298028744,
+        "silicon_mean_mape_percent": 0.018433266773824137,
+        "silicon_point_rmse_um": 0.02377176462480891
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0006334035511380288,
+        "oxide_mean_mae_um": 0.00041386641020890735,
+        "selectivity_mape_percent": 0.0016539610573884644,
+        "silicon_mean_mae_um": 0.02368746298028744,
+        "silicon_mean_mape_percent": 0.006144422257941379,
+        "silicon_point_rmse_um": 0.01584784308320594
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.002095278878222299,
+        "oxide_mean_mae_um": 0.00024696122516973065,
+        "selectivity_mape_percent": 0.01186269034138343,
+        "silicon_mean_mae_um": 0.029602769251550476,
+        "silicon_mean_mape_percent": 0.02148053080165946,
+        "silicon_point_rmse_um": 0.02977027613736314
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0010476394391111495,
+        "oxide_mean_mae_um": 0.0030870153146216332,
+        "selectivity_mape_percent": 0.0009885575284486192,
+        "silicon_mean_mae_um": 0.029602769251550476,
+        "silicon_mean_mape_percent": 0.007160176933886486,
+        "silicon_point_rmse_um": 0.019846850758242093
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": -0.5259732816680024,
+      "wall_multiplier": 0.5909798944676475
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.001525720325240781,
+        "oxide_mean_mae_um": 1.4471881012197245e-05,
+        "selectivity_mape_percent": 0.0372312341871918,
+        "silicon_mean_mae_um": 0.008575574849046603,
+        "silicon_mean_mape_percent": 0.04585569545290309,
+        "silicon_point_rmse_um": 0.008591737448513055
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007628601626203905,
+        "oxide_mean_mae_um": 0.00018089851265246556,
+        "selectivity_mape_percent": 0.0031026028489326497,
+        "silicon_mean_mae_um": 0.008575574849046603,
+        "silicon_mean_mape_percent": 0.015285231817634365,
+        "silicon_point_rmse_um": 0.00572782496567537
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0013825609017456906,
+        "oxide_mean_mae_um": 8.26518946346703e-06,
+        "selectivity_mape_percent": 0.04390224580383162,
+        "silicon_mean_mae_um": 0.007748990275093254,
+        "silicon_mean_mape_percent": 0.03941509413170937,
+        "silicon_point_rmse_um": 0.00776240542316322
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0006912804508728453,
+        "oxide_mean_mae_um": 0.00010331486829333787,
+        "selectivity_mape_percent": 0.003658520483652635,
+        "silicon_mean_mae_um": 0.007748990275093254,
+        "silicon_mean_mape_percent": 0.01313836471056979,
+        "silicon_point_rmse_um": 0.00517493694877548
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0010402558970560782,
+        "oxide_mean_mae_um": 2.3568831658506244e-05,
+        "selectivity_mape_percent": 0.04669229067081959,
+        "silicon_mean_mae_um": 0.007836241997938203,
+        "silicon_mean_mape_percent": 0.036002036541036585,
+        "silicon_point_rmse_um": 0.007847494940543914
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005201279485280391,
+        "oxide_mean_mae_um": 0.000294610395731328,
+        "selectivity_mape_percent": 0.003891024222568299,
+        "silicon_mean_mae_um": 0.007836241997938203,
+        "silicon_mean_mape_percent": 0.012000678847012195,
+        "silicon_point_rmse_um": 0.005231663293695943
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000811897781787402,
+        "oxide_mean_mae_um": 5.5437722685248346e-05,
+        "selectivity_mape_percent": 0.04987279421964204,
+        "silicon_mean_mae_um": 0.007717987984144845,
+        "silicon_mean_mape_percent": 0.03037230851863167,
+        "silicon_point_rmse_um": 0.0077261098594034105
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.000405948890893701,
+        "oxide_mean_mae_um": 0.0006929715335656043,
+        "selectivity_mape_percent": 0.00415606618497017,
+        "silicon_mean_mae_um": 0.007717987984144845,
+        "silicon_mean_mape_percent": 0.01012410283954389,
+        "silicon_point_rmse_um": 0.005150739906268941
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0014123249599568748,
+        "oxide_mean_mae_um": 0.00010964535868695909,
+        "selectivity_mape_percent": 0.0516727175142376,
+        "silicon_mean_mae_um": 0.007304821545017954,
+        "silicon_mean_mape_percent": 0.023421335194094766,
+        "silicon_point_rmse_um": 0.007317415453612555
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007061624799784374,
+        "oxide_mean_mae_um": 0.0013705669835869887,
+        "selectivity_mape_percent": 0.004306059792853133,
+        "silicon_mean_mae_um": 0.007304821545017954,
+        "silicon_mean_mape_percent": 0.007807111731364922,
+        "silicon_point_rmse_um": 0.004878276969075037
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0026339914456867375,
+        "oxide_mean_mae_um": 0.00017621172045560277,
+        "selectivity_mape_percent": 0.049156749857183435,
+        "silicon_mean_mae_um": 0.006794362515849172,
+        "silicon_mean_mape_percent": 0.017067005462722072,
+        "silicon_point_rmse_um": 0.006863955494879669
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0013169957228433688,
+        "oxide_mean_mae_um": 0.0022026465056950344,
+        "selectivity_mape_percent": 0.004096395821431953,
+        "silicon_mean_mae_um": 0.006794362515849172,
+        "silicon_mean_mape_percent": 0.005689001820907358,
+        "silicon_point_rmse_um": 0.004575970329919779
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.004015132205924664,
+        "oxide_mean_mae_um": 0.0002247224071290832,
+        "selectivity_mape_percent": 0.04120296554686531,
+        "silicon_mean_mae_um": 0.006545950922473954,
+        "silicon_mean_mape_percent": 0.01262589120199505,
+        "silicon_point_rmse_um": 0.006846242799184207
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.002007566102962332,
+        "oxide_mean_mae_um": 0.00280903008911354,
+        "selectivity_mape_percent": 0.0034335804622387758,
+        "silicon_mean_mae_um": 0.006545950922473954,
+        "silicon_mean_mape_percent": 0.0042086304006650165,
+        "silicon_point_rmse_um": 0.004564161866122805
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005122015251936539,
+        "oxide_mean_mae_um": 0.00023351636377742105,
+        "selectivity_mape_percent": 0.03054790793220974,
+        "silicon_mean_mae_um": 0.006425642484203043,
+        "silicon_mean_mape_percent": 0.00955362356539391,
+        "silicon_point_rmse_um": 0.007261926797681408
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0025610076259682695,
+        "oxide_mean_mae_um": 0.002918954547217763,
+        "selectivity_mape_percent": 0.0025456589943508114,
+        "silicon_mean_mae_um": 0.006425642484203043,
+        "silicon_mean_mape_percent": 0.0031845411884646366,
+        "silicon_point_rmse_um": 0.004841284531787606
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005676365909228479,
+        "oxide_mean_mae_um": 0.00020931546594391115,
+        "selectivity_mape_percent": 0.01998922049630133,
+        "silicon_mean_mae_um": 0.00526135294972164,
+        "silicon_mean_mape_percent": 0.006196923974568651,
+        "silicon_point_rmse_um": 0.007112379185717778
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0028381829546142395,
+        "oxide_mean_mae_um": 0.0026164433242988894,
+        "selectivity_mape_percent": 0.0016657683746917774,
+        "silicon_mean_mae_um": 0.00526135294972164,
+        "silicon_mean_mape_percent": 0.002065641324856217,
+        "silicon_point_rmse_um": 0.004741586123811852
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005743912835862078,
+        "oxide_mean_mae_um": 0.0001485580848913089,
+        "selectivity_mape_percent": 0.009165285347679871,
+        "silicon_mean_mae_um": 0.0016057569151848839,
+        "silicon_mean_mape_percent": 0.0015686588448569812,
+        "silicon_point_rmse_um": 0.006096645412578586
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.002871956417931039,
+        "oxide_mean_mae_um": 0.0018569760611413613,
+        "selectivity_mape_percent": 0.0007637737789733226,
+        "silicon_mean_mae_um": 0.0016057569151848839,
+        "silicon_mean_mape_percent": 0.0005228862816189937,
+        "silicon_point_rmse_um": 0.0040644302750523905
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005577580785644421,
+        "oxide_mean_mae_um": 6.081574837980478e-05,
+        "selectivity_mape_percent": 0.0009247159065732072,
+        "silicon_mean_mae_um": 0.004107486475194643,
+        "silicon_mean_mape_percent": 0.0035243778303935733,
+        "silicon_point_rmse_um": 0.007716673947787494
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0027887903928222107,
+        "oxide_mean_mae_um": 0.0007601968547475597,
+        "selectivity_mape_percent": 7.705965888110061e-05,
+        "silicon_mean_mae_um": 0.004107486475194643,
+        "silicon_mean_mape_percent": 0.001174792610131191,
+        "silicon_point_rmse_um": 0.005144449298524996
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005771226539982187,
+        "oxide_mean_mae_um": 0.0002205221893219485,
+        "selectivity_mape_percent": 0.011947243815478478,
+        "silicon_mean_mae_um": 0.004175017685613701,
+        "silicon_mean_mape_percent": 0.003353965756291544,
+        "silicon_point_rmse_um": 0.008331870840123476
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0028856132699910937,
+        "oxide_mean_mae_um": 0.0027565273665243564,
+        "selectivity_mape_percent": 0.0009956036512898732,
+        "silicon_mean_mae_um": 0.004175017685613701,
+        "silicon_mean_mape_percent": 0.0011179885854305147,
+        "silicon_point_rmse_um": 0.005554580560082317
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": -0.17939969138802977,
+      "wall_multiplier": 0.8357717818459676
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.009120238367604158,
+        "oxide_mean_mae_um": 9.477867488933978e-06,
+        "selectivity_mape_percent": 0.01600009030913026,
+        "silicon_mean_mae_um": 0.0038254572285569568,
+        "silicon_mean_mape_percent": 0.0216390129859206,
+        "silicon_point_rmse_um": 0.004161127961889946
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.004560119183802079,
+        "oxide_mean_mae_um": 0.00011847334361167472,
+        "selectivity_mape_percent": 0.0013333408590941885,
+        "silicon_mean_mae_um": 0.0038254572285569568,
+        "silicon_mean_mape_percent": 0.0072130043286402,
+        "silicon_point_rmse_um": 0.0027740853079266307
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.009145036270662592,
+        "oxide_mean_mae_um": 1.0719475584762458e-05,
+        "selectivity_mape_percent": 0.018628437862089932,
+        "silicon_mean_mae_um": 0.0023784119440537193,
+        "silicon_mean_mape_percent": 0.012811129510204614,
+        "silicon_point_rmse_um": 0.0029280356343189097
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.004572518135331296,
+        "oxide_mean_mae_um": 0.0001339934448095307,
+        "selectivity_mape_percent": 0.0015523698218408277,
+        "silicon_mean_mae_um": 0.0023784119440537193,
+        "silicon_mean_mape_percent": 0.004270376503401538,
+        "silicon_point_rmse_um": 0.0019520237562126064
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.009199442881460707,
+        "oxide_mean_mae_um": 1.8896747653734208e-05,
+        "selectivity_mape_percent": 0.012817530572591718,
+        "silicon_mean_mae_um": 0.0008715201545476248,
+        "silicon_mean_mape_percent": 0.0042496930237683195,
+        "silicon_point_rmse_um": 0.002081965904164684
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0045997214407303534,
+        "oxide_mean_mae_um": 0.0002362093456716776,
+        "selectivity_mape_percent": 0.0010681275477159764,
+        "silicon_mean_mae_um": 0.0008715201545476248,
+        "silicon_mean_mape_percent": 0.0014165643412561064,
+        "silicon_point_rmse_um": 0.0013879772694431226
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.009073613995247715,
+        "oxide_mean_mae_um": 3.495793530699176e-05,
+        "selectivity_mape_percent": 0.003496499437771157,
+        "silicon_mean_mae_um": 0.002098963791073061,
+        "silicon_mean_mape_percent": 0.008797486422014758,
+        "silicon_point_rmse_um": 0.0030286611609578315
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.004536806997623858,
+        "oxide_mean_mae_um": 0.00043697419133739696,
+        "selectivity_mape_percent": 0.00029137495314759645,
+        "silicon_mean_mae_um": 0.002098963791073061,
+        "silicon_mean_mape_percent": 0.0029324954740049193,
+        "silicon_point_rmse_um": 0.0020191074406385543
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.008470454518779147,
+        "oxide_mean_mae_um": 6.269068891287051e-05,
+        "selectivity_mape_percent": 0.00821825244926977,
+        "silicon_mean_mae_um": 0.007100251443589987,
+        "silicon_mean_mape_percent": 0.02437181039404616,
+        "silicon_point_rmse_um": 0.007548255866758397
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0042352272593895735,
+        "oxide_mean_mae_um": 0.0007836336114108814,
+        "selectivity_mape_percent": 0.0006848543707724808,
+        "silicon_mean_mae_um": 0.007100251443589987,
+        "silicon_mean_mape_percent": 0.008123936798015386,
+        "silicon_point_rmse_um": 0.005032170577838931
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.007088114294342411,
+        "oxide_mean_mae_um": 0.0001139097136299642,
+        "selectivity_mape_percent": 0.017534426224523614,
+        "silicon_mean_mae_um": 0.014141315369539218,
+        "silicon_mean_mape_percent": 0.0382847572048742,
+        "silicon_point_rmse_um": 0.014433008848725656
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0035440571471712055,
+        "oxide_mean_mae_um": 0.0014238714203745524,
+        "selectivity_mape_percent": 0.0014612021853769679,
+        "silicon_mean_mae_um": 0.014141315369539218,
+        "silicon_mean_mape_percent": 0.012761585734958066,
+        "silicon_point_rmse_um": 0.009622005899150438
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.004905797265984809,
+        "oxide_mean_mae_um": 0.00018692809204807906,
+        "selectivity_mape_percent": 0.022320347526285055,
+        "silicon_mean_mae_um": 0.02200021026228721,
+        "silicon_mean_mape_percent": 0.046106454483235915,
+        "silicon_point_rmse_um": 0.02218875353845479
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0024528986329924044,
+        "oxide_mean_mae_um": 0.002336601150600988,
+        "selectivity_mape_percent": 0.0018600289605237546,
+        "silicon_mean_mae_um": 0.02200021026228721,
+        "silicon_mean_mape_percent": 0.015368818161078638,
+        "silicon_point_rmse_um": 0.01479250235896986
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0024538862111157223,
+        "oxide_mean_mae_um": 0.00022777088183799124,
+        "selectivity_mape_percent": 0.025898286073997728,
+        "silicon_mean_mae_um": 0.02846236355354165,
+        "silicon_mean_mape_percent": 0.04639758718112308,
+        "silicon_point_rmse_um": 0.02856714210796707
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0012269431055578612,
+        "oxide_mean_mae_um": 0.0028471360229748903,
+        "selectivity_mape_percent": 0.002158190506166477,
+        "silicon_mean_mae_um": 0.02846236355354165,
+        "silicon_mean_mape_percent": 0.015465862393707694,
+        "silicon_point_rmse_um": 0.01904476140531138
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000936658076220817,
+        "oxide_mean_mae_um": 0.00017100983906675953,
+        "selectivity_mape_percent": 0.030769968792338474,
+        "silicon_mean_mae_um": 0.03226500907452798,
+        "silicon_mean_mape_percent": 0.04205484044677258,
+        "silicon_point_rmse_um": 0.03233538068627133
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0004683290381104085,
+        "oxide_mean_mae_um": 0.002137622988334494,
+        "selectivity_mape_percent": 0.002564164066028206,
+        "silicon_mean_mae_um": 0.03226500907452798,
+        "silicon_mean_mape_percent": 0.014018280148924193,
+        "silicon_point_rmse_um": 0.021556920457514218
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.001407838815810607,
+        "oxide_mean_mae_um": 2.321889931395482e-05,
+        "selectivity_mape_percent": 0.03650029603346905,
+        "silicon_mean_mae_um": 0.034569808406015645,
+        "silicon_mean_mape_percent": 0.03768986694850085,
+        "silicon_point_rmse_um": 0.03466384496217785
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007039194079053035,
+        "oxide_mean_mae_um": 0.00029023624142443527,
+        "selectivity_mape_percent": 0.0030416913361224207,
+        "silicon_mean_mae_um": 0.034569808406015645,
+        "silicon_mean_mape_percent": 0.012563288982833617,
+        "silicon_point_rmse_um": 0.023109229974785234
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0018528312974973851,
+        "oxide_mean_mae_um": 0.0001429106347142136,
+        "selectivity_mape_percent": 0.04178625608339578,
+        "silicon_mean_mae_um": 0.03698788648478285,
+        "silicon_mean_mape_percent": 0.0356648219456579,
+        "silicon_point_rmse_um": 0.03712506756775992
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0009264156487486926,
+        "oxide_mean_mae_um": 0.0017863829339276698,
+        "selectivity_mape_percent": 0.003482188006949648,
+        "silicon_mean_mae_um": 0.03698788648478285,
+        "silicon_mean_mape_percent": 0.011888273981885966,
+        "silicon_point_rmse_um": 0.02475004504517328
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0016408085512509636,
+        "oxide_mean_mae_um": 0.00046773007138041224,
+        "selectivity_mape_percent": 0.0506167787776155,
+        "silicon_mean_mae_um": 0.035705440850852595,
+        "silicon_mean_mape_percent": 0.03235223214514734,
+        "silicon_point_rmse_um": 0.03584258415485033
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0008204042756254818,
+        "oxide_mean_mae_um": 0.005846625892255153,
+        "selectivity_mape_percent": 0.004218064898134625,
+        "silicon_mean_mae_um": 0.035705440850852595,
+        "silicon_mean_mape_percent": 0.01078407738171578,
+        "silicon_point_rmse_um": 0.023895056103233555
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": 0.17939969138802944,
+      "wall_multiplier": 1.1964988789060353
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007421142570349835,
+        "oxide_mean_mae_um": 5.299139995322462e-05,
+        "selectivity_mape_percent": 0.08392329361115743,
+        "silicon_mean_mae_um": 0.00861187372675739,
+        "silicon_mean_mape_percent": 0.05235479075712608,
+        "silicon_point_rmse_um": 0.008620669339490256
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00037105712851749173,
+        "oxide_mean_mae_um": 0.0006623924994153078,
+        "selectivity_mape_percent": 0.006993607800929786,
+        "silicon_mean_mae_um": 0.00861187372675739,
+        "silicon_mean_mape_percent": 0.017451596919042026,
+        "silicon_point_rmse_um": 0.005747112892993504
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007994351194196877,
+        "oxide_mean_mae_um": 3.2621473210729944e-05,
+        "selectivity_mape_percent": 0.07614239939019403,
+        "silicon_mean_mae_um": 0.010088202140802784,
+        "silicon_mean_mape_percent": 0.05843187974637468,
+        "silicon_point_rmse_um": 0.010101613894432412
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00039971755970984386,
+        "oxide_mean_mae_um": 0.0004077684151341243,
+        "selectivity_mape_percent": 0.006345199949182836,
+        "silicon_mean_mae_um": 0.010088202140802784,
+        "silicon_mean_mape_percent": 0.01947729324879156,
+        "silicon_point_rmse_um": 0.006734409262954942
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0011045410074979843,
+        "oxide_mean_mae_um": 2.2164575014020174e-05,
+        "selectivity_mape_percent": 0.0713843700934745,
+        "silicon_mean_mae_um": 0.011682907449512357,
+        "silicon_mean_mape_percent": 0.0613262976285706,
+        "silicon_point_rmse_um": 0.011702362651686674
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005522705037489922,
+        "oxide_mean_mae_um": 0.00027705718767525217,
+        "selectivity_mape_percent": 0.0059486975077895415,
+        "silicon_mean_mae_um": 0.011682907449512357,
+        "silicon_mean_mape_percent": 0.020442099209523532,
+        "silicon_point_rmse_um": 0.00780157510112445
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0017076518429125773,
+        "oxide_mean_mae_um": 1.8811635041138252e-06,
+        "selectivity_mape_percent": 0.06518030332944906,
+        "silicon_mean_mae_um": 0.014401723885261598,
+        "silicon_mean_mape_percent": 0.06510766631762029,
+        "silicon_point_rmse_um": 0.01443268335679538
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0008538259214562887,
+        "oxide_mean_mae_um": 2.3514543801422816e-05,
+        "selectivity_mape_percent": 0.005431691944120755,
+        "silicon_mean_mae_um": 0.014401723885261598,
+        "silicon_mean_mape_percent": 0.021702555439206763,
+        "silicon_point_rmse_um": 0.009621788904530254
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0026741499338879568,
+        "oxide_mean_mae_um": 3.2609262009732906e-05,
+        "selectivity_mape_percent": 0.05903745204741817,
+        "silicon_mean_mae_um": 0.01816764902210366,
+        "silicon_mean_mape_percent": 0.06745052023571585,
+        "silicon_point_rmse_um": 0.018218684455666028
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0013370749669439784,
+        "oxide_mean_mae_um": 0.0004076157751216613,
+        "selectivity_mape_percent": 0.004919787670618181,
+        "silicon_mean_mae_um": 0.01816764902210366,
+        "silicon_mean_mape_percent": 0.022483506745238618,
+        "silicon_point_rmse_um": 0.012145789637110686
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.003971691688152625,
+        "oxide_mean_mae_um": 5.269398657252733e-05,
+        "selectivity_mape_percent": 0.05504932108823131,
+        "silicon_mean_mae_um": 0.02199647838114932,
+        "silicon_mean_mape_percent": 0.06466829988628013,
+        "silicon_point_rmse_um": 0.022083904590781887
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0019858458440763123,
+        "oxide_mean_mae_um": 0.0006586748321565916,
+        "selectivity_mape_percent": 0.0045874434240192755,
+        "silicon_mean_mae_um": 0.02199647838114932,
+        "silicon_mean_mape_percent": 0.021556099962093376,
+        "silicon_point_rmse_um": 0.014722603060521257
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005267024555882697,
+        "oxide_mean_mae_um": 1.0139955067803481e-05,
+        "selectivity_mape_percent": 0.05307366320573425,
+        "silicon_mean_mae_um": 0.023755250330898054,
+        "silicon_mean_mape_percent": 0.05435798799531533,
+        "silicon_point_rmse_um": 0.023916302604660534
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0026335122779413485,
+        "oxide_mean_mae_um": 0.00012674943834754351,
+        "selectivity_mape_percent": 0.004422805267144521,
+        "silicon_mean_mae_um": 0.023755250330898054,
+        "silicon_mean_mape_percent": 0.018119329331771777,
+        "silicon_point_rmse_um": 0.015944201736440355
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005941576203701462,
+        "oxide_mean_mae_um": 0.00015093047765137868,
+        "selectivity_mape_percent": 0.052148288377395005,
+        "silicon_mean_mae_um": 0.021486418859203316,
+        "silicon_mean_mape_percent": 0.03851248320992173,
+        "silicon_point_rmse_um": 0.02179147212075489
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.002970788101850731,
+        "oxide_mean_mae_um": 0.0018866309706422335,
+        "selectivity_mape_percent": 0.004345690698116251,
+        "silicon_mean_mae_um": 0.021486418859203316,
+        "silicon_mean_mape_percent": 0.012837494403307245,
+        "silicon_point_rmse_um": 0.014527648080503261
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.005621964766582171,
+        "oxide_mean_mae_um": 0.00046080798897071655,
+        "selectivity_mape_percent": 0.053648155560434084,
+        "silicon_mean_mae_um": 0.015976451060157045,
+        "silicon_mean_mape_percent": 0.02308436793740783,
+        "silicon_point_rmse_um": 0.0164991981773843
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0028109823832910856,
+        "oxide_mean_mae_um": 0.0057600998621339565,
+        "selectivity_mape_percent": 0.004470679630036173,
+        "silicon_mean_mae_um": 0.015976451060157045,
+        "silicon_mean_mape_percent": 0.007694789312469277,
+        "silicon_point_rmse_um": 0.010999465451589535
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0046491257144937,
+        "oxide_mean_mae_um": 0.0008740467943619171,
+        "selectivity_mape_percent": 0.05825791114381218,
+        "silicon_mean_mae_um": 0.010828911691976563,
+        "silicon_mean_mape_percent": 0.013195407078801699,
+        "silicon_point_rmse_um": 0.01154565769088162
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00232456285724685,
+        "oxide_mean_mae_um": 0.010925584929523963,
+        "selectivity_mape_percent": 0.004854825928651015,
+        "silicon_mean_mae_um": 0.010828911691976563,
+        "silicon_mean_mape_percent": 0.004398469026267233,
+        "silicon_point_rmse_um": 0.007697105127254414
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.003716728086285731,
+        "oxide_mean_mae_um": 0.0012636241941105552,
+        "selectivity_mape_percent": 0.06385961757216545,
+        "silicon_mean_mae_um": 0.008597128448414537,
+        "silicon_mean_mape_percent": 0.009327112877615562,
+        "silicon_point_rmse_um": 0.009327507156618816
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0018583640431428655,
+        "oxide_mean_mae_um": 0.01579530242638194,
+        "selectivity_mape_percent": 0.005321634797680454,
+        "silicon_mean_mae_um": 0.008597128448414537,
+        "silicon_mean_mape_percent": 0.003109037625871854,
+        "silicon_point_rmse_um": 0.006218338104412544
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.002814589617020307,
+        "oxide_mean_mae_um": 0.0017079567404253914,
+        "selectivity_mape_percent": 0.07355374798269368,
+        "silicon_mean_mae_um": 0.0061740143667111625,
+        "silicon_mean_mape_percent": 0.006318043598806019,
+        "silicon_point_rmse_um": 0.006826616072919352
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0014072948085101535,
+        "oxide_mean_mae_um": 0.021349459255317393,
+        "selectivity_mape_percent": 0.006129478998557807,
+        "silicon_mean_mae_um": 0.0061740143667111625,
+        "silicon_mean_mape_percent": 0.0021060145329353398,
+        "silicon_point_rmse_um": 0.004551077381946235
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": 0.5259732816680021,
+      "wall_multiplier": 1.6921049419131187
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0032895358248987757,
+        "oxide_mean_mae_um": 9.048734295932892e-05,
+        "selectivity_mape_percent": 0.0677031462774016,
+        "silicon_mean_mae_um": 0.002108494236839178,
+        "silicon_mean_mape_percent": 0.01363053532954043,
+        "silicon_point_rmse_um": 0.0021743784183545483
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0016447679124493879,
+        "oxide_mean_mae_um": 0.0011310917869916115,
+        "selectivity_mape_percent": 0.005641928856450133,
+        "silicon_mean_mae_um": 0.002108494236839178,
+        "silicon_mean_mape_percent": 0.004543511776513477,
+        "silicon_point_rmse_um": 0.0014495856122363655
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00331975158068625,
+        "oxide_mean_mae_um": 8.02957346378308e-05,
+        "selectivity_mape_percent": 0.06283176947724023,
+        "silicon_mean_mae_um": 0.0030985081688812005,
+        "silicon_mean_mape_percent": 0.01909023293678865,
+        "silicon_point_rmse_um": 0.0031535127585821956
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.001659875790343125,
+        "oxide_mean_mae_um": 0.001003696682972885,
+        "selectivity_mape_percent": 0.005235980789770019,
+        "silicon_mean_mae_um": 0.0030985081688812005,
+        "silicon_mean_mape_percent": 0.006363410978929549,
+        "silicon_point_rmse_um": 0.002102341839054797
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.003259588968920123,
+        "oxide_mean_mae_um": 9.288725422357369e-05,
+        "selectivity_mape_percent": 0.06337569290737004,
+        "silicon_mean_mae_um": 0.003767041496388259,
+        "silicon_mean_mape_percent": 0.021049586341320925,
+        "silicon_point_rmse_um": 0.003823042841537897
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0016297944844600614,
+        "oxide_mean_mae_um": 0.0011610906777946711,
+        "selectivity_mape_percent": 0.0052813077422808365,
+        "silicon_mean_mae_um": 0.003767041496388259,
+        "silicon_mean_mape_percent": 0.007016528780440308,
+        "silicon_point_rmse_um": 0.0025486952276919314
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.003218893479008829,
+        "oxide_mean_mae_um": 0.00011006496263782806,
+        "selectivity_mape_percent": 0.06275863829703147,
+        "silicon_mean_mae_um": 0.004936452362806894,
+        "silicon_mean_mape_percent": 0.023789428007667958,
+        "silicon_point_rmse_um": 0.004997019889993808
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0016094467395044146,
+        "oxide_mean_mae_um": 0.0013758120329728507,
+        "selectivity_mape_percent": 0.005229886524752623,
+        "silicon_mean_mae_um": 0.004936452362806894,
+        "silicon_mean_mape_percent": 0.00792980933588932,
+        "silicon_point_rmse_um": 0.0033313465933292054
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0032722179371860055,
+        "oxide_mean_mae_um": 0.00012828101266529297,
+        "selectivity_mape_percent": 0.05882285137272624,
+        "silicon_mean_mae_um": 0.0064188510719459186,
+        "silicon_mean_mape_percent": 0.02546488938078273,
+        "silicon_point_rmse_um": 0.006492725620695214
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0016361089685930027,
+        "oxide_mean_mae_um": 0.001603512658316162,
+        "selectivity_mape_percent": 0.00490190428106052,
+        "silicon_mean_mae_um": 0.0064188510719459186,
+        "silicon_mean_mape_percent": 0.00848829646026091,
+        "silicon_point_rmse_um": 0.004328483747130143
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0034468462261283794,
+        "oxide_mean_mae_um": 0.00013877717817475008,
+        "selectivity_mape_percent": 0.04861003541582024,
+        "silicon_mean_mae_um": 0.0072980871299584745,
+        "silicon_mean_mape_percent": 0.02301740673529847,
+        "silicon_point_rmse_um": 0.007404061973072573
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0017234231130641897,
+        "oxide_mean_mae_um": 0.001734714727184376,
+        "selectivity_mape_percent": 0.004050836284651687,
+        "silicon_mean_mae_um": 0.0072980871299584745,
+        "silicon_mean_mape_percent": 0.0076724689117661565,
+        "silicon_point_rmse_um": 0.004936041315381715
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.003529939175740941,
+        "oxide_mean_mae_um": 0.00012508228046181162,
+        "selectivity_mape_percent": 0.030941947978000425,
+        "silicon_mean_mae_um": 0.00598046611886114,
+        "silicon_mean_mape_percent": 0.014768262776249468,
+        "silicon_point_rmse_um": 0.00617173230230618
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0017649695878704705,
+        "oxide_mean_mae_um": 0.0015635285057726451,
+        "selectivity_mape_percent": 0.0025784956648333686,
+        "silicon_mean_mae_um": 0.00598046611886114,
+        "silicon_mean_mape_percent": 0.0049227542587498225,
+        "silicon_point_rmse_um": 0.004114488201537454
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0030930290594793036,
+        "oxide_mean_mae_um": 6.83456100666883e-05,
+        "selectivity_mape_percent": 0.009510285539398033,
+        "silicon_mean_mae_um": 0.001658183230106071,
+        "silicon_mean_mape_percent": 0.003233385705954698,
+        "silicon_point_rmse_um": 0.00230834283786306
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0015465145297396518,
+        "oxide_mean_mae_um": 0.0008543201258336037,
+        "selectivity_mape_percent": 0.0007925237949498362,
+        "silicon_mean_mae_um": 0.001658183230106071,
+        "silicon_mean_mape_percent": 0.0010777952353182327,
+        "silicon_point_rmse_um": 0.0015388952252420398
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0020319723259379203,
+        "oxide_mean_mae_um": 3.7875217922751505e-05,
+        "selectivity_mape_percent": 0.008635289100361081,
+        "silicon_mean_mae_um": 0.0038286223944577575,
+        "silicon_mean_mape_percent": 0.006074343382871827,
+        "silicon_point_rmse_um": 0.004033677257089936
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0010159861629689601,
+        "oxide_mean_mae_um": 0.0004734402240343938,
+        "selectivity_mape_percent": 0.0007196074250300902,
+        "silicon_mean_mae_um": 0.0038286223944577575,
+        "silicon_mean_mape_percent": 0.0020247811276239425,
+        "silicon_point_rmse_um": 0.002689118171393291
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0008602143030529091,
+        "oxide_mean_mae_um": 0.00017693352034568122,
+        "selectivity_mape_percent": 0.019020673080485384,
+        "silicon_mean_mae_um": 0.007180175259517417,
+        "silicon_mean_mape_percent": 0.009696737892889978,
+        "silicon_point_rmse_um": 0.007218274017357495
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00043010715152645457,
+        "oxide_mean_mae_um": 0.002211669004321015,
+        "selectivity_mape_percent": 0.0015850560900404487,
+        "silicon_mean_mae_um": 0.007180175259517417,
+        "silicon_mean_mape_percent": 0.0032322459642966594,
+        "silicon_point_rmse_um": 0.00481218267823833
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003059743086541841,
+        "oxide_mean_mae_um": 0.0003121004709544373,
+        "selectivity_mape_percent": 0.02269895946505862,
+        "silicon_mean_mae_um": 0.007352640592305306,
+        "silicon_mean_mape_percent": 0.008906607458090725,
+        "silicon_point_rmse_um": 0.007378229814786143
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00015298715432709206,
+        "oxide_mean_mae_um": 0.003901255886930466,
+        "selectivity_mape_percent": 0.0018915799554215518,
+        "silicon_mean_mae_um": 0.007352640592305306,
+        "silicon_mean_mape_percent": 0.0029688691526969084,
+        "silicon_point_rmse_um": 0.004918819876524095
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0008074151066345948,
+        "oxide_mean_mae_um": 0.0001939337881238027,
+        "selectivity_mape_percent": 0.01677964274913431,
+        "silicon_mean_mae_um": 0.007805085302398235,
+        "silicon_mean_mape_percent": 0.008954675353617898,
+        "silicon_point_rmse_um": 0.007874655871706394
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0004037075533172974,
+        "oxide_mean_mae_um": 0.0024241723515475338,
+        "selectivity_mape_percent": 0.0013983035624278593,
+        "silicon_mean_mae_um": 0.007805085302398235,
+        "silicon_mean_mape_percent": 0.0029848917845392993,
+        "silicon_point_rmse_um": 0.005249770581137596
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": 0.8367026620142461,
+      "wall_multiplier": 2.3087417104086048
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007103036753025236,
+        "oxide_mean_mae_um": 1.5772821522885839e-06,
+        "selectivity_mape_percent": 0.0073843998202292776,
+        "silicon_mean_mae_um": 0.001147589148053901,
+        "silicon_mean_mape_percent": 0.007753673089316996,
+        "silicon_point_rmse_um": 0.0011536196675148837
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0003551518376512618,
+        "oxide_mean_mae_um": 1.9716026903607298e-05,
+        "selectivity_mape_percent": 0.0006153666516857732,
+        "silicon_mean_mae_um": 0.001147589148053901,
+        "silicon_mean_mape_percent": 0.0025845576964389984,
+        "silicon_point_rmse_um": 0.0007690797783432558
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007559059707885032,
+        "oxide_mean_mae_um": 2.8264003163188667e-05,
+        "selectivity_mape_percent": 0.017332095310035694,
+        "silicon_mean_mae_um": 0.0002606872347090672,
+        "silicon_mean_mape_percent": 0.0016793676208785395,
+        "silicon_point_rmse_um": 0.0002846079328154093
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0003779529853942516,
+        "oxide_mean_mae_um": 0.00035330003953985833,
+        "selectivity_mape_percent": 0.0014443412758363078,
+        "silicon_mean_mae_um": 0.0002606872347090672,
+        "silicon_mean_mape_percent": 0.0005597892069595132,
+        "silicon_point_rmse_um": 0.00018973862187693954
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007104110197157223,
+        "oxide_mean_mae_um": 5.9994931762666536e-05,
+        "selectivity_mape_percent": 0.026056083002293413,
+        "silicon_mean_mae_um": 0.000303990245086491,
+        "silicon_mean_mape_percent": 0.0017780841738292232,
+        "silicon_point_rmse_um": 0.0003312426145668641
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00035520550985786116,
+        "oxide_mean_mae_um": 0.0007499366470333317,
+        "selectivity_mape_percent": 0.0021713402501911177,
+        "silicon_mean_mae_um": 0.000303990245086491,
+        "silicon_mean_mape_percent": 0.0005926947246097411,
+        "silicon_point_rmse_um": 0.00022082840971124275
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000722644612781869,
+        "oxide_mean_mae_um": 0.00012211903386450654,
+        "selectivity_mape_percent": 0.03731229353059762,
+        "silicon_mean_mae_um": 0.0013463399814004143,
+        "silicon_mean_mape_percent": 0.006804146608425654,
+        "silicon_point_rmse_um": 0.0013617110175946092
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0003613223063909345,
+        "oxide_mean_mae_um": 0.0015264879233063318,
+        "selectivity_mape_percent": 0.0031093577942164683,
+        "silicon_mean_mae_um": 0.0013463399814004143,
+        "silicon_mean_mape_percent": 0.002268048869475218,
+        "silicon_point_rmse_um": 0.0009078073450630728
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000830421852307786,
+        "oxide_mean_mae_um": 0.0002269378720985323,
+        "selectivity_mape_percent": 0.04896748194358894,
+        "silicon_mean_mae_um": 0.002731863109555898,
+        "silicon_mean_mape_percent": 0.011400865839162222,
+        "silicon_point_rmse_um": 0.0027516015516560297
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.000415210926153893,
+        "oxide_mean_mae_um": 0.0028367234012316536,
+        "selectivity_mape_percent": 0.004080623495299079,
+        "silicon_mean_mae_um": 0.002731863109555898,
+        "silicon_mean_mape_percent": 0.003800288613054074,
+        "silicon_point_rmse_um": 0.0018344010344373532
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.001114332703663841,
+        "oxide_mean_mae_um": 0.0003773453784572315,
+        "selectivity_mape_percent": 0.059197982321587204,
+        "silicon_mean_mae_um": 0.0036539445942317173,
+        "silicon_mean_mape_percent": 0.012181220507551771,
+        "silicon_point_rmse_um": 0.003684144280600938
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005571663518319205,
+        "oxide_mean_mae_um": 0.004716817230715394,
+        "selectivity_mape_percent": 0.0049331651934656,
+        "silicon_mean_mae_um": 0.0036539445942317173,
+        "silicon_mean_mape_percent": 0.00406040683585059,
+        "silicon_point_rmse_um": 0.0024560961870672923
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0013921555074788935,
+        "oxide_mean_mae_um": 0.0005539986141908774,
+        "selectivity_mape_percent": 0.06640668652973651,
+        "silicon_mean_mae_um": 0.002759212187546325,
+        "silicon_mean_mape_percent": 0.007251618128268096,
+        "silicon_point_rmse_um": 0.0028213951796008043
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0006960777537394467,
+        "oxide_mean_mae_um": 0.006924982677385967,
+        "selectivity_mape_percent": 0.005533890544144709,
+        "silicon_mean_mae_um": 0.002759212187546325,
+        "silicon_mean_mape_percent": 0.002417206042756032,
+        "silicon_point_rmse_um": 0.0018809301197338696
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0011825278141999148,
+        "oxide_mean_mae_um": 0.0007137453666331546,
+        "selectivity_mape_percent": 0.06836170318503247,
+        "silicon_mean_mae_um": 0.0003967885799606089,
+        "silicon_mean_mape_percent": 0.0008305689465316254,
+        "silicon_point_rmse_um": 0.000689101839680427
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005912639070999574,
+        "oxide_mean_mae_um": 0.008921817082914433,
+        "selectivity_mape_percent": 0.005696808598752706,
+        "silicon_mean_mae_um": 0.0003967885799606089,
+        "silicon_mean_mape_percent": 0.0002768563155105418,
+        "silicon_point_rmse_um": 0.00045940122645361797
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000441326162838006,
+        "oxide_mean_mae_um": 0.0008123199076570339,
+        "selectivity_mape_percent": 0.06341561147540926,
+        "silicon_mean_mae_um": 0.003923132542102603,
+        "silicon_mean_mape_percent": 0.006747851965369496,
+        "silicon_point_rmse_um": 0.003943711799825605
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.000220663081419003,
+        "oxide_mean_mae_um": 0.010153998845712924,
+        "selectivity_mape_percent": 0.005284634289617438,
+        "silicon_mean_mae_um": 0.003923132542102603,
+        "silicon_mean_mape_percent": 0.002249283988456499,
+        "silicon_point_rmse_um": 0.0026291411998837365
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00043135201497635487,
+        "oxide_mean_mae_um": 0.0008384116564243775,
+        "selectivity_mape_percent": 0.05332263012859192,
+        "silicon_mean_mae_um": 0.005217995302244655,
+        "silicon_mean_mape_percent": 0.007710120844086473,
+        "silicon_point_rmse_um": 0.005254560313236151
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00021567600748817744,
+        "oxide_mean_mae_um": 0.010480145705304719,
+        "selectivity_mape_percent": 0.004443552510715993,
+        "silicon_mean_mae_um": 0.005217995302244655,
+        "silicon_mean_mape_percent": 0.0025700402813621575,
+        "silicon_point_rmse_um": 0.0035030402088241006
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0008288892551500956,
+        "oxide_mean_mae_um": 0.0008215877376416536,
+        "selectivity_mape_percent": 0.04292965011764904,
+        "silicon_mean_mae_um": 0.004071697403753281,
+        "silicon_mean_mape_percent": 0.005435030900980298,
+        "silicon_point_rmse_um": 0.004155434625195229
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0004144446275750478,
+        "oxide_mean_mae_um": 0.01026984672052067,
+        "selectivity_mape_percent": 0.0035774708431374203,
+        "silicon_mean_mae_um": 0.004071697403753281,
+        "silicon_mean_mape_percent": 0.0018116769669934325,
+        "silicon_point_rmse_um": 0.002770289750130153
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.001300287215910771,
+        "oxide_mean_mae_um": 0.0006047871827255828,
+        "selectivity_mape_percent": 0.029626058799142964,
+        "silicon_mean_mae_um": 0.0034847770082988444,
+        "silicon_mean_mape_percent": 0.004422614047991195,
+        "silicon_point_rmse_um": 0.003680034581803415
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0006501436079553855,
+        "oxide_mean_mae_um": 0.007559839784069784,
+        "selectivity_mape_percent": 0.002468838233261914,
+        "silicon_mean_mae_um": 0.0034847770082988444,
+        "silicon_mean_mape_percent": 0.0014742046826637318,
+        "silicon_point_rmse_um": 0.0024533563878689434
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": 1.0904121386607453,
+      "wall_multiplier": 2.9755001385332593
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00010975901341822204,
+        "oxide_mean_mae_um": 2.0233452257183798e-05,
+        "selectivity_mape_percent": 0.01907132504587894,
+        "silicon_mean_mae_um": 0.0009353259790467187,
+        "silicon_mean_mape_percent": 0.006509910393530513,
+        "silicon_point_rmse_um": 0.0009374784299864104
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 5.487950670911102e-05,
+        "oxide_mean_mae_um": 0.0002529181532147975,
+        "selectivity_mape_percent": 0.0015892770871565782,
+        "silicon_mean_mae_um": 0.0009353259790467187,
+        "silicon_mean_mape_percent": 0.0021699701311768374,
+        "silicon_point_rmse_um": 0.0006249856199909402
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000124675879293974,
+        "oxide_mean_mae_um": 4.3004291242550635e-05,
+        "selectivity_mape_percent": 0.024717777417945303,
+        "silicon_mean_mae_um": 5.321110188927965e-05,
+        "silicon_mean_mape_percent": 0.00035329730177539415,
+        "silicon_point_rmse_um": 5.56322866021224e-05
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 6.2337939646987e-05,
+        "oxide_mean_mae_um": 0.0005375536405318829,
+        "selectivity_mape_percent": 0.0020598147848287754,
+        "silicon_mean_mae_um": 5.321110188927965e-05,
+        "silicon_mean_mape_percent": 0.00011776576725846471,
+        "silicon_point_rmse_um": 3.70881910680816e-05
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0002414213391242459,
+        "oxide_mean_mae_um": 6.016347339396747e-05,
+        "selectivity_mape_percent": 0.025103581492470127,
+        "silicon_mean_mae_um": 0.0005742742492049047,
+        "silicon_mean_mape_percent": 0.003465292875378445,
+        "silicon_point_rmse_um": 0.0005788012701733342
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00012071066956212295,
+        "oxide_mean_mae_um": 0.0007520434174245934,
+        "selectivity_mape_percent": 0.0020919651243725104,
+        "silicon_mean_mae_um": 0.0005742742492049047,
+        "silicon_mean_mape_percent": 0.0011550976251261484,
+        "silicon_point_rmse_um": 0.0003858675134488895
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003452288442444259,
+        "oxide_mean_mae_um": 9.2674158279078e-05,
+        "selectivity_mape_percent": 0.025325846357410718,
+        "silicon_mean_mae_um": 0.0017149267345066713,
+        "silicon_mean_mape_percent": 0.008957760394810482,
+        "silicon_point_rmse_um": 0.001723391484539251
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00017261442212221294,
+        "oxide_mean_mae_um": 0.0011584269784884749,
+        "selectivity_mape_percent": 0.002110487196450893,
+        "silicon_mean_mae_um": 0.0017149267345066713,
+        "silicon_mean_mape_percent": 0.0029859201316034937,
+        "silicon_point_rmse_um": 0.0011489276563595007
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0004122505392073968,
+        "oxide_mean_mae_um": 0.00014523731219954797,
+        "selectivity_mape_percent": 0.025609869948065796,
+        "silicon_mean_mae_um": 0.003228246013021021,
+        "silicon_mean_mape_percent": 0.013965539442562402,
+        "silicon_point_rmse_um": 0.003241815443860648
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0002061252696036984,
+        "oxide_mean_mae_um": 0.0018154664024943497,
+        "selectivity_mape_percent": 0.002134155829005483,
+        "silicon_mean_mae_um": 0.003228246013021021,
+        "silicon_mean_mape_percent": 0.004655179814187467,
+        "silicon_point_rmse_um": 0.002161210295907099
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0008013498445319623,
+        "oxide_mean_mae_um": 0.00021591985058796374,
+        "selectivity_mape_percent": 0.02690683184250083,
+        "silicon_mean_mae_um": 0.0043015106709268025,
+        "silicon_mean_mape_percent": 0.014930223004042748,
+        "silicon_point_rmse_um": 0.0043229549335865045
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00040067492226598115,
+        "oxide_mean_mae_um": 0.002698998132349547,
+        "selectivity_mape_percent": 0.002242235986875069,
+        "silicon_mean_mae_um": 0.0043015106709268025,
+        "silicon_mean_mape_percent": 0.0049767410013475824,
+        "silicon_point_rmse_um": 0.0028819699557243363
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0012609268022564129,
+        "oxide_mean_mae_um": 0.0002886318852094612,
+        "selectivity_mape_percent": 0.029282334012276756,
+        "silicon_mean_mae_um": 0.0036369698651969886,
+        "silicon_mean_mape_percent": 0.01001177274941926,
+        "silicon_point_rmse_um": 0.0036795284987772335
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0006304634011282064,
+        "oxide_mean_mae_um": 0.003607898565118265,
+        "selectivity_mape_percent": 0.002440194501023063,
+        "silicon_mean_mae_um": 0.0036369698651969886,
+        "silicon_mean_mape_percent": 0.0033372575831397532,
+        "silicon_point_rmse_um": 0.0024530189991848225
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0011877589119112383,
+        "oxide_mean_mae_um": 0.00033246722878718475,
+        "selectivity_mape_percent": 0.030138189180010617,
+        "silicon_mean_mae_um": 0.0009280253402127414,
+        "silicon_mean_mape_percent": 0.002049901866244319,
+        "silicon_point_rmse_um": 0.0010790482769916492
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0005938794559556191,
+        "oxide_mean_mae_um": 0.004155840359839809,
+        "selectivity_mape_percent": 0.002511515765000885,
+        "silicon_mean_mae_um": 0.0009280253402127414,
+        "silicon_mean_mape_percent": 0.0006833006220814397,
+        "silicon_point_rmse_um": 0.0007193655179944329
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0005610076647071662,
+        "oxide_mean_mae_um": 0.0003190844218333666,
+        "selectivity_mape_percent": 0.026329350773633447,
+        "silicon_mean_mae_um": 0.0019514828577576774,
+        "silicon_mean_mape_percent": 0.0035697383010545223,
+        "silicon_point_rmse_um": 0.0019796564792625513
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0002805038323535831,
+        "oxide_mean_mae_um": 0.0039885552729170826,
+        "selectivity_mape_percent": 0.002194112564469454,
+        "silicon_mean_mae_um": 0.0019514828577576774,
+        "silicon_mean_mape_percent": 0.001189912767018174,
+        "silicon_point_rmse_um": 0.0013197709861750343
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0001499041400287344,
+        "oxide_mean_mae_um": 0.0002511883060183144,
+        "selectivity_mape_percent": 0.01831652742259804,
+        "silicon_mean_mae_um": 0.0027508030688532395,
+        "silicon_mean_mape_percent": 0.004354129245897139,
+        "silicon_point_rmse_um": 0.002768208365046881
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 7.49520700143672e-05,
+        "oxide_mean_mae_um": 0.0031398538252289296,
+        "selectivity_mape_percent": 0.0015263772852165032,
+        "silicon_mean_mae_um": 0.0027508030688532395,
+        "silicon_mean_mape_percent": 0.0014513764152990461,
+        "silicon_point_rmse_um": 0.0018454722433645873
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00038089122587055274,
+        "oxide_mean_mae_um": 0.00016803190170477933,
+        "selectivity_mape_percent": 0.010026274011228983,
+        "silicon_mean_mae_um": 0.0015270969180511428,
+        "silicon_mean_mape_percent": 0.0021956011851802515,
+        "silicon_point_rmse_um": 0.001568038679793553
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00019044561293527637,
+        "oxide_mean_mae_um": 0.0021003987713097416,
+        "selectivity_mape_percent": 0.0008355228342690819,
+        "silicon_mean_mae_um": 0.0015270969180511428,
+        "silicon_mean_mape_percent": 0.0007318670617267505,
+        "silicon_point_rmse_um": 0.0010453591198623686
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0007402586786004891,
+        "oxide_mean_mae_um": 7.993526020759608e-05,
+        "selectivity_mape_percent": 0.0023690070015248326,
+        "silicon_mean_mae_um": 0.0007524658057819049,
+        "silicon_mean_mape_percent": 0.0010316317181769583,
+        "silicon_point_rmse_um": 0.000947345644466122
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00037012933930024455,
+        "oxide_mean_mae_um": 0.000999190752594951,
+        "selectivity_mape_percent": 0.0001974172501270694,
+        "silicon_mean_mae_um": 0.0007524658057819049,
+        "silicon_mean_mape_percent": 0.0003438772393923194,
+        "silicon_point_rmse_um": 0.0006315637629774147
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": 1.2698118300487748,
+      "wall_multiplier": 3.560182579939798
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0002607551994972174,
+        "oxide_mean_mae_um": 1.3188819934029835e-05,
+        "selectivity_mape_percent": 0.003752355992787374,
+        "silicon_mean_mae_um": 0.0006423503197664597,
+        "silicon_mean_mape_percent": 0.004540026592304644,
+        "silicon_point_rmse_um": 0.000645534626156928
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0001303775997486087,
+        "oxide_mean_mae_um": 0.00016486024917537293,
+        "selectivity_mape_percent": 0.0003126963327322812,
+        "silicon_mean_mae_um": 0.0006423503197664597,
+        "silicon_mean_mape_percent": 0.0015133421974348811,
+        "silicon_point_rmse_um": 0.000430356417437952
+      },
+      "local_ion_factor": 0.25597488528201584,
+      "local_ion_log_factor": -1.3626759436822484,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000171919142824759,
+        "oxide_mean_mae_um": 6.88167051514014e-06,
+        "selectivity_mape_percent": 0.0023342012785607658,
+        "silicon_mean_mae_um": 0.00023934337293293122,
+        "silicon_mean_mape_percent": 0.0016141879479019867,
+        "silicon_point_rmse_um": 0.00024145823844828494
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 8.59595714123795e-05,
+        "oxide_mean_mae_um": 8.602088143925175e-05,
+        "selectivity_mape_percent": 0.00019451677321339714,
+        "silicon_mean_mae_um": 0.00023934337293293122,
+        "silicon_mean_mape_percent": 0.0005380626493006622,
+        "silicon_point_rmse_um": 0.00016097215896552328
+      },
+      "local_ion_factor": 0.2808844708230974,
+      "local_ion_log_factor": -1.2698118300487748,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00028557539279240406,
+        "oxide_mean_mae_um": 1.893924175394394e-05,
+        "selectivity_mape_percent": 0.003565486604087287,
+        "silicon_mean_mae_um": 0.0009033792231880966,
+        "silicon_mean_mape_percent": 0.005540786110968495,
+        "silicon_point_rmse_um": 0.0009077137115402843
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00014278769639620203,
+        "oxide_mean_mae_um": 0.00023674052192429926,
+        "selectivity_mape_percent": 0.00029712388367394055,
+        "silicon_mean_mae_um": 0.0009033792231880966,
+        "silicon_mean_mape_percent": 0.0018469287036561649,
+        "silicon_point_rmse_um": 0.0006051424743601895
+      },
+      "local_ion_factor": 0.33607795444195104,
+      "local_ion_log_factor": -1.0904121386607455,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003388784383578229,
+        "oxide_mean_mae_um": 4.388623346016714e-05,
+        "selectivity_mape_percent": 0.005300585712894416,
+        "silicon_mean_mae_um": 0.002094781838778346,
+        "silicon_mean_mape_percent": 0.011134203660388309,
+        "silicon_point_rmse_um": 0.002103111933701622
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00016943921917891145,
+        "oxide_mean_mae_um": 0.0005485779182520892,
+        "selectivity_mape_percent": 0.0004417154760745347,
+        "silicon_mean_mae_um": 0.002094781838778346,
+        "silicon_mean_mape_percent": 0.0037114012201294364,
+        "silicon_point_rmse_um": 0.001402074622467748
+      },
+      "local_ion_factor": 0.4331363683913426,
+      "local_ion_log_factor": -0.8367026620142464,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0003739263780728743,
+        "oxide_mean_mae_um": 8.677764799239984e-05,
+        "selectivity_mape_percent": 0.00780281567714436,
+        "silicon_mean_mae_um": 0.0036565295411547065,
+        "silicon_mean_mape_percent": 0.016124789284499858,
+        "silicon_point_rmse_um": 0.0036701769047558287
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00018696318903643714,
+        "oxide_mean_mae_um": 0.001084720599904998,
+        "selectivity_mape_percent": 0.00065023463976203,
+        "silicon_mean_mae_um": 0.0036565295411547065,
+        "silicon_mean_mape_percent": 0.005374929761499953,
+        "silicon_point_rmse_um": 0.0024467846031705526
+      },
+      "local_ion_factor": 0.5909798944676475,
+      "local_ion_log_factor": -0.5259732816680024,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0009014108906992396,
+        "oxide_mean_mae_um": 0.0001460977917402939,
+        "selectivity_mape_percent": 0.011780976134124693,
+        "silicon_mean_mae_um": 0.004750169982677003,
+        "silicon_mean_mape_percent": 0.01685047131437223,
+        "silicon_point_rmse_um": 0.004773518849945905
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0004507054453496198,
+        "oxide_mean_mae_um": 0.001826222396753674,
+        "selectivity_mape_percent": 0.0009817480111770577,
+        "silicon_mean_mae_um": 0.004750169982677003,
+        "silicon_mean_mape_percent": 0.005616823771457409,
+        "silicon_point_rmse_um": 0.0031823458999639368
+      },
+      "local_ion_factor": 0.8357717818459676,
+      "local_ion_log_factor": -0.17939969138802977,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0014850678496665624,
+        "oxide_mean_mae_um": 0.00020583371485010402,
+        "selectivity_mape_percent": 0.01680214263661043,
+        "silicon_mean_mae_um": 0.004081930449345918,
+        "silicon_mean_mape_percent": 0.011523906243296503,
+        "silicon_point_rmse_um": 0.004132529204566737
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007425339248332812,
+        "oxide_mean_mae_um": 0.0025729214356263004,
+        "selectivity_mape_percent": 0.0014001785530508692,
+        "silicon_mean_mae_um": 0.004081930449345918,
+        "silicon_mean_mape_percent": 0.0038413020810988342,
+        "silicon_point_rmse_um": 0.002755019469711158
+      },
+      "local_ion_factor": 1.1964988789060353,
+      "local_ion_log_factor": 0.17939969138802944,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0014927466256711584,
+        "oxide_mean_mae_um": 0.0002355022301610769,
+        "selectivity_mape_percent": 0.019855690228372858,
+        "silicon_mean_mae_um": 0.001397373383072041,
+        "silicon_mean_mape_percent": 0.0031787056590243763,
+        "silicon_point_rmse_um": 0.001555693230518595
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0007463733128355792,
+        "oxide_mean_mae_um": 0.0029437778770134613,
+        "selectivity_mape_percent": 0.0016546408523644047,
+        "silicon_mean_mae_um": 0.001397373383072041,
+        "silicon_mean_mape_percent": 0.0010595685530081255,
+        "silicon_point_rmse_um": 0.00103712882034573
+      },
+      "local_ion_factor": 1.6921049419131187,
+      "local_ion_log_factor": 0.5259732816680021,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.0009358508367482332,
+        "oxide_mean_mae_um": 0.00020841931742870894,
+        "selectivity_mape_percent": 0.01774187083094647,
+        "silicon_mean_mae_um": 0.0014434977056804617,
+        "silicon_mean_mape_percent": 0.002731155949917537,
+        "silicon_point_rmse_um": 0.0015214132748326643
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.0004679254183741166,
+        "oxide_mean_mae_um": 0.002605241467858862,
+        "selectivity_mape_percent": 0.001478489235912206,
+        "silicon_mean_mae_um": 0.0014434977056804617,
+        "silicon_mean_mape_percent": 0.000910385316639179,
+        "silicon_point_rmse_um": 0.0010142755165551095
+      },
+      "local_ion_factor": 2.3087417104086048,
+      "local_ion_log_factor": 0.8367026620142461,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00038487022739976085,
+        "oxide_mean_mae_um": 0.0001289503396646167,
+        "selectivity_mape_percent": 0.011068983414354397,
+        "silicon_mean_mae_um": 0.0023330200180206855,
+        "silicon_mean_mape_percent": 0.0038346805775847,
+        "silicon_point_rmse_um": 0.002347174999703304
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 0.00019243511369988043,
+        "oxide_mean_mae_um": 0.001611879245807709,
+        "selectivity_mape_percent": 0.0009224152845295331,
+        "silicon_mean_mae_um": 0.0023330200180206855,
+        "silicon_mean_mape_percent": 0.0012782268591949,
+        "silicon_point_rmse_um": 0.001564783333135536
+      },
+      "local_ion_factor": 2.9755001385332593,
+      "local_ion_log_factor": 1.0904121386607453,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.000195141708874925,
+        "oxide_mean_mae_um": 3.7242621801816254e-05,
+        "selectivity_mape_percent": 0.003809832160029429,
+        "silicon_mean_mae_um": 0.0013748590646486037,
+        "silicon_mean_mape_percent": 0.0020586646161014537,
+        "silicon_point_rmse_um": 0.0013814754049158624
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 9.75708544374625e-05,
+        "oxide_mean_mae_um": 0.00046553277252270314,
+        "selectivity_mape_percent": 0.0003174860133357857,
+        "silicon_mean_mae_um": 0.0013748590646486037,
+        "silicon_mean_mape_percent": 0.0006862215387004846,
+        "silicon_point_rmse_um": 0.0009209836032772416
+      },
+      "local_ion_factor": 3.560182579939798,
+      "local_ion_log_factor": 1.2698118300487748,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    },
+    {
+      "errors": {
+        "normalized_shape_rmse_percent": 0.00012076313964390401,
+        "oxide_mean_mae_um": 0.00021429703302445682,
+        "selectivity_mape_percent": 0.008194101830829284,
+        "silicon_mean_mae_um": 0.0007013066062684933,
+        "silicon_mean_mape_percent": 0.0010028955336029988,
+        "silicon_point_rmse_um": 0.0007110000444830112
+      },
+      "fractions_of_frozen_gates": {
+        "normalized_shape_rmse_percent": 6.0381569821952003e-05,
+        "oxide_mean_mae_um": 0.00267871291280571,
+        "selectivity_mape_percent": 0.0006828418192357737,
+        "silicon_mean_mae_um": 0.0007013066062684933,
+        "silicon_mean_mape_percent": 0.00033429851120099957,
+        "silicon_point_rmse_um": 0.00047400002965534077
+      },
+      "local_ion_factor": 3.906633257783347,
+      "local_ion_log_factor": 1.3626759436822484,
+      "wall_log_multiplier": 1.3626759436822484,
+      "wall_multiplier": 3.906633257783347
+    }
+  ],
+  "schema": "petch-zenodo-bosch-v8-wall-ion-interpolation-validation-v1",
+  "surface_laws_changed": false,
+  "wall_midpoint_count": 12
+}

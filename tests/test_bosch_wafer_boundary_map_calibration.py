@@ -1,13 +1,33 @@
+from hashlib import sha256
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
 
 from scripts.audit_bosch_wafer_boundary_map_calibration import (
     BoschExactWallIonResponseTable,
+    _law_from_coefficients,
     _load_preregistration,
     _nodes,
+    _replay_gate_metrics,
 )
+
+
+ROOT = Path(__file__).resolve().parents[1]
+V8 = (
+    ROOT / "results" / "curated"
+    / "zenodo_bosch_wafer_boundary_map_depth_extension_v8"
+)
+
+
+def _json(name):
+    return json.loads((V8 / name).read_text(encoding="utf-8"))
+
+
+def _hash(name):
+    return sha256((V8 / name).read_bytes()).hexdigest()
 
 
 def _synthetic_table():
@@ -72,3 +92,99 @@ def test_wall_ion_response_rejects_extrapolation():
     conditioned = table.condition_on_wall(np.ones(3))
     with pytest.raises(ValueError, match="ion-factor"):
         conditioned.evaluate(np.full((3, 89), math.exp(1.5)))
+
+
+def test_exact_replay_law_requires_the_complete_frozen_coefficient_count():
+    law = _law_from_coefficients(3, 2, np.zeros(14))
+    assert law.static_maximum_order == 3
+    assert law.dynamic_maximum_order == 2
+    assert len(law.static_coefficients) == 9
+    assert len(law.dynamic_coefficients) == 5
+    with pytest.raises(ValueError, match="dynamic_coefficients"):
+        _law_from_coefficients(3, 2, np.zeros(13))
+
+
+def test_exact_replay_baseline_gates_remain_strict_and_slope_is_nonstrict():
+    passing = {
+        "silicon_mean_mae_um": np.nextafter(0.338486, 0.0),
+        "silicon_point_rmse_um": np.nextafter(0.486585, 0.0),
+        "normalized_shape_rmse_percent": np.nextafter(0.636619, 0.0),
+        "silicon_mean_mape_percent": 0.0,
+        "oxide_mean_mae_um": 0.0,
+        "selectivity_mape_percent": 0.0,
+    }
+    assert all(_replay_gate_metrics(passing, 0.082903).values())
+    for name, boundary in (
+        ("silicon_mean_mae_um", 0.338486),
+        ("silicon_point_rmse_um", 0.486585),
+        ("normalized_shape_rmse_percent", 0.636619),
+    ):
+        failing = {**passing, name: boundary}
+        assert not all(_replay_gate_metrics(failing, 0.082903).values())
+    assert not all(_replay_gate_metrics(
+        passing, np.nextafter(0.082903, 1.0)).values())
+
+
+def test_committed_v8_selection_is_the_lowest_passing_frozen_candidate():
+    capacity = _json("full_calibration_capacity.json")
+    fit = _json("calibration_fit.json")
+    assert capacity["heldout_outcomes_read"] is False
+    assert fit["heldout_outcomes_read"] is False
+    assert fit["heldout_prediction_written"] is False
+    assert fit["eligible_for_prediction_seal"] is False
+    assert len(capacity["candidates"]) == 20
+    passing = sorted(
+        (row for row in fit["candidates"]
+         if row["all_pre_replay_gates_pass"]),
+        key=lambda row: (
+            row["coefficient_count"],
+            row["static_maximum_order"],
+            row["dynamic_maximum_order"],
+        ),
+    )
+    selected = fit["selected_candidate"]
+    assert passing
+    assert selected["coefficient_count"] == passing[0]["coefficient_count"]
+    assert selected["static_maximum_order"] == 9
+    assert selected["dynamic_maximum_order"] == 2
+    assert selected["coefficient_count"] == 59
+
+
+def test_committed_v8_exact_replay_passes_without_opening_heldout():
+    interpolation = _json("interpolation_validation.json")
+    replay = _json("exact_replay.json")
+    assert interpolation["passes"] is True
+    assert (
+        interpolation["maximum_error_fraction_of_any_frozen_gate"]
+        <= interpolation["frozen_maximum_error_fraction"]
+    )
+    assert replay["all_replay_and_refinement_gates_pass"] is True
+    assert replay["full_calibration_exact"]["passes"] is True
+    assert replay["whole_lot_exact"]["passes"] is True
+    assert replay["refinement"]["passes"] is True
+    assert replay["heldout_outcomes_read"] is False
+    assert replay["heldout_prediction_written"] is False
+    assert replay["eligible_for_prediction_seal"] is False
+    whole_lot = replay["whole_lot_exact"]
+    assert whole_lot["metrics"]["silicon_mean_mae_um"] < 0.338486
+    assert whole_lot["metrics"]["silicon_point_rmse_um"] < 0.486585
+    assert (
+        whole_lot["metrics"]["normalized_shape_rmse_percent"] < 0.636619
+    )
+    assert whole_lot["within_lot_slope_mae_um_per_wafer"] <= 0.082903
+    assert (
+        replay["refinement"]["maximum_observable_difference_gate_fraction"]
+        <= 0.25
+    )
+
+
+def test_committed_v8_replay_input_hashes_are_exact():
+    replay = _json("exact_replay.json")
+    assert replay["input_hashes"]["preregistration"] == _hash(
+        "preregistration.json")
+    assert replay["input_hashes"]["response_table"] == _hash(
+        "exact_wall_ion_response_table.npz")
+    assert replay["input_hashes"]["calibration_fit"] == _hash(
+        "calibration_fit.json")
+    assert replay["input_hashes"]["interpolation_validation"] == _hash(
+        "interpolation_validation.json")

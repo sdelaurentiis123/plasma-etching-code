@@ -1,0 +1,301 @@
+{
+  "all_replay_and_refinement_gates_pass": true,
+  "eligible_for_prediction_seal": false,
+  "frozen_gate_source": {
+    "absolute_gates_unchanged_from_v7": true,
+    "all_candidates_scored_on_complete_whole_lot_folds": true,
+    "whole_lot_normalized_shape_rmse_percent_below": 0.636619,
+    "whole_lot_silicon_mean_mae_um_below": 0.338486,
+    "whole_lot_silicon_point_rmse_um_below": 0.486585,
+    "within_lot_slope_mae_um_per_wafer_at_most": 0.082903
+  },
+  "full_calibration_exact": {
+    "absolute_gate_fractions": {
+      "normalized_shape_rmse_percent": 0.3100371831945254,
+      "oxide_mean_mae_um": 0.4905309684084179,
+      "selectivity_mape_percent": 0.5012879843883936,
+      "silicon_mean_mae_um": 0.22366828651849724,
+      "silicon_mean_mape_percent": 0.17043824849655773,
+      "silicon_point_rmse_um": 0.2580373219192111
+    },
+    "absolute_gates": {
+      "normalized_shape_rmse_percent": true,
+      "oxide_mean_mae_um": true,
+      "selectivity_mape_percent": true,
+      "silicon_mean_mae_um": true,
+      "silicon_mean_mape_percent": true,
+      "silicon_point_rmse_um": true
+    },
+    "interpolation_difference": {
+      "normalized_shape_rmse_percent": 0.010330912245993489,
+      "oxide_mean_mae_um": 5.210036799052631e-06,
+      "selectivity_mape_percent": 0.02067336624526191,
+      "silicon_mean_mae_um": 0.008727089877653688,
+      "silicon_mean_mape_percent": 0.02006263560129451,
+      "silicon_point_rmse_um": 0.010991736730304368
+    },
+    "interpolation_difference_gate_fractions": {
+      "normalized_shape_rmse_percent": 0.005165456122996744,
+      "oxide_mean_mae_um": 6.512545998815789e-05,
+      "selectivity_mape_percent": 0.0017227805204384926,
+      "silicon_mean_mae_um": 0.008727089877653688,
+      "silicon_mean_mape_percent": 0.0066875452004315035,
+      "silicon_point_rmse_um": 0.007327824486869579
+    },
+    "interpolation_difference_passes_frozen_0p05_fraction": true,
+    "maximum_interpolation_difference_gate_fraction": 0.008727089877653688,
+    "metrics": {
+      "normalized_shape_rmse_percent": 0.6200743663890508,
+      "oxide_mean_correlation": 0.0731108336119297,
+      "oxide_mean_mae_um": 0.03924247747267343,
+      "oxide_mean_mape_percent": 6.235402874352433,
+      "predicted_oxide_mean_range_um": [
+        0.6507462908391717,
+        0.6639596038133977
+      ],
+      "predicted_silicon_mean_range_um": [
+        42.906844480648424,
+        44.070178144673754
+      ],
+      "selectivity_mape_percent": 6.015455812660724,
+      "silicon_mean_correlation": 0.7401599312511083,
+      "silicon_mean_mae_um": 0.22366828651849724,
+      "silicon_mean_mape_percent": 0.5113147454896732,
+      "silicon_point_rmse_um": 0.38705598287881665
+    },
+    "passes": true
+  },
+  "heldout_outcomes_read": false,
+  "heldout_prediction_written": false,
+  "input_hashes": {
+    "calibration_fit": "d48f7bdd89a3168416d3fd184a3827b40b4e1bd719487aed099eae1b103cc7b9",
+    "interpolation_validation": "62956e063a404356b26cdd1ad9c44557c4cb38b445f300831a7843cf1feac64b",
+    "preregistration": "9cd2d3cf2bbd30636e9db58ba4fba026adad1199a8e3f586bfe5a2fc61f40b93",
+    "response_table": "d27104f3bfdf4e72279fffcb1ed78ecb3ca600b8ba95edd3a9b28e39da5d3b4e",
+    "v7_fit": "b521ce464766b92bdde893b39e260e0f3093d19fc8f6eb5083dd12618db29a5d"
+  },
+  "refinement": {
+    "base_grid": {
+      "axial_cell_count": 24,
+      "azimuthal_cell_count": 16,
+      "radial_cell_count": 24,
+      "zernike_certification_grid": [
+        129,
+        256
+      ]
+    },
+    "base_maximum_absolute_log_field": 0.14743963310388508,
+    "maximum_observable_difference_gate_fraction": 0.04355900825741135,
+    "observable_difference": {
+      "normalized_shape_rmse_percent": 0.02185263462713185,
+      "oxide_mean_mae_um": 0.0007706736812782955,
+      "selectivity_mape_percent": 0.017062099256268375,
+      "silicon_mean_mae_um": 0.04355900825741135,
+      "silicon_mean_mape_percent": 0.09993797263717911,
+      "silicon_point_rmse_um": 0.04443529998426901
+    },
+    "observable_difference_gate_fractions": {
+      "normalized_shape_rmse_percent": 0.010926317313565925,
+      "oxide_mean_mae_um": 0.009633421015978694,
+      "selectivity_mape_percent": 0.0014218416046890313,
+      "silicon_mean_mae_um": 0.04355900825741135,
+      "silicon_mean_mape_percent": 0.03331265754572637,
+      "silicon_point_rmse_um": 0.029623533322846007
+    },
+    "passes": true,
+    "refined_full_calibration_metrics": {
+      "normalized_shape_rmse_percent": 0.6200411316329236,
+      "oxide_mean_correlation": 0.07307855528150171,
+      "oxide_mean_mae_um": 0.0390883403007034,
+      "oxide_mean_mape_percent": 6.2193076288723335,
+      "predicted_oxide_mean_range_um": [
+        0.6515018802811534,
+        0.6647393843246332
+      ],
+      "predicted_silicon_mean_range_um": [
+        42.949927719760524,
+        44.11424447167946
+      ],
+      "selectivity_mape_percent": 6.010985492812016,
+      "silicon_mean_correlation": 0.7397171947977013,
+      "silicon_mean_mae_um": 0.2277926310126128,
+      "silicon_mean_mape_percent": 0.5213944328527974,
+      "silicon_point_rmse_um": 0.38481583740946107
+    },
+    "refined_grid": {
+      "axial_cell_count": 32,
+      "azimuthal_cell_count": 24,
+      "radial_cell_count": 32,
+      "zernike_certification_grid": [
+        257,
+        512
+      ]
+    },
+    "refined_maximum_absolute_log_field": 0.14743963310388508
+  },
+  "remaining_seal_prerequisites": [
+    "write and hash the chronological heldout prediction without reading its outcome",
+    "commit and push all v8 code, fits, and replay receipts",
+    "only then permit the separate heldout scorer to parse numeric outcomes"
+  ],
+  "schema": "petch-zenodo-bosch-v8-exact-replay-v1",
+  "selected_candidate": {
+    "coefficient_count": 59,
+    "coefficients": [
+      0.0011435242616538851,
+      0.011868859000568287,
+      0.02425364659090655,
+      -0.002416648550052319,
+      -6.92154760085501e-05,
+      0.003322407383814868,
+      0.0039336923934657686,
+      0.0015052685474218992,
+      0.0031317039302710707,
+      0.014435484662870843,
+      0.004713446153666193,
+      0.00048759125207405727,
+      -0.006677721277145599,
+      1.2817101786613796e-05,
+      0.005256279225682159,
+      0.004866761309035038,
+      0.001265986642768095,
+      -0.00022664808996846264,
+      0.0016839358868483176,
+      0.00039264614001159837,
+      0.008073691916869958,
+      0.0011698849220143017,
+      0.0006993793738562249,
+      -0.010082937596377182,
+      0.0008973885393772813,
+      6.87930471643451e-05,
+      0.0013644305675594999,
+      0.00546249470537023,
+      -0.003630586034301007,
+      0.0011712395400813077,
+      -0.0006544143105327375,
+      0.001917986921598323,
+      -0.0007774366944735001,
+      -0.00620246141585109,
+      -0.00193359401125745,
+      0.011126550773972448,
+      0.0012459080687500551,
+      0.0008289415979325874,
+      -0.010160469017501287,
+      0.0008125811683370139,
+      -0.0013258505931688007,
+      0.0008566521845558919,
+      0.03381486505460129,
+      2.926966159772215e-05,
+      0.0036956170537749884,
+      -0.004387501643201278,
+      0.0009928002680072705,
+      -0.000377710625094759,
+      0.0019420417177894477,
+      -0.0006769575772067632,
+      -0.0019994696428266004,
+      -0.0008112989712295492,
+      -0.006423271062907924,
+      0.0025753895252457245,
+      0.000677275098519444,
+      -0.0005988164626992725,
+      -0.002840570299432143,
+      9.671130850020595e-05,
+      -0.00033843987282715485
+    ],
+    "dynamic_maximum_order": 2,
+    "selection_rule": "choose the lowest total coefficient count passing every gate",
+    "static_maximum_order": 9
+  },
+  "surface_laws_changed": false,
+  "total_positive_ion_current_changed": false,
+  "whole_lot_exact": {
+    "gates": {
+      "all_absolute_gates_pass": true,
+      "mean_beats_global_depth_baseline": true,
+      "point_beats_mean_map_baseline": true,
+      "shape_beats_mean_map_baseline": true,
+      "within_lot_slope_not_worse_than_v7": true
+    },
+    "interpolation_difference": {
+      "normalized_shape_rmse_percent": 0.010241737590276969,
+      "oxide_mean_mae_um": 6.540157202521435e-06,
+      "selectivity_mape_percent": 0.023125543810788685,
+      "silicon_mean_mae_um": 0.009672016623790209,
+      "silicon_mean_mape_percent": 0.022279712011121777,
+      "silicon_point_rmse_um": 0.012012066301121248
+    },
+    "interpolation_difference_gate_fractions": {
+      "normalized_shape_rmse_percent": 0.005120868795138484,
+      "oxide_mean_mae_um": 8.175196503151794e-05,
+      "selectivity_mape_percent": 0.001927128650899057,
+      "silicon_mean_mae_um": 0.009672016623790209,
+      "silicon_mean_mape_percent": 0.007426570670373926,
+      "silicon_point_rmse_um": 0.008008044200747499
+    },
+    "interpolation_difference_passes_frozen_0p05_fraction": true,
+    "maximum_interpolation_difference_gate_fraction": 0.009672016623790209,
+    "metrics": {
+      "normalized_shape_rmse_percent": 0.6352669741523898,
+      "oxide_mean_correlation": 0.0520582156311444,
+      "oxide_mean_mae_um": 0.03929238532713411,
+      "oxide_mean_mape_percent": 6.243227499521153,
+      "predicted_oxide_mean_range_um": [
+        0.650721732112149,
+        0.6638892269143473
+      ],
+      "predicted_silicon_mean_range_um": [
+        42.67236238124602,
+        44.00891068663914
+      ],
+      "selectivity_mape_percent": 6.054691279207692,
+      "silicon_mean_correlation": 0.5909476918146565,
+      "silicon_mean_mae_um": 0.2701786700740365,
+      "silicon_mean_mape_percent": 0.617779175313295,
+      "silicon_point_rmse_um": 0.4311988776751422
+    },
+    "passes": true,
+    "within_lot_slope_mae_um_per_wafer": 0.07780957975490001,
+    "within_lot_slopes": {
+      "1": {
+        "observed_um_per_wafer": -0.12323795880150035,
+        "predicted_um_per_wafer": -0.05620519150513981,
+        "residual_um_per_wafer": 0.06703276729636054
+      },
+      "2": {
+        "observed_um_per_wafer": -0.13669556422540072,
+        "predicted_um_per_wafer": -0.06268084832157658,
+        "residual_um_per_wafer": 0.07401471590382414
+      },
+      "3": {
+        "observed_um_per_wafer": -0.1194391266591776,
+        "predicted_um_per_wafer": -0.07100790323702853,
+        "residual_um_per_wafer": 0.04843122342214906
+      },
+      "4": {
+        "observed_um_per_wafer": -0.16046202961048683,
+        "predicted_um_per_wafer": -0.07021915373166263,
+        "residual_um_per_wafer": 0.09024287587882421
+      },
+      "5": {
+        "observed_um_per_wafer": -0.11382169384746367,
+        "predicted_um_per_wafer": -0.012358721351291728,
+        "residual_um_per_wafer": 0.10146297249617195
+      },
+      "6": {
+        "observed_um_per_wafer": -0.11252694586312555,
+        "predicted_um_per_wafer": -0.030830311274989027,
+        "residual_um_per_wafer": 0.08169663458813652
+      },
+      "7": {
+        "observed_um_per_wafer": -0.11158879614767672,
+        "predicted_um_per_wafer": 0.0007525815044556192,
+        "residual_um_per_wafer": 0.11234137765213234
+      },
+      "8": {
+        "observed_um_per_wafer": -0.055760791177392105,
+        "predicted_um_per_wafer": -0.008506720375790783,
+        "residual_um_per_wafer": 0.04725407080160132
+      }
+    }
+  }
+}

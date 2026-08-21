@@ -19,6 +19,7 @@ import sys
 
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+from scipy.optimize import least_squares
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,16 +34,27 @@ from petch.bosch_wafer_depth_fast import (  # noqa: E402
 )
 from petch.reactor_global.bosch_spts_cylindrical import (  # noqa: E402
     BoschSPTSCylindricalParameters,
+    BoschSPTSWaferIonTransmissionLaw,
     DeterministicBoschSPTSCylindricalReactorToWafer,
 )
 from scripts.audit_bosch_dynamic_wall_calibration import (  # noqa: E402
     _Prediction,
     _inputs,
+    _objective_from_arrays,
     _wall_nodes,
+)
+from scripts.audit_bosch_recipe_path_memory_calibration import (  # noqa: E402
+    _lot_slopes,
+    _recipe_path_steps,
+)
+from scripts.audit_bosch_recipe_path_spatial_residual import (  # noqa: E402
+    _load_features,
 )
 from scripts.audit_bosch_wall_conditioning_calibration import (  # noqa: E402
     BASE_CYLINDRICAL_KEYWORDS,
     BASE_REDUCED_PARAMETERS,
+    FROZEN_GATES,
+    _metrics,
 )
 
 
@@ -53,7 +65,16 @@ V8_DIRECTORY = (
 PREREGISTRATION = V8_DIRECTORY / "preregistration.json"
 RESPONSE_TABLE = V8_DIRECTORY / "exact_wall_ion_response_table.npz"
 OUTPUT = V8_DIRECTORY / "calibration_fit.json"
+CAPACITY_OUTPUT = V8_DIRECTORY / "full_calibration_capacity.json"
+INTERPOLATION_OUTPUT = V8_DIRECTORY / "interpolation_validation.json"
+EXACT_REPLAY_OUTPUT = V8_DIRECTORY / "exact_replay.json"
+V7_FIT = (
+    ROOT / "results" / "curated"
+    / "zenodo_bosch_recipe_path_memory_depth_extension_v7"
+    / "calibration_fit.json"
+)
 _LOG_FOUR = math.log(4.0)
+_COEFFICIENT_BOUND = 0.1
 
 
 def _hash(path):
@@ -416,16 +437,995 @@ def build_response_table(*, workers=8):
     )
 
 
+def _v7_coefficients(payload=None):
+    if payload is None:
+        payload = json.loads(V7_FIT.read_text(encoding="utf-8"))
+    parameters = payload["parameters"]
+    return np.asarray([
+        parameters["conditioning_repeat_log_coefficient"],
+        parameters["silicon_precondition_coefficient"],
+        parameters["silicon_oxide_precondition_coefficient"],
+        parameters["log_wall_loss_per_reference_wafer"],
+    ])
+
+
+def _wall_multipliers(
+        v7_coefficients, measurements, process_traces, lot_type_by_date):
+    steps, *_ = _recipe_path_steps(
+        v7_coefficients, process_traces, lot_type_by_date)
+    return np.asarray([
+        steps[item.experiment_key].combined_wall_loss_multiplier
+        for item in measurements
+    ])
+
+
+def _candidate_geometry(measurements, static_order, dynamic_order):
+    first = measurements[0]
+    x_m = first.x_um * 1.0e-6
+    y_m = first.y_um * 1.0e-6
+    model = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=BASE_REDUCED_PARAMETERS,
+            **BASE_CYLINDRICAL_KEYWORDS,
+        ))
+    return model.ion_transmission_geometry(
+        x_m=x_m,
+        y_m=y_m,
+        static_maximum_order=static_order,
+        dynamic_maximum_order=dynamic_order,
+    )
+
+
+def _candidate_predictions(
+        coefficients, geometry, voltages, conditioned_response):
+    factors = geometry.factors(coefficients, voltages)
+    if np.any(factors < 0.25) or np.any(factors > 4.0):
+        raise ValueError("Bosch v8 candidate leaves the frozen factor domain")
+    predictions, _silicon_derivative, _oxide_derivative = (
+        conditioned_response.evaluate(factors))
+    return predictions, factors
+
+
+def _candidate_objective(
+        coefficients, selected_indices, measurements, geometry, voltages,
+        conditioned_response):
+    try:
+        predictions, _factors = _candidate_predictions(
+            coefficients, geometry, voltages, conditioned_response)
+    except (ValueError, RuntimeError, FloatingPointError):
+        return np.full(len(selected_indices) * 92, 1.0e3)
+    subset_measurements = tuple(measurements[index] for index in selected_indices)
+    subset_predictions = tuple(predictions[index] for index in selected_indices)
+    return _objective_from_arrays(subset_measurements, subset_predictions)
+
+
+def _candidate_starts(geometry):
+    zero = np.zeros(geometry.coefficient_count)
+    starts = [zero]
+    radial_static_index = 2 if geometry.static_maximum_order >= 2 else None
+    for sign in (-1.0, 1.0):
+        value = zero.copy()
+        if radial_static_index is not None:
+            value[radial_static_index] = sign * 0.01
+        if geometry.dynamic_maximum_order == 2:
+            value[geometry.static_point_design.shape[1] + 2] = sign * 0.002
+        starts.append(value)
+    unique = []
+    for value in starts:
+        if not any(np.array_equal(value, prior) for prior in unique):
+            unique.append(value)
+    return tuple(unique)
+
+
+def _fit_candidate(
+        selected_indices, measurements, geometry, voltages,
+        conditioned_response, *, max_nfev=80):
+    attempts = []
+    lower = np.full(geometry.coefficient_count, -_COEFFICIENT_BOUND)
+    upper = np.full(geometry.coefficient_count, _COEFFICIENT_BOUND)
+    for start_index, start in enumerate(_candidate_starts(geometry)):
+        result = least_squares(
+            _candidate_objective,
+            start,
+            bounds=(lower, upper),
+            args=(selected_indices, measurements, geometry, voltages,
+                  conditioned_response),
+            max_nfev=int(max_nfev),
+            xtol=1.0e-8,
+            ftol=1.0e-8,
+            gtol=1.0e-8,
+            verbose=0,
+        )
+        attempts.append((float(result.cost), start_index, result))
+    _cost, start_index, result = min(
+        attempts, key=lambda item: (item[0], item[1]))
+    return result, start_index, tuple({
+        "start_index": index,
+        "cost": float(item.cost),
+        "success": bool(item.success),
+        "nfev": int(item.nfev),
+    } for _cost, index, item in attempts)
+
+
+def _map_identifiability(result):
+    jacobian = np.asarray(result.jac, dtype=float)
+    singular = np.linalg.svd(jacobian, compute_uv=False)
+    tolerance = np.finfo(float).eps * max(jacobian.shape) * singular[0]
+    rank = int(np.count_nonzero(singular > tolerance))
+    condition = (
+        float(singular[0] / singular[-1])
+        if singular[-1] > 0.0 else math.inf)
+    covariance = np.linalg.pinv(jacobian.T @ jacobian, rcond=1.0e-12)
+    standard = np.sqrt(np.maximum(np.diag(covariance), 0.0))
+    denominator = np.outer(standard, standard)
+    correlation = np.divide(
+        covariance,
+        denominator,
+        out=np.zeros_like(covariance),
+        where=denominator > 0.0,
+    )
+    np.fill_diagonal(correlation, 0.0)
+    maximum_correlation = float(np.max(np.abs(correlation)))
+    normalized_bound_distance = np.minimum(
+        (result.x + _COEFFICIENT_BOUND) / (2.0 * _COEFFICIENT_BOUND),
+        (_COEFFICIENT_BOUND - result.x) / (2.0 * _COEFFICIENT_BOUND),
+    )
+    gates = {
+        "full_column_rank": rank == jacobian.shape[1],
+        "condition_number_at_most_1e6": condition <= 1.0e6,
+        "maximum_parameter_correlation_below_0p995": (
+            maximum_correlation < 0.995),
+        "no_coefficient_bound_contact": bool(np.all(
+            normalized_bound_distance > 0.001)),
+    }
+    return {
+        "jacobian_shape": list(jacobian.shape),
+        "rank": rank,
+        "singular_values": singular.tolist(),
+        "condition_number": condition,
+        "maximum_pairwise_parameter_correlation_magnitude": maximum_correlation,
+        "normalized_distance_to_nearest_bound": (
+            normalized_bound_distance.tolist()),
+        "gates": gates,
+        "passes": all(gates.values()),
+    }
+
+
+def _candidate_row(
+        static_order, dynamic_order, measurements, voltages,
+        conditioned_response, *, max_nfev=80):
+    geometry = _candidate_geometry(measurements, static_order, dynamic_order)
+    selected = np.arange(len(measurements))
+    result, start_index, attempts = _fit_candidate(
+        selected,
+        measurements,
+        geometry,
+        voltages,
+        conditioned_response,
+        max_nfev=max_nfev,
+    )
+    predictions, factors = _candidate_predictions(
+        result.x, geometry, voltages, conditioned_response)
+    static_count = geometry.static_point_design.shape[1]
+    law_error = None
+    law_manifest = None
+    try:
+        law = BoschSPTSWaferIonTransmissionLaw(
+            static_maximum_order=static_order,
+            static_coefficients=tuple(result.x[:static_count]),
+            dynamic_maximum_order=dynamic_order,
+            dynamic_coefficients=tuple(result.x[static_count:]),
+        )
+        law_manifest = law.manifest()
+    except ValueError as error:
+        law_error = str(error)
+    metrics = _metrics(measurements, predictions)
+    absolute_gate = {
+        name: metrics[name] <= threshold
+        for name, threshold in FROZEN_GATES.items()
+    }
+    return {
+        "static_maximum_order": static_order,
+        "dynamic_maximum_order": dynamic_order,
+        "coefficient_count": geometry.coefficient_count,
+        "coefficients": result.x.tolist(),
+        "optimizer": {
+            "cost": float(result.cost),
+            "success": bool(result.success),
+            "status": int(result.status),
+            "message": str(result.message),
+            "nfev": int(result.nfev),
+            "selected_start_index": start_index,
+            "start_attempts": attempts,
+        },
+        "calibration_metrics": metrics,
+        "absolute_gates": absolute_gate,
+        "all_absolute_gates_pass": all(absolute_gate.values()),
+        "identifiability": _map_identifiability(result),
+        "law_domain_pass": law_error is None,
+        "law_domain_error": law_error,
+        "law_manifest": law_manifest,
+        "minimum_local_ion_factor": float(np.min(factors)),
+        "maximum_local_ion_factor": float(np.max(factors)),
+    }
+
+
+def build_full_calibration_capacity(*, max_nfev=80):
+    preregistration = _load_preregistration()
+    measurements, process_traces, lot_type_by_date = _inputs()
+    table = BoschExactWallIonResponseTable.load(RESPONSE_TABLE)
+    if table.experiment_keys != tuple(
+            item.experiment_key for item in measurements):
+        raise RuntimeError("Bosch v8 response table key order is stale")
+    v7_payload = json.loads(V7_FIT.read_text(encoding="utf-8"))
+    wall_multipliers = _wall_multipliers(
+        _v7_coefficients(v7_payload),
+        measurements,
+        process_traces,
+        lot_type_by_date,
+    )
+    conditioned = table.condition_on_wall(wall_multipliers)
+    keys = tuple(item.experiment_key for item in measurements)
+    voltages = _load_features(keys)["c4f8_platen_peak_to_peak_rms"]
+    rows = []
+    for static_order in preregistration["wafer_boundary_operator"][
+            "static_maximum_order_candidates"]:
+        for dynamic_order in preregistration["wafer_boundary_operator"][
+                "dynamic_maximum_order_candidates"]:
+            print(
+                f"Bosch v8 full calibration static={static_order} "
+                f"dynamic={dynamic_order}",
+                flush=True,
+            )
+            rows.append(_candidate_row(
+                static_order,
+                dynamic_order,
+                measurements,
+                voltages,
+                conditioned,
+                max_nfev=max_nfev,
+            ))
+    return {
+        "schema": "petch-zenodo-bosch-v8-full-calibration-capacity-v1",
+        "status": "calibration-only physical boundary fits; whole-lot selection and heldout seal not yet evaluated",
+        "calibration_wafer_count": len(measurements),
+        "points_per_wafer": 89,
+        "candidates": rows,
+        "heldout_outcomes_read": False,
+        "heldout_prediction_written": False,
+        "eligible_for_prediction_seal": False,
+        "surface_laws_changed": False,
+        "total_positive_ion_current_changed": False,
+        "input_hashes": {
+            "preregistration": _hash(PREREGISTRATION),
+            "response_table": _hash(RESPONSE_TABLE),
+            "v7_fit": _hash(V7_FIT),
+        },
+    }
+
+
+def _fold_v7_coefficients(v7_payload):
+    output = {}
+    for fold in v7_payload["whole_lot_leave_one_out"]["folds"]:
+        parameters = fold["parameters"]
+        output[int(fold["heldout_lot"])] = np.asarray([
+            parameters["conditioning_repeat_log_coefficient"],
+            parameters["silicon_precondition_coefficient"],
+            parameters["silicon_oxide_precondition_coefficient"],
+            parameters["log_wall_loss_per_reference_wafer"],
+        ])
+    return output
+
+
+def _raw_design_condition(geometry, voltages, selected_indices):
+    zero = np.zeros(geometry.coefficient_count)
+    _log_factor, jacobian = geometry.log_factor_and_jacobian(zero, voltages)
+    selected = np.asarray(selected_indices, dtype=int)
+    return float(np.linalg.cond(jacobian[selected].reshape(
+        -1, geometry.coefficient_count)))
+
+
+def _whole_lot_candidate(
+        full_row, measurements, process_traces, lot_type_by_date, table,
+        voltages, fold_wall_coefficients, *, max_nfev=80):
+    static_order = int(full_row["static_maximum_order"])
+    dynamic_order = int(full_row["dynamic_maximum_order"])
+    geometry = _candidate_geometry(measurements, static_order, dynamic_order)
+    lots = sorted({item.lot_number for item in measurements})
+    predictions = [None] * len(measurements)
+    folds = []
+    coefficient_rows = []
+    for lot in lots:
+        print(
+            f"Bosch v8 LOLO static={static_order} dynamic={dynamic_order} "
+            f"lot={lot}",
+            flush=True,
+        )
+        train = tuple(
+            index for index, item in enumerate(measurements)
+            if item.lot_number != lot)
+        test = tuple(
+            index for index, item in enumerate(measurements)
+            if item.lot_number == lot)
+        wall_multipliers = _wall_multipliers(
+            fold_wall_coefficients[lot],
+            measurements,
+            process_traces,
+            lot_type_by_date,
+        )
+        conditioned = table.condition_on_wall(wall_multipliers)
+        result, start_index, attempts = _fit_candidate(
+            train,
+            measurements,
+            geometry,
+            voltages,
+            conditioned,
+            max_nfev=max_nfev,
+        )
+        all_predictions, factors = _candidate_predictions(
+            result.x, geometry, voltages, conditioned)
+        for index in test:
+            predictions[index] = all_predictions[index]
+        coefficient_rows.append(result.x)
+        folds.append({
+            "heldout_lot": lot,
+            "training_wafer_count": len(train),
+            "test_wafer_count": len(test),
+            "coefficients": result.x.tolist(),
+            "selected_start_index": start_index,
+            "start_attempts": attempts,
+            "optimizer_success": bool(result.success),
+            "optimizer_nfev": int(result.nfev),
+            "optimizer_cost": float(result.cost),
+            "identifiability": _map_identifiability(result),
+            "raw_design_condition_number": _raw_design_condition(
+                geometry, voltages, train),
+            "minimum_local_ion_factor": float(np.min(factors)),
+            "maximum_local_ion_factor": float(np.max(factors)),
+            "test_metrics": _metrics(
+                tuple(measurements[index] for index in test),
+                tuple(all_predictions[index] for index in test)),
+        })
+    if any(item is None for item in predictions):
+        raise RuntimeError("Bosch v8 whole-lot audit missed a wafer")
+    predictions = tuple(predictions)
+    aggregate = _metrics(measurements, predictions)
+    slopes = _lot_slopes(measurements, predictions)
+    slope_mae = float(np.mean([
+        abs(item["residual_um_per_wafer"])
+        for item in slopes.values()
+    ]))
+    coefficients = np.stack(coefficient_rows)
+    stability = {
+        "median_fold_coefficient_standard_deviation": float(np.median(
+            np.std(coefficients, axis=0))),
+        "maximum_fold_coefficient_range": float(np.max(
+            np.ptp(coefficients, axis=0))),
+        "maximum_raw_design_condition_number": float(max(
+            item["raw_design_condition_number"] for item in folds)),
+        "maximum_fold_jacobian_condition_number": float(max(
+            item["identifiability"]["condition_number"] for item in folds)),
+        "all_fold_identifiability_gates_pass": all(
+            item["identifiability"]["passes"] for item in folds),
+    }
+    gates = {
+        "absolute_calibration_gates_pass": bool(
+            full_row["all_absolute_gates_pass"]),
+        "full_fit_identifiability_pass": bool(
+            full_row["identifiability"]["passes"]),
+        "full_fit_law_domain_pass": bool(full_row["law_domain_pass"]),
+        "whole_lot_mean_beats_global_depth_baseline": (
+            aggregate["silicon_mean_mae_um"] < 0.338486),
+        "whole_lot_point_beats_mean_map_baseline": (
+            aggregate["silicon_point_rmse_um"] < 0.486585),
+        "whole_lot_shape_beats_mean_map_baseline": (
+            aggregate["normalized_shape_rmse_percent"] < 0.636619),
+        "within_lot_slope_not_worse_than_v7": slope_mae <= 0.082903,
+        "all_fold_identifiability_gates_pass": stability[
+            "all_fold_identifiability_gates_pass"],
+        "maximum_design_condition_at_most_1000": stability[
+            "maximum_raw_design_condition_number"] <= 1000.0,
+        "median_fold_coefficient_std_at_most_0p005": stability[
+            "median_fold_coefficient_standard_deviation"] <= 0.005,
+        "maximum_fold_coefficient_range_at_most_0p05": stability[
+            "maximum_fold_coefficient_range"] <= 0.05,
+    }
+    return {
+        "static_maximum_order": static_order,
+        "dynamic_maximum_order": dynamic_order,
+        "coefficient_count": geometry.coefficient_count,
+        "full_calibration": full_row,
+        "whole_lot_leave_one_out": {
+            "aggregate_metrics": aggregate,
+            "within_lot_slope_mae_um_per_wafer": slope_mae,
+            "within_lot_slopes": slopes,
+            "coefficient_stability": stability,
+            "folds": folds,
+        },
+        "pre_replay_gates": gates,
+        "all_pre_replay_gates_pass": all(gates.values()),
+    }
+
+
+def build_whole_lot_audit(*, max_nfev=80):
+    preregistration = _load_preregistration()
+    capacity = json.loads(CAPACITY_OUTPUT.read_text(encoding="utf-8"))
+    if capacity["heldout_outcomes_read"] is not False:
+        raise RuntimeError("Bosch v8 capacity audit opened a heldout outcome")
+    measurements, process_traces, lot_type_by_date = _inputs()
+    table = BoschExactWallIonResponseTable.load(RESPONSE_TABLE)
+    v7_payload = json.loads(V7_FIT.read_text(encoding="utf-8"))
+    fold_wall_coefficients = _fold_v7_coefficients(v7_payload)
+    lots = {item.lot_number for item in measurements}
+    if set(fold_wall_coefficients) != lots:
+        raise RuntimeError("Bosch v7 fold wall coefficients are incomplete")
+    keys = tuple(item.experiment_key for item in measurements)
+    voltages = _load_features(keys)["c4f8_platen_peak_to_peak_rms"]
+    rows = []
+    for full_row in capacity["candidates"]:
+        rows.append(_whole_lot_candidate(
+            full_row,
+            measurements,
+            process_traces,
+            lot_type_by_date,
+            table,
+            voltages,
+            fold_wall_coefficients,
+            max_nfev=max_nfev,
+        ))
+    ordered = sorted(rows, key=lambda row: (
+        row["coefficient_count"],
+        row["static_maximum_order"],
+        row["dynamic_maximum_order"],
+    ))
+    selected = next(
+        (row for row in ordered if row["all_pre_replay_gates_pass"]), None)
+    return {
+        "schema": "petch-zenodo-bosch-v8-calibration-whole-lot-audit-v1",
+        "status": (
+            "pre-replay candidate selected; interpolation, exact replay, "
+            "refinement, and heldout seal remain closed"
+            if selected is not None else
+            "no candidate passed frozen pre-replay gates; heldout remains sealed"
+        ),
+        "candidate_count": len(rows),
+        "candidates": rows,
+        "selected_candidate": (
+            None if selected is None else {
+                "static_maximum_order": selected["static_maximum_order"],
+                "dynamic_maximum_order": selected["dynamic_maximum_order"],
+                "coefficient_count": selected["coefficient_count"],
+                "coefficients": selected["full_calibration"]["coefficients"],
+                "selection_rule": preregistration[
+                    "candidate_selection"]["rule"],
+            }),
+        "heldout_outcomes_read": False,
+        "heldout_prediction_written": False,
+        "eligible_for_prediction_seal": False,
+        "surface_laws_changed": False,
+        "total_positive_ion_current_changed": False,
+        "remaining_seal_prerequisites": [
+            "independent wall-ion response midpoint validation",
+            "exact selected full-calibration replay",
+            "exact selected whole-lot replay",
+            "cylindrical and Zernike-grid refinement",
+            "code, data, parameter, fold, and prediction hashes",
+        ],
+        "input_hashes": {
+            "preregistration": _hash(PREREGISTRATION),
+            "response_table": _hash(RESPONSE_TABLE),
+            "full_calibration_capacity": _hash(CAPACITY_OUTPUT),
+            "v7_fit": _hash(V7_FIT),
+        },
+    }
+
+
+def _response_difference_metrics(exact, interpolated):
+    exact_silicon = np.stack([
+        item.silicon_depth_m for item in exact]) * 1.0e6
+    interpolated_silicon = np.stack([
+        item.silicon_depth_m for item in interpolated]) * 1.0e6
+    exact_oxide = np.stack([
+        item.oxide_loss_m for item in exact]) * 1.0e6
+    interpolated_oxide = np.stack([
+        item.oxide_loss_m for item in interpolated]) * 1.0e6
+    exact_silicon_mean = np.mean(exact_silicon, axis=1)
+    interpolated_silicon_mean = np.mean(interpolated_silicon, axis=1)
+    exact_oxide_mean = np.mean(exact_oxide, axis=1)
+    interpolated_oxide_mean = np.mean(interpolated_oxide, axis=1)
+    exact_shape = exact_silicon / exact_silicon_mean[:, None]
+    interpolated_shape = (
+        interpolated_silicon / interpolated_silicon_mean[:, None])
+    exact_selectivity = exact_silicon_mean / exact_oxide_mean
+    interpolated_selectivity = (
+        interpolated_silicon_mean / interpolated_oxide_mean)
+    return {
+        "silicon_mean_mae_um": float(np.mean(np.abs(
+            interpolated_silicon_mean - exact_silicon_mean))),
+        "silicon_mean_mape_percent": float(100.0 * np.mean(np.abs(
+            interpolated_silicon_mean / exact_silicon_mean - 1.0))),
+        "silicon_point_rmse_um": float(np.sqrt(np.mean(
+            (interpolated_silicon - exact_silicon) ** 2))),
+        "normalized_shape_rmse_percent": float(100.0 * np.sqrt(np.mean(
+            (interpolated_shape - exact_shape) ** 2))),
+        "oxide_mean_mae_um": float(np.mean(np.abs(
+            interpolated_oxide_mean - exact_oxide_mean))),
+        "selectivity_mape_percent": float(100.0 * np.mean(np.abs(
+            interpolated_selectivity / exact_selectivity - 1.0))),
+    }
+
+
+def build_interpolation_validation(*, workers=8):
+    _load_preregistration()
+    measurements, process_traces, _lot_type_by_date = _inputs()
+    trace_by_key = {trace.experiment_key: trace for trace in process_traces}
+    table = BoschExactWallIonResponseTable.load(RESPONSE_TABLE)
+    wall_midpoints = 0.5 * (
+        table.log_wall_multiplier_nodes[:-1]
+        + table.log_wall_multiplier_nodes[1:])
+    ion_midpoints = 0.5 * (
+        table.log_ion_factor_nodes[:-1]
+        + table.log_ion_factor_nodes[1:])
+    rows = []
+    maximum_fraction = 0.0
+    maximum_by_metric = {name: 0.0 for name in FROZEN_GATES}
+    for wall_index, log_wall in enumerate(wall_midpoints, start=1):
+        wall_multiplier = math.exp(float(log_wall))
+        print(
+            f"Bosch v8 interpolation wall midpoint "
+            f"{wall_index}/{len(wall_midpoints)} "
+            f"multiplier={wall_multiplier:.9g}",
+            flush=True,
+        )
+        exact_silicon, exact_oxide = _exact_responses_at_wall_multiplier(
+            wall_multiplier,
+            measurements,
+            trace_by_key,
+            ion_midpoints,
+            workers=workers,
+        )
+        conditioned = table.condition_on_wall(
+            np.full(len(measurements), wall_multiplier))
+        for ion_index, log_ion in enumerate(ion_midpoints):
+            factor = math.exp(float(log_ion))
+            interpolated, _dsi, _dox = conditioned.evaluate(
+                np.full((len(measurements), 89), factor))
+            exact = tuple(
+                _Prediction(
+                    silicon_depth_m=exact_silicon[ion_index, wafer],
+                    oxide_loss_m=exact_oxide[ion_index, wafer],
+                )
+                for wafer in range(len(measurements))
+            )
+            metrics = _response_difference_metrics(exact, interpolated)
+            fractions = {
+                name: metrics[name] / FROZEN_GATES[name]
+                for name in FROZEN_GATES
+            }
+            for name, value in metrics.items():
+                maximum_by_metric[name] = max(maximum_by_metric[name], value)
+            maximum_fraction = max(maximum_fraction, max(fractions.values()))
+            rows.append({
+                "wall_log_multiplier": float(log_wall),
+                "wall_multiplier": wall_multiplier,
+                "local_ion_log_factor": float(log_ion),
+                "local_ion_factor": factor,
+                "errors": metrics,
+                "fractions_of_frozen_gates": fractions,
+            })
+    return {
+        "schema": "petch-zenodo-bosch-v8-wall-ion-interpolation-validation-v1",
+        "wall_midpoint_count": len(wall_midpoints),
+        "local_ion_midpoint_count": len(ion_midpoints),
+        "independent_tensor_midpoint_count": len(rows),
+        "maximum_error_by_metric": maximum_by_metric,
+        "maximum_error_fraction_of_any_frozen_gate": maximum_fraction,
+        "frozen_maximum_error_fraction": 0.05,
+        "passes": maximum_fraction <= 0.05,
+        "rows": rows,
+        "heldout_outcomes_read": False,
+        "surface_laws_changed": False,
+        "input_hashes": {
+            "preregistration": _hash(PREREGISTRATION),
+            "response_table": _hash(RESPONSE_TABLE),
+        },
+    }
+
+
+def _law_from_coefficients(static_order, dynamic_order, coefficients):
+    coefficient = np.asarray(coefficients, dtype=float)
+    static_count = (static_order + 1) * (static_order + 2) // 2 - 1
+    dynamic_count = (dynamic_order + 1) * (dynamic_order + 2) // 2 - 1
+    if coefficient.shape != (static_count + dynamic_count,):
+        raise ValueError(
+            "Bosch v8 coefficient vector does not match static and "
+            "dynamic_coefficients counts")
+    return BoschSPTSWaferIonTransmissionLaw(
+        static_maximum_order=static_order,
+        static_coefficients=tuple(coefficient[:static_count]),
+        dynamic_maximum_order=dynamic_order,
+        dynamic_coefficients=tuple(coefficient[static_count:]),
+    )
+
+
+def _exact_map_predictions(
+        measurements, process_traces, wall_multipliers, voltages, laws,
+        *, workers=8, radial_cell_count=24, axial_cell_count=24,
+        azimuthal_cell_count=16):
+    wall_multipliers = np.asarray(wall_multipliers, dtype=float)
+    voltages = np.asarray(voltages, dtype=float)
+    laws = tuple(laws)
+    if (
+        wall_multipliers.shape != (len(measurements),)
+        or voltages.shape != (len(measurements),)
+        or len(laws) != len(measurements)
+        or any(not isinstance(item, BoschSPTSWaferIonTransmissionLaw)
+               for item in laws)
+        or isinstance(workers, (bool, np.bool_))
+        or int(workers) != workers
+        or int(workers) <= 0
+    ):
+        raise ValueError("invalid Bosch exact map replay query")
+    trace_by_key = {trace.experiment_key: trace for trace in process_traces}
+    first = measurements[0]
+    if any(
+        not np.array_equal(item.x_um, first.x_um)
+        or not np.array_equal(item.y_um, first.y_um)
+        for item in measurements
+    ):
+        raise RuntimeError("Bosch exact replay wafers do not share one map")
+    x_m = first.x_um * 1.0e-6
+    y_m = first.y_um * 1.0e-6
+
+    def solve(index):
+        reduced = replace(
+            BASE_REDUCED_PARAMETERS,
+            neutral_wall_loss_multiplier=float(wall_multipliers[index]),
+            radial_cell_count=int(radial_cell_count),
+            axial_cell_count=int(axial_cell_count),
+        )
+        cylindrical = {
+            **BASE_CYLINDRICAL_KEYWORDS,
+            "azimuthal_cell_count": int(azimuthal_cell_count),
+        }
+        model = DeterministicBoschSPTSCylindricalReactorToWafer(
+            BoschSPTSCylindricalParameters(
+                reduced=reduced,
+                **cylindrical,
+            ))
+        response = model.source_response(
+            x_m=x_m,
+            y_m=y_m,
+            ion_transmission_law=laws[index],
+            c4f8_platen_vpp_rms_V=float(voltages[index]),
+        )
+        return model.solve(
+            trace_by_key[measurements[index].experiment_key],
+            x_m=x_m,
+            y_m=y_m,
+            source_response=response,
+        )
+
+    with ThreadPoolExecutor(max_workers=int(workers)) as pool:
+        boundaries = tuple(pool.map(solve, range(len(measurements))))
+    silicon, oxide = build_bosch_reference_surface_mechanisms()
+    return predict_bosch_wafer_point_depth_batch_fast(
+        boundaries, silicon, oxide)
+
+
+def _metric_gate_fractions(metrics):
+    return {
+        name: metrics[name] / FROZEN_GATES[name]
+        for name in FROZEN_GATES
+    }
+
+
+def _replay_gate_metrics(metrics, slope_mae):
+    return {
+        "all_absolute_gates_pass": all(
+            metrics[name] <= threshold
+            for name, threshold in FROZEN_GATES.items()),
+        "mean_beats_global_depth_baseline": (
+            metrics["silicon_mean_mae_um"] < 0.338486),
+        "point_beats_mean_map_baseline": (
+            metrics["silicon_point_rmse_um"] < 0.486585),
+        "shape_beats_mean_map_baseline": (
+            metrics["normalized_shape_rmse_percent"] < 0.636619),
+        "within_lot_slope_not_worse_than_v7": slope_mae <= 0.082903,
+    }
+
+
+def build_exact_replay(*, workers=8):
+    preregistration = _load_preregistration()
+    interpolation = json.loads(
+        INTERPOLATION_OUTPUT.read_text(encoding="utf-8"))
+    audit = json.loads(OUTPUT.read_text(encoding="utf-8"))
+    expected_audit_hashes = {
+        "preregistration": _hash(PREREGISTRATION),
+        "response_table": _hash(RESPONSE_TABLE),
+        "full_calibration_capacity": _hash(CAPACITY_OUTPUT),
+        "v7_fit": _hash(V7_FIT),
+    }
+    expected_interpolation_hashes = {
+        "preregistration": _hash(PREREGISTRATION),
+        "response_table": _hash(RESPONSE_TABLE),
+    }
+    if (
+        not interpolation["passes"]
+        or interpolation["heldout_outcomes_read"] is not False
+        or interpolation["input_hashes"] != expected_interpolation_hashes
+        or audit["selected_candidate"] is None
+        or audit["heldout_outcomes_read"] is not False
+        or audit["heldout_prediction_written"] is not False
+        or audit["eligible_for_prediction_seal"] is not False
+        or audit["input_hashes"] != expected_audit_hashes
+    ):
+        raise RuntimeError("Bosch v8 did not earn exact replay")
+    selected = audit["selected_candidate"]
+    static_order = int(selected["static_maximum_order"])
+    dynamic_order = int(selected["dynamic_maximum_order"])
+    full_coefficients = np.asarray(selected["coefficients"], dtype=float)
+    full_law = _law_from_coefficients(
+        static_order, dynamic_order, full_coefficients)
+    measurements, process_traces, lot_type_by_date = _inputs()
+    keys = tuple(item.experiment_key for item in measurements)
+    voltages = _load_features(keys)["c4f8_platen_peak_to_peak_rms"]
+    v7_payload = json.loads(V7_FIT.read_text(encoding="utf-8"))
+    full_wall_multipliers = _wall_multipliers(
+        _v7_coefficients(v7_payload),
+        measurements,
+        process_traces,
+        lot_type_by_date,
+    )
+    table = BoschExactWallIonResponseTable.load(RESPONSE_TABLE)
+    if table.experiment_keys != keys:
+        raise RuntimeError("Bosch v8 response table key order is stale")
+    full_geometry = _candidate_geometry(
+        measurements, static_order, dynamic_order)
+    accelerated_full, _factor = _candidate_predictions(
+        full_coefficients,
+        full_geometry,
+        voltages,
+        table.condition_on_wall(full_wall_multipliers),
+    )
+    exact_full = _exact_map_predictions(
+        measurements,
+        process_traces,
+        full_wall_multipliers,
+        voltages,
+        (full_law,) * len(measurements),
+        workers=workers,
+    )
+    full_metrics = _metrics(measurements, exact_full)
+    full_difference = _response_difference_metrics(
+        exact_full, accelerated_full)
+    full_absolute_gates = {
+        name: full_metrics[name] <= threshold
+        for name, threshold in FROZEN_GATES.items()
+    }
+    full_difference_fractions = _metric_gate_fractions(full_difference)
+    full_difference_pass = (
+        max(full_difference_fractions.values()) <= 0.05)
+
+    selected_row = next(
+        row for row in audit["candidates"]
+        if row["static_maximum_order"] == static_order
+        and row["dynamic_maximum_order"] == dynamic_order)
+    fold_map = {
+        int(row["heldout_lot"]): row
+        for row in selected_row["whole_lot_leave_one_out"]["folds"]
+    }
+    fold_wall_coefficients = _fold_v7_coefficients(v7_payload)
+    exact_lolo_laws = []
+    exact_lolo_walls = np.empty(len(measurements))
+    accelerated_lolo = [None] * len(measurements)
+    for lot in sorted(fold_map):
+        test = tuple(
+            index for index, item in enumerate(measurements)
+            if item.lot_number == lot)
+        coefficients = np.asarray(fold_map[lot]["coefficients"], dtype=float)
+        law = _law_from_coefficients(
+            static_order, dynamic_order, coefficients)
+        walls = _wall_multipliers(
+            fold_wall_coefficients[lot],
+            measurements,
+            process_traces,
+            lot_type_by_date,
+        )
+        conditioned = table.condition_on_wall(walls)
+        predicted, _factors = _candidate_predictions(
+            coefficients, full_geometry, voltages, conditioned)
+        for index in test:
+            accelerated_lolo[index] = predicted[index]
+            exact_lolo_walls[index] = walls[index]
+            exact_lolo_laws.append((index, law))
+    if any(item is None for item in accelerated_lolo):
+        raise RuntimeError("Bosch v8 replay missed a whole-lot prediction")
+    law_by_index = [None] * len(measurements)
+    for index, law in exact_lolo_laws:
+        law_by_index[index] = law
+    exact_lolo = _exact_map_predictions(
+        measurements,
+        process_traces,
+        exact_lolo_walls,
+        voltages,
+        law_by_index,
+        workers=workers,
+    )
+    lolo_metrics = _metrics(measurements, exact_lolo)
+    lolo_difference = _response_difference_metrics(
+        exact_lolo, tuple(accelerated_lolo))
+    lolo_difference_fractions = _metric_gate_fractions(lolo_difference)
+    lolo_difference_pass = (
+        max(lolo_difference_fractions.values()) <= 0.05)
+    slopes = _lot_slopes(measurements, exact_lolo)
+    slope_mae = float(np.mean([
+        abs(item["residual_um_per_wafer"])
+        for item in slopes.values()
+    ]))
+    replay_gates = _replay_gate_metrics(lolo_metrics, slope_mae)
+
+    refined_full = _exact_map_predictions(
+        measurements,
+        process_traces,
+        full_wall_multipliers,
+        voltages,
+        (full_law,) * len(measurements),
+        workers=workers,
+        radial_cell_count=32,
+        axial_cell_count=32,
+        azimuthal_cell_count=24,
+    )
+    refinement_difference = _response_difference_metrics(
+        exact_full, refined_full)
+    refinement_fractions = _metric_gate_fractions(refinement_difference)
+    refined_metrics = _metrics(measurements, refined_full)
+
+    radius = np.linspace(0.0, 1.0, 257)
+    phi = np.linspace(0.0, 2.0 * np.pi, 512, endpoint=False)
+    rho, angle = np.meshgrid(radius, phi, indexing="ij")
+    refined_field_maximum = float(max(
+        np.max(np.abs(full_law.log_field(
+            rho, angle, full_law.standardized_vpp(voltage))))
+        for voltage in full_law.vpp_domain_V
+    ))
+    base_field_maximum = float(
+        full_law.manifest()["certified_maximum_absolute_log_field"])
+    refinement_pass = (
+        max(refinement_fractions.values()) <= 0.25
+        and refined_field_maximum <= full_law.maximum_absolute_log_field
+    )
+    replay_pass = (
+        all(full_absolute_gates.values())
+        and full_difference_pass
+        and all(replay_gates.values())
+        and lolo_difference_pass
+    )
+    return {
+        "schema": "petch-zenodo-bosch-v8-exact-replay-v1",
+        "selected_candidate": selected,
+        "full_calibration_exact": {
+            "metrics": full_metrics,
+            "absolute_gate_fractions": _metric_gate_fractions(full_metrics),
+            "absolute_gates": full_absolute_gates,
+            "interpolation_difference": full_difference,
+            "interpolation_difference_gate_fractions": (
+                full_difference_fractions),
+            "maximum_interpolation_difference_gate_fraction": (
+                max(full_difference_fractions.values())),
+            "interpolation_difference_passes_frozen_0p05_fraction": (
+                full_difference_pass),
+            "passes": (
+                all(full_absolute_gates.values()) and full_difference_pass),
+        },
+        "whole_lot_exact": {
+            "metrics": lolo_metrics,
+            "within_lot_slope_mae_um_per_wafer": slope_mae,
+            "within_lot_slopes": slopes,
+            "interpolation_difference": lolo_difference,
+            "interpolation_difference_gate_fractions": (
+                lolo_difference_fractions),
+            "maximum_interpolation_difference_gate_fraction": (
+                max(lolo_difference_fractions.values())),
+            "interpolation_difference_passes_frozen_0p05_fraction": (
+                lolo_difference_pass),
+            "gates": replay_gates,
+            "passes": all(replay_gates.values()) and lolo_difference_pass,
+        },
+        "refinement": {
+            "base_grid": {
+                "radial_cell_count": 24,
+                "axial_cell_count": 24,
+                "azimuthal_cell_count": 16,
+                "zernike_certification_grid": [129, 256],
+            },
+            "refined_grid": {
+                "radial_cell_count": 32,
+                "axial_cell_count": 32,
+                "azimuthal_cell_count": 24,
+                "zernike_certification_grid": [257, 512],
+            },
+            "refined_full_calibration_metrics": refined_metrics,
+            "observable_difference": refinement_difference,
+            "observable_difference_gate_fractions": refinement_fractions,
+            "maximum_observable_difference_gate_fraction": max(
+                refinement_fractions.values()),
+            "base_maximum_absolute_log_field": base_field_maximum,
+            "refined_maximum_absolute_log_field": refined_field_maximum,
+            "passes": refinement_pass,
+        },
+        "all_replay_and_refinement_gates_pass": (
+            replay_pass and refinement_pass),
+        "heldout_outcomes_read": False,
+        "heldout_prediction_written": False,
+        "eligible_for_prediction_seal": False,
+        "remaining_seal_prerequisites": [
+            "write and hash the chronological heldout prediction without reading its outcome",
+            "commit and push all v8 code, fits, and replay receipts",
+            "only then permit the separate heldout scorer to parse numeric outcomes",
+        ],
+        "surface_laws_changed": False,
+        "total_positive_ion_current_changed": False,
+        "input_hashes": {
+            "preregistration": _hash(PREREGISTRATION),
+            "response_table": _hash(RESPONSE_TABLE),
+            "calibration_fit": _hash(OUTPUT),
+            "interpolation_validation": _hash(INTERPOLATION_OUTPUT),
+            "v7_fit": _hash(V7_FIT),
+        },
+        "frozen_gate_source": preregistration[
+            "frozen_acceptance_gates"],
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--write-table", action="store_true")
+    parser.add_argument("--fit-full", action="store_true")
+    parser.add_argument("--fit-lolo", action="store_true")
+    parser.add_argument("--validate-interpolation", action="store_true")
+    parser.add_argument("--exact-replay", action="store_true")
+    parser.add_argument("--max-nfev", type=int, default=80)
     parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args(argv)
-    if not args.write_table:
-        parser.error("the current checkpoint supports --write-table")
-    table = build_response_table(workers=args.workers)
-    table.save(RESPONSE_TABLE)
-    print(RESPONSE_TABLE.relative_to(ROOT))
+    if not any((
+            args.write_table, args.fit_full, args.fit_lolo,
+            args.validate_interpolation, args.exact_replay)):
+        parser.error(
+            "choose --write-table, --fit-full, --fit-lolo, and/or "
+            "--validate-interpolation/--exact-replay")
+    if args.write_table:
+        table = build_response_table(workers=args.workers)
+        table.save(RESPONSE_TABLE)
+        print(RESPONSE_TABLE.relative_to(ROOT))
+    if args.fit_full:
+        payload = build_full_calibration_capacity(max_nfev=args.max_nfev)
+        CAPACITY_OUTPUT.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(CAPACITY_OUTPUT.relative_to(ROOT))
+    if args.fit_lolo:
+        payload = build_whole_lot_audit(max_nfev=args.max_nfev)
+        OUTPUT.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(OUTPUT.relative_to(ROOT))
+    if args.validate_interpolation:
+        payload = build_interpolation_validation(workers=args.workers)
+        INTERPOLATION_OUTPUT.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(INTERPOLATION_OUTPUT.relative_to(ROOT))
+    if args.exact_replay:
+        payload = build_exact_replay(workers=args.workers)
+        EXACT_REPLAY_OUTPUT.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(EXACT_REPLAY_OUTPUT.relative_to(ROOT))
     return 0
 
 
