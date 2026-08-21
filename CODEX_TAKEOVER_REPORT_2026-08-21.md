@@ -1,12 +1,12 @@
 # Codex takeover report — reactor-to-feature absolute-depth campaign
 
-Snapshot: 2026-08-21 09:00 EDT / 13:00 UTC
+Snapshot: 2026-08-21 09:40 EDT / 13:40 UTC
 
 Repository: `/Users/stanislavdelaurentiis/chip-etch/plasma-etching-code`
 
 Branch: `codex/validation-first-multiphysics`
 
-Scientific HEAD at snapshot: `fefd97066c039c86834ab55658ad2a2de29c78e0`
+Scientific HEAD at snapshot: `2cbec26`
 
 Remote branch at snapshot: the same commit.
 
@@ -37,12 +37,14 @@ At this snapshot:
   regression test;
 - three target-free Krueger 60-second forecasts are still advancing through
   resumable checkpoints;
-- the Bosch reactor-to-depth model passes its preregistered absolute
-  calibration tolerances, but it has correctly refused the heldout reveal
-  because it still loses to simple leave-one-lot-out baselines;
-- the Bosch residual record identifies a missing dynamic chamber/tool-memory
-  closure and measured impedance response rather than a need for another
-  arbitrary depth multiplier;
+- the Bosch reactor-to-depth model now contains an identifiable, preregistered
+  recipe-path wall-memory closure; it passes all absolute calibration gates,
+  beats the leave-one-lot-out global-depth baseline, and improves within-lot
+  drift, but correctly refuses heldout reveal because it still loses the
+  radial point and shape baselines;
+- the remaining Bosch error is localized primarily to radial/electrical tool
+  response rather than bulk depth normalization or a non-identifiable wall
+  deposition/cleaning split;
 - the goal is not complete: there is not yet a sealed heldout profile match for
   Freddie, a final Krueger depth match, or an independently validated third
   chemistry using the unchanged core.
@@ -95,10 +97,17 @@ pre-existing user work at these paths:
 
 Do not edit, stage, delete, clean, reset, or absorb those paths. There is no
 need for destructive Git commands. All campaign-owned work through the Oxford
-v6 acceptance and Bosch v2 residual audit is committed and pushed.
+v6 acceptance and Bosch v7 calibration audit is committed and pushed.
 
 Recent authoritative commits:
 
+- `2cbec26` records the identifiable Bosch v7 calibration/LOLO audit and exact
+  thirteen-node reactor-to-surface response table;
+- `abb209b` implements the fixed-recipe wall-memory operator and tests;
+- `f784852` freezes the reduced v7 law and its validity domain before code;
+- `19c7db8` records the useful but structurally unidentifiable v6 result;
+- `e64d5bc` implements the exact bounded v6 coverage recurrence;
+- `2612a07` freezes the v6 physical wall-coverage hypothesis;
 - `fefd970` records the clean Oxford v6 acceptance trajectory and the Bosch
   within-lot sequence-drift evidence;
 - `980800a` makes material-owner cleanup idempotent while preserving the exact
@@ -110,7 +119,7 @@ Recent authoritative commits:
 - `852df0b` carries the first bounded Bosch wall state through the reactor;
 - `921e62a` freezes that closure before calibration.
 
-The latest relevant focused run has 112 passing Oxford/Bosch tests. The last
+The latest v7-focused Bosch run has 37 passing tests. The last
 recorded broad suite before the final Oxford owner-projection fix had 2,125
 passing tests. A new full-suite run is still required after the Oxford v6 board
 is retrieved; do not substitute the older broad-suite count for that final
@@ -246,7 +255,7 @@ surface coefficients and electrode waveform are not independently measured.
 
 ### Current v6 board run
 
-At 2026-08-21 13:00 UTC:
+At 2026-08-21 13:40 UTC:
 
 - parent PID file: `/root/zhu_v6_board_980800a.pid`;
 - parent PID: 27994;
@@ -255,8 +264,8 @@ At 2026-08-21 13:00 UTC:
 - log: `/root/zhu_v6_board_980800a.log`;
 - parent state: alive;
 - four child workers: alive, each near 100% CPU;
-- one v6 cache exists: the previously accepted cell;
-- the other 55 exact cells are being recomputed from scratch.
+- thirteen unique v6 caches are complete;
+- the other 43 exact cells are being recomputed from scratch.
 
 The workers spend most time in CPU feature evolution and call CUDA transport in
 bursts. A single `nvidia-smi` snapshot can therefore show 0% GPU while all four
@@ -307,14 +316,14 @@ nm:
 
 ### Live Krueger state
 
-At the snapshot, all supervisor PID files are alive and their logs continue to
+At 13:40 UTC, all supervisor PID files are alive and their logs continue to
 advance through resumable half-hour segments:
 
 | case | PID | elapsed process time | depth prefix | mask opening prefix |
 |---|---:|---:|---:|---:|
-| nominal unresolved | 10284 | 23.297 s | 210.779 nm | 20.299 nm |
-| all CF2 | 10285 | 22.203 s | 235.923 nm | 25.940 nm |
-| all CF3 | 10286 | 21.891 s | 240.383 nm | 23.148 nm |
+| nominal unresolved | 10284 | 24.125 s | 214.628 nm | 19.991 nm |
+| all CF2 | 10285 | 23.000 s | 240.370 nm | 24.113 nm |
+| all CF3 | 10286 | 22.688 s | 244.791 nm | 23.857 nm |
 
 Each target duration is 60 s. These prefixes must not be linearly extrapolated,
 ranked by proximity to 825 nm, or reported as final depths. Geometry, mask
@@ -342,100 +351,125 @@ lands at 825 nm.
 
 ## Track C — Bosch SF6/C4F8 reactor-to-depth transfer
 
-### What has succeeded
+### Stack and target firewall
 
-The reduced/cylindrical SPTS Bosch stack uses measured process traces, bounded
-absorbed-power and transport closures, radial/azimuthal equipment response,
-fused silicon/oxide surface recurrence, and unchanged surface laws.
+The reduced/cylindrical SPTS Bosch stack uses all measured process traces,
+bounded absorbed-power and neutral-loss closures, species-resolved radial wafer
+transfer, and the unchanged Belen silicon plus La Magna/Garozzo oxide/film
+surface laws. Seventy-five wafers have 89-point measured depth maps; a 76th
+processed wafer without an outcome is still carried through chamber history.
 
-The static wall-conditioning v5 calibration passes every preregistered absolute
-calibration gate on 75 wafers:
-
-- silicon mean MAE: 0.375596 um;
-- silicon mean MAPE: 0.860673%;
-- silicon point RMSE: 0.841164 um;
-- normalized shape RMSE: 1.654573%;
-- oxide mean MAE: 0.039568 um;
-- selectivity MAPE: 5.993638%.
-
-This is useful absolute-depth performance, but it is not enough for a prediction
-seal.
-
-### Why the seal was refused
-
-Simple leave-one-lot-out empirical baselines are still better:
-
-- global-mean silicon MAE: 0.338486 um;
-- mean-map point RMSE: 0.486585 um;
-- mean-map normalized shape RMSE: 0.636619%.
-
-The fitted conditioning multipliers are only about 0.9995–1.016. They reproduce
-static conditioning classes but do not explain the dominant sequential drift.
-Therefore:
+The chronological heldout outcome remains unopened. Every v5, v6, and v7
+receipt states:
 
 - `heldout_outcomes_read = false`;
 - `heldout_prediction_written = false`;
 - `eligible_for_prediction_seal = false`.
 
-This refusal is correct. Passing absolute in-sample tolerances while losing to a
-trivial heldout baseline is not evidence of a useful reactor predictor.
+### What v6 learned and why it was rejected
 
-### New physical discovery
-
-All eight calibration lots show declining measured silicon depth within the
-lot:
-
-`-0.1232, -0.1367, -0.1194, -0.1605, -0.1138, -0.1125, -0.1116,
--0.0558 um/wafer`.
-
-The static physics model predicts nearly flat or rising sequences:
-
-`+0.0217, +0.0204, +0.0072, -0.0107, +0.0467, +0.0280, +0.0638,
-+0.0526 um/wafer`.
-
-After removing lot identity and linear wafer sequence, the silicon residual is
-still strongly related to measured platen/tool electrical channels:
-
-- SF6 platen Vpp median: partial Pearson 0.58836;
-- SF6 platen reflected power mean: 0.56150;
-- SF6 platen Vpp RMS: 0.55251;
-- C4F8 platen Vpp q90: 0.54494.
-
-Gas-dose variation is tiny across calibration wafers, while Vpp/reflected-power
-variation retains explanatory signal. This is evidence for two missing pieces:
-
-1. a dynamic chamber wall/seasoning state carried from wafer to wafer; and
-2. an impedance/sheath-transfer closure that uses the measured waveform and
-   reflected-power response rather than forward power alone.
-
-It is not evidence for a wafer-number depth offset. Wafer number is a proxy for
-state evolution, not a physical input.
-
-### Correct next Bosch iteration
-
-Before fitting again, preregister a minimal exact chamber-memory recurrence.
-A suitable first closure is a bounded scalar fluorocarbon wall coverage `q`:
+Version 6 implemented the physically attractive bounded occupancy law
 
 ```text
-dq/ds = k_dep * D_C4F8 * (1 - q) - k_clean * D_SF6 * q
+dq/ds = k_dep*D_C4F8*(1-q) - k_clean*D_SF6*q
 ```
 
-Use the analytic interval solution to carry `q_start`, `q_mean`, and `q_end`
-through each wafer in sequence. Let `q_mean` modulate only a physically named
-neutral wall-loss or sticking term in the first test. Do not change the ion or
-surface laws simultaneously.
+and carried the exact analytic mean/end state between wafers. It improved
+calibration mean-depth MAE from 0.375596 to 0.233331 um and reduced the
+within-lot slope error from 0.145388 to 0.083769 um/wafer. That proved dynamic
+memory matters.
 
-Because C4F8 and SF6 doses vary very little in this dataset, keep the parameter
-count minimal and audit identifiability. A four-parameter coverage model can be
-degenerate; prefer a reparameterized equilibrium coverage, relaxation rate,
-initial state, and one bounded log-response coefficient, or freeze one from
-literature/conditioning evidence.
+It did not identify its physics coefficients:
 
-Fit only calibration lots with whole-lot leave-one-out folds. Preserve the
-heldout firewall. If a dynamic neutral wall state closes sequential drift but a
-Vpp residual remains, preregister a separate measured impedance/sheath-transfer
-closure in the next iteration. Do not introduce both at once and call the
-mechanism identified.
+- `k_clean` landed exactly on its lower bound;
+- wall response landed exactly on its upper bound;
+- Jacobian condition number: `6.762e6`, above the frozen `1e6` limit;
+- maximum parameter correlation: `0.999997`, above `0.995`;
+- the nine-node interpolation audit reached `0.06091` of a frozen gate,
+  above the `0.05` limit.
+
+This is structural, not optimizer bad luck. Across all 76 calibration traces,
+C4F8 dose CV is 0.002336, SF6 dose CV is 0.000501, and the SF6/C4F8 dose-ratio
+CV is 0.002572. One nearly fixed recipe cannot separate deposition, cleaning,
+and response rates. Version 6 therefore correctly refused a seal.
+
+### Version 7 identifiable recipe-path closure
+
+Version 7 was frozen before implementation in `f784852`, implemented in
+`abb209b`, and audited in `2cbec26`. It retains only the combination supported
+by the experiment: cumulative normalized C4F8 production exposure `H` since a
+declared conditioning sequence:
+
+```text
+H_mean = H_start + 0.5*d_C4F8
+H_end  = H_start + d_C4F8
+```
+
+The four shared coefficients are three static conditioning terms and one
+bounded `b_H` response. The law changes only neutral upper/sidewall loss. It
+does not change positive ions, lower-wafer collection, surface yields, or depth
+directly. It has no fitted lot state and never uses wafer number, date, lot
+number, or target depth.
+
+This is deliberately a **recipe-path** model, not a universal deposition and
+cleaning law. It refuses any process trace outside the measured ratio domain
+`5.635257777059961 <= D_SF6/D_C4F8 <= 5.737394214801463`. Independent
+varying-ratio experiments or wall diagnostics are required before that scope
+can be expanded.
+
+### Version 7 result
+
+The identification problem is closed:
+
+- fitted `b_H`: `0.00661551` log wall-loss per reference wafer;
+- Jacobian rank: `4/4`;
+- condition number: `14.518`;
+- maximum pairwise parameter correlation: `0.60234`;
+- no parameter bound contact;
+- thirteen-node/twelve-midpoint interpolation maximum: `0.01626` of a frozen
+  gate, below `0.05`.
+
+Absolute calibration performance on 75 wafers is:
+
+- silicon mean MAE: `0.232214 um`;
+- silicon mean MAPE: `0.530134%`;
+- silicon point RMSE: `0.789018 um`;
+- normalized shape RMSE: `1.664987%`;
+- oxide mean MAE: `0.039568 um`;
+- selectivity MAPE: `6.046622%`.
+
+Whole-lot leave-one-out performance is:
+
+- silicon mean MAE: `0.285331 um`, beating the `0.338486 um` global-depth
+  baseline;
+- silicon point RMSE: `0.814735 um`, losing to the `0.486585 um` mean-map
+  baseline;
+- normalized shape RMSE: `1.669293%`, losing to the `0.636619%` mean-map
+  baseline;
+- within-lot depth-slope MAE: `0.082903 um/wafer`, improved from the v5
+  `0.145388 um/wafer`.
+
+This is genuine progress: shared physical state now transfers mean depth across
+whole left-out calibration lots and is numerically identifiable. It is not a
+prediction seal because radial map accuracy still loses to a trivial empirical
+mean map. Exact selected-parameter replay, grid refinement, and heldout hashing
+are intentionally deferred rather than performed after a known prerequisite
+failed.
+
+### Next Bosch physics
+
+The next preregistered iteration should target radial/electrical equipment
+response, using measured platen Vpp and reflected power rather than another
+bulk depth multiplier. After removing lot and sequence trends, the strongest
+calibration residual features remain SF6 platen Vpp median (partial Pearson
+`0.58836`), SF6 reflected-power mean (`0.56150`), SF6 Vpp RMS (`0.55251`), and
+C4F8 Vpp q90 (`0.54494`).
+
+Freeze one minimal transfer law at a time—for example, a bounded mapping from
+measured Vpp/reflection to sheath energy or radial source mix—then rerun the
+same whole-lot baselines. Do not alter wall memory, ion transfer, and surface
+yields simultaneously, and do not open the heldout until the radial point and
+shape baselines are beaten.
 
 ## Track D — generalization and other chemistries
 
@@ -469,9 +503,10 @@ The current independent systems are strongest in:
 3. SPTS SF6/C4F8 Bosch silicon/oxide reactor-to-depth calibration and sealed
    heldout protocol.
 
-They share the core multiphysics architecture, but only the final two completed
-heldout grades can establish the requested cross-chemistry claim. At present,
-Oxford lacks the unrevealed SEM score and Bosch has not earned its reveal.
+They share the core multiphysics architecture, but only completed heldout grades
+can establish the requested cross-chemistry claim. At present, Oxford lacks the
+unrevealed SEM score, Bosch has not earned its chronological reveal, and
+Krueger's no-fit terminal forecasts are still running.
 
 ## What data would most improve predictive accuracy
 
@@ -511,15 +546,15 @@ from many solutions consistent with forward power, pressure, and flow alone.
 2. Monitor Oxford PID 27994 and its children; do not restart a healthy board.
 3. Monitor the three exact Krueger PID files and logs; do not extrapolate
    partial depths.
-4. While compute runs, write and hash the Bosch dynamic-wall v6
-   preregistration before implementation or fitting.
-5. Implement only the frozen recurrence and its conservation/sequence tests.
-6. Run calibration-only whole-lot cross-validation; keep heldout sealed.
-7. Retrieve and certify Oxford v6 immediately after completion.
-8. Retrieve all three Krueger terminal audits after completion.
-9. Run focused and full test suites.
-10. Commit and push each complete scientific checkpoint.
-11. Destroy instance 48177892 only after all required artifacts are local,
+4. Treat Bosch v7 as a completed, useful non-seal; do not reopen the heldout or
+   refit its wall law.
+5. Freeze a minimal measured Vpp/reflected-power radial/electrical transfer law
+   before implementing the next Bosch iteration.
+6. Retrieve and certify Oxford v6 immediately after completion.
+7. Retrieve all three Krueger terminal audits after completion.
+8. Run focused and full test suites after live artifacts land.
+9. Commit and push each complete scientific checkpoint.
+10. Destroy instance 48177892 only after all required artifacts are local,
     hash-verified, committed, and pushed.
 
 ## Claims allowed now
@@ -534,9 +569,11 @@ Allowed:
   ledgers;
 - the full blind Oxford board is running;
 - Krueger transferred no-fit forecasts are running;
-- Bosch reaches sub-percent mean-depth calibration error while correctly
-  refusing heldout due to baseline failure;
-- Bosch data expose a repeatable dynamic chamber/electrical-response signal;
+- Bosch v7 reaches 0.53% calibration and 0.285 um whole-lot mean-depth error
+  with an identifiable shared recipe-path memory law;
+- Bosch v7 beats the global-depth baseline while correctly refusing heldout
+  because radial point/shape baselines still win;
+- Bosch data expose a repeatable remaining electrical/radial-response signal;
 - the target SEMs and heldout outcomes have not been used to tune the active
   prediction paths.
 
@@ -561,21 +598,22 @@ well-separated scientific gates:
    running;
 2. Krueger: the frozen surface-transfer hypotheses are only about one third of
    the way through their full nonlinear process time;
-3. Bosch: absolute calibration works, but dynamic chamber memory and measured
-   impedance response must be added and cross-validated before heldout reveal.
+3. Bosch: identifiable dynamic recipe-path memory now transfers mean depth, but
+   measured impedance/radial response must beat point/shape baselines before
+   heldout reveal.
 
 The right takeover behavior is to preserve those firewalls, finish the live
 runs, and improve only closures supported by independent observables. The
-wrong behavior is to treat a conditional 679 nm Oxford trajectory, a partial
-240 nm Krueger prefix, or an in-sample Bosch pass as the requested general
-absolute-depth breakthrough.
+wrong behavior is to treat a conditional Oxford trajectory, a partial Krueger
+prefix, or Bosch's improved calibration/LOLO mean depth as the requested
+general absolute-depth breakthrough.
 
-## Source-semantics correction after the snapshot
+## Source-semantics correction preserved in v6/v7
 
-The Bosch source README was visually audited after this report's 13:00 UTC
-snapshot. In the lot labels, `C` means conditioning on the bare system
+The Bosch source README was visually audited. In the lot labels, `C` means
+conditioning on the bare system
 **chuck**, not a carbon cycle. The v5 static calculation used the numerical
 repeat count correctly, but its `log_carbon_cycle` variable and this report's
-earlier wording were semantically wrong. The authoritative v6 preregistration
-uses `conditioning_repeat_count` and records the actual O2 then O2/SF6
+earlier wording were semantically wrong. The authoritative v6 and v7 records
+use conditioning-repeat semantics and record the actual O2 then O2/SF6
 conditioning sequence.
