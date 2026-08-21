@@ -1,6 +1,6 @@
 # Codex takeover report — reactor-to-depth campaign
 
-Last live refresh: **2026-08-21 17:29 UTC**. The filename records the original
+Last live refresh: **2026-08-21 17:44 UTC**. The filename records the original
 17:00 UTC checkpoint; this file is intentionally maintained as the single
 authoritative handoff rather than proliferating contradictory snapshots.
 
@@ -43,7 +43,7 @@ The August 20 story that one Oxford cell was stuck at 55/56 is stale.
 4. Because even roundoff-scale stored weights changed, the active Oxford model
    revision is v7 and all 56 cells are being recomputed. v6 and v7 caches must
    never be mixed.
-5. At the 17:29 UTC snapshot, Oxford v7 had produced 27/56 trajectories. All 27
+5. At the 17:44 UTC snapshot, Oxford v7 had produced 31/56 trajectories. All 31
    are now retrieved locally, checked, and included in this checkpoint. Eight
    workers remain healthy at about 100% CPU each with real CUDA allocations.
 6. Bosch has produced the first sealed chronological machine-to-wafer-depth win:
@@ -68,7 +68,7 @@ The honest headline is:
 Use only this repository and branch. Do not switch to the old website branch,
 `reactorlab`, `petch-torchsim`, or another stale implementation.
 
-At the start of this checkpoint, local and remote were both at `438f536`.
+At the start of this refresh, local and remote were both at `5397d6d`.
 The only unrelated untracked paths are user work. Never edit, stage, remove,
 reset, clean, or absorb them:
 
@@ -152,7 +152,7 @@ The captured v6 failure is quarantined under
 - focused suite: 149 passed
 - repository suite: `2229 passed, 7 skipped`
 
-### Exact v7 state at 17:29 UTC
+### Exact v7 state at 17:44 UTC
 
 Processes:
 
@@ -166,11 +166,11 @@ MiB CUDA allocation. Host and device memory were healthy. The remote log only
 contains Warp initialization because cell completion is expressed by atomic
 cache writes; use exact processes and mtimes for liveness.
 
-Twenty-seven active v7 caches have been retrieved. The authoritative hash ledger is:
+Thirty-one active v7 caches have been retrieved. The authoritative hash ledger is:
 
 `results/curated/zhu_npg80_moving_cr_profiles_v1/V7_LIVE_EXECUTION_2026-08-21.md`
 
-Validation of all 27:
+Validation of all 31:
 
 - exact v7 revision and frozen preregistration hash
 - exactly two rate endpoints per trajectory
@@ -179,7 +179,7 @@ Validation of all 27:
 - complete width-80 conditional etched depth: approximately 683.71-684.09 nm
 - complete width-120 conditional etched depth: approximately 684.05-684.34 nm
 - complete width-160 conditional etched depth: approximately 679.85-682.05 nm
-- first three width-200 cases: approximately 678.48-679.31 nm
+- first seven width-200 cases: approximately 677.82-679.41 nm
 
 Some high-rate endpoint profiles terminate by `domain_gas_breakthrough` after
 the TiO2 clearing front reaches the modeled domain; the paired trajectory still
@@ -222,14 +222,14 @@ Three frozen Guo-transfer sensitivity cases remain live:
 - aggregate ion treated as CF2+: supervisor PID 10285
 - aggregate ion treated as CF3+: supervisor PID 10286
 
-At 17:29 UTC each supervisor had one live child around 100% CPU and fresh
+At 17:43 UTC each supervisor had one live child around 100% CPU and fresh
 `audit.json` and `checkpoint.npz` files. The latest accepted records were:
 
 | Case | Physical time | Step | Etch depth | Mask opening |
 |---|---:|---:|---:|---:|
-| nominal unresolved | 28.718750 s | 1838 | 233.237 nm | 16.985 nm |
-| all CF2+ | 27.328125 s | 1749 | 261.913 nm | 20.675 nm |
-| all CF3+ | 27.031250 s | 1730 | 267.404 nm | 20.565 nm |
+| nominal unresolved | 28.937500 s | 1852 | 234.065 nm | 16.867 nm |
+| all CF2+ | 27.531250 s | 1762 | 263.044 nm | 20.301 nm |
+| all CF3+ | 27.234375 s | 1743 | 268.423 nm | 20.744 nm |
 
 Do not extrapolate these evolving-topology snapshots to 60 s and do not select
 the closest branch after seeing the paper target. All three receipts correctly

@@ -1,6 +1,6 @@
 # Oxford moving-Cr v7 live execution receipt
 
-Status at 2026-08-21 17:29 UTC: **27 of 56 trajectories complete and retrieved**. This is a
+Status at 2026-08-21 17:44 UTC: **31 of 56 trajectories complete and retrieved**. This is a
 recoverable execution checkpoint, not a complete board and not a grade against
 Freddie's withheld SEM.
 
@@ -82,14 +82,18 @@ df6384251b89cffd4a6b5bc453572999a5bbfbe67b481463388e5789471f0e84  trajectories/w
 0069ea5c0ec05e726eac165b9600c5e8e37a7856207796bba0a4cea6ab147ca3  trajectories/w200_s14.000_ion_low_tail_0p0_092401bf986144ac.json
 9fa12842f85cca6170cd322ab69663fa1e89175c462c38ff6abd7ece049a44e1  trajectories/w200_s18.017_ion_low_tail_0p0_ef4f9d9285713e58.json
 3627e9ffa383311f3db3ef779b5b0aad05122bd7447e1bbe4ecdd1ed56cc9070  trajectories/w200_s14.000_ion_low_tail_0p65_1562da159b25bcc5.json
+ec0ed8a17d6d52f3a6cdf41d875362200e3e7b406ae1f31b4d12b21e9baaadc3  trajectories/w200_s14.000_ion_high_tail_0p0_ac5760134694776a.json
+566b56839dc4ead8e20c0baf3b9dfbe97e12df251834c74a6a239e933ba94738  trajectories/w200_s14.000_ion_high_tail_0p65_4bf546e088482920.json
+c3d54eeec22903a05bb412b84233ef7f6cb60c6b03b98b49c22e68578f8df758  trajectories/w200_s18.017_ion_high_tail_0p0_acc4970f89816560.json
+343274efb7662038c57247602f50ff298d24d9cd3282fd3953bfdc3a03984f43  trajectories/w200_s18.017_ion_low_tail_0p65_4147c85c8e520351.json
 ```
 
-All 27 retrieved cells declare the frozen v7 model revision and preregistration
+All 31 retrieved cells declare the frozen v7 model revision and preregistration
 hash, contain both rate-normalized endpoints, have exact zero particle-balance
 error, and have maximum surface-state remap residual below `1.47e-15`. The
 three complete width boards finish at approximately 683.71-684.09 nm (80 nm),
 684.05-684.34 nm (120 nm), and 679.85-682.05 nm (160 nm) etched depth. The
-first three width-200 cells finish at approximately 678.48-679.31 nm. These are
+first seven width-200 cells finish at approximately 677.82-679.41 nm. These are
 blind conditional results, not observed SEM matches.
 
 Do not assemble or publish `audit.json` until all 56 v7 cache keys exist and
