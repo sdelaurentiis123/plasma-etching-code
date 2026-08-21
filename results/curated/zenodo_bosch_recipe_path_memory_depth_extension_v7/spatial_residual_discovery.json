@@ -1,0 +1,425 @@
+{
+  "calibration_wafer_count": 75,
+  "complete_zernike_output_space_capacity": [
+    {
+      "coefficient_count": 2,
+      "maximum_absolute_coefficient": 0.00936663928522549,
+      "maximum_design_condition_number": 1.0000000000000067,
+      "maximum_order": 1,
+      "median_fold_coefficient_standard_deviation": 0.0002667346477909788,
+      "metrics": {
+        "normalized_shape_rmse_percent": 1.6009489487397084,
+        "silicon_point_rmse_um": 0.7639380032684543
+      }
+    },
+    {
+      "coefficient_count": 5,
+      "maximum_absolute_coefficient": 0.020525564003813303,
+      "maximum_design_condition_number": 1.460058740183796,
+      "maximum_order": 2,
+      "median_fold_coefficient_standard_deviation": 0.00015665814695661658,
+      "metrics": {
+        "normalized_shape_rmse_percent": 1.07903728265931,
+        "silicon_point_rmse_um": 0.5579983511355964
+      }
+    },
+    {
+      "coefficient_count": 9,
+      "maximum_absolute_coefficient": 0.020525564003813335,
+      "maximum_design_condition_number": 1.6990004132476633,
+      "maximum_order": 3,
+      "median_fold_coefficient_standard_deviation": 9.299368825336761e-05,
+      "metrics": {
+        "normalized_shape_rmse_percent": 1.0629559009173621,
+        "silicon_point_rmse_um": 0.5521049976587584
+      }
+    },
+    {
+      "coefficient_count": 14,
+      "maximum_absolute_coefficient": 0.02016327978644898,
+      "maximum_design_condition_number": 2.0059299818635274,
+      "maximum_order": 4,
+      "median_fold_coefficient_standard_deviation": 9.639250852556063e-05,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.8899939409280901,
+        "silicon_point_rmse_um": 0.4887550331351776
+      }
+    },
+    {
+      "coefficient_count": 20,
+      "maximum_absolute_coefficient": 0.020163279786448985,
+      "maximum_design_condition_number": 2.206817987361956,
+      "maximum_order": 5,
+      "median_fold_coefficient_standard_deviation": 9.789411248999111e-05,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.8733910173070226,
+        "silicon_point_rmse_um": 0.4830157701620343
+      }
+    },
+    {
+      "coefficient_count": 27,
+      "maximum_absolute_coefficient": 0.020454857315416023,
+      "maximum_design_condition_number": 2.7007870602591133,
+      "maximum_order": 6,
+      "median_fold_coefficient_standard_deviation": 0.00010514996461586049,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.8281600634664026,
+        "silicon_point_rmse_um": 0.4675209468341167
+      }
+    },
+    {
+      "coefficient_count": 35,
+      "maximum_absolute_coefficient": 0.020454857315416006,
+      "maximum_design_condition_number": 3.179122448822787,
+      "maximum_order": 7,
+      "median_fold_coefficient_standard_deviation": 0.00011827127653668875,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.8230815450190014,
+        "silicon_point_rmse_um": 0.46580340580849017
+      }
+    },
+    {
+      "coefficient_count": 44,
+      "maximum_absolute_coefficient": 0.025924616786083963,
+      "maximum_design_condition_number": 4.491543411327649,
+      "maximum_order": 8,
+      "median_fold_coefficient_standard_deviation": 0.00012072584156154988,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.6600068793646529,
+        "silicon_point_rmse_um": 0.41351572587148794
+      }
+    },
+    {
+      "coefficient_count": 54,
+      "maximum_absolute_coefficient": 0.025924616786083987,
+      "maximum_design_condition_number": 8.773907708803572,
+      "maximum_order": 9,
+      "median_fold_coefficient_standard_deviation": 0.00014306002231377965,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.6482851062818688,
+        "silicon_point_rmse_um": 0.4099516992492059
+      }
+    },
+    {
+      "coefficient_count": 65,
+      "maximum_absolute_coefficient": 0.030099472347096277,
+      "maximum_design_condition_number": 27.85279754053782,
+      "maximum_order": 10,
+      "median_fold_coefficient_standard_deviation": 0.00015744677822180533,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.6352591063525377,
+        "silicon_point_rmse_um": 0.4060483997198602
+      }
+    }
+  ],
+  "decomposition": {
+    "centered_residual_singular_variance_fractions_first_five": [
+      0.5251559339093904,
+      0.285916853182996,
+      0.07663579897113684,
+      0.057327522020896825,
+      0.02079942508907383
+    ],
+    "fixed_mean_residual_rmse_percent": 1.5458560848431033,
+    "fraction_of_squared_residual_in_fixed_mean_map": 0.8620180872474941,
+    "interpretation": "the dominant missing term is one shared spatial equipment boundary map, not another scalar depth normalization",
+    "v7_raw_normalized_shape_rmse_percent": 1.6649870904874655,
+    "within_wafer_set_residual_rmse_after_all_data_fixed_map_percent": 0.6184747177075774
+  },
+  "eligible_for_prediction_seal": false,
+  "heldout_outcomes_read": false,
+  "heldout_prediction_written": false,
+  "input_hashes": {
+    "process_summary": "62543f987e62cff4931c6aef24932696ad4d2e452a9a02cc939bd4777c926f7f",
+    "v7_fit": "b521ce464766b92bdde893b39e260e0f3093d19fc8f6eb5083dd12618db29a5d",
+    "v7_preregistration": "16a4461e559bf383f32a5ff2869f445a14203ce5951cea8ecf774046dde1d565",
+    "v7_response_table": "4583a4ae17ad93fd13f79b4c854cebc8ca31eae366bef65ed62173c0c03b67cd"
+  },
+  "points_per_wafer": 89,
+  "positive_ion_boundary_changed": false,
+  "schema": "petch-zenodo-bosch-v7-spatial-residual-discovery-v1",
+  "selected_physical_family_diagnostic": {
+    "features": [
+      "c4f8_platen_peak_to_peak_rms",
+      "c4f8_platen_peak_to_peak_q50",
+      "c4f8_platen_peak_to_peak_q90",
+      "c4f8_platen_peak_to_peak_mean",
+      "sf6_platen_peak_to_peak_q50",
+      "sf6_platen_reflected_power_mean"
+    ],
+    "interpretation": "higher C4F8-phase platen Vpp produces an edge-positive, center-negative residual mode, supporting a voltage-dependent current-conserving sheath/focus-ring transmission closure",
+    "representative_feature": "c4f8_platen_peak_to_peak_rms",
+    "representative_feature_mean_V": 637.4409584828442,
+    "representative_feature_standard_deviation_V": 3.816305957878358,
+    "standardized_slope_inner_mean_percent": -0.09184485602038152,
+    "standardized_slope_map_edge_basis_pearson": 0.8048587177549859,
+    "standardized_slope_map_rmse_percent": 0.14549602061623607,
+    "standardized_slope_outer_mean_percent": 0.21457066745361655
+  },
+  "status": "calibration-only model-form discovery; no physical boundary refit or prediction seal",
+  "surface_laws_changed": false,
+  "whole_lot_output_space_proxies": {
+    "intercept_plus_one_standardized_feature_slope_rankings": [
+      {
+        "feature": "c4f8_platen_peak_to_peak_rms",
+        "feature_maximum": 643.534317555529,
+        "feature_minimum": 626.9533265149638,
+        "maximum_absolute_standardized_slope": 0.004220000480019095,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6203403014598341,
+          "silicon_point_rmse_um": 0.3996709767505046
+        }
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q50",
+        "feature_maximum": 663.3884887695312,
+        "feature_minimum": 644.1618041992188,
+        "maximum_absolute_standardized_slope": 0.004265983598221649,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6210052375399175,
+          "silicon_point_rmse_um": 0.40009472194207674
+        }
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q90",
+        "feature_maximum": 733.7374572753906,
+        "feature_minimum": 710.4800415039062,
+        "maximum_absolute_standardized_slope": 0.004519532705865836,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6211774308206085,
+          "silicon_point_rmse_um": 0.39962822406015486
+        }
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_mean",
+        "feature_maximum": 616.5402604449879,
+        "feature_minimum": 600.4623747346751,
+        "maximum_absolute_standardized_slope": 0.003957023578100981,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6219240748397475,
+          "silicon_point_rmse_um": 0.4003450746205279
+        }
+      },
+      {
+        "feature": "sf6_source_current_mean",
+        "feature_maximum": 10.000360325013338,
+        "feature_minimum": 9.997143372782954,
+        "maximum_absolute_standardized_slope": 0.0036241129318232597,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6226529781912966,
+          "silicon_point_rmse_um": 0.4010679571025924
+        }
+      },
+      {
+        "feature": "sf6_source_current_rms",
+        "feature_maximum": 10.000362711216768,
+        "feature_minimum": 9.997145553623131,
+        "maximum_absolute_standardized_slope": 0.0036242317205904353,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6226550030191602,
+          "silicon_point_rmse_um": 0.40106872018360773
+        }
+      },
+      {
+        "feature": "c4f8_epd_intensity_std",
+        "feature_maximum": 194.77262656525394,
+        "feature_minimum": 0.0,
+        "maximum_absolute_standardized_slope": 0.0051761088198957654,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6243530068627955,
+          "silicon_point_rmse_um": 0.40185143765150144
+        }
+      },
+      {
+        "feature": "c4f8_epd_intensity_rms",
+        "feature_maximum": 201.49726270965678,
+        "feature_minimum": 0.12300000339746474,
+        "maximum_absolute_standardized_slope": 0.005176135510168449,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6243531339074007,
+          "silicon_point_rmse_um": 0.4018514484091126
+        }
+      },
+      {
+        "feature": "c4f8_epd_intensity_mean",
+        "feature_maximum": 51.621418232712045,
+        "feature_minimum": 0.12300000339746475,
+        "maximum_absolute_standardized_slope": 0.005176482335671168,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6243555007733812,
+          "silicon_point_rmse_um": 0.4018517793183343
+        }
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q50",
+        "feature_maximum": 14.987030029296875,
+        "feature_minimum": 14.986419677734375,
+        "maximum_absolute_standardized_slope": 0.005464326065924903,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6273691729170726,
+          "silicon_point_rmse_um": 0.40296813121421093
+        }
+      },
+      {
+        "feature": "wafer_number",
+        "feature_maximum": 10.0,
+        "feature_minimum": 1.0,
+        "maximum_absolute_standardized_slope": 0.004551221543104695,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6282591327574031,
+          "silicon_point_rmse_um": 0.4026500074276945
+        }
+      },
+      {
+        "feature": "sf6_platen_reflected_power_mean",
+        "feature_maximum": 3.313656468272527,
+        "feature_minimum": 2.629284790980631,
+        "maximum_absolute_standardized_slope": 0.003890045107229988,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6289148483796576,
+          "silicon_point_rmse_um": 0.40330931272223197
+        }
+      },
+      {
+        "feature": "sf6_source_load_power_q10",
+        "feature_maximum": 2785.83642578125,
+        "feature_minimum": 2783.654296875,
+        "maximum_absolute_standardized_slope": 0.0037128353053663414,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6289660497597528,
+          "silicon_point_rmse_um": 0.40335101073340923
+        }
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_std",
+        "feature_maximum": 190.6078198736516,
+        "feature_minimum": 177.5032959984188,
+        "maximum_absolute_standardized_slope": 0.0042819031841139586,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6293228442263588,
+          "silicon_point_rmse_um": 0.4032630332946364
+        }
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_q50",
+        "feature_maximum": 464.5985412597656,
+        "feature_minimum": 444.71954345703125,
+        "maximum_absolute_standardized_slope": 0.003198311723963218,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6294634680973963,
+          "silicon_point_rmse_um": 0.40326516826921605
+        }
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_q90",
+        "feature_maximum": 23.15439376831055,
+        "feature_minimum": 11.947996139526367,
+        "maximum_absolute_standardized_slope": 0.0038720558950638257,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6295308616527093,
+          "silicon_point_rmse_um": 0.4030271271748868
+        }
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q90",
+        "feature_maximum": 14.988861083984375,
+        "feature_minimum": 14.987640380859375,
+        "maximum_absolute_standardized_slope": 0.004267453132723427,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6298394377547539,
+          "silicon_point_rmse_um": 0.4039573813932673
+        }
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_rms",
+        "feature_maximum": 560.7030515089151,
+        "feature_minimum": 551.1258041951371,
+        "maximum_absolute_standardized_slope": 0.004114539842625542,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6308039174454708,
+          "silicon_point_rmse_um": 0.40384184204719936
+        }
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_mean",
+        "feature_maximum": 6.609010491620564,
+        "feature_minimum": 4.636133333451771,
+        "maximum_absolute_standardized_slope": 0.004217874378045855,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6308292857485265,
+          "silicon_point_rmse_um": 0.4035369965237913
+        }
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q10",
+        "feature_maximum": 14.983977317810059,
+        "feature_minimum": 14.982146263122559,
+        "maximum_absolute_standardized_slope": 0.007373530017479968,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6311429103366928,
+          "silicon_point_rmse_um": 0.4044413913324971
+        }
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_mean",
+        "feature_maximum": 527.8974671456634,
+        "feature_minimum": 516.5118487854145,
+        "maximum_absolute_standardized_slope": 0.0030617934831717345,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6314904594376715,
+          "silicon_point_rmse_um": 0.40416521673453093
+        }
+      },
+      {
+        "feature": "sf6_source_current_q90",
+        "feature_maximum": 10.01068115234375,
+        "feature_minimum": 10.00665283203125,
+        "maximum_absolute_standardized_slope": 0.006532770309512818,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6320427183665015,
+          "silicon_point_rmse_um": 0.40460197825683525
+        }
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_std",
+        "feature_maximum": 0.001827939879669329,
+        "feature_minimum": 0.001514423475196018,
+        "maximum_absolute_standardized_slope": 0.007057057312931899,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6324067371717211,
+          "silicon_point_rmse_um": 0.40481258922968205
+        }
+      },
+      {
+        "feature": "c4f8_pressure_q10",
+        "feature_maximum": 0.029999999329447746,
+        "feature_minimum": 0.02969999983906746,
+        "maximum_absolute_standardized_slope": 0.0024903437816737968,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6328308187355721,
+          "silicon_point_rmse_um": 0.4050169609807109
+        }
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_rms",
+        "feature_maximum": 20.925987940362386,
+        "feature_minimum": 11.242238493390134,
+        "maximum_absolute_standardized_slope": 0.002991463743025844,
+        "metrics": {
+          "normalized_shape_rmse_percent": 0.6330172493290509,
+          "silicon_point_rmse_um": 0.4049776086149921
+        }
+      }
+    ],
+    "selection_bias_warning": "131 outcome-free machine features were ranked after examining calibration residuals; the physical feature family and operator must be frozen before formal refitting",
+    "shared_89_point_intercept": {
+      "independent_parameter_count": 88,
+      "maximum_fold_map_difference": 0.006064775784469675,
+      "metrics": {
+        "normalized_shape_rmse_percent": 0.6334735331121012,
+        "silicon_point_rmse_um": 0.4055134146837346
+      }
+    }
+  },
+  "zernike_warning": "these are outcome-space capacity probes, not ion-flux fits; high orders approaching the 89-point mean map are not automatically acceptable physics"
+}
