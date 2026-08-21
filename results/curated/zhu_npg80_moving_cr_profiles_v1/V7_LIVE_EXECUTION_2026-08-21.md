@@ -1,6 +1,6 @@
 # Oxford moving-Cr v7 live execution receipt
 
-Status at 2026-08-21 16:52 UTC: **11 of 56 trajectories complete and retrieved**. This is a
+Status at 2026-08-21 16:58 UTC: **15 of 56 trajectories complete and retrieved**. This is a
 recoverable execution checkpoint, not a complete board and not a grade against
 Freddie's withheld SEM.
 
@@ -66,13 +66,17 @@ ba7c5a0825bc7b7413dce2e42fe1af3c89b352771cf188972ec2d1d54198db0b  trajectories/w
 17cb8f90bc96f099a23f0b61212b14c1901359342e8aff526c4729cfdfd64a63  trajectories/w120_s14.000_ion_high_tail_0p0_634c0d52394b18f0.json
 ee67f8e967bed4cdfc8b22ec019721f1812688221ca083bd269bf4338833c2b4  trajectories/w120_s14.000_ion_low_tail_0p0_9713fd1a430912a4.json
 28326afdce64da32ba366d4bcf2f7411e8646011e49e33530019777e8ce62c45  trajectories/w120_s18.017_ion_low_tail_0p0_f7ad6305552d158c.json
+022f73c25803b5b030d3e641c7daed226faee2baf8d1b0081eeb40820237d6d2  trajectories/w120_s14.000_ion_low_tail_0p65_50c05bc901c0e441.json
+ed76d8ccabd11af0d5410d63b02109144b79b436da277901378e71349b7305b5  trajectories/w120_s18.017_ion_low_tail_0p65_236ba2bc49dc5040.json
+4402bd50b0740142bba9e0b3b54821a40a8228ffaaa648642266e998a3e5744b  trajectories/w120_s18.017_ion_high_tail_0p0_85f539c1d939c3c9.json
+8f38eee5362919df58459c42067e6d8dd2ebd8f6bbfa9b5851744af2d1a274ad  trajectories/w120_s14.000_ion_high_tail_0p65_81623bca4b468160.json
 ```
 
-All 11 retrieved cells declare the frozen v7 model revision and preregistration
+All 15 retrieved cells declare the frozen v7 model revision and preregistration
 hash, contain both rate-normalized endpoints, have exact zero particle-balance
 error, and have maximum surface-state remap residual below `1.47e-15`. The
 width-80 endpoints finish at approximately 683.71-684.09 nm etched depth. The
-three retrieved width-120 endpoints finish at approximately 684.05-684.28 nm.
+seven retrieved width-120 endpoints finish at approximately 684.05-684.32 nm.
 These are blind conditional results, not observed SEM matches.
 
 Do not assemble or publish `audit.json` until all 56 v7 cache keys exist and
