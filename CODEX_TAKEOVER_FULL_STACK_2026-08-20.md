@@ -8,12 +8,11 @@ Branch: `codex/validation-first-multiphysics`
 
 Pushed implementation checkpoint: `e5aed0f`
 
-This is the canonical resume document.  It supersedes the live-state portions
-of `CODEX_TAKEOVER_ABSOLUTE_DEPTH_2026-08-20.md`,
-`CODEX_TAKEOVER_MOVING_CR_2026-08-20.md`, and
-`HANDOFF_MOVING_CR_BOARD_2026-08-20.md`.  Keep those files as forensic history,
-but do not follow their old recovery instructions without first checking this
-report and the actual process IDs.
+This report is now forensic history.  The current operational handoff is
+`CODEX_TAKEOVER_LIVE_STATE_2026-08-20.md`, which records the Oxford v5 topology
+stop at 39/56, the later Krueger prefixes, and the completed Bosch cylindrical
+calibration/model-form audit.  Read that file first and do not follow the live
+recovery instructions below without checking the actual process IDs.
 
 ## Read this first: the honest state
 
