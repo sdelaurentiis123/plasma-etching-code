@@ -136,6 +136,10 @@ class SurfaceTransferWeights3D:
     application_metadata: Mapping[str, Mapping[str, object]] = field(repr=False)
 
     def __post_init__(self):
+        def invalid(reason):
+            raise ValueError(
+                f"invalid sparse surface-transfer weights: {reason}")
+
         if (not isinstance(self.old_surface, TriangleSurface3D)
                 or not isinstance(self.new_surface, TriangleSurface3D)):
             raise TypeError("surface transfer requires TriangleSurface3D inputs")
@@ -151,26 +155,114 @@ class SurfaceTransferWeights3D:
             self.maximum_exact_surface_distance,
             self.maximum_nearest_centroid_distance,
         ], dtype=float)
-        if (offsets.shape != (row_count + 1,) or offsets[0] != 0
-                or np.any(np.diff(offsets) <= 0) or offsets[-1] != len(source)
-                or weight.shape != source.shape or distance.shape != source.shape
-                or shift.shape != (len(source), 3) or row_sum.shape != (row_count,)
-                or np.any(source < 0) or np.any(source >= len(self.old_surface.faces))
-                or np.any(~np.isfinite(weight)) or np.any(weight < 0.0)
-                or np.any(~np.isfinite(distance)) or np.any(distance < 0.0)
-                or np.any(~np.isfinite(shift))
-                or not np.allclose(row_sum, 1.0, rtol=0.0, atol=8e-16)
-                or np.any(~np.isfinite(scalar_diagnostics))
-                or self.maximum_allowed_distance <= 0.0
-                or self.maximum_exact_surface_distance < 0.0
-                or self.maximum_nearest_centroid_distance < 0.0
-                or isinstance(self.neighbor_count, (bool, np.bool_))
-                or int(self.neighbor_count) != self.neighbor_count
-                or int(self.neighbor_count) <= 0
-                or not isinstance(self.fingerprint, str)
-                or len(self.fingerprint) != 64
-                or set(self.application_metadata) != {"intensive", "extensive"}):
-            raise ValueError("invalid sparse surface-transfer weights")
+        if offsets.shape != (row_count + 1,):
+            invalid(
+                f"row_offsets_shape={offsets.shape}, expected="
+                f"{(row_count + 1,)}")
+        if offsets[0] != 0:
+            invalid(f"row_offsets_first={int(offsets[0])}, expected=0")
+        offset_step = np.diff(offsets)
+        if np.any(offset_step <= 0):
+            bad = np.flatnonzero(offset_step <= 0)
+            invalid(
+                f"nonpositive_row_lengths count={len(bad)}, "
+                f"first_row={int(bad[0])}, "
+                f"first_length={int(offset_step[bad[0]])}")
+        if offsets[-1] != len(source):
+            invalid(
+                f"row_offsets_last={int(offsets[-1])}, "
+                f"source_count={len(source)}")
+        if weight.shape != source.shape:
+            invalid(
+                f"weight_shape={weight.shape}, source_shape={source.shape}")
+        if distance.shape != source.shape:
+            invalid(
+                f"distance_shape={distance.shape}, source_shape={source.shape}")
+        if shift.shape != (len(source), 3):
+            invalid(
+                f"periodic_shift_shape={shift.shape}, expected="
+                f"{(len(source), 3)}")
+        if row_sum.shape != (row_count,):
+            invalid(
+                f"row_sum_shape={row_sum.shape}, expected={(row_count,)}")
+        invalid_source = (source < 0) | (source >= len(self.old_surface.faces))
+        if np.any(invalid_source):
+            bad = np.flatnonzero(invalid_source)
+            invalid(
+                f"source_index_out_of_range count={len(bad)}, "
+                f"first_entry={int(bad[0])}, "
+                f"first_index={int(source[bad[0]])}, "
+                f"old_face_count={len(self.old_surface.faces)}")
+        if np.any(~np.isfinite(weight)):
+            bad = np.flatnonzero(~np.isfinite(weight))
+            invalid(
+                f"nonfinite_weights count={len(bad)}, "
+                f"first_entry={int(bad[0])}, "
+                f"first_value={weight[bad[0]]!r}")
+        if np.any(weight < 0.0):
+            bad = np.flatnonzero(weight < 0.0)
+            invalid(
+                f"negative_weights count={len(bad)}, "
+                f"first_entry={int(bad[0])}, "
+                f"minimum={float(np.min(weight)):.17g}")
+        if np.any(~np.isfinite(distance)):
+            bad = np.flatnonzero(~np.isfinite(distance))
+            invalid(
+                f"nonfinite_centroid_distances count={len(bad)}, "
+                f"first_entry={int(bad[0])}, "
+                f"first_value={distance[bad[0]]!r}")
+        if np.any(distance < 0.0):
+            bad = np.flatnonzero(distance < 0.0)
+            invalid(
+                f"negative_centroid_distances count={len(bad)}, "
+                f"first_entry={int(bad[0])}, "
+                f"minimum={float(np.min(distance)):.17g}")
+        if np.any(~np.isfinite(shift)):
+            bad = np.argwhere(~np.isfinite(shift))[0]
+            invalid(
+                f"nonfinite_periodic_shifts first_entry="
+                f"({int(bad[0])}, {int(bad[1])}), "
+                f"first_value={shift[tuple(bad)]!r}")
+        row_sum_error = np.abs(row_sum - 1.0)
+        if not np.allclose(row_sum, 1.0, rtol=0.0, atol=8e-16):
+            bad = np.flatnonzero(row_sum_error > 8e-16)
+            first = int(bad[0])
+            invalid(
+                f"row_sum_not_unit count={len(bad)}, first_row={first}, "
+                f"first_sum={float(row_sum[first]):.17g}, "
+                f"maximum_absolute_error={float(np.max(row_sum_error)):.17g}, "
+                "absolute_tolerance=8e-16")
+        if np.any(~np.isfinite(scalar_diagnostics)):
+            invalid(
+                "nonfinite_scalar_diagnostics values="
+                f"{scalar_diagnostics.tolist()}")
+        if self.maximum_allowed_distance <= 0.0:
+            invalid(
+                "maximum_allowed_distance_not_positive="
+                f"{float(self.maximum_allowed_distance):.17g}")
+        if self.maximum_exact_surface_distance < 0.0:
+            invalid(
+                "maximum_exact_surface_distance_negative="
+                f"{float(self.maximum_exact_surface_distance):.17g}")
+        if self.maximum_nearest_centroid_distance < 0.0:
+            invalid(
+                "maximum_nearest_centroid_distance_negative="
+                f"{float(self.maximum_nearest_centroid_distance):.17g}")
+        if isinstance(self.neighbor_count, (bool, np.bool_)):
+            invalid(f"neighbor_count_is_boolean={self.neighbor_count!r}")
+        if int(self.neighbor_count) != self.neighbor_count:
+            invalid(f"neighbor_count_not_integral={self.neighbor_count!r}")
+        if int(self.neighbor_count) <= 0:
+            invalid(f"neighbor_count_not_positive={self.neighbor_count!r}")
+        if not isinstance(self.fingerprint, str):
+            invalid(f"fingerprint_not_string={type(self.fingerprint).__name__}")
+        if len(self.fingerprint) != 64:
+            invalid(f"fingerprint_length={len(self.fingerprint)}, expected=64")
+        metadata_keys = set(self.application_metadata)
+        if metadata_keys != {"intensive", "extensive"}:
+            invalid(
+                f"application_metadata_keys={sorted(metadata_keys)!r}, "
+                "expected=['extensive', 'intensive']")
         for row in range(row_count):
             start, stop = offsets[row:row + 2]
             selected = source[start:stop]

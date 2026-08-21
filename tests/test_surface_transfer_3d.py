@@ -1,3 +1,4 @@
+from dataclasses import replace
 import time
 
 import numpy as np
@@ -148,6 +149,34 @@ def test_rows_close_are_material_local_and_sparse_arrays_are_immutable():
         assert not array.flags.writeable
         with pytest.raises(ValueError):
             array.flat[0] = 9
+
+
+def test_sparse_contract_names_the_exact_rejected_invariant():
+    old = _square_surface()
+    new = _square_surface(z=0.05)
+    transfer = build_surface_transfer_3d(
+        old, new, neighbor_count=2, maximum_distance=0.1)
+    bad_row_sum = transfer.row_sum.copy()
+    bad_row_sum[1] = np.nextafter(1.0, 2.0, dtype=np.float64)
+    bad_row_sum[1] = np.nextafter(bad_row_sum[1], 2.0, dtype=np.float64)
+    bad_row_sum[1] = np.nextafter(bad_row_sum[1], 2.0, dtype=np.float64)
+    bad_row_sum[1] = np.nextafter(bad_row_sum[1], 2.0, dtype=np.float64)
+    with pytest.raises(
+            ValueError,
+            match=(
+                r"invalid sparse surface-transfer weights: "
+                r"row_sum_not_unit count=1, first_row=1, .*"
+                r"absolute_tolerance=8e-16")):
+        replace(transfer, row_sum=bad_row_sum)
+
+    bad_weight = transfer.weight.copy()
+    bad_weight[0] = np.nan
+    with pytest.raises(
+            ValueError,
+            match=(
+                r"invalid sparse surface-transfer weights: "
+                r"nonfinite_weights count=1, first_entry=0")):
+        replace(transfer, weight=bad_weight)
 
 
 def test_deterministic_replay_and_order_sensitive_surface_contract():
