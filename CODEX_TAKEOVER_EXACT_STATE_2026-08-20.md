@@ -1,5 +1,10 @@
 # Codex takeover — exact absolute-depth campaign state
 
+> **Superseded for live state and next actions.** Read
+> `CODEX_TAKEOVER_REPORT_2026-08-21.md`. This file remains the forensic record
+> of the Oxford v5 failure that was subsequently fixed in `980800a` and
+> accepted under v6 in `fefd970`.
+
 Snapshot: 2026-08-20 23:25 EDT / 2026-08-21 03:25 UTC
 
 Repository: `/Users/stanislavdelaurentiis/chip-etch/plasma-etching-code`
