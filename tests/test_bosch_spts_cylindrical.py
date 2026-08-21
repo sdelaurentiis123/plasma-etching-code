@@ -163,3 +163,31 @@ def test_species_radial_source_moments_match_fresh_model(trace):
         fresh.point_flux_m2_s, rel=2.0e-14, abs=1.0)
     assert response.provenance["parameters"]["species_source_ring_radius_m"] == list(rings)
     assert response.provenance["parameters"]["species_source_radial_width_m"] == list(widths)
+
+
+def test_edge_sheath_focus_is_positive_and_conserves_total_ion_current(trace):
+    reduced = BoschSPTSReducedParameters(radial_cell_count=16, axial_cell_count=10)
+    x = np.array([0.0, 0.04, 0.08, 0.095, -0.095])
+    y = np.zeros_like(x)
+    model = DeterministicBoschSPTSCylindricalReactorToWafer(
+        BoschSPTSCylindricalParameters(
+            reduced=reduced, azimuthal_cell_count=12))
+    base = model.source_response(x_m=x, y_m=y)
+    focused = model.source_response(
+        x_m=x, y_m=y, ion_edge_focus_amplitude=0.3,
+        ion_edge_focus_onset_radius_m=0.09,
+        ion_edge_focus_width_m=0.002)
+
+    assert focused.unit_wafer_average_flux_per_density_m_s == pytest.approx(
+        base.unit_wafer_average_flux_per_density_m_s, rel=2.0e-14, abs=1e-16)
+    assert focused.unit_point_flux_per_density_m_s[:2] == pytest.approx(
+        base.unit_point_flux_per_density_m_s[:2], rel=2.0e-14, abs=1e-16)
+    base_ratio = (
+        base.unit_point_flux_per_density_m_s[2, 3]
+        / base.unit_point_flux_per_density_m_s[2, 0])
+    focused_ratio = (
+        focused.unit_point_flux_per_density_m_s[2, 3]
+        / focused.unit_point_flux_per_density_m_s[2, 0])
+    assert focused_ratio > base_ratio
+    assert np.all(focused.unit_point_flux_per_density_m_s >= 0.0)
+    assert focused.provenance["total_wafer_ion_current_conserved"] is True

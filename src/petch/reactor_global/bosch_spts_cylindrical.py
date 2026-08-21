@@ -20,6 +20,7 @@ from .geometry import CylindricalReactor
 
 
 _SPECIES = ("F", "C4F8_film_precursor", "positive_ion")
+_GAUSS_X, _GAUSS_W = np.polynomial.legendre.leggauss(128)
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,9 @@ class BoschSPTSCylindricalParameters:
     azimuthal_cell_count: int = 16
     species_source_ring_radius_m: tuple[float, float, float] | None = None
     species_source_radial_width_m: tuple[float, float, float] | None = None
+    ion_edge_focus_amplitude: float = 0.0
+    ion_edge_focus_onset_radius_m: float = 0.095
+    ion_edge_focus_width_m: float = 0.005
     source_cosine_coefficients: tuple[tuple[float, ...], ...] = ((), (), ())
     source_sine_coefficients: tuple[tuple[float, ...], ...] = ((), (), ())
 
@@ -53,6 +57,14 @@ class BoschSPTSCylindricalParameters:
                 or any(not math.isfinite(value) or value <= 0.0
                        for value in width)):
             raise ValueError("invalid species-resolved radial source moments")
+        if (not math.isfinite(self.ion_edge_focus_amplitude)
+                or not 0.0 <= self.ion_edge_focus_amplitude <= 5.0
+                or not math.isfinite(self.ion_edge_focus_onset_radius_m)
+                or not 0.0 <= self.ion_edge_focus_onset_radius_m <= (
+                    self.reduced.wafer_radius_m)
+                or not math.isfinite(self.ion_edge_focus_width_m)
+                or self.ion_edge_focus_width_m <= 0.0):
+            raise ValueError("invalid ion edge-focus parameters")
         cosine = tuple(tuple(float(value) for value in row)
                        for row in self.source_cosine_coefficients)
         sine = tuple(tuple(float(value) for value in row)
@@ -77,6 +89,10 @@ class BoschSPTSCylindricalParameters:
                 self.species_source_ring_radius_m),
             "species_source_radial_width_m": list(
                 self.species_source_radial_width_m),
+            "ion_edge_focus_amplitude": self.ion_edge_focus_amplitude,
+            "ion_edge_focus_onset_radius_m": (
+                self.ion_edge_focus_onset_radius_m),
+            "ion_edge_focus_width_m": self.ion_edge_focus_width_m,
             "source_cosine_coefficients": [
                 list(row) for row in self.source_cosine_coefficients],
             "source_sine_coefficients": [
@@ -243,6 +259,51 @@ def _wafer_area_weights(grid, wafer_radius_m):
     return area_weights
 
 
+def _ion_edge_focus_point_factor(unit_lower, grid, parameters, point_radius_m):
+    """Resolve a sub-grid wafer-edge ion layer at fixed total ion current."""
+    unit_lower = np.asarray(unit_lower, dtype=float)
+    point_radius = np.asarray(point_radius_m, dtype=float)
+    amplitude = float(parameters.ion_edge_focus_amplitude)
+    if amplitude == 0.0:
+        return np.ones_like(point_radius), 1.0, 1.0
+    onset = float(parameters.ion_edge_focus_onset_radius_m)
+    width = float(parameters.ion_edge_focus_width_m)
+    wafer_radius = float(parameters.reduced.wafer_radius_m)
+
+    quadrature_radius = 0.5 * wafer_radius * (_GAUSS_X + 1.0)
+    quadrature_sigmoid = 1.0 / (
+        1.0 + np.exp(-(quadrature_radius - onset) / width))
+    sigmoid_area_mean = float(np.sum(
+        _GAUSS_W * quadrature_radius * quadrature_sigmoid)
+        * wafer_radius / (wafer_radius ** 2))
+    continuous_area_mean = 1.0 + amplitude * 2.0 * sigmoid_area_mean
+
+    radial_sigmoid = 1.0 / (
+        1.0 + np.exp(-(grid.radial_centers_m - onset) / width))
+    area_normalized = (
+        1.0 + amplitude * radial_sigmoid[:, None]) / continuous_area_mean
+    area_weights = _wafer_area_weights(grid, wafer_radius)
+    initial_current = float(np.sum(unit_lower[2] * area_weights))
+    candidate_current = float(np.sum(
+        unit_lower[2] * area_normalized * area_weights))
+    if initial_current <= 0.0 or candidate_current <= 0.0:
+        raise RuntimeError("ion edge focus encountered zero wafer current")
+    current_correction = initial_current / candidate_current
+    final_current = float(np.sum(
+        unit_lower[2] * area_normalized * current_correction * area_weights))
+    current_residual = abs(final_current - initial_current) / initial_current
+    if current_residual > 2.0e-14:
+        raise RuntimeError("ion edge focus failed current conservation")
+    point_sigmoid = 1.0 / (
+        1.0 + np.exp(-(point_radius - onset) / width))
+    point_factor = (
+        (1.0 + amplitude * point_sigmoid) / continuous_area_mean
+        * current_correction)
+    if np.any(~np.isfinite(point_factor)) or np.any(point_factor <= 0.0):
+        raise RuntimeError("ion edge focus produced an invalid point factor")
+    return point_factor, continuous_area_mean, current_correction
+
+
 class DeterministicBoschSPTSCylindricalReactorToWafer:
     """0-D measured waveform plus positive cylindrical 3-D inventory lift."""
 
@@ -278,7 +339,10 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
             source_sine_coefficients=None, source_ring_radius_m=None,
             source_radial_width_m=None, source_central_fraction=None,
             species_source_ring_radius_m=None,
-            species_source_radial_width_m=None):
+            species_source_radial_width_m=None,
+            ion_edge_focus_amplitude=None,
+            ion_edge_focus_onset_radius_m=None,
+            ion_edge_focus_width_m=None):
         if ((source_cosine_coefficients is None)
                 != (source_sine_coefficients is None)):
             raise ValueError("cosine and sine source coefficients must be paired")
@@ -293,7 +357,20 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
             source_central_fraction, species_source_ring_radius_m,
             species_source_radial_width_m))
         if source_cosine_coefficients is None and not source_geometry_changed:
-            parameters = self.parameters
+            parameters = replace(
+                self.parameters,
+                ion_edge_focus_amplitude=(
+                    self.parameters.ion_edge_focus_amplitude
+                    if ion_edge_focus_amplitude is None
+                    else ion_edge_focus_amplitude),
+                ion_edge_focus_onset_radius_m=(
+                    self.parameters.ion_edge_focus_onset_radius_m
+                    if ion_edge_focus_onset_radius_m is None
+                    else ion_edge_focus_onset_radius_m),
+                ion_edge_focus_width_m=(
+                    self.parameters.ion_edge_focus_width_m
+                    if ion_edge_focus_width_m is None
+                    else ion_edge_focus_width_m))
             unit_lower = self._lift.unit_lower_flux_per_density_m_s
             maximum_ledger = self._maximum_ledger
             maximum_linear = self._maximum_linear
@@ -331,15 +408,33 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
                 source_sine_coefficients=(
                     self.parameters.source_sine_coefficients
                     if source_sine_coefficients is None
-                    else source_sine_coefficients))
+                    else source_sine_coefficients),
+                ion_edge_focus_amplitude=(
+                    self.parameters.ion_edge_focus_amplitude
+                    if ion_edge_focus_amplitude is None
+                    else ion_edge_focus_amplitude),
+                ion_edge_focus_onset_radius_m=(
+                    self.parameters.ion_edge_focus_onset_radius_m
+                    if ion_edge_focus_onset_radius_m is None
+                    else ion_edge_focus_onset_radius_m),
+                ion_edge_focus_width_m=(
+                    self.parameters.ion_edge_focus_width_m
+                    if ion_edge_focus_width_m is None
+                    else ion_edge_focus_width_m))
             unit_lower, maximum_ledger, maximum_linear = (
                 self._lift.source_shape_to_unit_lower_flux(
                     _source_shapes(self._grid, parameters)))
             reused_factorization = True
         weights = _point_interpolation_weights(self._grid, x_m, y_m)
         unit_point_flux = np.einsum("srp,qrp->sq", unit_lower, weights)
+        point_radius = np.sqrt(
+            np.asarray(x_m, dtype=float) ** 2 + np.asarray(y_m, dtype=float) ** 2)
+        point_factor, continuous_area_mean, current_correction = (
+            _ion_edge_focus_point_factor(
+                unit_lower, self._grid, parameters, point_radius))
+        unit_point_flux[2] *= point_factor
         area_weights = _wafer_area_weights(
-            self._grid, self.parameters.reduced.wafer_radius_m)
+            self._grid, parameters.reduced.wafer_radius_m)
         unit_average_flux = np.einsum(
             "srp,rp->s", unit_lower, area_weights)
         return BoschSPTSCylindricalSourceResponse(
@@ -352,6 +447,9 @@ class DeterministicBoschSPTSCylindricalReactorToWafer:
                 "model": "spts-bosch-cylindrical-source-response-v1",
                 "parameters": parameters.manifest(),
                 "transport_factorization_reused": reused_factorization,
+                "ion_edge_focus_continuous_area_mean": continuous_area_mean,
+                "ion_edge_focus_exact_current_correction": current_correction,
+                "total_wafer_ion_current_conserved": True,
                 "target_depth_used": False,
             })
 
