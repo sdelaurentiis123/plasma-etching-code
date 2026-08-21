@@ -13,6 +13,7 @@ from scripts.audit_bosch_wafer_boundary_map_calibration import (
     _nodes,
     _replay_gate_metrics,
 )
+from scripts import seal_bosch_wafer_boundary_map_heldout_prediction as seal_v8
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -188,3 +189,32 @@ def test_committed_v8_replay_input_hashes_are_exact():
         "calibration_fit.json")
     assert replay["input_hashes"]["interpolation_validation"] == _hash(
         "interpolation_validation.json")
+
+
+def test_v8_prediction_builder_cannot_open_the_mixed_outcome_asset(
+        monkeypatch):
+    original_open = Path.open
+
+    def guarded_open(path, *args, **kwargs):
+        if path.name == "Si_Oxide_etch_89_points.csv":
+            raise AssertionError("prediction writer opened heldout outcomes")
+        return original_open(path, *args, **kwargs)
+
+    def synthetic_exact(queries, *_args, **_kwargs):
+        return tuple(
+            type("Prediction", (), {
+                "silicon_depth_m": np.full(89, 43.0e-6),
+                "oxide_loss_m": np.full(89, 0.65e-6),
+            })()
+            for _query in queries
+        )
+
+    monkeypatch.setattr(Path, "open", guarded_open)
+    monkeypatch.setattr(seal_v8, "_exact_map_predictions", synthetic_exact)
+    payload = seal_v8.build_prediction(workers=1)
+    firewall = payload["target_firewall"]
+    assert payload["heldout_process_record_count"] == 20
+    assert len(payload["predictions"]) == 20
+    assert firewall["mixed_outcome_csv_opened"] is False
+    assert firewall["heldout_numeric_outcomes_read"] is False
+    assert firewall["eligible_for_separate_outcome_score_after_hash_commit"] is True
