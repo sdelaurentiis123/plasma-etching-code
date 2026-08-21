@@ -64,6 +64,39 @@ def _center_within_lot(values, lots):
     return output
 
 
+def _detrend_within_lot(values, wafer_numbers, lots):
+    """Remove an independent intercept and linear sequence slope in every lot."""
+    values = np.asarray(values, dtype=float)
+    wafer_numbers = np.asarray(wafer_numbers, dtype=float)
+    output = np.empty_like(values)
+    for lot in sorted(set(lots)):
+        selected = lots == lot
+        design = np.column_stack((
+            np.ones(np.count_nonzero(selected)),
+            wafer_numbers[selected],
+        ))
+        coefficient = np.linalg.lstsq(
+            design, values[selected], rcond=None)[0]
+        output[selected] = values[selected] - design @ coefficient
+    return output
+
+
+def _per_lot_sequence_slopes(values, wafer_numbers, lots):
+    values = np.asarray(values, dtype=float)
+    wafer_numbers = np.asarray(wafer_numbers, dtype=float)
+    output = {}
+    for lot in sorted(set(lots)):
+        selected = lots == lot
+        design = np.column_stack((
+            np.ones(np.count_nonzero(selected)),
+            wafer_numbers[selected],
+        ))
+        coefficient = np.linalg.lstsq(
+            design, values[selected], rcond=None)[0]
+        output[str(int(lot))] = float(coefficient[1])
+    return output
+
+
 def _load_features(keys):
     with SUMMARY.open("r", newline="", encoding="utf-8") as stream:
         rows = {row["experiment_key"]: row for row in csv.DictReader(stream)}
@@ -133,11 +166,16 @@ def build():
     keys = tuple(item.experiment_key for item in measurements)
     lots = np.asarray([item.lot_number for item in measurements])
     features = _load_features(keys)
+    wafer_numbers = features["wafer_number"]
 
     rankings = {}
+    sequence_detrended_rankings = {}
     for target_name, target in targets.items():
         centered_target = _center_within_lot(target, lots)
+        detrended_target = _detrend_within_lot(
+            target, wafer_numbers, lots)
         rows = []
+        detrended_rows = []
         for feature_name, feature in features.items():
             if np.std(feature) <= 0.0:
                 continue
@@ -151,8 +189,22 @@ def build():
                 "feature_minimum": float(np.min(feature)),
                 "feature_maximum": float(np.max(feature)),
             })
+            detrended_feature = _detrend_within_lot(
+                feature, wafer_numbers, lots)
+            if np.std(detrended_feature) > 0.0:
+                detrended_rows.append({
+                    "feature": feature_name,
+                    "sequence_partial_pearson": _pearson(
+                        detrended_feature, detrended_target),
+                    "feature_minimum": float(np.min(feature)),
+                    "feature_maximum": float(np.max(feature)),
+                })
         rows.sort(key=lambda row: abs(row["within_lot_pearson"]), reverse=True)
+        detrended_rows.sort(
+            key=lambda row: abs(row["sequence_partial_pearson"]),
+            reverse=True)
         rankings[target_name] = rows[:20]
+        sequence_detrended_rankings[target_name] = detrended_rows[:20]
 
     correction = {}
     for outcome_name, residual, prediction, observation in (
@@ -174,13 +226,27 @@ def build():
         correction[outcome_name] = rows[:20]
 
     return {
-        "schema": "petch-zenodo-bosch-calibration-residual-feature-audit-v1",
+        "schema": "petch-zenodo-bosch-calibration-residual-feature-audit-v2",
         "status": "calibration-only exploratory model-form discovery; not a prediction seal",
         "calibration_wafer_count": len(measurements),
         "candidate_feature_count": len(features),
         "feature_source_contains_outcomes": False,
         "conditioning_fit_used": str(CONDITIONING_FIT.relative_to(ROOT)),
         "residual_feature_rankings": rankings,
+        "sequence_detrended_residual_feature_rankings": (
+            sequence_detrended_rankings),
+        "per_lot_sequence_slopes_um_per_wafer": {
+            "observed_silicon_mean": _per_lot_sequence_slopes(
+                observed_si_mean, wafer_numbers, lots),
+            "predicted_silicon_mean": _per_lot_sequence_slopes(
+                predicted_si_mean, wafer_numbers, lots),
+            "silicon_mean_residual": _per_lot_sequence_slopes(
+                targets["silicon_mean_residual_um"], wafer_numbers, lots),
+            "observed_oxide_mean": _per_lot_sequence_slopes(
+                observed_oxide_mean, wafer_numbers, lots),
+            "predicted_oxide_mean": _per_lot_sequence_slopes(
+                predicted_oxide_mean, wafer_numbers, lots),
+        },
         "exploratory_univariate_leave_one_lot_out_corrections": correction,
         "selection_bias_warning": (
             "the best feature was selected after comparing all extracted machine "

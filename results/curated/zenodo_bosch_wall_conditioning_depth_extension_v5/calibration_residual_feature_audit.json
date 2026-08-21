@@ -215,6 +215,58 @@
     "conditioning_fit": "3c8b3bc98c22818895d34640cfc8390f06925e0ea5ed71a0e86123fc0021d25f",
     "process_summary": "62543f987e62cff4931c6aef24932696ad4d2e452a9a02cc939bd4777c926f7f"
   },
+  "per_lot_sequence_slopes_um_per_wafer": {
+    "observed_oxide_mean": {
+      "1": -0.0033223481674625674,
+      "2": -0.0031379519786856823,
+      "3": 0.007867370930269022,
+      "4": -0.002517995288525662,
+      "5": -0.004465582040789875,
+      "6": 0.004885737134490994,
+      "7": 0.0011566947489566298,
+      "8": 0.0007407891982976004
+    },
+    "observed_silicon_mean": {
+      "1": -0.12323795880149706,
+      "2": -0.13669556422540002,
+      "3": -0.1194391266591723,
+      "4": -0.16046202961048497,
+      "5": -0.1138216938474614,
+      "6": -0.11252694586312442,
+      "7": -0.11158879614767511,
+      "8": -0.05576079117739017
+    },
+    "predicted_oxide_mean": {
+      "1": 0.0003762776418490058,
+      "2": 0.00036907971039922645,
+      "3": 0.00012197428696798344,
+      "4": -0.0001387041397963536,
+      "5": 0.0007855029498032693,
+      "6": 0.00044530514174013206,
+      "7": 0.0009977063035404427,
+      "8": 0.0008596859865318648
+    },
+    "predicted_silicon_mean": {
+      "1": 0.021650295917323543,
+      "2": 0.020361279490340136,
+      "3": 0.007189320390296262,
+      "4": -0.010676908593923734,
+      "5": 0.046672958824367075,
+      "6": 0.02795426444474918,
+      "7": 0.06379311401307816,
+      "8": 0.052625860637617566
+    },
+    "silicon_mean_residual": {
+      "1": 0.14488825471882047,
+      "2": 0.1570568437157386,
+      "3": 0.1266284470494702,
+      "4": 0.14978512101656202,
+      "5": 0.16049465267182855,
+      "6": 0.14048121030787372,
+      "7": 0.17538191016075533,
+      "8": 0.10838665181500723
+    }
+  },
   "residual_feature_rankings": {
     "normalized_shape_rmse_percent": [
       {
@@ -703,7 +755,375 @@
       }
     ]
   },
-  "schema": "petch-zenodo-bosch-calibration-residual-feature-audit-v1",
+  "schema": "petch-zenodo-bosch-calibration-residual-feature-audit-v2",
   "selection_bias_warning": "the best feature was selected after comparing all extracted machine summaries on calibration outcomes; a physical feature family must be frozen before any formal refit or heldout reveal",
+  "sequence_detrended_residual_feature_rankings": {
+    "normalized_shape_rmse_percent": [
+      {
+        "feature": "c4f8_pressure_rms",
+        "feature_maximum": 0.0426972993110137,
+        "feature_minimum": 0.04228525971147993,
+        "sequence_partial_pearson": 0.39459851117982103
+      },
+      {
+        "feature": "c4f8_pressure_mean",
+        "feature_maximum": 0.04171647759292021,
+        "feature_minimum": 0.041325815881318444,
+        "sequence_partial_pearson": 0.372642499813599
+      },
+      {
+        "feature": "c4f8_pressure_q50",
+        "feature_maximum": 0.04609999805688858,
+        "feature_minimum": 0.04364999942481518,
+        "sequence_partial_pearson": 0.3396125590620024
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_std",
+        "feature_maximum": 192.7224722605005,
+        "feature_minimum": 186.00438054970766,
+        "sequence_partial_pearson": 0.33417037985293313
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_std",
+        "feature_maximum": 0.11913058287238992,
+        "feature_minimum": 0.1020856735133686,
+        "sequence_partial_pearson": -0.3341314291423706
+      },
+      {
+        "feature": "sf6_source_reflected_power_mean",
+        "feature_maximum": 54.547216222636614,
+        "feature_minimum": 37.996322089151946,
+        "sequence_partial_pearson": 0.29679960728168037
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_mean",
+        "feature_maximum": 14.975112559271198,
+        "feature_minimum": 14.973678056489337,
+        "sequence_partial_pearson": 0.2909212663207634
+      },
+      {
+        "feature": "sf6_source_load_power_mean",
+        "feature_maximum": 2785.3940301847415,
+        "feature_minimum": 2750.598701579625,
+        "sequence_partial_pearson": -0.2829280924241526
+      },
+      {
+        "feature": "sf6_source_load_power_rms",
+        "feature_maximum": 2788.6313642656355,
+        "feature_minimum": 2770.1805692465696,
+        "sequence_partial_pearson": -0.2825434327056757
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_rms",
+        "feature_maximum": 14.975504917450685,
+        "feature_minimum": 14.97415195045001,
+        "sequence_partial_pearson": 0.2812175696766417
+      },
+      {
+        "feature": "c4f8_above_threshold_s",
+        "feature_maximum": 141.40003371238708,
+        "feature_minimum": 140.4000334739685,
+        "sequence_partial_pearson": 0.2795097278555626
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_q50",
+        "feature_maximum": 464.5985412597656,
+        "feature_minimum": 444.71954345703125,
+        "sequence_partial_pearson": -0.2750550337622522
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q90",
+        "feature_maximum": 733.7374572753906,
+        "feature_minimum": 710.4800415039062,
+        "sequence_partial_pearson": -0.2647086714814502
+      },
+      {
+        "feature": "sf6_source_load_power_std",
+        "feature_maximum": 328.7965466663697,
+        "feature_minimum": 134.2614299711363,
+        "sequence_partial_pearson": 0.2645476251784007
+      },
+      {
+        "feature": "sf6_source_reflected_power_rms",
+        "feature_maximum": 118.91015322874938,
+        "feature_minimum": 40.92873014202675,
+        "sequence_partial_pearson": 0.26328773535888783
+      },
+      {
+        "feature": "c4f8_flow_dose_machine_units_s",
+        "feature_maximum": 46993.10849071061,
+        "feature_minimum": 46186.505798525075,
+        "sequence_partial_pearson": 0.2455550470296897
+      },
+      {
+        "feature": "sf6_source_reflected_power_std",
+        "feature_maximum": 105.99583777429484,
+        "feature_minimum": 15.213167281545061,
+        "sequence_partial_pearson": 0.2362395297751429
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_mean",
+        "feature_maximum": 527.8974671456634,
+        "feature_minimum": 516.5118487854145,
+        "sequence_partial_pearson": -0.230893584891824
+      },
+      {
+        "feature": "sf6_source_load_power_q50",
+        "feature_maximum": 2792.550537109375,
+        "feature_minimum": 2791.20751953125,
+        "sequence_partial_pearson": 0.2143848554084943
+      },
+      {
+        "feature": "sample_count",
+        "feature_maximum": 3835.0,
+        "feature_minimum": 3194.0,
+        "sequence_partial_pearson": 0.20765333340704398
+      }
+    ],
+    "oxide_mean_residual_um": [
+      {
+        "feature": "sf6_source_load_power_q10",
+        "feature_maximum": 2785.83642578125,
+        "feature_minimum": 2783.654296875,
+        "sequence_partial_pearson": -0.32972576001059123
+      },
+      {
+        "feature": "sf6_source_load_power_q90",
+        "feature_maximum": 2799.0966796875,
+        "feature_minimum": 2797.250244140625,
+        "sequence_partial_pearson": 0.32950493967121575
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_q90",
+        "feature_maximum": 14.989471435546875,
+        "feature_minimum": 14.988861083984375,
+        "sequence_partial_pearson": -0.29888300547679186
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_q90",
+        "feature_maximum": 23.15439376831055,
+        "feature_minimum": 11.947996139526367,
+        "sequence_partial_pearson": 0.2947820707087223
+      },
+      {
+        "feature": "c4f8_pressure_q50",
+        "feature_maximum": 0.04609999805688858,
+        "feature_minimum": 0.04364999942481518,
+        "sequence_partial_pearson": 0.28860669875367256
+      },
+      {
+        "feature": "c4f8_platen_reflected_power_mean",
+        "feature_maximum": 6.609010491620564,
+        "feature_minimum": 4.636133333451771,
+        "sequence_partial_pearson": 0.2809967067282698
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_q10",
+        "feature_maximum": 14.985809326171875,
+        "feature_minimum": 14.983977317810059,
+        "sequence_partial_pearson": -0.2716957529844311
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_rms",
+        "feature_maximum": 14.987623745735894,
+        "feature_minimum": 14.98697711404438,
+        "sequence_partial_pearson": -0.2396861964776194
+      },
+      {
+        "feature": "sf6_helium_backside_pressure_mean",
+        "feature_maximum": 14.987623660624083,
+        "feature_minimum": 14.986977014820168,
+        "sequence_partial_pearson": -0.2396790358302801
+      },
+      {
+        "feature": "c4f8_source_load_power_q50",
+        "feature_maximum": 2792.046875,
+        "feature_minimum": 2789.361328125,
+        "sequence_partial_pearson": -0.23706067918997142
+      },
+      {
+        "feature": "sf6_platen_load_power_mean",
+        "feature_maximum": 44.203615532257096,
+        "feature_minimum": 43.99141404893663,
+        "sequence_partial_pearson": -0.23112586675763966
+      },
+      {
+        "feature": "c4f8_platen_load_power_mean",
+        "feature_maximum": 36.660976269228236,
+        "feature_minimum": 36.51891947738172,
+        "sequence_partial_pearson": -0.22962199116535859
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q90",
+        "feature_maximum": 14.988861083984375,
+        "feature_minimum": 14.987640380859375,
+        "sequence_partial_pearson": -0.2216798675135156
+      },
+      {
+        "feature": "c4f8_platen_load_power_rms",
+        "feature_maximum": 38.111308428495796,
+        "feature_minimum": 37.94843079255424,
+        "sequence_partial_pearson": -0.2162688561728701
+      },
+      {
+        "feature": "sf6_source_reflected_power_q10",
+        "feature_maximum": 28.87051010131836,
+        "feature_minimum": 24.719993591308594,
+        "sequence_partial_pearson": 0.2143773980644659
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q90",
+        "feature_maximum": 733.7374572753906,
+        "feature_minimum": 710.4800415039062,
+        "sequence_partial_pearson": -0.203430297299302
+      },
+      {
+        "feature": "sf6_platen_reflected_power_std",
+        "feature_maximum": 5.960820745521779,
+        "feature_minimum": 4.425530234364368,
+        "sequence_partial_pearson": -0.20261362379912773
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q50",
+        "feature_maximum": 14.987030029296875,
+        "feature_minimum": 14.986419677734375,
+        "sequence_partial_pearson": -0.20193810443165874
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_mean",
+        "feature_maximum": 616.5402604449879,
+        "feature_minimum": 600.4623747346751,
+        "sequence_partial_pearson": -0.20037478487254815
+      },
+      {
+        "feature": "sf6_platen_reflected_power_rms",
+        "feature_maximum": 6.733391044995605,
+        "feature_minimum": 5.149902573287205,
+        "sequence_partial_pearson": -0.19770490819111636
+      }
+    ],
+    "silicon_mean_residual_um": [
+      {
+        "feature": "sf6_platen_peak_to_peak_q50",
+        "feature_maximum": 464.5985412597656,
+        "feature_minimum": 444.71954345703125,
+        "sequence_partial_pearson": 0.588362929633167
+      },
+      {
+        "feature": "sf6_platen_reflected_power_mean",
+        "feature_maximum": 3.313656468272527,
+        "feature_minimum": 2.629284790980631,
+        "sequence_partial_pearson": 0.5615007461107162
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_rms",
+        "feature_maximum": 560.7030515089151,
+        "feature_minimum": 551.1258041951371,
+        "sequence_partial_pearson": 0.5525096515858342
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q90",
+        "feature_maximum": 733.7374572753906,
+        "feature_minimum": 710.4800415039062,
+        "sequence_partial_pearson": 0.5449449279723478
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_rms",
+        "feature_maximum": 643.534317555529,
+        "feature_minimum": 626.9533265149638,
+        "sequence_partial_pearson": 0.5337547264217917
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_q50",
+        "feature_maximum": 663.3884887695312,
+        "feature_minimum": 644.1618041992188,
+        "sequence_partial_pearson": 0.5175648100092197
+      },
+      {
+        "feature": "c4f8_platen_peak_to_peak_mean",
+        "feature_maximum": 616.5402604449879,
+        "feature_minimum": 600.4623747346751,
+        "sequence_partial_pearson": 0.5053635870235861
+      },
+      {
+        "feature": "sf6_platen_load_power_q90",
+        "feature_maximum": 79.83641815185547,
+        "feature_minimum": 79.10397338867188,
+        "sequence_partial_pearson": -0.49757677413998136
+      },
+      {
+        "feature": "sf6_platen_peak_to_peak_mean",
+        "feature_maximum": 527.8974671456634,
+        "feature_minimum": 516.5118487854145,
+        "sequence_partial_pearson": 0.4898230797144467
+      },
+      {
+        "feature": "c4f8_platen_load_power_q90",
+        "feature_maximum": 40.28443145751953,
+        "feature_minimum": 39.78087615966797,
+        "sequence_partial_pearson": -0.4815162380898659
+      },
+      {
+        "feature": "c4f8_platen_load_power_q10",
+        "feature_maximum": 39.09421157836914,
+        "feature_minimum": 37.9635009765625,
+        "sequence_partial_pearson": 0.4562026344352852
+      },
+      {
+        "feature": "sf6_platen_reflected_power_rms",
+        "feature_maximum": 6.733391044995605,
+        "feature_minimum": 5.149902573287205,
+        "sequence_partial_pearson": 0.45164026760138487
+      },
+      {
+        "feature": "sf6_platen_dc_bias_mean",
+        "feature_maximum": 4.7077700011259545,
+        "feature_minimum": 2.0774658173944425,
+        "sequence_partial_pearson": 0.4482952256394369
+      },
+      {
+        "feature": "sf6_platen_reflected_power_std",
+        "feature_maximum": 5.960820745521779,
+        "feature_minimum": 4.425530234364368,
+        "sequence_partial_pearson": 0.41537637053321474
+      },
+      {
+        "feature": "c4f8_platen_dc_bias_q90",
+        "feature_maximum": 20.09643840789795,
+        "feature_minimum": 0.0,
+        "sequence_partial_pearson": -0.3910859094273015
+      },
+      {
+        "feature": "c4f8_platen_dc_bias_q10",
+        "feature_maximum": 0.0,
+        "feature_minimum": -13.672292709350586,
+        "sequence_partial_pearson": 0.38987127199521615
+      },
+      {
+        "feature": "c4f8_platen_dc_bias_std",
+        "feature_maximum": 11.227912784345069,
+        "feature_minimum": 1.6700057741371037,
+        "sequence_partial_pearson": -0.3565201098241639
+      },
+      {
+        "feature": "sf6_platen_load_power_q10",
+        "feature_maximum": 28.88576889038086,
+        "feature_minimum": 28.24488067626953,
+        "sequence_partial_pearson": 0.3511826064955609
+      },
+      {
+        "feature": "c4f8_helium_backside_pressure_q50",
+        "feature_maximum": 14.987030029296875,
+        "feature_minimum": 14.986419677734375,
+        "sequence_partial_pearson": 0.3411875820866312
+      },
+      {
+        "feature": "sf6_platen_dc_bias_q10",
+        "feature_maximum": 0.0,
+        "feature_minimum": -20.007935142517088,
+        "sequence_partial_pearson": 0.33123140981051785
+      }
+    ]
+  },
   "status": "calibration-only exploratory model-form discovery; not a prediction seal"
 }

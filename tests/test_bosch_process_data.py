@@ -291,3 +291,12 @@ def test_wall_conditioning_residual_discovery_remains_unsealed_and_target_free()
     assert silicon[0]["feature"] == "wafer_number"
     assert silicon[0]["within_lot_pearson"] > 0.9
     assert "selected after comparing" in payload["selection_bias_warning"]
+    assert payload["schema"].endswith("-v2")
+    slopes = payload["per_lot_sequence_slopes_um_per_wafer"]
+    assert all(value < 0.0 for value in slopes["observed_silicon_mean"].values())
+    assert all(value > 0.1 for value in slopes["silicon_mean_residual"].values())
+    partial = payload[
+        "sequence_detrended_residual_feature_rankings"
+    ]["silicon_mean_residual_um"]
+    assert partial[0]["feature"] == "sf6_platen_peak_to_peak_q50"
+    assert partial[0]["sequence_partial_pearson"] > 0.55
