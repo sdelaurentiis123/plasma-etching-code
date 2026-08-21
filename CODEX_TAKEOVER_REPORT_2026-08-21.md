@@ -1,12 +1,12 @@
 # Codex takeover report — reactor-to-feature absolute-depth campaign
 
-Snapshot: 2026-08-21 09:40 EDT / 13:40 UTC
+Snapshot: 2026-08-21 10:00 EDT / 14:00 UTC
 
 Repository: `/Users/stanislavdelaurentiis/chip-etch/plasma-etching-code`
 
 Branch: `codex/validation-first-multiphysics`
 
-Scientific HEAD at snapshot: `2cbec26`
+Scientific HEAD at snapshot: `cd83816`
 
 Remote branch at snapshot: the same commit.
 
@@ -42,9 +42,11 @@ At this snapshot:
   beats the leave-one-lot-out global-depth baseline, and improves within-lot
   drift, but correctly refuses heldout reveal because it still loses the
   radial point and shape baselines;
-- the remaining Bosch error is localized primarily to radial/electrical tool
-  response rather than bulk depth normalization or a non-identifiable wall
-  deposition/cleaning split;
+- a subsequent calibration-only decomposition localizes `86.2018%` of the
+  squared Bosch normalized-map residual to one repeatable spatial tool map;
+  the leading dynamic residual is an edge-positive, center-negative mode tied
+  to measured C4F8-phase platen Vpp, so the next closure is now materially more
+  specific than a generic "radial/electrical response" guess;
 - the goal is not complete: there is not yet a sealed heldout profile match for
   Freddie, a final Krueger depth match, or an independently validated third
   chemistry using the unchanged core.
@@ -97,10 +99,14 @@ pre-existing user work at these paths:
 
 Do not edit, stage, delete, clean, reset, or absorb those paths. There is no
 need for destructive Git commands. All campaign-owned work through the Oxford
-v6 acceptance and Bosch v7 calibration audit is committed and pushed.
+v6 acceptance, Bosch v7 calibration audit, and Bosch spatial-residual
+localization is committed and pushed.
 
 Recent authoritative commits:
 
+- `cd83816` records the Bosch spatial-boundary residual decomposition and
+  output-space capacity diagnostics without changing the physical model or
+  opening the heldout;
 - `2cbec26` records the identifiable Bosch v7 calibration/LOLO audit and exact
   thirteen-node reactor-to-surface response table;
 - `abb209b` implements the fixed-recipe wall-memory operator and tests;
@@ -119,7 +125,7 @@ Recent authoritative commits:
 - `852df0b` carries the first bounded Bosch wall state through the reactor;
 - `921e62a` freezes that closure before calibration.
 
-The latest v7-focused Bosch run has 37 passing tests. The last
+The Bosch-focused suite at this snapshot has 62 passing tests. The last
 recorded broad suite before the final Oxford owner-projection fix had 2,125
 passing tests. A new full-suite run is still required after the Oxford v6 board
 is retrieved; do not substitute the older broad-suite count for that final
@@ -255,7 +261,7 @@ surface coefficients and electrode waveform are not independently measured.
 
 ### Current v6 board run
 
-At 2026-08-21 13:40 UTC:
+At 2026-08-21 14:00 UTC:
 
 - parent PID file: `/root/zhu_v6_board_980800a.pid`;
 - parent PID: 27994;
@@ -264,8 +270,8 @@ At 2026-08-21 13:40 UTC:
 - log: `/root/zhu_v6_board_980800a.log`;
 - parent state: alive;
 - four child workers: alive, each near 100% CPU;
-- thirteen unique v6 caches are complete;
-- the other 43 exact cells are being recomputed from scratch.
+- eighteen unique v6 caches are complete;
+- the other 38 exact cells are being recomputed from scratch.
 
 The workers spend most time in CPU feature evolution and call CUDA transport in
 bursts. A single `nvidia-smi` snapshot can therefore show 0% GPU while all four
@@ -316,14 +322,14 @@ nm:
 
 ### Live Krueger state
 
-At 13:40 UTC, all supervisor PID files are alive and their logs continue to
+At 14:00 UTC, all supervisor PID files are alive and their logs continue to
 advance through resumable half-hour segments:
 
 | case | PID | elapsed process time | depth prefix | mask opening prefix |
 |---|---:|---:|---:|---:|
-| nominal unresolved | 10284 | 24.125 s | 214.628 nm | 19.991 nm |
-| all CF2 | 10285 | 23.000 s | 240.370 nm | 24.113 nm |
-| all CF3 | 10286 | 22.688 s | 244.791 nm | 23.857 nm |
+| nominal unresolved | 10284 | 24.516 s | 216.178 nm | 19.804 nm |
+| all CF2 | 10285 | 23.375 s | 242.399 nm | 23.367 nm |
+| all CF3 | 10286 | 23.063 s | 246.620 nm | 24.297 nm |
 
 Each target duration is 60 s. These prefixes must not be linearly extrapolated,
 ranked by proximity to 825 nm, or reported as final depths. Geometry, mask
@@ -456,20 +462,60 @@ mean map. Exact selected-parameter replay, grid refinement, and heldout hashing
 are intentionally deferred rather than performed after a known prerequisite
 failed.
 
-### Next Bosch physics
+### Spatial residual localization after v7
 
-The next preregistered iteration should target radial/electrical equipment
-response, using measured platen Vpp and reflected power rather than another
-bulk depth multiplier. After removing lot and sequence trends, the strongest
-calibration residual features remain SF6 platen Vpp median (partial Pearson
-`0.58836`), SF6 reflected-power mean (`0.56150`), SF6 Vpp RMS (`0.55251`), and
-C4F8 Vpp q90 (`0.54494`).
+Commit `cd83816` adds a calibration-only model-form audit. It does not modify
+the reactor, wafer boundary, or surface law and it does not read the heldout.
+Its main result is unusually decisive:
 
-Freeze one minimal transfer law at a time—for example, a bounded mapping from
-measured Vpp/reflection to sheath energy or radial source mix—then rerun the
-same whole-lot baselines. Do not alter wall memory, ion transfer, and surface
-yields simultaneously, and do not open the heldout until the radial point and
-shape baselines are beaten.
+- the shared mean spatial residual contains `86.2018%` of the squared v7
+  normalized-map residual;
+- raw v7 normalized shape RMSE is `1.664987%`;
+- subtracting that all-calibration shared map leaves `0.618475%` RMSE;
+- a whole-lot output-space shared-map proxy reaches `0.633474%` shape RMSE
+  and `0.405513 um` point RMSE, beating the frozen mean-map baselines of
+  `0.636619%` and `0.486585 um` while retaining the reactor-predicted wafer
+  mean;
+- adding one standardized C4F8 platen-Vpp-RMS slope improves the proxy to
+  `0.620340%` shape and `0.399671 um` point RMSE;
+- that slope map is edge-positive and center-negative, with `0.804859`
+  Pearson correlation to the frozen edge basis;
+- the measured C4F8 Vpp-RMS domain is `626.9533--643.5343 V`, with mean
+  `637.44096 V` and standard deviation `3.81631 V`.
+
+This is evidence that the dominant missing term is a stable, machine-specific
+wafer ion-transmission fingerprint, plausibly produced by chamber, electrode,
+and focus-ring geometry. The smaller dynamic term is consistent with
+Vpp-driven sheath curvature or edge focusing. It is not evidence for another
+scalar etch rate, wall-loss multiplier, or surface-yield adjustment.
+
+The capacity audit also sets an important warning. Complete real-Zernike
+output-space bases do not narrowly beat the strict shape baseline until order
+10 (`65` non-piston coefficients, `0.635259%` shape RMSE). That is enough to
+show representational capacity, but it is not yet a physical reactor-to-wafer
+closure and must not be presented as one.
+
+### Next Bosch physics: version 8, not yet frozen
+
+The next iteration should be preregistered as a positive, smooth,
+current-conserving wafer-boundary operator applied only to the positive-ion
+channel before the unchanged feature and surface recurrence:
+
+1. a static tool fingerprint in the official wafer coordinate frame;
+2. a low-order Vpp-dependent edge mode using only the measured C4F8-phase
+   waveform statistic;
+3. exact area/current normalization so total positive-ion current is
+   unchanged;
+4. strict coefficient, field-amplitude, voltage-domain, identifiability, and
+   interpolation gates;
+5. whole-lot refits with no heldout leakage and the same point/shape baselines;
+6. no changes to v7 wall memory, neutral chemistry, or surface yields.
+
+The portable science is the operator and conservation law. The fitted static
+map is a calibration of this specific SPTS tool and coordinate frame. If the
+minimum basis capable of passing the baseline is too high-order or unstable
+under whole-lot refits, v8 must fail rather than laundering an empirical depth
+map into plasma physics.
 
 ## Track D — generalization and other chemistries
 
@@ -548,8 +594,8 @@ from many solutions consistent with forward power, pressure, and flow alone.
    partial depths.
 4. Treat Bosch v7 as a completed, useful non-seal; do not reopen the heldout or
    refit its wall law.
-5. Freeze a minimal measured Vpp/reflected-power radial/electrical transfer law
-   before implementing the next Bosch iteration.
+5. Freeze the current-conserving static-tool-map plus low-order Vpp edge-mode
+   v8 hypothesis before implementing it; keep wall and surface laws unchanged.
 6. Retrieve and certify Oxford v6 immediately after completion.
 7. Retrieve all three Krueger terminal audits after completion.
 8. Run focused and full test suites after live artifacts land.
@@ -573,7 +619,8 @@ Allowed:
   with an identifiable shared recipe-path memory law;
 - Bosch v7 beats the global-depth baseline while correctly refusing heldout
   because radial point/shape baselines still win;
-- Bosch data expose a repeatable remaining electrical/radial-response signal;
+- Bosch data localize 86.2% of squared map residual to one repeatable tool
+  fingerprint and expose a smaller Vpp-dependent edge mode;
 - the target SEMs and heldout outcomes have not been used to tune the active
   prediction paths.
 
@@ -598,9 +645,10 @@ well-separated scientific gates:
    running;
 2. Krueger: the frozen surface-transfer hypotheses are only about one third of
    the way through their full nonlinear process time;
-3. Bosch: identifiable dynamic recipe-path memory now transfers mean depth, but
-   measured impedance/radial response must beat point/shape baselines before
-   heldout reveal.
+3. Bosch: identifiable dynamic recipe-path memory now transfers mean depth;
+   the dominant remaining map error is localized to a stable tool fingerprint,
+   but that fingerprint still has to be implemented as a conservative physical
+   wafer-boundary operator and beat point/shape baselines before heldout reveal.
 
 The right takeover behavior is to preserve those firewalls, finish the live
 runs, and improve only closures supported by independent observables. The
