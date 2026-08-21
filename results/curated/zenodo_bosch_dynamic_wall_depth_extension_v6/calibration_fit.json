@@ -1,0 +1,1207 @@
+{
+  "absolute_gate_pass": {
+    "normalized_shape_rmse_percent": true,
+    "oxide_mean_mae_um": true,
+    "selectivity_mape_percent": true,
+    "silicon_mean_mae_um": true,
+    "silicon_mean_mape_percent": true,
+    "silicon_point_rmse_um": true
+  },
+  "all_absolute_gates_pass": true,
+  "calibration_metrics": {
+    "normalized_shape_rmse_percent": 1.6657332676700307,
+    "oxide_mean_correlation": 0.07339678380186711,
+    "oxide_mean_mae_um": 0.03956832019504017,
+    "oxide_mean_mape_percent": 6.269435926145374,
+    "predicted_oxide_mean_range_um": [
+      0.6490234806212059,
+      0.6623852927961149
+    ],
+    "predicted_silicon_mean_range_um": [
+      42.87480072996871,
+      44.01030853451032
+    ],
+    "selectivity_mape_percent": 6.048051377045681,
+    "silicon_mean_correlation": 0.7221879086819429,
+    "silicon_mean_mae_um": 0.23333050325000348,
+    "silicon_mean_mape_percent": 0.5327108279065035,
+    "silicon_point_rmse_um": 0.7896797800940227
+  },
+  "calibration_process_trace_count": 76,
+  "calibration_wafer_count": 75,
+  "deterministic_acceleration": {
+    "exact_selected_parameter_replay_completed": false,
+    "log_wall_multiplier_nodes": [
+      -1.3862943611198906,
+      -1.2807689862744773,
+      -0.9802581434685472,
+      -0.530511884381729,
+      -8.488604760107494e-17,
+      0.5305118843817289,
+      0.9802581434685471,
+      1.2807689862744773,
+      1.3862943611198906
+    ],
+    "method": "PCHIP in log wall-loss multiplier over exact reactor-to-surface nodes",
+    "node_count": 9,
+    "response_table": "results/curated/zenodo_bosch_dynamic_wall_depth_extension_v6/exact_response_table.npz",
+    "response_table_sha256": "74ea85bef0a3d5cfb524b44ba8d10d9521b069edfd8ef6827fb3837a74471450",
+    "used_only_for_calibration_search": true,
+    "validation": {
+      "frozen_maximum": 0.05,
+      "independent_midpoint_node_count": 8,
+      "maximum_error_fraction_of_any_frozen_gate": 0.0609081339100959,
+      "nodes": [
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.00034107688503534747,
+            "oxide_mean_mae_um": 1.3768300516225906e-06,
+            "selectivity_mape_percent": 0.0026594910024556975,
+            "silicon_mean_mae_um": 0.0014638673758379166,
+            "silicon_point_rmse_um": 0.0014831040437593963
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.00017053844251767374,
+            "oxide_mean_mae_um": 1.7210375645282383e-05,
+            "selectivity_mape_percent": 0.00022162425020464145,
+            "silicon_mean_mae_um": 0.0014638673758379166,
+            "silicon_point_rmse_um": 0.0009887360291729308
+          },
+          "wall_loss_multiplier": 0.26354486134791083
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.0008699119259923943,
+            "oxide_mean_mae_um": 3.7711786061785563e-07,
+            "selectivity_mape_percent": 0.0016045019396913793,
+            "silicon_mean_mae_um": 0.0008301717455304925,
+            "silicon_point_rmse_um": 0.0009532803314364138
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.00043495596299619716,
+            "oxide_mean_mae_um": 4.713973257723195e-06,
+            "selectivity_mape_percent": 0.0001337084949742816,
+            "silicon_mean_mae_um": 0.0008301717455304925,
+            "silicon_point_rmse_um": 0.0006355202209576092
+          },
+          "wall_loss_multiplier": 0.32286740048196194
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.005672329312603123,
+            "oxide_mean_mae_um": 8.41881928361617e-06,
+            "selectivity_mape_percent": 0.026422065435168268,
+            "silicon_mean_mae_um": 0.012343862402722531,
+            "silicon_point_rmse_um": 0.012748143812974271
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.0028361646563015617,
+            "oxide_mean_mae_um": 0.00010523524104520213,
+            "selectivity_mape_percent": 0.0022018387862640224,
+            "silicon_mean_mae_um": 0.012343862402722531,
+            "silicon_point_rmse_um": 0.008498762541982847
+          },
+          "wall_loss_multiplier": 0.46982968893061516
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.007202047028757534,
+            "oxide_mean_mae_um": 3.5078058736548455e-06,
+            "selectivity_mape_percent": 0.1317666069060913,
+            "silicon_mean_mae_um": 0.0609081339100959,
+            "silicon_point_rmse_um": 0.06107013392543897
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.003601023514378767,
+            "oxide_mean_mae_um": 4.384757342068557e-05,
+            "selectivity_mape_percent": 0.010980550575507607,
+            "silicon_mean_mae_um": 0.0609081339100959,
+            "silicon_point_rmse_um": 0.04071342261695931
+          },
+          "wall_loss_multiplier": 0.7670096147304827
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.01613071834099391,
+            "oxide_mean_mae_um": 0.0002025080467010243,
+            "selectivity_mape_percent": 0.17889364315354567,
+            "silicon_mean_mae_um": 0.06078821844124377,
+            "silicon_point_rmse_um": 0.061304431507450644
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.008065359170496954,
+            "oxide_mean_mae_um": 0.0025313505837628036,
+            "selectivity_mape_percent": 0.014907803596128805,
+            "silicon_mean_mae_um": 0.06078821844124377,
+            "silicon_point_rmse_um": 0.0408696210049671
+          },
+          "wall_loss_multiplier": 1.303764621453131
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.01490174487235227,
+            "oxide_mean_mae_um": 0.0013108783852870582,
+            "selectivity_mape_percent": 0.2619560132218348,
+            "silicon_mean_mae_um": 0.02194561917765611,
+            "silicon_point_rmse_um": 0.0226687955027993
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.007450872436176135,
+            "oxide_mean_mae_um": 0.016385979816088227,
+            "selectivity_mape_percent": 0.021829667768486233,
+            "silicon_mean_mae_um": 0.02194561917765611,
+            "silicon_point_rmse_um": 0.015112530335199534
+          },
+          "wall_loss_multiplier": 2.12843084113333
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.0006615422632874349,
+            "oxide_mean_mae_um": 0.0008705049584932182,
+            "selectivity_mape_percent": 0.1618772305475038,
+            "silicon_mean_mae_um": 0.007772089994908811,
+            "silicon_point_rmse_um": 0.007789463148204959
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.00033077113164371746,
+            "oxide_mean_mae_um": 0.010881311981165227,
+            "selectivity_mape_percent": 0.013489769212291983,
+            "silicon_mean_mae_um": 0.007772089994908811,
+            "silicon_point_rmse_um": 0.005192975432136639
+          },
+          "wall_loss_multiplier": 3.097246728865302
+        },
+        {
+          "errors": {
+            "normalized_shape_rmse_percent": 0.0006622236882088065,
+            "oxide_mean_mae_um": 4.767999799531057e-05,
+            "selectivity_mape_percent": 0.009896865473175254,
+            "silicon_mean_mae_um": 0.0006660964837271403,
+            "silicon_point_rmse_um": 0.00070396544792124
+          },
+          "fractions_of_frozen_gates": {
+            "normalized_shape_rmse_percent": 0.00033111184410440327,
+            "oxide_mean_mae_um": 0.0005959999749413821,
+            "selectivity_mape_percent": 0.0008247387894312711,
+            "silicon_mean_mae_um": 0.0006660964837271403,
+            "silicon_point_rmse_um": 0.00046931029861416
+          },
+          "wall_loss_multiplier": 3.7944204067780323
+        }
+      ],
+      "passes": false
+    }
+  },
+  "eligible_for_prediction_seal": false,
+  "frozen_absolute_gates": {
+    "normalized_shape_rmse_percent": 2.0,
+    "oxide_mean_mae_um": 0.08,
+    "selectivity_mape_percent": 12.0,
+    "silicon_mean_mae_um": 1.0,
+    "silicon_mean_mape_percent": 3.0,
+    "silicon_point_rmse_um": 1.5
+  },
+  "heldout_outcomes_read": false,
+  "heldout_prediction_written": false,
+  "identifiability": {
+    "condition_number": 6762259.421663552,
+    "dynamic_bound_contact": true,
+    "gates": {
+      "condition_number_at_most_1e6": false,
+      "full_column_rank": true,
+      "maximum_parameter_correlation_below_0p995": false,
+      "no_unresolved_dynamic_bound_contact": false
+    },
+    "jacobian_shape": [
+      6900,
+      6
+    ],
+    "maximum_pairwise_parameter_correlation_magnitude": 0.9999972608677061,
+    "normalized_distance_to_nearest_bound": [
+      0.4998607896683998,
+      0.4940743402283276,
+      0.4933723064575087,
+      0.20284965776969202,
+      1.1093400498982997e-16,
+      4.8812771951517976e-11
+    ],
+    "passes": false,
+    "rank": 6,
+    "singular_values": [
+      7.43032984060139,
+      5.820103848745681,
+      4.215012836704151,
+      0.3291930574178966,
+      0.001005708116236036,
+      1.0987939647505403e-06
+    ]
+  },
+  "implementation_hashes": {
+    "cylindrical_transfer": "a6904537f6674815505a15795e5cd78b8ae0d05c6685756faf6e58fdbf0e5391",
+    "dynamic_calibration_driver": "b15486afef1f87408cc02a8fd2b5168675765ac50623e3e7c891b13bd84ca5da",
+    "reduced_reactor": "d4a460961cd654ac70d37b664a4310797417e9ae2349498b2d20fe76dced2a1e",
+    "surface_recurrence": "da837c8c37ee33dc3ecf2bdd226af1fbd520fe432d2e95c60878760644e04745"
+  },
+  "input_hashes": {
+    "calibration_measurements": "c46b82fd7d15903dc61098d72823ba3992cf8ac7b14c69d71e3e90da4caa20eb",
+    "process_data": "fd304fbc08a9641f182f71f11064b8fe00a01c24a100ae8211536ad0cd404f49",
+    "process_dictionary": "51c9bebfad14f0a0558bf8e5831579b6a3308a2ff5b330ae5b8f8f32bc4b4302",
+    "v1_preregistration": "c7e69b16c8945e2bbeaea1458880850ca6852f8b4fae35b06fa06675186f3f75",
+    "v2_preregistration": "66f681abbe54d7785965e5e949a23f7562c3cad18d4105752b964eba59b93555",
+    "v5_fit": "3c8b3bc98c22818895d34640cfc8390f06925e0ea5ed71a0e86123fc0021d25f",
+    "v5_residual_audit": "b32b4ee9d0a49e6e2d9fabf0eeb0726f6f0ff847df5139a776e990e1fb747089",
+    "v6_preregistration": "9d8dc549364450ee07fa013d9e8bec5d636755356330cf34963ea6ed068892c2"
+  },
+  "leave_one_lot_out_empirical_baselines": {
+    "global_mean": {
+      "silicon_mean_mae_um": 0.3384860882259995,
+      "silicon_mean_mape_percent": 0.7754341244771714
+    },
+    "mean_map": {
+      "normalized_shape_rmse_percent": 0.6366189140525332,
+      "silicon_point_rmse_um": 0.48658530285598817
+    }
+  },
+  "optimizer": {
+    "cost": 0.7237097560467183,
+    "fixed_start_attempts": [
+      {
+        "cost": 0.7237097560467278,
+        "nfev": 26,
+        "start_index": 0,
+        "success": true
+      },
+      {
+        "cost": 0.7237097560467262,
+        "nfev": 24,
+        "start_index": 1,
+        "success": true
+      },
+      {
+        "cost": 0.7237097560467183,
+        "nfev": 27,
+        "start_index": 2,
+        "success": true
+      }
+    ],
+    "message": "`ftol` termination condition is satisfied.",
+    "nfev": 27,
+    "parameter_lower_bounds": [
+      -1.5,
+      -1.5,
+      -1.5,
+      -6.907755278982137,
+      -6.907755278982137,
+      -1.3862943611198906
+    ],
+    "parameter_upper_bounds": [
+      1.5,
+      1.5,
+      1.5,
+      1.0986122886681098,
+      1.0986122886681098,
+      1.3862943611198906
+    ],
+    "selected_fixed_start_index": 2,
+    "status": 2,
+    "success": true
+  },
+  "parameters": {
+    "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+    "conditioning_repeat_log_coefficient": 0.0004176309948005382,
+    "deposition_rate_per_reference_wafer": 0.005073794303697658,
+    "dynamic_law_manifest": {
+      "c4f8_reference_dose_machine_units_s": 46564.0977805,
+      "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+      "deposition_rate_per_reference_wafer": 0.005073794303697658,
+      "log_wall_loss_response": 1.3862943609845528,
+      "maximum_absolute_log_response": 1.3862943611198906,
+      "per_lot_initial_state_fitted": false,
+      "rate_bounds_per_reference_wafer": [
+        0.001,
+        3.0
+      ],
+      "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+      "sf6_reference_dose_machine_units_s": 264830.251437,
+      "target_depth_used": false,
+      "wafer_number_used": false,
+      "wall_loss_multiplier_bounds": [
+        0.25,
+        4.0
+      ]
+    },
+    "log_wall_loss_response": 1.3862943609845528,
+    "silicon_oxide_precondition_coefficient": -0.019883080627473897,
+    "silicon_precondition_coefficient": -0.01777697931501737,
+    "static_law_manifest": {
+      "coefficient_bound": 1.5,
+      "log_carbon_cycle_coefficient": 0.0004176309948005382,
+      "reference_lot_type": "3C",
+      "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+      "silicon_oxide_precondition_coefficient": -0.019883080627473897,
+      "silicon_precondition_coefficient": -0.01777697931501737,
+      "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+      "target_depth_used": false,
+      "wall_loss_multiplier_bounds": [
+        0.25,
+        4.0
+      ]
+    }
+  },
+  "per_lot_or_per_wafer_depth_offsets": false,
+  "points_per_wafer": 89,
+  "positive_ion_path_changed": false,
+  "schema": "petch-zenodo-bosch-dynamic-wall-calibration-fit-v1",
+  "seal_prerequisites": {
+    "all_absolute_calibration_gates_pass": true,
+    "certification_grid_refinement_completed": false,
+    "exact_selected_parameter_replay_completed": false,
+    "heldout_prediction_hash_sealed": false,
+    "identifiability_gate_passes": false,
+    "interpolation_validation_passes": false,
+    "whole_lot_physics_beats_all_empirical_baselines": false,
+    "within_lot_slope_error_improves_over_v5": true
+  },
+  "status": "calibration-only surrogate search; exact replay and heldout seal remain closed",
+  "surface_laws_changed": false,
+  "unmeasured_process_traces_carried_through_wall_history": [
+    "2024-07-02_07"
+  ],
+  "wafer_number_used_as_model_input": false,
+  "wall_history": {
+    "dynamic_law": {
+      "c4f8_reference_dose_machine_units_s": 46564.0977805,
+      "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+      "deposition_rate_per_reference_wafer": 0.005073794303697658,
+      "log_wall_loss_response": 1.3862943609845528,
+      "maximum_absolute_log_response": 1.3862943611198906,
+      "per_lot_initial_state_fitted": false,
+      "rate_bounds_per_reference_wafer": [
+        0.001,
+        3.0
+      ],
+      "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+      "sf6_reference_dose_machine_units_s": 264830.251437,
+      "target_depth_used": false,
+      "wafer_number_used": false,
+      "wall_loss_multiplier_bounds": [
+        0.25,
+        4.0
+      ]
+    },
+    "maximum_applied_multiplier": 1.0675403595902295,
+    "maximum_mean_occupancy": 0.046858848831390354,
+    "minimum_applied_multiplier": 0.9837563755584953,
+    "minimum_mean_occupancy": 0.0025274497265060925,
+    "static_law": {
+      "coefficient_bound": 1.5,
+      "log_carbon_cycle_coefficient": 0.0004176309948005382,
+      "reference_lot_type": "3C",
+      "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+      "silicon_oxide_precondition_coefficient": -0.019883080627473897,
+      "silicon_precondition_coefficient": -0.01777697931501737,
+      "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+      "target_depth_used": false,
+      "wall_loss_multiplier_bounds": [
+        0.25,
+        4.0
+      ]
+    }
+  },
+  "whole_lot_leave_one_out": {
+    "aggregate_metrics": {
+      "normalized_shape_rmse_percent": 1.6702567804889397,
+      "oxide_mean_correlation": 0.07433610544955309,
+      "oxide_mean_mae_um": 0.03956751686183322,
+      "oxide_mean_mape_percent": 6.269258888580268,
+      "predicted_oxide_mean_range_um": [
+        0.6490228964492435,
+        0.6623840827551005
+      ],
+      "predicted_silicon_mean_range_um": [
+        42.64450841613282,
+        43.95519698132232
+      ],
+      "selectivity_mape_percent": 6.0876700485504,
+      "silicon_mean_correlation": 0.5764867870176917,
+      "silicon_mean_mae_um": 0.2865202480519091,
+      "silicon_mean_mape_percent": 0.654656553960512,
+      "silicon_point_rmse_um": 0.8156411040838689
+    },
+    "completed": true,
+    "folds": [
+      {
+        "heldout_lot": 1,
+        "optimizer_cost": 0.6572269823094474,
+        "optimizer_nfev": 24,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": 0.0004079130279708915,
+          "deposition_rate_per_reference_wafer": 0.006017419977039736,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.006017419977039736,
+            "log_wall_loss_response": 1.3862943584663436,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943584663436,
+          "silicon_oxide_precondition_coefficient": -0.025359920098992118,
+          "silicon_precondition_coefficient": -0.02417500499957079,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": 0.0004079130279708915,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.025359920098992118,
+            "silicon_precondition_coefficient": -0.02417500499957079,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 0,
+        "start_attempts": [
+          {
+            "cost": 0.6572269823094474,
+            "nfev": 24,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.6572269823126133,
+            "nfev": 23,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.6572269823103316,
+            "nfev": 29,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.5773843352886063,
+          "oxide_mean_correlation": -0.3480300820891348,
+          "oxide_mean_mae_um": 0.07014512563460697,
+          "oxide_mean_mape_percent": 11.986524293479192,
+          "predicted_oxide_mean_range_um": [
+            0.6538160337099777,
+            0.6602364777275413
+          ],
+          "predicted_silicon_mean_range_um": [
+            43.086442594014635,
+            43.685510779690794
+          ],
+          "selectivity_mape_percent": 11.254548145353167,
+          "silicon_mean_correlation": 0.8488753611595654,
+          "silicon_mean_mae_um": 0.2830760990424434,
+          "silicon_mean_mape_percent": 0.6435188144298493,
+          "silicon_point_rmse_um": 0.7972788011506361
+        },
+        "test_wafer_count": 9,
+        "training_wafer_count": 66
+      },
+      {
+        "heldout_lot": 2,
+        "optimizer_cost": 0.6377591435109364,
+        "optimizer_nfev": 23,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": -0.013170444627918448,
+          "deposition_rate_per_reference_wafer": 0.006388309566074375,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.006388309566074375,
+            "log_wall_loss_response": 1.3862943611005145,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943611005145,
+          "silicon_oxide_precondition_coefficient": -0.027508988667945315,
+          "silicon_precondition_coefficient": -0.026846489847903016,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": -0.013170444627918448,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.027508988667945315,
+            "silicon_precondition_coefficient": -0.026846489847903016,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 1,
+        "start_attempts": [
+          {
+            "cost": 0.6377591435173143,
+            "nfev": 24,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.6377591435109364,
+            "nfev": 23,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.6377591435115584,
+            "nfev": 28,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.4695168206997242,
+          "oxide_mean_correlation": -0.4355174594586016,
+          "oxide_mean_mae_um": 0.07540791486374811,
+          "oxide_mean_mape_percent": 13.002843002152858,
+          "predicted_oxide_mean_range_um": [
+            0.6534324814899137,
+            0.659638548072907
+          ],
+          "predicted_silicon_mean_range_um": [
+            42.85721662859748,
+            43.40877308958942
+          ],
+          "selectivity_mape_percent": 12.195730129742017,
+          "silicon_mean_correlation": 0.8833330609593428,
+          "silicon_mean_mae_um": 0.35063976258774476,
+          "silicon_mean_mape_percent": 0.8001921681669744,
+          "silicon_point_rmse_um": 0.7906813484203697
+        },
+        "test_wafer_count": 10,
+        "training_wafer_count": 65
+      },
+      {
+        "heldout_lot": 3,
+        "optimizer_cost": 0.7187318114180226,
+        "optimizer_nfev": 22,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": 0.011310428540004625,
+          "deposition_rate_per_reference_wafer": 0.006068459244500596,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.006068459244500596,
+            "log_wall_loss_response": 1.3862943601825217,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943601825217,
+          "silicon_oxide_precondition_coefficient": -0.025655783408896224,
+          "silicon_precondition_coefficient": -0.02464261698350586,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": 0.011310428540004625,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.025655783408896224,
+            "silicon_precondition_coefficient": -0.02464261698350586,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 0,
+        "start_attempts": [
+          {
+            "cost": 0.7187318114180226,
+            "nfev": 22,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.7187318114180267,
+            "nfev": 25,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.718731811419066,
+            "nfev": 29,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.8380293679568158,
+          "oxide_mean_correlation": 0.6250520357412261,
+          "oxide_mean_mae_um": 0.040089169581993656,
+          "oxide_mean_mape_percent": 5.991410985047688,
+          "predicted_oxide_mean_range_um": [
+            0.652468291640511,
+            0.6616303728740686
+          ],
+          "predicted_silicon_mean_range_um": [
+            42.64450841613282,
+            43.62381185699019
+          ],
+          "selectivity_mape_percent": 5.615399985252231,
+          "silicon_mean_correlation": 0.9342983922188666,
+          "silicon_mean_mae_um": 0.44380207662071525,
+          "silicon_mean_mape_percent": 1.0117130331780877,
+          "silicon_point_rmse_um": 0.9488625977322381
+        },
+        "test_wafer_count": 10,
+        "training_wafer_count": 65
+      },
+      {
+        "heldout_lot": 4,
+        "optimizer_cost": 0.7478331261191768,
+        "optimizer_nfev": 26,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": 0.0004146624088510949,
+          "deposition_rate_per_reference_wafer": 0.004629815404933906,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.004629815404933906,
+            "log_wall_loss_response": 1.3862943610570069,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943610570069,
+          "silicon_oxide_precondition_coefficient": -0.017301851593807094,
+          "silicon_precondition_coefficient": -0.010051043589133613,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": 0.0004146624088510949,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.017301851593807094,
+            "silicon_precondition_coefficient": -0.010051043589133613,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 2,
+        "start_attempts": [
+          {
+            "cost": 0.7478331261191798,
+            "nfev": 23,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.7478331261231321,
+            "nfev": 20,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.7478331261191768,
+            "nfev": 26,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.5935540110961464,
+          "oxide_mean_correlation": 0.5959649966489012,
+          "oxide_mean_mae_um": 0.03601806879206411,
+          "oxide_mean_mape_percent": 5.181638826400257,
+          "predicted_oxide_mean_range_um": [
+            0.6529293739266037,
+            0.6623840827551005
+          ],
+          "predicted_silicon_mean_range_um": [
+            43.05219617776887,
+            43.95519698132232
+          ],
+          "selectivity_mape_percent": 5.052574514403265,
+          "silicon_mean_correlation": 0.8865901815468102,
+          "silicon_mean_mae_um": 0.24623648391321495,
+          "silicon_mean_mape_percent": 0.5584143308884149,
+          "silicon_point_rmse_um": 0.7855862419955872
+        },
+        "test_wafer_count": 10,
+        "training_wafer_count": 65
+      },
+      {
+        "heldout_lot": 5,
+        "optimizer_cost": 0.7685797614749181,
+        "optimizer_nfev": 23,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": 0.0046374847506690155,
+          "deposition_rate_per_reference_wafer": 0.004606590961208204,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.004606590961208204,
+            "log_wall_loss_response": 1.3862943603010052,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943603010052,
+          "silicon_oxide_precondition_coefficient": -0.017166754749634156,
+          "silicon_precondition_coefficient": -0.020995652100813694,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": 0.0046374847506690155,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.017166754749634156,
+            "silicon_precondition_coefficient": -0.020995652100813694,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 1,
+        "start_attempts": [
+          {
+            "cost": 0.7685797614833842,
+            "nfev": 20,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.7685797614749181,
+            "nfev": 23,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.7685797614788733,
+            "nfev": 25,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.4869435793326549,
+          "oxide_mean_correlation": -0.43453908203253866,
+          "oxide_mean_mae_um": 0.023391011267610375,
+          "oxide_mean_mape_percent": 3.4391710459073597,
+          "predicted_oxide_mean_range_um": [
+            0.6490228964492435,
+            0.6609706956585942
+          ],
+          "predicted_silicon_mean_range_um": [
+            43.34945248319658,
+            43.86385654185048
+          ],
+          "selectivity_mape_percent": 3.3372368620910473,
+          "silicon_mean_correlation": 0.4638551107805422,
+          "silicon_mean_mae_um": 0.32597921043395317,
+          "silicon_mean_mape_percent": 0.7504273757713431,
+          "silicon_point_rmse_um": 0.7369045858630627
+        },
+        "test_wafer_count": 10,
+        "training_wafer_count": 65
+      },
+      {
+        "heldout_lot": 6,
+        "optimizer_cost": 0.7416739000517523,
+        "optimizer_nfev": 27,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": -0.00024650883623012626,
+          "deposition_rate_per_reference_wafer": 0.004597604263390487,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.004597604263390487,
+            "log_wall_loss_response": 1.3862943610991674,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943610991674,
+          "silicon_oxide_precondition_coefficient": -0.017114476648133876,
+          "silicon_precondition_coefficient": -0.015553886377167104,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": -0.00024650883623012626,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.017114476648133876,
+            "silicon_precondition_coefficient": -0.015553886377167104,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 2,
+        "start_attempts": [
+          {
+            "cost": 0.7416739000739503,
+            "nfev": 23,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.7416739000517719,
+            "nfev": 22,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.7416739000517523,
+            "nfev": 27,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 2.0312630072473503,
+          "oxide_mean_correlation": 0.21590838540152393,
+          "oxide_mean_mae_um": 0.014528148086313464,
+          "oxide_mean_mape_percent": 2.1572088045987945,
+          "predicted_oxide_mean_range_um": [
+            0.6505202542991951,
+            0.6601144882431161
+          ],
+          "predicted_silicon_mean_range_um": [
+            43.3076328655405,
+            43.85203474744049
+          ],
+          "selectivity_mape_percent": 2.6545732745328476,
+          "silicon_mean_correlation": 0.8478613586986484,
+          "silicon_mean_mae_um": 0.2416701858224478,
+          "silicon_mean_mape_percent": 0.5553471052165904,
+          "silicon_point_rmse_um": 0.9186995955070828
+        },
+        "test_wafer_count": 10,
+        "training_wafer_count": 65
+      },
+      {
+        "heldout_lot": 7,
+        "optimizer_cost": 0.7458680393633105,
+        "optimizer_nfev": 27,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": 0.0004186663038571372,
+          "deposition_rate_per_reference_wafer": 0.004933117964455971,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.004933117964455971,
+            "log_wall_loss_response": 1.386294361079352,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.386294361079352,
+          "silicon_oxide_precondition_coefficient": -0.01763964355923521,
+          "silicon_precondition_coefficient": -0.016821956053416097,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": 0.0004186663038571372,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.01763964355923521,
+            "silicon_precondition_coefficient": -0.016821956053416097,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 2,
+        "start_attempts": [
+          {
+            "cost": 0.7458680393634026,
+            "nfev": 23,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.7458680393653212,
+            "nfev": 24,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.7458680393633105,
+            "nfev": 27,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.5922785087310625,
+          "oxide_mean_correlation": 0.7600458948596353,
+          "oxide_mean_mae_um": 0.028440821893481,
+          "oxide_mean_mape_percent": 4.1557912109707384,
+          "predicted_oxide_mean_range_um": [
+            0.652005973581074,
+            0.6583245980611646
+          ],
+          "predicted_silicon_mean_range_um": [
+            43.43012993314105,
+            43.784657670917476
+          ],
+          "selectivity_mape_percent": 4.188515639179688,
+          "silicon_mean_correlation": 0.302816588130158,
+          "silicon_mean_mae_um": 0.21398296793212643,
+          "silicon_mean_mape_percent": 0.4893305972047142,
+          "silicon_point_rmse_um": 0.7383342552533718
+        },
+        "test_wafer_count": 6,
+        "training_wafer_count": 69
+      },
+      {
+        "heldout_lot": 8,
+        "optimizer_cost": 0.7611420997651009,
+        "optimizer_nfev": 24,
+        "optimizer_success": true,
+        "parameters": {
+          "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+          "conditioning_repeat_log_coefficient": 0.0004195519615938642,
+          "deposition_rate_per_reference_wafer": 0.004808806500140442,
+          "dynamic_law_manifest": {
+            "c4f8_reference_dose_machine_units_s": 46564.0977805,
+            "cleaning_rate_per_reference_wafer": 0.001000000000000001,
+            "deposition_rate_per_reference_wafer": 0.004808806500140442,
+            "log_wall_loss_response": 1.3862943603114688,
+            "maximum_absolute_log_response": 1.3862943611198906,
+            "per_lot_initial_state_fitted": false,
+            "rate_bounds_per_reference_wafer": [
+              0.001,
+              3.0
+            ],
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "sf6_reference_dose_machine_units_s": 264830.251437,
+            "target_depth_used": false,
+            "wafer_number_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          },
+          "log_wall_loss_response": 1.3862943603114688,
+          "silicon_oxide_precondition_coefficient": -0.02101040715778234,
+          "silicon_precondition_coefficient": -0.01597798791816384,
+          "static_law_manifest": {
+            "coefficient_bound": 1.5,
+            "log_carbon_cycle_coefficient": 0.0004195519615938642,
+            "reference_lot_type": "3C",
+            "schema": "petch-spts-bosch-wall-conditioning-law-v1",
+            "silicon_oxide_precondition_coefficient": -0.02101040715778234,
+            "silicon_precondition_coefficient": -0.01597798791816384,
+            "source_semantics": "C means conditioning on the bare system chuck; the first feature is conditioning-repeat count, not carbon",
+            "target_depth_used": false,
+            "wall_loss_multiplier_bounds": [
+              0.25,
+              4.0
+            ]
+          }
+        },
+        "selected_start_index": 1,
+        "start_attempts": [
+          {
+            "cost": 0.7611420997652234,
+            "nfev": 21,
+            "start_index": 0,
+            "success": true
+          },
+          {
+            "cost": 0.7611420997651009,
+            "nfev": 24,
+            "start_index": 1,
+            "success": true
+          },
+          {
+            "cost": 0.7611420997664445,
+            "nfev": 26,
+            "start_index": 2,
+            "success": true
+          }
+        ],
+        "test_metrics": {
+          "normalized_shape_rmse_percent": 1.65782040229184,
+          "oxide_mean_correlation": 0.7896431189087935,
+          "oxide_mean_mae_um": 0.02712695766478459,
+          "oxide_mean_mape_percent": 3.965822409531346,
+          "predicted_oxide_mean_range_um": [
+            0.6496799583671871,
+            0.6603048024292296
+          ],
+          "predicted_silicon_mean_range_um": [
+            43.44458593186998,
+            43.794542516774925
+          ],
+          "selectivity_mape_percent": 4.159807883780937,
+          "silicon_mean_correlation": 0.343894971310793,
+          "silicon_mean_mae_um": 0.15741587111376773,
+          "silicon_mean_mape_percent": 0.3610648501727376,
+          "silicon_point_rmse_um": 0.7487704423111761
+        },
+        "test_wafer_count": 10,
+        "training_wafer_count": 65
+      }
+    ]
+  },
+  "whole_lot_physics_beats_empirical_baseline": {
+    "global_mean_depth_mae": true,
+    "mean_map_normalized_shape_rmse": false,
+    "mean_map_point_rmse": false
+  },
+  "within_lot_sequence": {
+    "dynamic_lot_slopes": {
+      "1": {
+        "observed_um_per_wafer": -0.12323795880150035,
+        "predicted_um_per_wafer": -0.04108100927776358,
+        "residual_um_per_wafer": 0.08215694952373677
+      },
+      "2": {
+        "observed_um_per_wafer": -0.13669556422540072,
+        "predicted_um_per_wafer": -0.04229998804767213,
+        "residual_um_per_wafer": 0.09439557617772859
+      },
+      "3": {
+        "observed_um_per_wafer": -0.1194391266591776,
+        "predicted_um_per_wafer": -0.05516511339735265,
+        "residual_um_per_wafer": 0.06427401326182494
+      },
+      "4": {
+        "observed_um_per_wafer": -0.16046202961048683,
+        "predicted_um_per_wafer": -0.0718426055350614,
+        "residual_um_per_wafer": 0.08861942407542543
+      },
+      "5": {
+        "observed_um_per_wafer": -0.11382169384746367,
+        "predicted_um_per_wafer": -0.014552179228287108,
+        "residual_um_per_wafer": 0.09926951461917656
+      },
+      "6": {
+        "observed_um_per_wafer": -0.11252694586312555,
+        "predicted_um_per_wafer": -0.0331630133993352,
+        "residual_um_per_wafer": 0.07936393246379034
+      },
+      "7": {
+        "observed_um_per_wafer": -0.11158879614767672,
+        "predicted_um_per_wafer": 0.002975104394747633,
+        "residual_um_per_wafer": 0.11456390054242435
+      },
+      "8": {
+        "observed_um_per_wafer": -0.055760791177392105,
+        "predicted_um_per_wafer": -0.008254704884791575,
+        "residual_um_per_wafer": 0.04750608629260053
+      }
+    },
+    "dynamic_slope_mae_um_per_wafer": 0.08376867461958844,
+    "improves_over_v5": true,
+    "v5_static_slope_mae_um_per_wafer": 0.1453878864320067
+  }
+}

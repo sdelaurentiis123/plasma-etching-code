@@ -71,6 +71,17 @@ WALL_CONDITIONING_RESIDUAL_FEATURE_AUDIT = (
     WALL_CONDITIONING_PREREGISTRATION.parent
     / "calibration_residual_feature_audit.json"
 )
+DYNAMIC_WALL_PREREGISTRATION = (
+    ROOT / "results" / "curated"
+    / "zenodo_bosch_dynamic_wall_depth_extension_v6"
+    / "preregistration.json"
+)
+DYNAMIC_WALL_CALIBRATION_FIT = (
+    DYNAMIC_WALL_PREREGISTRATION.parent / "calibration_fit.json"
+)
+DYNAMIC_WALL_RESPONSE_TABLE = (
+    DYNAMIC_WALL_PREREGISTRATION.parent / "exact_response_table.npz"
+)
 
 
 @pytest.fixture(scope="module")
@@ -300,3 +311,50 @@ def test_wall_conditioning_residual_discovery_remains_unsealed_and_target_free()
     ]["silicon_mean_residual_um"]
     assert partial[0]["feature"] == "sf6_platen_peak_to_peak_q50"
     assert partial[0]["sequence_partial_pearson"] > 0.55
+
+
+def test_dynamic_wall_v6_is_frozen_before_implementation_with_correct_source_semantics():
+    payload = json.loads(DYNAMIC_WALL_PREREGISTRATION.read_text())
+
+    exposure = payload["calibration_exposure"]
+    assert exposure["dynamic_wall_fit_started_before_this_freeze"] is False
+    assert exposure["dynamic_wall_operator_implemented_before_this_freeze"] is False
+    assert exposure["heldout_outcomes_examined"] is False
+    semantics = payload["source_semantics_correction"]
+    assert "bare system chuck" in semantics["correction"] or (
+        "chuck" in semantics["source_statement"])
+    assert semantics["source_sha256"] == sha256(
+        (DATA / "Readme.pdf").read_bytes()).hexdigest()
+    dynamic = payload["dynamic_state"]
+    assert "k_dep" in dynamic["rate_equation"]
+    assert "k_clean" in dynamic["rate_equation"]
+    assert payload["free_parameters"]["maximum_total_count"] == 6
+    assert payload["free_parameters"]["no_free_initial_state"] is True
+    assert payload["identifiability_gate"]["required"] is True
+    assert payload["target_firewall"]["heldout_outcomes_read_at_freeze"] is False
+
+
+def test_dynamic_wall_v6_improves_depth_but_refuses_unidentified_kinetics():
+    payload = json.loads(DYNAMIC_WALL_CALIBRATION_FIT.read_text())
+
+    assert payload["heldout_outcomes_read"] is False
+    assert payload["heldout_prediction_written"] is False
+    assert payload["surface_laws_changed"] is False
+    assert payload["positive_ion_path_changed"] is False
+    assert payload["eligible_for_prediction_seal"] is False
+    assert payload["within_lot_sequence"]["improves_over_v5"] is True
+    assert payload["calibration_metrics"]["silicon_mean_mae_um"] < 0.25
+    assert payload["whole_lot_physics_beats_empirical_baseline"][
+        "global_mean_depth_mae"] is True
+    assert payload["whole_lot_physics_beats_empirical_baseline"][
+        "mean_map_point_rmse"] is False
+    assert payload["identifiability"]["passes"] is False
+    assert payload["identifiability"]["condition_number"] > 1.0e6
+    assert payload["identifiability"][
+        "maximum_pairwise_parameter_correlation_magnitude"] > 0.999
+    assert payload["unmeasured_process_traces_carried_through_wall_history"] == [
+        "2024-07-02_07"]
+    response = payload["deterministic_acceleration"]
+    assert response["response_table_sha256"] == sha256(
+        DYNAMIC_WALL_RESPONSE_TABLE.read_bytes()).hexdigest()
+    assert response["validation"]["passes"] is False
