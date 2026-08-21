@@ -1,3 +1,7 @@
+> **SUPERSEDED:** Read `CODEX_TAKEOVER_EXACT_STATE_2026-08-20.md` first. The
+> Oxford diagnostic, Bosch conditioning falsification, residual-state
+> discovery, repository HEAD, and exact next actions in this file are stale.
+
 # Codex takeover — live reactor-to-depth state
 
 Snapshot: 2026-08-20 22:39 EDT / 2026-08-21 02:39 UTC
