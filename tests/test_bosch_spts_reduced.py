@@ -8,8 +8,10 @@ from petch.bosch_process_data import (
     load_bosch_process_traces,
 )
 from petch.reactor_global.bosch_spts_reduced import (
+    BoschSPTSDynamicWallLaw, BoschSPTSDynamicWallState,
     BoschSPTSReducedParameters, BoschSPTSWallConditioningLaw,
-    DeterministicBoschSPTSReactorToWafer, conditioned_bosch_spts_parameters,
+    DeterministicBoschSPTSReactorToWafer, _bosch_dynamic_wall_interval,
+    advance_bosch_spts_dynamic_wall, conditioned_bosch_spts_parameters,
     solve_bosch_spts_reduced_reactor,
 )
 
@@ -163,3 +165,94 @@ def test_conditioning_changes_neutral_reactor_state_but_not_ions(trace):
         base.volume_average_density_m3[:, 2],
     )
     assert np.array_equal(conditioned.ion_energy_eV, base.ion_energy_eV)
+
+
+def test_dynamic_wall_exact_interval_preserves_bounds_and_one_sided_limits():
+    mean, end = _bosch_dynamic_wall_interval(0.2, 0.7, 0.0)
+    assert 0.2 < mean < end < 1.0
+    expected_end = 1.0 + (0.2 - 1.0) * np.exp(-0.7)
+    expected_mean = 1.0 + (0.2 - 1.0) * (-np.expm1(-0.7) / 0.7)
+    assert end == pytest.approx(expected_end)
+    assert mean == pytest.approx(expected_mean)
+
+    mean, end = _bosch_dynamic_wall_interval(0.8, 0.0, 0.5)
+    assert 0.0 < end < mean < 0.8
+    assert end == pytest.approx(0.8 * np.exp(-0.5))
+    assert mean == pytest.approx(0.8 * (-np.expm1(-0.5) / 0.5))
+
+    assert _bosch_dynamic_wall_interval(0.37, 0.0, 0.0) == (0.37, 0.37)
+
+
+def test_dynamic_wall_state_is_dose_driven_and_carried_between_wafers(trace):
+    law = BoschSPTSDynamicWallLaw(
+        deposition_rate_per_reference_wafer=0.20,
+        cleaning_rate_per_reference_wafer=0.05,
+        log_wall_loss_response=np.log(2.0),
+    )
+    state = BoschSPTSDynamicWallState()
+    steps = []
+    for _ in range(10):
+        step = advance_bosch_spts_dynamic_wall(trace, law, state)
+        steps.append(step)
+        state = step.end_state
+
+    assert all(step.normalized_c4f8_dose > 0.0 for step in steps)
+    assert all(step.normalized_sf6_dose > 0.0 for step in steps)
+    assert all(
+        right.end_state.occupancy > left.end_state.occupancy
+        for left, right in zip(steps, steps[1:])
+    )
+    assert all(
+        right.combined_wall_loss_multiplier
+        > left.combined_wall_loss_multiplier
+        for left, right in zip(steps, steps[1:])
+    )
+    assert steps[1].start_state == steps[0].end_state
+    assert steps[-1].end_state.occupancy < 1.0
+    manifest = law.manifest()
+    assert manifest["target_depth_used"] is False
+    assert manifest["wafer_number_used"] is False
+    assert manifest["per_lot_initial_state_fitted"] is False
+
+
+def test_dynamic_wall_multiplier_changes_neutrals_but_not_ion_channel(trace):
+    law = BoschSPTSDynamicWallLaw(
+        deposition_rate_per_reference_wafer=0.8,
+        cleaning_rate_per_reference_wafer=0.01,
+        log_wall_loss_response=np.log(4.0),
+    )
+    step = advance_bosch_spts_dynamic_wall(
+        trace, law, BoschSPTSDynamicWallState())
+    assert 1.0 < step.combined_wall_loss_multiplier <= 4.0
+    base_parameters = BoschSPTSReducedParameters()
+    dynamic_parameters = BoschSPTSReducedParameters(
+        neutral_wall_loss_multiplier=step.combined_wall_loss_multiplier)
+    base = solve_bosch_spts_reduced_reactor(trace, base_parameters)
+    dynamic = solve_bosch_spts_reduced_reactor(trace, dynamic_parameters)
+
+    assert np.all(
+        np.mean(dynamic.volume_average_density_m3[:, :2], axis=0)
+        < np.mean(base.volume_average_density_m3[:, :2], axis=0)
+    )
+    assert np.array_equal(
+        dynamic.volume_average_density_m3[:, 2],
+        base.volume_average_density_m3[:, 2],
+    )
+    assert np.array_equal(dynamic.ion_energy_eV, base.ion_energy_eV)
+
+
+def test_dynamic_wall_law_rejects_nonphysical_rates_and_states():
+    with pytest.raises(ValueError, match="invalid Bosch dynamic wall law"):
+        BoschSPTSDynamicWallLaw(
+            deposition_rate_per_reference_wafer=0.0,
+            cleaning_rate_per_reference_wafer=0.1,
+            log_wall_loss_response=0.0,
+        )
+    with pytest.raises(ValueError, match="invalid Bosch dynamic wall law"):
+        BoschSPTSDynamicWallLaw(
+            deposition_rate_per_reference_wafer=0.1,
+            cleaning_rate_per_reference_wafer=0.1,
+            log_wall_loss_response=2.0,
+        )
+    with pytest.raises(ValueError, match="invalid Bosch dynamic wall state"):
+        BoschSPTSDynamicWallState(1.01)

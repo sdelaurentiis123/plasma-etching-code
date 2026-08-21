@@ -53,7 +53,13 @@ _SPECIES = ("F", "C4F8_film_precursor", "positive_ion")
 
 @dataclass(frozen=True)
 class BoschSPTSWallConditioningLaw:
-    """Shared declared-lot preparation to neutral wall-loss closure."""
+    """Shared declared-lot preparation to neutral wall-loss closure.
+
+    ``log_carbon_cycle_coefficient`` is retained as a serialized v5 API name.
+    The source dataset defines ``C`` as conditioning on the bare chamber chuck,
+    not carbon; the numerical feature has always been the logarithm of the
+    conditioning-repeat count.
+    """
 
     log_carbon_cycle_coefficient: float = 0.0
     silicon_precondition_coefficient: float = 0.0
@@ -103,9 +109,9 @@ class BoschSPTSWallConditioningLaw:
         return declared[label]
 
     def multiplier(self, lot_type):
-        carbon_count, silicon, silicon_oxide = self._lot_features(lot_type)
+        repeat_count, silicon, silicon_oxide = self._lot_features(lot_type)
         log_multiplier = (
-            self.log_carbon_cycle_coefficient * math.log(carbon_count / 3.0)
+            self.log_carbon_cycle_coefficient * math.log(repeat_count / 3.0)
             + self.silicon_precondition_coefficient * silicon
             + self.silicon_oxide_precondition_coefficient * silicon_oxide
         )
@@ -127,8 +133,207 @@ class BoschSPTSWallConditioningLaw:
             "wall_loss_multiplier_bounds": [
                 self.minimum_multiplier, self.maximum_multiplier],
             "reference_lot_type": "3C",
+            "source_semantics": (
+                "C means conditioning on the bare system chuck; the first "
+                "feature is conditioning-repeat count, not carbon"),
             "target_depth_used": False,
         }
+
+
+@dataclass(frozen=True)
+class BoschSPTSDynamicWallLaw:
+    """Dose-driven incremental wall occupancy and neutral-loss response.
+
+    The state is relative to the declared post-conditioning chamber state.
+    C4F8 exposure fills unoccupied state and SF6 exposure removes occupied
+    state.  Both rates are per median calibration-wafer dose, so their values
+    are dimensionless inverse normalized-wafer exposures.
+    """
+
+    deposition_rate_per_reference_wafer: float
+    cleaning_rate_per_reference_wafer: float
+    log_wall_loss_response: float
+    c4f8_reference_dose_machine_units_s: float = 46564.0977805
+    sf6_reference_dose_machine_units_s: float = 264830.251437
+    minimum_rate_per_reference_wafer: float = 0.001
+    maximum_rate_per_reference_wafer: float = 3.0
+    maximum_absolute_log_response: float = math.log(4.0)
+    minimum_multiplier: float = 0.25
+    maximum_multiplier: float = 4.0
+
+    def __post_init__(self):
+        rates = (
+            self.deposition_rate_per_reference_wafer,
+            self.cleaning_rate_per_reference_wafer,
+        )
+        if (
+            any(not math.isfinite(value) for value in rates)
+            or any(
+                not self.minimum_rate_per_reference_wafer
+                <= value <= self.maximum_rate_per_reference_wafer
+                for value in rates
+            )
+            or not math.isfinite(self.log_wall_loss_response)
+            or abs(self.log_wall_loss_response)
+            > self.maximum_absolute_log_response
+            or not math.isfinite(self.c4f8_reference_dose_machine_units_s)
+            or self.c4f8_reference_dose_machine_units_s <= 0.0
+            or not math.isfinite(self.sf6_reference_dose_machine_units_s)
+            or self.sf6_reference_dose_machine_units_s <= 0.0
+            or not math.isfinite(self.minimum_rate_per_reference_wafer)
+            or not math.isfinite(self.maximum_rate_per_reference_wafer)
+            or not 0.0 < self.minimum_rate_per_reference_wafer
+            <= self.maximum_rate_per_reference_wafer
+            or not math.isfinite(self.maximum_absolute_log_response)
+            or self.maximum_absolute_log_response <= 0.0
+            or not math.isfinite(self.minimum_multiplier)
+            or not math.isfinite(self.maximum_multiplier)
+            or not 0.0 < self.minimum_multiplier <= 1.0
+            or not 1.0 <= self.maximum_multiplier
+            or self.minimum_multiplier >= self.maximum_multiplier
+        ):
+            raise ValueError("invalid Bosch dynamic wall law")
+
+    def manifest(self):
+        return {
+            "schema": "petch-spts-bosch-dynamic-wall-law-v1",
+            "deposition_rate_per_reference_wafer": (
+                self.deposition_rate_per_reference_wafer),
+            "cleaning_rate_per_reference_wafer": (
+                self.cleaning_rate_per_reference_wafer),
+            "log_wall_loss_response": self.log_wall_loss_response,
+            "c4f8_reference_dose_machine_units_s": (
+                self.c4f8_reference_dose_machine_units_s),
+            "sf6_reference_dose_machine_units_s": (
+                self.sf6_reference_dose_machine_units_s),
+            "rate_bounds_per_reference_wafer": [
+                self.minimum_rate_per_reference_wafer,
+                self.maximum_rate_per_reference_wafer,
+            ],
+            "maximum_absolute_log_response": (
+                self.maximum_absolute_log_response),
+            "wall_loss_multiplier_bounds": [
+                self.minimum_multiplier, self.maximum_multiplier],
+            "target_depth_used": False,
+            "wafer_number_used": False,
+            "per_lot_initial_state_fitted": False,
+        }
+
+
+@dataclass(frozen=True)
+class BoschSPTSDynamicWallState:
+    """Incremental chamber-wall occupancy at a production-wafer boundary."""
+
+    occupancy: float = 0.0
+
+    def __post_init__(self):
+        if (not math.isfinite(self.occupancy)
+                or not 0.0 <= self.occupancy <= 1.0):
+            raise ValueError("invalid Bosch dynamic wall state")
+
+
+@dataclass(frozen=True)
+class BoschSPTSDynamicWallStep:
+    """Exact one-wafer wall-state update and applied neutral multiplier."""
+
+    start_state: BoschSPTSDynamicWallState
+    mean_occupancy: float
+    end_state: BoschSPTSDynamicWallState
+    normalized_c4f8_dose: float
+    normalized_sf6_dose: float
+    deposition_exposure: float
+    cleaning_exposure: float
+    static_wall_loss_multiplier: float
+    combined_wall_loss_multiplier: float
+
+    def __post_init__(self):
+        finite_nonnegative = (
+            self.mean_occupancy,
+            self.normalized_c4f8_dose,
+            self.normalized_sf6_dose,
+            self.deposition_exposure,
+            self.cleaning_exposure,
+        )
+        if (
+            not isinstance(self.start_state, BoschSPTSDynamicWallState)
+            or not isinstance(self.end_state, BoschSPTSDynamicWallState)
+            or any(not math.isfinite(value) or value < 0.0
+                   for value in finite_nonnegative)
+            or self.mean_occupancy > 1.0
+            or not math.isfinite(self.static_wall_loss_multiplier)
+            or not 0.25 <= self.static_wall_loss_multiplier <= 4.0
+            or not math.isfinite(self.combined_wall_loss_multiplier)
+            or not 0.25 <= self.combined_wall_loss_multiplier <= 4.0
+        ):
+            raise ValueError("invalid Bosch dynamic wall step")
+
+
+def _bosch_dynamic_wall_interval(start_occupancy, deposition_exposure,
+                                 cleaning_exposure):
+    """Exact mean/end occupancy for one constant-exposure wafer interval."""
+    start = float(start_occupancy)
+    deposition = float(deposition_exposure)
+    cleaning = float(cleaning_exposure)
+    if (not math.isfinite(start) or not 0.0 <= start <= 1.0
+            or not math.isfinite(deposition) or deposition < 0.0
+            or not math.isfinite(cleaning) or cleaning < 0.0):
+        raise ValueError("invalid Bosch dynamic wall interval")
+    rate = deposition + cleaning
+    if rate == 0.0:
+        return start, start
+    equilibrium = deposition / rate
+    decay = math.exp(-rate)
+    interval_mean_factor = -math.expm1(-rate) / rate
+    end = equilibrium + (start - equilibrium) * decay
+    mean = equilibrium + (start - equilibrium) * interval_mean_factor
+    tolerance = 32.0 * np.finfo(float).eps
+    if (not -tolerance <= end <= 1.0 + tolerance
+            or not -tolerance <= mean <= 1.0 + tolerance):
+        raise RuntimeError("exact Bosch dynamic wall update lost boundedness")
+    return float(np.clip(mean, 0.0, 1.0)), float(np.clip(end, 0.0, 1.0))
+
+
+def advance_bosch_spts_dynamic_wall(
+        trace: BoschProcessTrace,
+        law: BoschSPTSDynamicWallLaw,
+        state: BoschSPTSDynamicWallState,
+        *, static_wall_loss_multiplier=1.0) -> BoschSPTSDynamicWallStep:
+    """Advance the target-free chamber state through one measured wafer trace."""
+    if not isinstance(trace, BoschProcessTrace):
+        raise TypeError("trace must be BoschProcessTrace")
+    if not isinstance(law, BoschSPTSDynamicWallLaw):
+        raise TypeError("law must be BoschSPTSDynamicWallLaw")
+    if not isinstance(state, BoschSPTSDynamicWallState):
+        raise TypeError("state must be BoschSPTSDynamicWallState")
+    static = float(static_wall_loss_multiplier)
+    if not math.isfinite(static) or not 0.25 <= static <= 4.0:
+        raise ValueError("invalid static Bosch wall-loss multiplier")
+    c4f8_dose = float(np.trapz(
+        np.maximum(trace.channels[C4F8_FLOW_CHANNEL], 0.0), trace.elapsed_s))
+    sf6_dose = float(np.trapz(
+        np.maximum(trace.channels[SF6_FLOW_CHANNEL], 0.0), trace.elapsed_s))
+    normalized_c4f8 = c4f8_dose / law.c4f8_reference_dose_machine_units_s
+    normalized_sf6 = sf6_dose / law.sf6_reference_dose_machine_units_s
+    deposition = law.deposition_rate_per_reference_wafer * normalized_c4f8
+    cleaning = law.cleaning_rate_per_reference_wafer * normalized_sf6
+    mean, end = _bosch_dynamic_wall_interval(
+        state.occupancy, deposition, cleaning)
+    combined = float(np.clip(
+        static * math.exp(law.log_wall_loss_response * mean),
+        law.minimum_multiplier,
+        law.maximum_multiplier,
+    ))
+    return BoschSPTSDynamicWallStep(
+        start_state=state,
+        mean_occupancy=mean,
+        end_state=BoschSPTSDynamicWallState(end),
+        normalized_c4f8_dose=normalized_c4f8,
+        normalized_sf6_dose=normalized_sf6,
+        deposition_exposure=deposition,
+        cleaning_exposure=cleaning,
+        static_wall_loss_multiplier=static,
+        combined_wall_loss_multiplier=combined,
+    )
 
 
 @dataclass(frozen=True)
