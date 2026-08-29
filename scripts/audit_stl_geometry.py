@@ -82,6 +82,38 @@ def _components(mesh):
     return sorted(output, key=lambda item: abs(item.signed_volume), reverse=True)
 
 
+def _planar_extrusion_payload(*, extent, components, candidates):
+    payload = {
+        "candidate_axes": list(candidates),
+        "unique_candidate": len(candidates) == 1,
+        "candidate_axis": candidates[0] if len(candidates) == 1 else None,
+        "extrusion_thickness_file_units": None,
+        "projected_solid_area_file_units_squared": None,
+        "projected_bounding_box_area_file_units_squared": None,
+        "projected_fill_fraction": None,
+        "component_projected_area_file_units_squared": None,
+    }
+    if len(candidates) != 1:
+        return payload
+    axis = int(candidates[0])
+    thickness = float(extent[axis])
+    planar_axes = [index for index in range(3) if index != axis]
+    bounding_area = float(np.prod(np.asarray(extent)[planar_axes]))
+    component_areas = [
+        abs(float(item["signed_volume_file_units_cubed"])) / thickness
+        for item in components
+    ]
+    projected_area = float(sum(component_areas))
+    payload.update({
+        "extrusion_thickness_file_units": thickness,
+        "projected_solid_area_file_units_squared": projected_area,
+        "projected_bounding_box_area_file_units_squared": bounding_area,
+        "projected_fill_fraction": projected_area / bounding_area,
+        "component_projected_area_file_units_squared": component_areas,
+    })
+    return payload
+
+
 def build(source):
     source = Path(source)
     raw = read_stl(source)
@@ -124,8 +156,11 @@ def build(source):
             for item in components
         ):
             extrusion_candidates.append(axis)
+    planar = _planar_extrusion_payload(
+        extent=extent, components=components, candidates=extrusion_candidates)
+    planar["unique_coordinate_count_by_axis"] = unique_per_axis
     return repaired, {
-        "schema": "petch.stl-geometry-audit.v1",
+        "schema": "petch.stl-geometry-audit.v2",
         "source": {
             "filename": source.name,
             "size_bytes": source.stat().st_size,
@@ -155,14 +190,7 @@ def build(source):
             "p99": float(np.percentile(lengths, 99)),
             "maximum": float(np.max(lengths)),
         },
-        "planar_extrusion": {
-            "unique_coordinate_count_by_axis": unique_per_axis,
-            "candidate_axes": extrusion_candidates,
-            "unique_candidate": len(extrusion_candidates) == 1,
-            "candidate_axis": (
-                extrusion_candidates[0] if len(extrusion_candidates) == 1 else None
-            ),
-        },
+        "planar_extrusion": planar,
         "simulation_readiness": {
             "geometry_topology_ready": (
                 diagnose_mesh(repaired).failure_reason() is None),
