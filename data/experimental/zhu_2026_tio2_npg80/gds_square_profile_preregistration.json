@@ -1,0 +1,120 @@
+{
+  "schema": "petch.zhu-npg80-gds-square-profile-preregistration.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "frozen_before_specific_condition_sem": true,
+  "target_sem_used": false,
+  "target_depth_used": false,
+  "coefficient_selected_from_target": null,
+  "geometry_source": {
+    "file": "layout/gds_sem_image_450nm.gds",
+    "sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+    "audit": "layout/gds_geometry_audit.json",
+    "evidence_class": "operator_supplied_exact_GDSII",
+    "database_unit_nm": 0.5,
+    "filename_450nm_is_not_pitch": true
+  },
+  "exact_target_inputs": {
+    "film_material": "ALD TiO2",
+    "film_thickness_nm": 700.0,
+    "mask_material": "Cr",
+    "mask_thickness_nm": 45.0,
+    "substrate": "fused silica",
+    "pressure_mTorr": 30.0,
+    "forward_power_setpoint_W": 150.0,
+    "temperature_C": 20.0,
+    "etch_time_s": 1200.0,
+    "gas_flows_sccm": {
+      "CHF3": 55.0,
+      "SF6": 5.0,
+      "O2": 1.0
+    }
+  },
+  "exact_layout_geometry": {
+    "feature_family": "square layer-1 polygons conditionally interpreted as Cr islands yielding TiO2 pillars",
+    "pitch_nm": 350.0,
+    "square_width_nm": [
+      105.0,
+      110.0,
+      115.0,
+      120.0,
+      125.0,
+      130.0,
+      135.0,
+      140.0,
+      145.0,
+      150.0,
+      155.0,
+      160.0,
+      165.0,
+      170.0,
+      185.0,
+      190.0,
+      195.0,
+      225.0,
+      230.0,
+      235.0,
+      240.0,
+      245.0,
+      250.0
+    ],
+    "special_cells_deferred_to_shape_board": [
+      "CROSS_250x105",
+      "INVHOLE_105",
+      "INVHOLE_250",
+      "RECT_250x105"
+    ],
+    "mask_polarity_assumption": "positive layer-1 polygons become Cr islands after positive-ZEP lift-off",
+    "mask_polarity_confirmed_by_operator": false,
+    "permitted_claim": "exact square geometry board conditional on the declared mask-polarity interpretation",
+    "forbidden_claim": "the GDS identifies ion energy, material-response coefficients, or the final measured SEM"
+  },
+  "deterministic_feature_transport": {
+    "operator": "periodic 3D triangle-mesh adjoint ballistic face gather",
+    "stochastic_sampling": false,
+    "mesh_spacing_nm": 10.0,
+    "triangle_quadrature_points": 3,
+    "polar_quadrature_nodes": 12,
+    "azimuthal_quadrature_nodes": 8,
+    "angular_model": "two-component axisymmetric Gaussian core plus collisional tail",
+    "core_transverse_temperature_eV": 0.044,
+    "tail_transverse_temperature_eV": 0.57,
+    "tail_fraction_sensitivity": [0.0, 0.65],
+    "impact_energy_rule": {
+      "low": "0.5 times the minimum powered-electrode sheath drop in the conserved daughter-reclosed power board",
+      "high": "1.0 times the maximum powered-electrode sheath drop in the conserved daughter-reclosed power board",
+      "target_iead_measured": false
+    },
+    "known_omissions": [
+      "self-consistent intra-feature charging",
+      "ion reflection and fast-neutral re-impact",
+      "microscopic TiO2/Cr surface chemistry for the exact Oxford condition"
+    ]
+  },
+  "surface_response_axes": {
+    "ald_tio2_density_kg_m3": [3250.0, 4150.0],
+    "tio2_to_cr_selectivity": [14.0, 18.016664028610727],
+    "evidence_class": {
+      "density": "measured cross-process ALD TiO2 range",
+      "rate": "Janissen 2016 cross-machine feature-rate witness interval",
+      "selectivity": "cross-machine Janissen TiO2/Cr witnesses; not a measured target coefficient"
+    }
+  },
+  "reactor_axes": {
+    "absorbed_power_W": [60.0, 90.0, 105.0, 120.0],
+    "forward_power_setpoint_selects_unique_absorbed_power": false,
+    "species_resolved_center_wafer_flux_source": "results/curated/zhu_npg80_daughter_wafer_dose_v1/audit.json"
+  },
+  "frozen_outputs": [
+    "final etch depth interval at every exact square width",
+    "top, middle, and bottom CD while the moving Cr mask remains resolved",
+    "sidewall angle and bowing metrics",
+    "Cr mask survival or extinction event",
+    "terminal reason and numerical-conservation receipts"
+  ],
+  "claim_boundary": {
+    "geometry_is_exact_for_listed_square_cells": true,
+    "mask_polarity_is_conditional": true,
+    "surface_response_is_cross_machine_conditional": true,
+    "unique_absolute_oxford_profile_predicted": false
+  }
+}
