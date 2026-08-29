@@ -3,7 +3,10 @@ from pathlib import Path
 
 import numpy as np
 
-from petch.feature_step_3d import make_square_pillar_mask_geometry_3d
+from petch.feature_step_3d import (
+    make_footprint_mask_geometry_3d,
+    make_square_pillar_mask_geometry_3d,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +100,61 @@ def test_square_geometry_refuses_depth_beyond_film():
             mask_thickness=0.05,
             base_top=0.1,
             etched_depth=0.701,
+        )
+
+
+def test_generic_footprint_builder_reproduces_square_geometry():
+    pitch = 0.4
+    dx = 0.025
+    width = 0.2
+    coordinate = np.arange(int(round(pitch / dx)) + 1) * dx
+    inside = 0.5 * width - np.abs(coordinate - 0.5 * pitch)
+    footprint = np.minimum(inside[:, None], inside[None, :])
+    common = dict(
+        domain_height=1.05,
+        dx=dx,
+        film_thickness=0.7,
+        mask_thickness=0.05,
+        base_top=0.1,
+        etched_depth=0.4,
+        film_material_id=11,
+        mask_material_id=12,
+        base_material_id=13,
+    )
+
+    square = make_square_pillar_mask_geometry_3d(
+        pitch=pitch, pillar_width=width, **common)
+    generic = make_footprint_mask_geometry_3d(
+        cell_width=pitch,
+        cell_length=pitch,
+        mask_footprint_levelset_xy=footprint,
+        **common,
+    )
+
+    assert np.array_equal(generic.material_id, square.material_id)
+    assert np.allclose(generic.phi, square.phi)
+    for material_id in (11, 12, 13):
+        assert np.allclose(
+            generic.material_levelsets[material_id],
+            square.material_levelsets[material_id],
+        )
+
+
+def test_generic_footprint_builder_refuses_nonperiodic_endpoints():
+    footprint = -np.ones((17, 17), dtype=float)
+    footprint[4:13, 4:13] = 1.0
+    footprint[0, 8] = 1.0
+
+    with np.testing.assert_raises_regex(ValueError, "invalid footprint-mask"):
+        make_footprint_mask_geometry_3d(
+            cell_width=0.4,
+            cell_length=0.4,
+            domain_height=1.05,
+            dx=0.025,
+            mask_footprint_levelset_xy=footprint,
+            film_thickness=0.7,
+            mask_thickness=0.05,
+            base_top=0.1,
         )
 
 

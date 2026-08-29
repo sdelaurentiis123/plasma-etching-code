@@ -272,6 +272,100 @@ def make_square_pillar_mask_geometry_3d(
         material_levelsets=layers)
 
 
+def make_footprint_mask_geometry_3d(
+        *, cell_width, cell_length, domain_height, dx,
+        mask_footprint_levelset_xy, film_thickness, mask_thickness, base_top,
+        etched_depth=0.0, mesh_length_unit_m=1e-6,
+        film_material_id=1, mask_material_id=2, base_material_id=3):
+    """Construct a periodic layered feature from an arbitrary mask footprint.
+
+    ``mask_footprint_levelset_xy`` is a nodal two-dimensional field in the
+    declared mesh unit, positive inside the hard-mask solid and negative in an
+    exposed opening.  Its shape must include the duplicate periodic endpoint
+    on both axes.  The function owns only the layer construction; callers may
+    derive the footprint from analytic shapes, GDS polygons, or measured mask
+    contours while preserving the common moving-material solver.
+
+    This is intentionally additive rather than a refactor of the certified
+    square builder, so historical square-board numerical fingerprints remain
+    unchanged.
+    """
+    values = np.asarray([
+        cell_width, cell_length, domain_height, dx, film_thickness,
+        mask_thickness, base_top, etched_depth, mesh_length_unit_m,
+    ], dtype=float)
+    material_ids = tuple(map(int, (
+        film_material_id, mask_material_id, base_material_id)))
+    film_top = float(base_top) + float(film_thickness)
+    mask_top = film_top + float(mask_thickness)
+    expected_shape = tuple(
+        max(3, int(round(length / dx)) + 1)
+        for length in (cell_width, cell_length)
+    )
+    footprint = np.asarray(mask_footprint_levelset_xy, dtype=float)
+    periodic = (
+        footprint.ndim == 2
+        and footprint.shape == expected_shape
+        and np.allclose(footprint[0, :], footprint[-1, :])
+        and np.allclose(footprint[:, 0], footprint[:, -1])
+    )
+    if (
+        np.any(~np.isfinite(values))
+        or np.any(values[:7] <= 0.0)
+        or etched_depth < 0.0
+        or etched_depth > film_thickness
+        or mask_top >= domain_height
+        or footprint.shape != expected_shape
+        or np.any(~np.isfinite(footprint))
+        or not np.any(footprint > 0.0)
+        or not np.any(footprint < 0.0)
+        or not periodic
+        or any(material_id <= 0 for material_id in material_ids)
+        or len(set(material_ids)) != 3
+    ):
+        raise ValueError("invalid footprint-mask geometry inputs")
+
+    shape = expected_shape + (
+        max(3, int(round(domain_height / dx)) + 1),)
+    z = np.arange(shape[2]) * dx
+    Z = np.broadcast_to(z[None, None, :], shape)
+    footprint_3d = np.broadcast_to(footprint[:, :, None], shape)
+
+    base_levelset = float(base_top) - Z
+    floor = film_top - float(etched_depth)
+    lower_film_slab = np.minimum(Z - float(base_top), floor - Z)
+    protected_feature = np.minimum.reduce((
+        Z - floor,
+        film_top - Z,
+        footprint_3d,
+    ))
+    film_levelset = np.maximum(lower_film_slab, protected_feature)
+    mask_levelset = np.minimum.reduce((
+        Z - film_top,
+        mask_top - Z,
+        footprint_3d,
+    ))
+
+    band = float(domain_height) + float(cell_width) + float(cell_length)
+    base_phi = reinit_narrow(base_levelset, dx, band)
+    film_phi = reinit_narrow(film_levelset, dx, band)
+    mask_phi = reinit_narrow(mask_levelset, dx, band)
+    layers = {
+        material_ids[0]: film_phi,
+        material_ids[1]: mask_phi,
+        material_ids[2]: base_phi,
+    }
+    phi = reinit_narrow(
+        np.maximum.reduce(tuple(layers.values())), dx, band)
+    stack = np.stack(tuple(layers.values()), axis=0)
+    labels = np.asarray(material_ids, dtype=int)
+    material = labels[np.argmax(stack, axis=0)]
+    material[phi < 0.0] = 0
+    return FeatureGeometry3D(
+        phi, material, dx, mesh_length_unit_m,
+        material_levelsets=layers)
+
+
 @dataclass(frozen=True)
 class FeatureStepValidity:
     within_declared_scope: bool
