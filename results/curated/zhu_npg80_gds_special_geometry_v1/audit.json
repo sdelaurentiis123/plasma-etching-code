@@ -1,0 +1,91 @@
+{
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "gds_audit_sha256": "f93cf0cf62bdba94af0921114cbd990e85f57516709bd447b38eb3a60006d724",
+  "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+  "mask_polarity_assumption": "positive layer-1 polygons become Cr islands after positive-ZEP lift-off",
+  "mask_polarity_confirmed_by_operator": false,
+  "mesh_spacing_nm": 10.0,
+  "pitch_nm": 350.0,
+  "profile_evolution_geometry_ready": true,
+  "profile_evolution_surface_response_still_conditional": true,
+  "rows": [
+    {
+      "analytic_mask_area_fraction": 0.3385714285714286,
+      "cell_name": "CROSS_250x105",
+      "center_is_mask": true,
+      "finite_levelsets": true,
+      "footprint_periodic_x": true,
+      "footprint_periodic_y": true,
+      "geometry_shape": [
+        36,
+        36,
+        106
+      ],
+      "material_ids": [
+        1,
+        2,
+        3
+      ],
+      "nodal_positive_mask_fraction": 0.32407407407407407
+    },
+    {
+      "analytic_mask_area_fraction": 0.91,
+      "cell_name": "INVHOLE_105",
+      "center_is_mask": false,
+      "finite_levelsets": true,
+      "footprint_periodic_x": true,
+      "footprint_periodic_y": true,
+      "geometry_shape": [
+        36,
+        36,
+        106
+      ],
+      "material_ids": [
+        1,
+        2,
+        3
+      ],
+      "nodal_positive_mask_fraction": 0.9228395061728395
+    },
+    {
+      "analytic_mask_area_fraction": 0.4897959183673469,
+      "cell_name": "INVHOLE_250",
+      "center_is_mask": false,
+      "finite_levelsets": true,
+      "footprint_periodic_x": true,
+      "footprint_periodic_y": true,
+      "geometry_shape": [
+        36,
+        36,
+        106
+      ],
+      "material_ids": [
+        1,
+        2,
+        3
+      ],
+      "nodal_positive_mask_fraction": 0.5177469135802469
+    },
+    {
+      "analytic_mask_area_fraction": 0.21428571428571427,
+      "cell_name": "RECT_250x105",
+      "center_is_mask": true,
+      "finite_levelsets": true,
+      "footprint_periodic_x": true,
+      "footprint_periodic_y": true,
+      "geometry_shape": [
+        36,
+        36,
+        106
+      ],
+      "material_ids": [
+        1,
+        2,
+        3
+      ],
+      "nodal_positive_mask_fraction": 0.2006172839506173
+    }
+  ],
+  "schema": "petch.zhu-npg80-gds-special-geometry-audit.v1",
+  "target_sem_used": false
+}
