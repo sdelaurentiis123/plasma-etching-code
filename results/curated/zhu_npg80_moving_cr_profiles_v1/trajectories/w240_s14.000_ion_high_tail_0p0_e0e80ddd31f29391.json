@@ -1,0 +1,421 @@
+{
+  "execution": {
+    "transport_device": "cuda:0"
+  },
+  "job_spec": {
+    "duration_s": 1200.0,
+    "mesh_spacing_nm": 10.0,
+    "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+    "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+    "rates_nm_min": [
+      34.125,
+      43.46666666666667
+    ],
+    "scenario": {
+      "impact_energy_eV": 296.20650777233976,
+      "impact_energy_label": "high",
+      "name": "ion_high_tail_0p0",
+      "tail_fraction": 0.0
+    },
+    "selectivity": 14.0,
+    "width_nm": 240.0
+  },
+  "profiles": [
+    {
+      "accepted_process_equivalent_duration_s": 1200.0,
+      "accepted_profile_steps": 195,
+      "blanket_cr_rate_nm_min": 2.4375,
+      "blanket_tio2_rate_nm_min": 34.125,
+      "cr_mask": {
+        "center_bottom_height_nm": null,
+        "center_remaining_thickness_nm": 0.0,
+        "center_top_height_nm": null,
+        "mask_below_vertical_resolution_at_center": true,
+        "mask_exhausted_at_center": true,
+        "material_layer_retired": true,
+        "vertical_cells_remaining": 0.0
+      },
+      "cr_mask_interior_minimum_thickness_nm": 0.0,
+      "dose_equivalent_reference_rate_nm_min": 43.46666666666667,
+      "dose_equivalent_reference_time_s": 942.101226993865,
+      "duration_s": 1200.0,
+      "material_lifecycle_events": [
+        {
+          "effective_surface_state_remap_backend": "common_refinement",
+          "kind": "material_extinction",
+          "material_extinction_geometry": {
+            "2": {
+              "classification": "roundoff_projected_material_extinction",
+              "extinction_roundoff_tolerance": 1.1368683772161603e-13,
+              "maximum": 2.0594875970087776e-14,
+              "minimum": -0.05,
+              "nonnegative_node_count": 441,
+              "resolved_nonnegative_cell_count": 0
+            }
+          },
+          "reference_elapsed_s": 560.4294478527615,
+          "retired_material_ids": [
+            2
+          ],
+          "state_retirement": {
+            "2": {
+              "field_remap_modes": {
+                "m2__removed_material_units_m2": "conservative"
+              },
+              "lifecycle": "strict_levelset_extinction",
+              "old_face_count": 1315,
+              "retired_area_m2": 6.369210429640635e-14,
+              "retired_field_integrals": {
+                "m2__removed_material_units_m2": 136733429.46843758
+              }
+            }
+          }
+        }
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.237702611355139e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "mesh_spacing_nm": 10.0,
+      "parameter_evidence_supports_prediction": false,
+      "profile": {
+        "bottom_cd_nm": 242.64802388950318,
+        "bow_nm": 115.23393372184805,
+        "cd_metrics_grid_resolved": true,
+        "cross_section": [
+          {
+            "height_um": 0.7324223161186975,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.1,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.6986334741780462,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.15000000000000002,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.6648446322373951,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.2,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.6310557902967439,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.25,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.5972669483560926,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.30000000000000004,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.5634781064154415,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.35,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.5296892644747901,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.4,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.49590042253413896,
+            "mean_width_nm": 235.93103317655957,
+            "relief_fraction_from_top": 0.45000000000000007,
+            "width_x_nm": 235.85594707686727,
+            "width_y_nm": 236.0061192762518
+          },
+          {
+            "height_um": 0.4621115805934878,
+            "mean_width_nm": 236.18788392411983,
+            "relief_fraction_from_top": 0.5,
+            "width_x_nm": 236.0946070360298,
+            "width_y_nm": 236.2811608122098
+          },
+          {
+            "height_um": 0.42832273865283654,
+            "mean_width_nm": 237.55491989911954,
+            "relief_fraction_from_top": 0.55,
+            "width_x_nm": 237.52216225936795,
+            "width_y_nm": 237.58767753887113
+          },
+          {
+            "height_um": 0.39453389671218536,
+            "mean_width_nm": 237.97792079183816,
+            "relief_fraction_from_top": 0.6,
+            "width_x_nm": 237.99759235044795,
+            "width_y_nm": 237.9582492332284
+          },
+          {
+            "height_um": 0.3607450547715341,
+            "mean_width_nm": 238.17328470872155,
+            "relief_fraction_from_top": 0.65,
+            "width_x_nm": 238.18343469059158,
+            "width_y_nm": 238.16313472685158
+          },
+          {
+            "height_um": 0.3269562128308829,
+            "mean_width_nm": 239.19629953358387,
+            "relief_fraction_from_top": 0.7000000000000001,
+            "width_x_nm": 239.20121209969142,
+            "width_y_nm": 239.19138696747632
+          },
+          {
+            "height_um": 0.2931673708902317,
+            "mean_width_nm": 240.39605109753543,
+            "relief_fraction_from_top": 0.75,
+            "width_x_nm": 240.3885513190962,
+            "width_y_nm": 240.40355087597464
+          },
+          {
+            "height_um": 0.25937852894958047,
+            "mean_width_nm": 241.4658495785265,
+            "relief_fraction_from_top": 0.8,
+            "width_x_nm": 241.45005313945566,
+            "width_y_nm": 241.48164601759737
+          },
+          {
+            "height_um": 0.22558968700892934,
+            "mean_width_nm": 242.44891816180237,
+            "relief_fraction_from_top": 0.85,
+            "width_x_nm": 242.4473040062168,
+            "width_y_nm": 242.45053231738788
+          },
+          {
+            "height_um": 0.191800845068278,
+            "mean_width_nm": 244.0293039281806,
+            "relief_fraction_from_top": 0.9,
+            "width_x_nm": 244.0288928717994,
+            "width_y_nm": 244.02971498456182
+          }
+        ],
+        "etched_depth_nm": 675.7768388130243,
+        "floor_height_nm": 124.22316118697566,
+        "floor_height_p95_minus_p05_nm": 27.174237720400313,
+        "middle_cd_nm": 236.55794566659964,
+        "minimum_relief_for_cd_claim_nm": 20.0,
+        "sidewall_angle_from_wafer_deg": 79.8219647869899,
+        "top_cd_nm": 0.0
+      },
+      "terminal_reason": "requested_duration",
+      "tio2_to_cr_selectivity": 14.0,
+      "transport_scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "width_nm": 240.0
+    },
+    {
+      "accepted_process_equivalent_duration_s": 942.101226993865,
+      "accepted_profile_steps": 195,
+      "blanket_cr_rate_nm_min": 3.104761904761905,
+      "blanket_tio2_rate_nm_min": 43.46666666666667,
+      "cr_mask": {
+        "center_bottom_height_nm": null,
+        "center_remaining_thickness_nm": 0.0,
+        "center_top_height_nm": null,
+        "mask_below_vertical_resolution_at_center": true,
+        "mask_exhausted_at_center": true,
+        "material_layer_retired": true,
+        "vertical_cells_remaining": 0.0
+      },
+      "cr_mask_interior_minimum_thickness_nm": 0.0,
+      "dose_equivalent_reference_rate_nm_min": 43.46666666666667,
+      "dose_equivalent_reference_time_s": 942.101226993865,
+      "duration_s": 1200.0,
+      "material_lifecycle_events": [
+        {
+          "effective_surface_state_remap_backend": "common_refinement",
+          "kind": "material_extinction",
+          "material_extinction_geometry": {
+            "2": {
+              "classification": "roundoff_projected_material_extinction",
+              "extinction_roundoff_tolerance": 1.1368683772161603e-13,
+              "maximum": 2.0594875970087776e-14,
+              "minimum": -0.05,
+              "nonnegative_node_count": 441,
+              "resolved_nonnegative_cell_count": 0
+            }
+          },
+          "reference_elapsed_s": 560.4294478527615,
+          "retired_material_ids": [
+            2
+          ],
+          "state_retirement": {
+            "2": {
+              "field_remap_modes": {
+                "m2__removed_material_units_m2": "conservative"
+              },
+              "lifecycle": "strict_levelset_extinction",
+              "old_face_count": 1315,
+              "retired_area_m2": 6.369210429640635e-14,
+              "retired_field_integrals": {
+                "m2__removed_material_units_m2": 136733429.46843758
+              }
+            }
+          }
+        }
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.237702611355139e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "mesh_spacing_nm": 10.0,
+      "parameter_evidence_supports_prediction": false,
+      "profile": {
+        "bottom_cd_nm": 242.64802388950318,
+        "bow_nm": 115.23393372184805,
+        "cd_metrics_grid_resolved": true,
+        "cross_section": [
+          {
+            "height_um": 0.7324223161186975,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.1,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.6986334741780462,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.15000000000000002,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.6648446322373951,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.2,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.6310557902967439,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.25,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.5972669483560926,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.30000000000000004,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.5634781064154415,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.35,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.5296892644747901,
+            "mean_width_nm": 0.0,
+            "relief_fraction_from_top": 0.4,
+            "width_x_nm": 0.0,
+            "width_y_nm": 0.0
+          },
+          {
+            "height_um": 0.49590042253413896,
+            "mean_width_nm": 235.93103317655957,
+            "relief_fraction_from_top": 0.45000000000000007,
+            "width_x_nm": 235.85594707686727,
+            "width_y_nm": 236.0061192762518
+          },
+          {
+            "height_um": 0.4621115805934878,
+            "mean_width_nm": 236.18788392411983,
+            "relief_fraction_from_top": 0.5,
+            "width_x_nm": 236.0946070360298,
+            "width_y_nm": 236.2811608122098
+          },
+          {
+            "height_um": 0.42832273865283654,
+            "mean_width_nm": 237.55491989911954,
+            "relief_fraction_from_top": 0.55,
+            "width_x_nm": 237.52216225936795,
+            "width_y_nm": 237.58767753887113
+          },
+          {
+            "height_um": 0.39453389671218536,
+            "mean_width_nm": 237.97792079183816,
+            "relief_fraction_from_top": 0.6,
+            "width_x_nm": 237.99759235044795,
+            "width_y_nm": 237.9582492332284
+          },
+          {
+            "height_um": 0.3607450547715341,
+            "mean_width_nm": 238.17328470872155,
+            "relief_fraction_from_top": 0.65,
+            "width_x_nm": 238.18343469059158,
+            "width_y_nm": 238.16313472685158
+          },
+          {
+            "height_um": 0.3269562128308829,
+            "mean_width_nm": 239.19629953358387,
+            "relief_fraction_from_top": 0.7000000000000001,
+            "width_x_nm": 239.20121209969142,
+            "width_y_nm": 239.19138696747632
+          },
+          {
+            "height_um": 0.2931673708902317,
+            "mean_width_nm": 240.39605109753543,
+            "relief_fraction_from_top": 0.75,
+            "width_x_nm": 240.3885513190962,
+            "width_y_nm": 240.40355087597464
+          },
+          {
+            "height_um": 0.25937852894958047,
+            "mean_width_nm": 241.4658495785265,
+            "relief_fraction_from_top": 0.8,
+            "width_x_nm": 241.45005313945566,
+            "width_y_nm": 241.48164601759737
+          },
+          {
+            "height_um": 0.22558968700892934,
+            "mean_width_nm": 242.44891816180237,
+            "relief_fraction_from_top": 0.85,
+            "width_x_nm": 242.4473040062168,
+            "width_y_nm": 242.45053231738788
+          },
+          {
+            "height_um": 0.191800845068278,
+            "mean_width_nm": 244.0293039281806,
+            "relief_fraction_from_top": 0.9,
+            "width_x_nm": 244.0288928717994,
+            "width_y_nm": 244.02971498456182
+          }
+        ],
+        "etched_depth_nm": 675.7768388130243,
+        "floor_height_nm": 124.22316118697566,
+        "floor_height_p95_minus_p05_nm": 27.174237720400313,
+        "middle_cd_nm": 236.55794566659964,
+        "minimum_relief_for_cd_claim_nm": 20.0,
+        "sidewall_angle_from_wafer_deg": 79.8219647869899,
+        "top_cd_nm": 0.0
+      },
+      "terminal_reason": "domain_gas_breakthrough",
+      "tio2_to_cr_selectivity": 14.0,
+      "transport_scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "width_nm": 240.0
+    }
+  ]
+}
