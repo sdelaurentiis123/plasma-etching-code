@@ -118,7 +118,11 @@ def _execute(payload):
     return profiles, path, str(transport_device)
 
 
-def _jobs(*, smoke=False):
+def _jobs(*, smoke=False, shard_count=1, shard_index=0):
+    shard_count = int(shard_count)
+    shard_index = int(shard_index)
+    if shard_count <= 0 or shard_index < 0 or shard_index >= shard_count:
+        raise ValueError("require 0 <= shard_index < shard_count")
     document = _load(PREREGISTRATION)
     preregistration = _physics_preregistration(document)
     analog = _load(ANALOG_BOARD)
@@ -143,19 +147,26 @@ def _jobs(*, smoke=False):
             12.0,
             20.0,
         )], rates, selectivities, scenarios
+    widths = [
+        width for index, width in enumerate(
+            preregistration["inferred_geometry_board"]["width_nm"])
+        if index % shard_count == shard_index
+    ]
     jobs = [
         (width, scenario, rates, selectivity, 1200.0,
          PRODUCTION_MESH_SPACING_NM)
-        for width in preregistration["inferred_geometry_board"]["width_nm"]
+        for width in widths
         for scenario in scenarios
         for selectivity in selectivities
     ]
     return jobs, rates, selectivities, scenarios
 
 
-def build(*, smoke=False, transport_device="cpu", workers=None):
+def build(*, smoke=False, transport_device="cpu", workers=None,
+          shard_count=1, shard_index=0):
     document = _load(PREREGISTRATION)
-    jobs, rates, selectivities, scenarios = _jobs(smoke=smoke)
+    jobs, rates, selectivities, scenarios = _jobs(
+        smoke=smoke, shard_count=shard_count, shard_index=shard_index)
     groups = []
     receipts = []
     missing = []
@@ -230,6 +241,9 @@ def build(*, smoke=False, transport_device="cpu", workers=None):
                 receipt["transport_device"] for receipt in receipts
             )),
             "execution_device_not_part_of_physics_spec": True,
+            "shard_count": int(shard_count),
+            "shard_index": int(shard_index),
+            "complete_layout_board": int(shard_count) == 1,
         },
         "trajectory_receipts": receipts,
         "profiles": profiles,
@@ -253,12 +267,16 @@ def main():
             if "PETCH_PROFILE_WORKERS" in os.environ else None
         ),
     )
+    parser.add_argument("--shard-count", type=int, default=1)
+    parser.add_argument("--shard-index", type=int, default=0)
     args = parser.parse_args()
     if args.smoke:
         print(_render(build(
             smoke=True,
             transport_device=args.transport_device,
             workers=args.workers,
+            shard_count=args.shard_count,
+            shard_index=args.shard_index,
         )))
         return
     if args.write == args.check:
@@ -267,12 +285,20 @@ def main():
         smoke=False,
         transport_device=args.transport_device,
         workers=args.workers,
+        shard_count=args.shard_count,
+        shard_index=args.shard_index,
     ))
     if args.write:
-        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-        OUTPUT.write_text(rendered, encoding="utf-8")
-        print(OUTPUT.relative_to(ROOT))
+        output = OUTPUT
+        if args.shard_count != 1:
+            output = OUTPUT.with_name(
+                f"audit_shard_{args.shard_index}_of_{args.shard_count}.json")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+        print(output.relative_to(ROOT))
         return
+    if args.shard_count != 1 or args.shard_index != 0:
+        raise SystemExit("--check requires the complete unsharded board")
     if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != rendered:
         raise SystemExit("exact-GDS square profile audit is stale")
     print(f"PASS {OUTPUT.relative_to(ROOT)}")

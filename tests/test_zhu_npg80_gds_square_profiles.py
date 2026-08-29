@@ -49,6 +49,23 @@ def test_exact_gds_board_has_all_184_frozen_square_trajectories():
     assert {job[5] for job in jobs} == {10.0}
 
 
+def test_exact_gds_width_shards_are_disjoint_and_complete():
+    whole = _jobs(smoke=False)[0]
+    shards = [_jobs(smoke=False, shard_count=3, shard_index=index)[0]
+              for index in range(3)]
+    whole_specs = {_job_spec(job)["width_nm"] for job in whole}
+    shard_widths = [{_job_spec(job)["width_nm"] for job in shard}
+                    for shard in shards]
+
+    assert set.union(*shard_widths) == whole_specs
+    assert all(
+        first.isdisjoint(second)
+        for index, first in enumerate(shard_widths)
+        for second in shard_widths[index + 1:]
+    )
+    assert sum(len(shard) for shard in shards) == len(whole)
+
+
 def test_exact_gds_cache_spec_binds_revision_preregistration_and_gds():
     job = _jobs(smoke=False)[0][0]
     spec = _job_spec(job)
