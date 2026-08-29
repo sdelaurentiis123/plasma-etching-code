@@ -1,0 +1,1624 @@
+{
+  "absolute_oxford_profile_prediction_certified": false,
+  "board_complete": false,
+  "campaign": "legacy_square_width_prior",
+  "claim_boundary": {
+    "envelopes_include_only_complete_width_slices": true,
+    "mask_polarity_remains_operator_unconfirmed": false,
+    "missing_grid_cells_are_not_inferred": true,
+    "surface_law_is_cross_machine_rate_normalized": true,
+    "target_sem_is_required_for_blind_validation_not_as_input": true
+  },
+  "coefficient_selected_from_target": null,
+  "complete_width_envelopes": [
+    {
+      "bottom_cd_nm": [
+        83.29735519533853,
+        89.62904125682083
+      ],
+      "bow_nm": [
+        -2.457996924744478,
+        34.94624458309021
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        683.7137786802002,
+        684.0938336546001
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.4212623696048828e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        40.50733032035438,
+        76.97631712342088
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        86.25176291777396,
+        86.51526241177487
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 80.0
+    },
+    {
+      "bottom_cd_nm": [
+        123.39969947171271,
+        134.64817638032528
+      ],
+      "bow_nm": [
+        40.157441380292084,
+        54.38820466049523
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        684.04832112277,
+        684.3417839684417
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.4651401423857226e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        104.7766079015298,
+        116.47764746679748
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.3812640196733,
+        84.84597730532066
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 120.0
+    },
+    {
+      "bottom_cd_nm": [
+        163.19978081477004,
+        172.37146112083624
+      ],
+      "bow_nm": [
+        60.58841496513365,
+        74.9578616534538
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        679.8526227837182,
+        682.0530214507191
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.4223131589599832e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        144.3657167482933,
+        157.0082373498997
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        82.77508469786896,
+        83.17533573526208
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 160.0
+    },
+    {
+      "bottom_cd_nm": [
+        202.90041187358202,
+        213.42901638795533
+      ],
+      "bow_nm": [
+        80.2995941947526,
+        95.09652757129041
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        677.8163577454345,
+        679.4077751001814
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.3089973554501436e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        183.95951833476218,
+        196.54673350808142
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        81.0528700763994,
+        81.50528418617837
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 200.0
+    },
+    {
+      "bottom_cd_nm": [
+        242.64802388950318,
+        251.56656200428566
+      ],
+      "bow_nm": [
+        101.12791757974325,
+        115.23393372184805
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        673.5983500982958,
+        675.8668119413004
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.237702611355139e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        223.6526262538595,
+        236.55794566659964
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        79.4227842262676,
+        79.8219647869899
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 240.0
+    },
+    {
+      "bottom_cd_nm": [
+        282.16437847879183,
+        287.38919913270723
+      ],
+      "bow_nm": [
+        121.53276940050029,
+        135.3837092135997
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        660.7738185690879,
+        666.886658555026
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1815493975885216e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        262.6149586398962,
+        276.49996215367656
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        77.73124235663845,
+        78.05219832068018
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 280.0
+    }
+  ],
+  "corrupt_cache_receipts": [],
+  "missing_job_specs": [
+    {
+      "duration_s": 1200.0,
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+      "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 320.0
+    }
+  ],
+  "physics_grid": {
+    "completed_width_nm": [
+      80.0,
+      120.0,
+      160.0,
+      200.0,
+      240.0,
+      280.0
+    ],
+    "corrupt_trajectory_count": 0,
+    "expected_trajectories_per_width": 8,
+    "expected_trajectory_count": 56,
+    "missing_trajectory_count": 1,
+    "trajectory_count_by_width_nm": {
+      "120.0": 8,
+      "160.0": 8,
+      "200.0": 8,
+      "240.0": 8,
+      "280.0": 8,
+      "320.0": 7,
+      "80.0": 8
+    },
+    "valid_trajectory_count": 55
+  },
+  "preregistration": {
+    "path": "data/experimental/zhu_2026_tio2_npg80/square_pillar_blind_preregistration.json",
+    "sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35"
+  },
+  "result_status": "partial_grid_do_not_interpolate",
+  "schema": "petch.zhu-npg80-profile-cache-closeout.v1",
+  "target_depth_used": false,
+  "target_sem_used": false,
+  "valid_trajectory_receipts": [
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s14.000_ion_low_tail_0p0_5060598c59a0533b.json",
+      "profile_count": 2,
+      "sha256": "bcb9e0b727dcc946ab282a2131158a545dd3fe932ca9d75695c0a759d61ff75a",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s18.017_ion_low_tail_0p0_3191039eb71f0d8d.json",
+      "profile_count": 2,
+      "sha256": "b63d9a3255b2b884ee26c0166d40ff23953c05aa4cdddfeab462006d242090be",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s14.000_ion_low_tail_0p65_c4467951bc65af3f.json",
+      "profile_count": 2,
+      "sha256": "147ce4b0f0511ca60f6d2661e9aebd3ceedbcc7f9f1eda1f2a0065ad446f1aac",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s18.017_ion_low_tail_0p65_ae05c672dd49a0f9.json",
+      "profile_count": 2,
+      "sha256": "ba7c5a0825bc7b7413dce2e42fe1af3c89b352771cf188972ec2d1d54198db0b",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s14.000_ion_high_tail_0p0_42692f797926cb19.json",
+      "profile_count": 2,
+      "sha256": "2ab98c4c82856f6113372740b584e56041e3f2cb3e73bc45b82ae0646414de61",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s18.017_ion_high_tail_0p0_7a5bb429a9a4abf2.json",
+      "profile_count": 2,
+      "sha256": "aa9410a9265e2d2b098f33d57ddd44f3ef9db38b060449ff5c5e4b86b5deae58",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s14.000_ion_high_tail_0p65_f9ba2d90f86e4da1.json",
+      "profile_count": 2,
+      "sha256": "abbdf2093b32420cfa7bb9f982876c9eb9e26240d68d999a07f29ee78bbfce53",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 80.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w080_s18.017_ion_high_tail_0p65_ba43b0e393d3c961.json",
+      "profile_count": 2,
+      "sha256": "771fc2bccff7e49964bf09804b5f081c310ff3e36c7bf9e1f0cbacab1be89428",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s14.000_ion_low_tail_0p0_9713fd1a430912a4.json",
+      "profile_count": 2,
+      "sha256": "ee67f8e967bed4cdfc8b22ec019721f1812688221ca083bd269bf4338833c2b4",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s18.017_ion_low_tail_0p0_f7ad6305552d158c.json",
+      "profile_count": 2,
+      "sha256": "28326afdce64da32ba366d4bcf2f7411e8646011e49e33530019777e8ce62c45",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s14.000_ion_low_tail_0p65_50c05bc901c0e441.json",
+      "profile_count": 2,
+      "sha256": "022f73c25803b5b030d3e641c7daed226faee2baf8d1b0081eeb40820237d6d2",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s18.017_ion_low_tail_0p65_236ba2bc49dc5040.json",
+      "profile_count": 2,
+      "sha256": "ed76d8ccabd11af0d5410d63b02109144b79b436da277901378e71349b7305b5",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s14.000_ion_high_tail_0p0_634c0d52394b18f0.json",
+      "profile_count": 2,
+      "sha256": "17cb8f90bc96f099a23f0b61212b14c1901359342e8aff526c4729cfdfd64a63",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s18.017_ion_high_tail_0p0_85f539c1d939c3c9.json",
+      "profile_count": 2,
+      "sha256": "4402bd50b0740142bba9e0b3b54821a40a8228ffaaa648642266e998a3e5744b",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s14.000_ion_high_tail_0p65_81623bca4b468160.json",
+      "profile_count": 2,
+      "sha256": "8f38eee5362919df58459c42067e6d8dd2ebd8f6bbfa9b5851744af2d1a274ad",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w120_s18.017_ion_high_tail_0p65_9df0dceecee91081.json",
+      "profile_count": 2,
+      "sha256": "bb2dcdf153816728681c04fb950f755f8229ad0b33629d36f7143e52dd4be3b3",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s14.000_ion_low_tail_0p0_146c54c4b8e75ac5.json",
+      "profile_count": 2,
+      "sha256": "700a557ae39a1f71e207645b308c47bddaf37584761b5f7f386b962796ab309d",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s18.017_ion_low_tail_0p0_ae7e0c3bb4538c0c.json",
+      "profile_count": 2,
+      "sha256": "78d1d0bebbd043dc7ba0f3e75e32eb9e1abbc0de788e5771b75794bf680aecf0",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s14.000_ion_low_tail_0p65_b2ca2d4095d898ce.json",
+      "profile_count": 2,
+      "sha256": "f69c629a7b355901048b11248c43ef42d3bafed8c7e607fca63fd50ec57153c7",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s18.017_ion_low_tail_0p65_4961c4833eac0006.json",
+      "profile_count": 2,
+      "sha256": "36ef9841ea7fc8df1b01298acad69f15fd8a7eb1a4a69dd45bf1e232d690dbc4",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s14.000_ion_high_tail_0p0_715aa952170f7485.json",
+      "profile_count": 2,
+      "sha256": "c22a523b032968a9668d4b3a1e588e791d9cfabce9c19c2e2f56c57be7152192",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s18.017_ion_high_tail_0p0_140f49dd52d554c6.json",
+      "profile_count": 2,
+      "sha256": "d2a0fe484ec4bb41e76bd274099ddf384296654b8b207a55f517de13c0955457",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s14.000_ion_high_tail_0p65_4a323c6a6de23c43.json",
+      "profile_count": 2,
+      "sha256": "df6384251b89cffd4a6b5bc453572999a5bbfbe67b481463388e5789471f0e84",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 160.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w160_s18.017_ion_high_tail_0p65_234d80123d037e6b.json",
+      "profile_count": 2,
+      "sha256": "7d7e86ae5763d410c5b0cf0ff985bdbe16bc423a4b4cdd61e70c58313f9ac498",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s14.000_ion_low_tail_0p0_092401bf986144ac.json",
+      "profile_count": 2,
+      "sha256": "0069ea5c0ec05e726eac165b9600c5e8e37a7856207796bba0a4cea6ab147ca3",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s18.017_ion_low_tail_0p0_ef4f9d9285713e58.json",
+      "profile_count": 2,
+      "sha256": "9fa12842f85cca6170cd322ab69663fa1e89175c462c38ff6abd7ece049a44e1",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s14.000_ion_low_tail_0p65_1562da159b25bcc5.json",
+      "profile_count": 2,
+      "sha256": "3627e9ffa383311f3db3ef779b5b0aad05122bd7447e1bbe4ecdd1ed56cc9070",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s18.017_ion_low_tail_0p65_4147c85c8e520351.json",
+      "profile_count": 2,
+      "sha256": "343274efb7662038c57247602f50ff298d24d9cd3282fd3953bfdc3a03984f43",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s14.000_ion_high_tail_0p0_ac5760134694776a.json",
+      "profile_count": 2,
+      "sha256": "ec0ed8a17d6d52f3a6cdf41d875362200e3e7b406ae1f31b4d12b21e9baaadc3",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s18.017_ion_high_tail_0p0_acc4970f89816560.json",
+      "profile_count": 2,
+      "sha256": "c3d54eeec22903a05bb412b84233ef7f6cb60c6b03b98b49c22e68578f8df758",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s14.000_ion_high_tail_0p65_4bf546e088482920.json",
+      "profile_count": 2,
+      "sha256": "566b56839dc4ead8e20c0baf3b9dfbe97e12df251834c74a6a239e933ba94738",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 200.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w200_s18.017_ion_high_tail_0p65_4610a8dad92e5355.json",
+      "profile_count": 2,
+      "sha256": "576708987fb5c085f99c0c7827a54c64cd326d606b0273724f7ed32fb84db264",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s14.000_ion_low_tail_0p0_1d0e39fba4619124.json",
+      "profile_count": 2,
+      "sha256": "fbdba43bdfb28c18ebebf8af1142a0b16b60de56f40a2dff826974bf97c79743",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s18.017_ion_low_tail_0p0_f7330a0825b28477.json",
+      "profile_count": 2,
+      "sha256": "91ff80b06974a010ae69a63fca59102d47cf1a3011eb8e4928134c9f3b003c60",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s14.000_ion_low_tail_0p65_b7512860b7f526fa.json",
+      "profile_count": 2,
+      "sha256": "e4cb9650389aca0c11a29872d257332dc9d0a24b1f4ab1a3f36bdc5031844d72",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s18.017_ion_low_tail_0p65_c82b9274b0f3f418.json",
+      "profile_count": 2,
+      "sha256": "7666714860a1834f88f4716d2904e79531b666fd1bb491c3d8df82eeb977c029",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s14.000_ion_high_tail_0p0_e0e80ddd31f29391.json",
+      "profile_count": 2,
+      "sha256": "5e0cc69cc1d2a4f2fe0eaf0d2a26f86db4baf56bb5e1c592099bdac6c360f9c3",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s18.017_ion_high_tail_0p0_c03f95cf9dc2b302.json",
+      "profile_count": 2,
+      "sha256": "7c14f8cbf47d83de1b8d1e68ab5697848538ac7b5f8c89bbc6d0b4c9d52f40f7",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s14.000_ion_high_tail_0p65_3b531064bbf74c93.json",
+      "profile_count": 2,
+      "sha256": "ee17d77c6eebfaf7db75dc506ffe28d39aa95d3453114d66d1979ae8f7e728c9",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 240.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w240_s18.017_ion_high_tail_0p65_3ef4c1b2b6a9dd64.json",
+      "profile_count": 2,
+      "sha256": "a8ef12dc83f5de2d31e96eaa900144cc1ebc6f57c20a4df6a8ba1da6fb00a319",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s14.000_ion_low_tail_0p0_e25e6f033cb4c3e2.json",
+      "profile_count": 2,
+      "sha256": "47a9aa1d000695bdabf40c61da6e19f285eee8a9cb5c23174ef114adf6582163",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s18.017_ion_low_tail_0p0_b1f7e770ff4fba09.json",
+      "profile_count": 2,
+      "sha256": "55113c51611d0110aa1e194f983d537caf26459a9f2d58f572826544419d4c1a",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s14.000_ion_low_tail_0p65_7ef1b38128a437ca.json",
+      "profile_count": 2,
+      "sha256": "2b3a2286c427124a901c8907728a7480400d1b4a30ee2631e38a91400822c88f",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s18.017_ion_low_tail_0p65_6f3f170d3b43e935.json",
+      "profile_count": 2,
+      "sha256": "abdf64d9ce480609cddcd793c3639dc9c4b37a17a212e67d21522899153cf791",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s14.000_ion_high_tail_0p0_88fcbb3471826c74.json",
+      "profile_count": 2,
+      "sha256": "da07affc1b87e84fd8c73788b5110028f111a9ad180e8ea111dac6b9721e73f8",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s18.017_ion_high_tail_0p0_12c53701e2ec33fc.json",
+      "profile_count": 2,
+      "sha256": "ebe97d8f72f65d304c179da226a88472116bb43cfc1d1e64b6f00027601a47d0",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s14.000_ion_high_tail_0p65_62d97f3ea784e59e.json",
+      "profile_count": 2,
+      "sha256": "8ae516a7ea6225cbd114b3b4b7b5942f8ee1d16972dc758f07b59b825690a522",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 280.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w280_s18.017_ion_high_tail_0p65_651ad696c3fb5094.json",
+      "profile_count": 2,
+      "sha256": "e2068a7cd00f135af93ebd553f07000258de39ec1d62799cb26a91f2adeff1b0",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s14.000_ion_low_tail_0p0_c9b10e259e2c5b39.json",
+      "profile_count": 2,
+      "sha256": "13144922f478ea834049774eb58b56ce280714de2f48ca86e4a190b71c7f0769",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s18.017_ion_low_tail_0p0_8caa190816409531.json",
+      "profile_count": 2,
+      "sha256": "a1c7379f5203b0fc0e9e153afdff308bc1c707d81b82b358bb0b67ea00b19c1b",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s14.000_ion_low_tail_0p65_f06fe05dd90d271b.json",
+      "profile_count": 2,
+      "sha256": "1410ad089b683c2db37f76b487b6c234171af04d600a918dec233e8b727c9820",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s18.017_ion_low_tail_0p65_9923aebd62c5af66.json",
+      "profile_count": 2,
+      "sha256": "a4436a9bcd5c50a4d89f257df8445ccc2242e95ffc21a82ddf88e4c8924aa787",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s14.000_ion_high_tail_0p0_df272964cfa99071.json",
+      "profile_count": 2,
+      "sha256": "daa1d9be02031d8bd63f9ba0c95a49a22fd859e1480491156e5bec92649be3e3",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s18.017_ion_high_tail_0p0_c07e7e141c8c351c.json",
+      "profile_count": 2,
+      "sha256": "9ba08bb18f41f681fb56a9c113818c0c8ddd0256ffefc974fcb6669f99e2af13",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-positive-row-closure-v7",
+        "preregistration_sha256": "d0ae72dab202a2e39078f9ae5c40b6c78dd5889b8d0dc68ac837560caf980d35",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 320.0
+      },
+      "path": "results/curated/zhu_npg80_moving_cr_profiles_v1/trajectories/w320_s14.000_ion_high_tail_0p65_cfeff4730d2572b7.json",
+      "profile_count": 2,
+      "sha256": "05056a346b1ccaf72ace98649a54ea0427d0a8be44cc37c32a821fa137aef608",
+      "transport_device": "cuda:0"
+    }
+  ]
+}

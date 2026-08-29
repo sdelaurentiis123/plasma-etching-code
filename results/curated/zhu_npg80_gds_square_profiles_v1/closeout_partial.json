@@ -1,0 +1,3932 @@
+{
+  "absolute_oxford_profile_prediction_certified": false,
+  "board_complete": false,
+  "campaign": "exact_gds",
+  "claim_boundary": {
+    "envelopes_include_only_complete_width_slices": true,
+    "mask_polarity_remains_operator_unconfirmed": true,
+    "missing_grid_cells_are_not_inferred": true,
+    "surface_law_is_cross_machine_rate_normalized": true,
+    "target_sem_is_required_for_blind_validation_not_as_input": true
+  },
+  "coefficient_selected_from_target": null,
+  "complete_width_envelopes": [
+    {
+      "bottom_cd_nm": [
+        100.21645142367088,
+        116.78984088553689
+      ],
+      "bow_nm": [
+        31.4278183656864,
+        47.31307105979358
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        683.6409626811694,
+        684.0206283923769
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1470997869113641e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        88.45517223002601,
+        99.03183160896839
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        85.11778698018793,
+        85.81025685605178
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 105.0
+    },
+    {
+      "bottom_cd_nm": [
+        113.2297039038367,
+        123.10844087444258
+      ],
+      "bow_nm": [
+        35.623200802866464,
+        49.86242843573587
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        682.6880769782069,
+        683.8607981917824
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.0464355070520908e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        95.35285154263313,
+        106.57337600013268
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.84788687668471,
+        85.26633664982926
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 110.0
+    },
+    {
+      "bottom_cd_nm": [
+        114.96391138224779,
+        126.7808636678074
+      ],
+      "bow_nm": [
+        36.89827709774129,
+        52.728578801196996
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        680.5336381100021,
+        683.1531449214201
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1597059070505441e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        100.17129551964297,
+        110.62555392055451
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.67836135968196,
+        85.18924909384268
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 115.0
+    },
+    {
+      "bottom_cd_nm": [
+        117.35209972735959,
+        131.7142392846135
+      ],
+      "bow_nm": [
+        39.46880110402796,
+        55.34006625740724
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_thickness_nm": [
+        0.0,
+        0.0
+      ],
+      "etch_depth_nm": [
+        680.6687767917956,
+        683.4846424193762
+      ],
+      "maximum_state_remap_relative_conservation_residual": 9.510291322851198e-16,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        104.11689173187527,
+        114.53788939724795
+      ],
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.47363173846234,
+        85.09042293440265
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 120.0
+    }
+  ],
+  "corrupt_cache_receipts": [],
+  "gds": {
+    "path": "data/experimental/zhu_2026_tio2_npg80/layout/gds_sem_image_450nm.gds",
+    "sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b"
+  },
+  "missing_job_specs": [
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 125.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 125.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 125.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 125.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 125.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 130.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 135.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 140.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 145.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 150.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 155.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 160.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 165.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 170.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 185.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 190.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 195.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 225.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 230.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 235.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 240.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 245.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 146.53883149611795,
+        "impact_energy_label": "low",
+        "name": "ion_low_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 14.0,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p0",
+        "tail_fraction": 0.0
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 14.0,
+      "width_nm": 250.0
+    },
+    {
+      "duration_s": 1200.0,
+      "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+      "mesh_spacing_nm": 10.0,
+      "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+      "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+      "rates_nm_min": [
+        34.125,
+        43.46666666666667
+      ],
+      "scenario": {
+        "impact_energy_eV": 296.20650777233976,
+        "impact_energy_label": "high",
+        "name": "ion_high_tail_0p65",
+        "tail_fraction": 0.65
+      },
+      "selectivity": 18.016664028610727,
+      "width_nm": 250.0
+    }
+  ],
+  "physics_grid": {
+    "completed_width_nm": [
+      105.0,
+      110.0,
+      115.0,
+      120.0
+    ],
+    "corrupt_trajectory_count": 0,
+    "expected_trajectories_per_width": 8,
+    "expected_trajectory_count": 184,
+    "missing_trajectory_count": 149,
+    "trajectory_count_by_width_nm": {
+      "105.0": 8,
+      "110.0": 8,
+      "115.0": 8,
+      "120.0": 8,
+      "125.0": 3,
+      "130.0": 0,
+      "135.0": 0,
+      "140.0": 0,
+      "145.0": 0,
+      "150.0": 0,
+      "155.0": 0,
+      "160.0": 0,
+      "165.0": 0,
+      "170.0": 0,
+      "185.0": 0,
+      "190.0": 0,
+      "195.0": 0,
+      "225.0": 0,
+      "230.0": 0,
+      "235.0": 0,
+      "240.0": 0,
+      "245.0": 0,
+      "250.0": 0
+    },
+    "valid_trajectory_count": 35
+  },
+  "preregistration": {
+    "path": "data/experimental/zhu_2026_tio2_npg80/gds_square_profile_preregistration.json",
+    "sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128"
+  },
+  "result_status": "partial_grid_do_not_interpolate",
+  "schema": "petch.zhu-npg80-profile-cache-closeout.v1",
+  "target_depth_used": false,
+  "target_sem_used": false,
+  "valid_trajectory_receipts": [
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s14.000_ion_low_tail_0p0_7c458006338e0169.json",
+      "profile_count": 2,
+      "sha256": "5f6600f6576ef523180d16a82c18db4c506cbe1c3686ad94e2582047f91d4bc4",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s18.017_ion_low_tail_0p0_2bdc7e759b222ae3.json",
+      "profile_count": 2,
+      "sha256": "3eb2366ff33aacadf6cda25a86dafc017e9420ace15e04abc2751aaa58ceb507",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s14.000_ion_low_tail_0p65_eab8afbc506530ce.json",
+      "profile_count": 2,
+      "sha256": "cd46cad17f3ed53cb4cd065884de011fb6d9aebd57514ee701eba1081defa05d",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s18.017_ion_low_tail_0p65_e734843db334eff1.json",
+      "profile_count": 2,
+      "sha256": "74607d6c3cae9d6bf581860348cd267d477dfa168e81c38f7aa5f6dfee5ca0ce",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s14.000_ion_high_tail_0p0_daa29e60dde5e016.json",
+      "profile_count": 2,
+      "sha256": "8f4bf1f8475bc1dc6c6fb3d8b6ab0e5fbf0e855055a78944be6585d79164043a",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s18.017_ion_high_tail_0p0_94ab1bcfa7c96637.json",
+      "profile_count": 2,
+      "sha256": "9102bb9a7314be33a58fbd6f5987e5fcc147d61c0f2461dad663338ae0b865f3",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s14.000_ion_high_tail_0p65_bbf6cd9c48a6b029.json",
+      "profile_count": 2,
+      "sha256": "49f8b8249f69b6cab7744caf6e2285dd64efbb11bae45646e25e3aaaf62215df",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 105.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w105_s18.017_ion_high_tail_0p65_b38a0170b4edbe95.json",
+      "profile_count": 2,
+      "sha256": "26763b8bf6ee4992ae39aab58dbd4b6c5843081c94abb63312873e02eb5c0ae6",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s14.000_ion_low_tail_0p0_ed7ce14bd3994a08.json",
+      "profile_count": 2,
+      "sha256": "1dc035781e45ba75c920a2cc2bfe2dcb884764f8c42ef01cd843abdb2797ff4e",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s18.017_ion_low_tail_0p0_85ab4ef10e6dde6a.json",
+      "profile_count": 2,
+      "sha256": "fc515d36db9685fc00b5b87aefd97bbcccb3b961e0cb8fd2f15ff08c9461b159",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s14.000_ion_low_tail_0p65_1c1b7bd9d2a29898.json",
+      "profile_count": 2,
+      "sha256": "13f85a6d55f49437e9ad114e9afbdab813e5395c9806d12b616833c3408a73ec",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s18.017_ion_low_tail_0p65_9d6ee672c0627418.json",
+      "profile_count": 2,
+      "sha256": "7eeedb9b816b3a46d9ec805daed503bdfa8f3d97c5a8cd039b1ea5bb38ad7de7",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s14.000_ion_high_tail_0p0_6d4af9619431bab6.json",
+      "profile_count": 2,
+      "sha256": "d9dad23b98caaf19c2ac484e7f31548d5ce40021d234398d21ea4851cfe674fc",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s18.017_ion_high_tail_0p0_e1599eeba20db211.json",
+      "profile_count": 2,
+      "sha256": "118f78a76812a75b9edc4d5f5b34d6f08172e93554414024767abb124f33eedb",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s14.000_ion_high_tail_0p65_d5d4c2dec4c69f0e.json",
+      "profile_count": 2,
+      "sha256": "0ccb3768c7594872c2faaa0de42c47e05e37fb941487d2288a058c451e2bafe6",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 110.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w110_s18.017_ion_high_tail_0p65_07706345053770dc.json",
+      "profile_count": 2,
+      "sha256": "464760f44c3d76b32abfcedc3e5a1ebe7660e165e51d24fd58383b6fd10332cf",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s14.000_ion_low_tail_0p0_3a688d19d12fa96d.json",
+      "profile_count": 2,
+      "sha256": "9a5d329af14f21a8695b4af862016769a6ebd77fcb9639f0658f0f791992db29",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s18.017_ion_low_tail_0p0_754a779177d685c7.json",
+      "profile_count": 2,
+      "sha256": "9324a69ba90c44296c2cabb846c1d0e0b61a6923a3a3aab731f2c296d0464699",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s14.000_ion_low_tail_0p65_3ccde9d435b655b6.json",
+      "profile_count": 2,
+      "sha256": "33c0b801277b604da8ea3e375b3814bcbfe5830b246ff2df8c113336324d20cc",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s18.017_ion_low_tail_0p65_51b36181a966af51.json",
+      "profile_count": 2,
+      "sha256": "3b3cbc0f8e37f65b46a7be19f301c84251ffcac10336a4d657f931d31563c673",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s14.000_ion_high_tail_0p0_d5334fb38b8309d1.json",
+      "profile_count": 2,
+      "sha256": "33913f995eb6ea5f99ae1b45d3c3e86f2718267ae83ff9635f983fb1eb3024cf",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s18.017_ion_high_tail_0p0_19206b8a4aa4ddcb.json",
+      "profile_count": 2,
+      "sha256": "1de6c4c0970e16512e77a8d9eda8bf3717957d52f2656d94aa6f3df4efab1988",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s14.000_ion_high_tail_0p65_161627d0f7e98041.json",
+      "profile_count": 2,
+      "sha256": "881cc0677cfc58faa71eccb06dd8bd5266ba27a3e6058f82c574788fc5a2f5f2",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 115.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w115_s18.017_ion_high_tail_0p65_38c50b09624b3982.json",
+      "profile_count": 2,
+      "sha256": "ce124cb926d0feb4aa31d23fb2eaab21ee2cba00ad83ea94b96059b3433650bb",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s14.000_ion_low_tail_0p0_90c49a5d37d367e1.json",
+      "profile_count": 2,
+      "sha256": "f75a2609a3fec4da04f527ca31874ed7b62920e18e22f9fcc8dae18dee191a71",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s18.017_ion_low_tail_0p0_635386a7f1870a63.json",
+      "profile_count": 2,
+      "sha256": "b48aefa1cbc7defdf4d001b610740f4ac9b73b5632bf3bd98092407a5349a4d8",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s14.000_ion_low_tail_0p65_40017e755ca28c75.json",
+      "profile_count": 2,
+      "sha256": "a8f4094ffe293a0405396dd91908f44ea9970c1fb75b6cb177497a80188c733b",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s18.017_ion_low_tail_0p65_725363c282cd140d.json",
+      "profile_count": 2,
+      "sha256": "4e6c0ee42cb4a7ac6d806fa788f47cf8976866c2bc932a633d68f5265743366f",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s14.000_ion_high_tail_0p0_2e4d731eb7f5eb75.json",
+      "profile_count": 2,
+      "sha256": "7a185d8d2650a4bdd1d274c74d5b0097030ae475a5e52231728541a3ebeca80b",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s18.017_ion_high_tail_0p0_0051ec0ce857b07b.json",
+      "profile_count": 2,
+      "sha256": "07a2293baf33198c5f293df4c459560ad8ea93dbb564492af07f02e50b0bfe8b",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s14.000_ion_high_tail_0p65_85ade61d811a457c.json",
+      "profile_count": 2,
+      "sha256": "7b65ea01c4392e8f045ea388d2dfb354b4b5ec692ccae0abe0327174e4ac0958",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 296.20650777233976,
+          "impact_energy_label": "high",
+          "name": "ion_high_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 120.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w120_s18.017_ion_high_tail_0p65_10de2c7013a234fc.json",
+      "profile_count": 2,
+      "sha256": "a963eeddb078e549f2b52459a8a0f7ccd96949423ff35f34d9c408425a99f6ce",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 14.0,
+        "width_nm": 125.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w125_s14.000_ion_low_tail_0p0_43905b88d1d89c98.json",
+      "profile_count": 2,
+      "sha256": "3316d50b357f3dfa663ce708408b1309bab9128ed8b0f03005708086a0949406",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p0",
+          "tail_fraction": 0.0
+        },
+        "selectivity": 18.016664028610727,
+        "width_nm": 125.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w125_s18.017_ion_low_tail_0p0_21c9cad17c50bd99.json",
+      "profile_count": 2,
+      "sha256": "b7228a558d50635c6bcb043206e2e8db596b1aa0c4d37a187cf6652323d90e0d",
+      "transport_device": "cuda:0"
+    },
+    {
+      "job_spec": {
+        "duration_s": 1200.0,
+        "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+        "mesh_spacing_nm": 10.0,
+        "model_revision": "two-material-moving-tio2-cr-exact-gds-squares-v1",
+        "preregistration_sha256": "de55e071d07ff2ca67e082af5e368ff418179ce4ecc1f332a3650fbf27e1b128",
+        "rates_nm_min": [
+          34.125,
+          43.46666666666667
+        ],
+        "scenario": {
+          "impact_energy_eV": 146.53883149611795,
+          "impact_energy_label": "low",
+          "name": "ion_low_tail_0p65",
+          "tail_fraction": 0.65
+        },
+        "selectivity": 14.0,
+        "width_nm": 125.0
+      },
+      "path": "results/curated/zhu_npg80_gds_square_profiles_v1/trajectories/w125_s14.000_ion_low_tail_0p65_299b56eea3e66d54.json",
+      "profile_count": 2,
+      "sha256": "f7737060703a3d4d6d9b04b2e567fd3e006a0988aeea25629c19ab128a096d24",
+      "transport_device": "cuda:0"
+    }
+  ]
+}
