@@ -13,6 +13,7 @@ from petch.stl_import import (
     assign_materials_by_z,
     build_feature_geometry_from_stl,
     diagnose_mesh,
+    drop_degenerate_faces,
     extract_axisymmetric_profile,
     rasterize_signed_distance,
     read_stl,
@@ -187,6 +188,27 @@ def test_non_watertight_stl_is_rejected_with_a_diagnostic():
     assert "not watertight" in report.failure_reason()
     with pytest.raises(ValueError, match="not watertight"):
         rasterize_signed_distance(holed, dx=0.2)
+
+
+def test_isolated_zero_area_exporter_facet_requires_receipted_repair():
+    clean = _box_mesh((-0.5, 0.5), (-0.5, 0.5), (0.0, 2.0))
+    point = len(clean.vertices)
+    raw = StlMesh(
+        np.concatenate((clean.vertices, [[0.5, 0.5, 2.0]]), axis=0),
+        np.concatenate((clean.faces, [[point, point, point]]), axis=0),
+    )
+
+    diagnosis = diagnose_mesh(raw)
+    assert diagnosis.n_degenerate_faces == 1
+    assert "zero-area" in diagnosis.failure_reason()
+    with pytest.raises(ValueError, match="zero-area"):
+        rasterize_signed_distance(raw, dx=0.2)
+
+    repaired, receipt = drop_degenerate_faces(raw)
+    assert diagnose_mesh(repaired).failure_reason() is None
+    assert receipt["removed_face_indices"] == [len(raw.faces) - 1]
+    assert receipt["relative_volume_change"] <= 128.0 * np.finfo(float).eps
+    assert repaired.signed_volume == clean.signed_volume
 
 
 def test_material_layers_reconstruct_the_solid_sign_exactly():

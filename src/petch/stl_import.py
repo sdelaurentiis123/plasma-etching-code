@@ -64,6 +64,7 @@ __all__ = [
     "read_stl",
     "write_stl",
     "diagnose_mesh",
+    "drop_degenerate_faces",
     "revolved_stl_mesh",
     "rasterize_signed_distance",
     "extract_axisymmetric_profile",
@@ -282,6 +283,11 @@ class MeshDiagnostics:
 
     def failure_reason(self):
         """Human-readable refusal text, or ``None`` when the mesh is usable."""
+        if self.n_degenerate_faces:
+            return (
+                f"degenerate mesh: {self.n_degenerate_faces} zero-area "
+                "facet(s); remove them with a topology-preserving repair"
+            )
         if self.n_boundary_edges:
             return (f"not watertight: {self.n_boundary_edges} boundary edge(s) "
                     "bound only one facet (the surface has holes)")
@@ -314,6 +320,86 @@ def diagnose_mesh(mesh):
         consistently_oriented=bool(np.all(directed_counts == 1)
                                    and np.all(counts <= 2)),
         signed_volume=float(mesh.signed_volume))
+
+
+def drop_degenerate_faces(mesh, *, relative_area_tolerance=0.0):
+    """Remove only zero/near-zero facets and prove topology is unchanged.
+
+    Some CAD exporters append point facets ``[v, v, v]``.  Ignoring them
+    silently is unsafe because a zero-area facet can also be evidence of a
+    collapsed or corrupted surface.  This helper removes the requested area
+    class, compacts unused vertices, and accepts the repair only when the
+    remaining surface is closed, manifold, consistently oriented, nonzero in
+    volume, and volume-preserving to floating-point precision.
+
+    Returns ``(clean_mesh, receipt)`` where ``receipt`` is a plain mapping that
+    can be serialized beside the supplied STL.
+    """
+    tolerance = float(relative_area_tolerance)
+    if not np.isfinite(tolerance) or tolerance < 0.0:
+        raise ValueError("relative_area_tolerance must be finite and nonnegative")
+    vertices = np.asarray(mesh.vertices, dtype=float)
+    extent = float(np.max(np.ptp(vertices, axis=0)))
+    area_limit = tolerance * extent ** 2
+    areas = np.asarray(mesh.face_areas, dtype=float)
+    removable = areas <= area_limit
+    indices = np.flatnonzero(removable)
+    if len(indices) == 0:
+        return mesh, {
+            "operation": "drop_degenerate_faces",
+            "removed_face_indices": [],
+            "removed_face_count": 0,
+            "relative_area_tolerance": tolerance,
+            "absolute_area_tolerance_file_units_squared": area_limit,
+            "signed_volume_before": float(mesh.signed_volume),
+            "signed_volume_after": float(mesh.signed_volume),
+            "topology_preserved": True,
+        }
+    surviving_faces = np.asarray(mesh.faces, dtype=int)[~removable]
+    if len(surviving_faces) == 0:
+        raise ValueError("degenerate-face repair would remove the whole mesh")
+    used, inverse = np.unique(surviving_faces.reshape(-1), return_inverse=True)
+    compact_faces = inverse.reshape(-1, 3)
+    normals = None
+    if mesh.file_normals is not None:
+        normals = np.asarray(mesh.file_normals, dtype=float)[~removable]
+    clean = StlMesh(vertices[used], compact_faces, normals)
+    diagnostics = diagnose_mesh(clean)
+    reason = diagnostics.failure_reason()
+    if reason is not None:
+        raise ValueError(
+            "degenerate-face removal did not preserve a usable surface -- "
+            f"{reason}"
+        )
+    before = float(mesh.signed_volume)
+    after = float(clean.signed_volume)
+    scale = max(abs(before), abs(after), np.finfo(float).tiny)
+    relative_volume_change = abs(after - before) / scale
+    if relative_volume_change > 128.0 * np.finfo(float).eps:
+        raise ValueError(
+            "degenerate-face removal changed enclosed volume by "
+            f"{relative_volume_change:.3e}"
+        )
+    return clean, {
+        "operation": "drop_degenerate_faces",
+        "removed_face_indices": indices.astype(int).tolist(),
+        "removed_face_count": int(len(indices)),
+        "relative_area_tolerance": tolerance,
+        "absolute_area_tolerance_file_units_squared": area_limit,
+        "signed_volume_before": before,
+        "signed_volume_after": after,
+        "relative_volume_change": relative_volume_change,
+        "topology_preserved": True,
+        "clean_diagnostics": {
+            "n_vertices": diagnostics.n_vertices,
+            "n_faces": diagnostics.n_faces,
+            "n_degenerate_faces": diagnostics.n_degenerate_faces,
+            "n_boundary_edges": diagnostics.n_boundary_edges,
+            "n_nonmanifold_edges": diagnostics.n_nonmanifold_edges,
+            "consistently_oriented": diagnostics.consistently_oriented,
+            "signed_volume": diagnostics.signed_volume,
+        },
+    }
 
 
 def _point_triangle_distance_and_solid_angle(points, tri):
