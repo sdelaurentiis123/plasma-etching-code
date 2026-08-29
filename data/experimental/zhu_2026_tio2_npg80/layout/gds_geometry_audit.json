@@ -1,0 +1,1316 @@
+{
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "exact_mask_primitives": {
+    "special_cells": [
+      {
+        "bounds_nm": [
+          -125.0,
+          -125.0,
+          125.0,
+          125.0
+        ],
+        "cell_name": "CROSS_250x105",
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -52.5,
+                -125.0
+              ],
+              [
+                52.5,
+                -125.0
+              ],
+              [
+                52.5,
+                -52.5
+              ],
+              [
+                125.0,
+                -52.5
+              ],
+              [
+                125.0,
+                52.5
+              ],
+              [
+                52.5,
+                52.5
+              ],
+              [
+                52.5,
+                125.0
+              ],
+              [
+                -52.5,
+                125.0
+              ],
+              [
+                -52.5,
+                52.5
+              ],
+              [
+                -125.0,
+                52.5
+              ],
+              [
+                -125.0,
+                -52.5
+              ],
+              [
+                -52.5,
+                -52.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 250.0,
+        "width_y_nm": 250.0
+      },
+      {
+        "bounds_nm": [
+          -175.0,
+          -175.0,
+          175.0,
+          175.0
+        ],
+        "cell_name": "INVHOLE_105",
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -175.0,
+                -175.0
+              ],
+              [
+                -52.5,
+                -175.0
+              ],
+              [
+                -52.5,
+                175.0
+              ],
+              [
+                -175.0,
+                175.0
+              ]
+            ]
+          },
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                52.5,
+                -175.0
+              ],
+              [
+                175.0,
+                -175.0
+              ],
+              [
+                175.0,
+                175.0
+              ],
+              [
+                52.5,
+                175.0
+              ]
+            ]
+          },
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -52.5,
+                -175.0
+              ],
+              [
+                52.5,
+                -175.0
+              ],
+              [
+                52.5,
+                -52.5
+              ],
+              [
+                -52.5,
+                -52.5
+              ]
+            ]
+          },
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -52.5,
+                52.5
+              ],
+              [
+                52.5,
+                52.5
+              ],
+              [
+                52.5,
+                175.0
+              ],
+              [
+                -52.5,
+                175.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 350.0,
+        "width_y_nm": 350.0
+      },
+      {
+        "bounds_nm": [
+          -175.0,
+          -175.0,
+          175.0,
+          175.0
+        ],
+        "cell_name": "INVHOLE_250",
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -175.0,
+                -175.0
+              ],
+              [
+                -125.0,
+                -175.0
+              ],
+              [
+                -125.0,
+                175.0
+              ],
+              [
+                -175.0,
+                175.0
+              ]
+            ]
+          },
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                125.0,
+                -175.0
+              ],
+              [
+                175.0,
+                -175.0
+              ],
+              [
+                175.0,
+                175.0
+              ],
+              [
+                125.0,
+                175.0
+              ]
+            ]
+          },
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -125.0,
+                -175.0
+              ],
+              [
+                125.0,
+                -175.0
+              ],
+              [
+                125.0,
+                -125.0
+              ],
+              [
+                -125.0,
+                -125.0
+              ]
+            ]
+          },
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -125.0,
+                125.0
+              ],
+              [
+                125.0,
+                125.0
+              ],
+              [
+                125.0,
+                175.0
+              ],
+              [
+                -125.0,
+                175.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 350.0,
+        "width_y_nm": 350.0
+      },
+      {
+        "bounds_nm": [
+          -125.0,
+          -52.5,
+          125.0,
+          52.5
+        ],
+        "cell_name": "RECT_250x105",
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -125.0,
+                -52.5
+              ],
+              [
+                125.0,
+                -52.5
+              ],
+              [
+                125.0,
+                52.5
+              ],
+              [
+                -125.0,
+                52.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 250.0,
+        "width_y_nm": 105.0
+      }
+    ],
+    "square_cells": [
+      {
+        "bounds_nm": [
+          -125.0,
+          -125.0,
+          125.0,
+          125.0
+        ],
+        "cell_name": "M00_S250",
+        "declared_width_nm": 250.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -125.0,
+                -125.0
+              ],
+              [
+                125.0,
+                -125.0
+              ],
+              [
+                125.0,
+                125.0
+              ],
+              [
+                -125.0,
+                125.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 250.0,
+        "width_y_nm": 250.0
+      },
+      {
+        "bounds_nm": [
+          -122.5,
+          -122.5,
+          122.5,
+          122.5
+        ],
+        "cell_name": "M01_S245",
+        "declared_width_nm": 245.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -122.5,
+                -122.5
+              ],
+              [
+                122.5,
+                -122.5
+              ],
+              [
+                122.5,
+                122.5
+              ],
+              [
+                -122.5,
+                122.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 245.0,
+        "width_y_nm": 245.0
+      },
+      {
+        "bounds_nm": [
+          -120.0,
+          -120.0,
+          120.0,
+          120.0
+        ],
+        "cell_name": "M02_S240",
+        "declared_width_nm": 240.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -120.0,
+                -120.0
+              ],
+              [
+                120.0,
+                -120.0
+              ],
+              [
+                120.0,
+                120.0
+              ],
+              [
+                -120.0,
+                120.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 240.0,
+        "width_y_nm": 240.0
+      },
+      {
+        "bounds_nm": [
+          -117.5,
+          -117.5,
+          117.5,
+          117.5
+        ],
+        "cell_name": "M03_S235",
+        "declared_width_nm": 235.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -117.5,
+                -117.5
+              ],
+              [
+                117.5,
+                -117.5
+              ],
+              [
+                117.5,
+                117.5
+              ],
+              [
+                -117.5,
+                117.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 235.0,
+        "width_y_nm": 235.0
+      },
+      {
+        "bounds_nm": [
+          -115.0,
+          -115.0,
+          115.0,
+          115.0
+        ],
+        "cell_name": "M04_S230",
+        "declared_width_nm": 230.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -115.0,
+                -115.0
+              ],
+              [
+                115.0,
+                -115.0
+              ],
+              [
+                115.0,
+                115.0
+              ],
+              [
+                -115.0,
+                115.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 230.0,
+        "width_y_nm": 230.0
+      },
+      {
+        "bounds_nm": [
+          -112.5,
+          -112.5,
+          112.5,
+          112.5
+        ],
+        "cell_name": "M05_S225",
+        "declared_width_nm": 225.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -112.5,
+                -112.5
+              ],
+              [
+                112.5,
+                -112.5
+              ],
+              [
+                112.5,
+                112.5
+              ],
+              [
+                -112.5,
+                112.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 225.0,
+        "width_y_nm": 225.0
+      },
+      {
+        "bounds_nm": [
+          -97.5,
+          -97.5,
+          97.5,
+          97.5
+        ],
+        "cell_name": "M06_S195",
+        "declared_width_nm": 195.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -97.5,
+                -97.5
+              ],
+              [
+                97.5,
+                -97.5
+              ],
+              [
+                97.5,
+                97.5
+              ],
+              [
+                -97.5,
+                97.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 195.0,
+        "width_y_nm": 195.0
+      },
+      {
+        "bounds_nm": [
+          -95.0,
+          -95.0,
+          95.0,
+          95.0
+        ],
+        "cell_name": "M07_S190",
+        "declared_width_nm": 190.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -95.0,
+                -95.0
+              ],
+              [
+                95.0,
+                -95.0
+              ],
+              [
+                95.0,
+                95.0
+              ],
+              [
+                -95.0,
+                95.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 190.0,
+        "width_y_nm": 190.0
+      },
+      {
+        "bounds_nm": [
+          -92.5,
+          -92.5,
+          92.5,
+          92.5
+        ],
+        "cell_name": "M08_S185",
+        "declared_width_nm": 185.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -92.5,
+                -92.5
+              ],
+              [
+                92.5,
+                -92.5
+              ],
+              [
+                92.5,
+                92.5
+              ],
+              [
+                -92.5,
+                92.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 185.0,
+        "width_y_nm": 185.0
+      },
+      {
+        "bounds_nm": [
+          -85.0,
+          -85.0,
+          85.0,
+          85.0
+        ],
+        "cell_name": "M09_S170",
+        "declared_width_nm": 170.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -85.0,
+                -85.0
+              ],
+              [
+                85.0,
+                -85.0
+              ],
+              [
+                85.0,
+                85.0
+              ],
+              [
+                -85.0,
+                85.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 170.0,
+        "width_y_nm": 170.0
+      },
+      {
+        "bounds_nm": [
+          -82.5,
+          -82.5,
+          82.5,
+          82.5
+        ],
+        "cell_name": "M10_S165",
+        "declared_width_nm": 165.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -82.5,
+                -82.5
+              ],
+              [
+                82.5,
+                -82.5
+              ],
+              [
+                82.5,
+                82.5
+              ],
+              [
+                -82.5,
+                82.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 165.0,
+        "width_y_nm": 165.0
+      },
+      {
+        "bounds_nm": [
+          -80.0,
+          -80.0,
+          80.0,
+          80.0
+        ],
+        "cell_name": "M11_S160",
+        "declared_width_nm": 160.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -80.0,
+                -80.0
+              ],
+              [
+                80.0,
+                -80.0
+              ],
+              [
+                80.0,
+                80.0
+              ],
+              [
+                -80.0,
+                80.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 160.0,
+        "width_y_nm": 160.0
+      },
+      {
+        "bounds_nm": [
+          -77.5,
+          -77.5,
+          77.5,
+          77.5
+        ],
+        "cell_name": "M12_S155",
+        "declared_width_nm": 155.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -77.5,
+                -77.5
+              ],
+              [
+                77.5,
+                -77.5
+              ],
+              [
+                77.5,
+                77.5
+              ],
+              [
+                -77.5,
+                77.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 155.0,
+        "width_y_nm": 155.0
+      },
+      {
+        "bounds_nm": [
+          -75.0,
+          -75.0,
+          75.0,
+          75.0
+        ],
+        "cell_name": "M13_S150",
+        "declared_width_nm": 150.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -75.0,
+                -75.0
+              ],
+              [
+                75.0,
+                -75.0
+              ],
+              [
+                75.0,
+                75.0
+              ],
+              [
+                -75.0,
+                75.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 150.0,
+        "width_y_nm": 150.0
+      },
+      {
+        "bounds_nm": [
+          -72.5,
+          -72.5,
+          72.5,
+          72.5
+        ],
+        "cell_name": "M14_S145",
+        "declared_width_nm": 145.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -72.5,
+                -72.5
+              ],
+              [
+                72.5,
+                -72.5
+              ],
+              [
+                72.5,
+                72.5
+              ],
+              [
+                -72.5,
+                72.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 145.0,
+        "width_y_nm": 145.0
+      },
+      {
+        "bounds_nm": [
+          -70.0,
+          -70.0,
+          70.0,
+          70.0
+        ],
+        "cell_name": "M15_S140",
+        "declared_width_nm": 140.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -70.0,
+                -70.0
+              ],
+              [
+                70.0,
+                -70.0
+              ],
+              [
+                70.0,
+                70.0
+              ],
+              [
+                -70.0,
+                70.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 140.0,
+        "width_y_nm": 140.0
+      },
+      {
+        "bounds_nm": [
+          -67.5,
+          -67.5,
+          67.5,
+          67.5
+        ],
+        "cell_name": "M16_S135",
+        "declared_width_nm": 135.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -67.5,
+                -67.5
+              ],
+              [
+                67.5,
+                -67.5
+              ],
+              [
+                67.5,
+                67.5
+              ],
+              [
+                -67.5,
+                67.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 135.0,
+        "width_y_nm": 135.0
+      },
+      {
+        "bounds_nm": [
+          -65.0,
+          -65.0,
+          65.0,
+          65.0
+        ],
+        "cell_name": "M17_S130",
+        "declared_width_nm": 130.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -65.0,
+                -65.0
+              ],
+              [
+                65.0,
+                -65.0
+              ],
+              [
+                65.0,
+                65.0
+              ],
+              [
+                -65.0,
+                65.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 130.0,
+        "width_y_nm": 130.0
+      },
+      {
+        "bounds_nm": [
+          -62.5,
+          -62.5,
+          62.5,
+          62.5
+        ],
+        "cell_name": "M18_S125",
+        "declared_width_nm": 125.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -62.5,
+                -62.5
+              ],
+              [
+                62.5,
+                -62.5
+              ],
+              [
+                62.5,
+                62.5
+              ],
+              [
+                -62.5,
+                62.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 125.0,
+        "width_y_nm": 125.0
+      },
+      {
+        "bounds_nm": [
+          -60.0,
+          -60.0,
+          60.0,
+          60.0
+        ],
+        "cell_name": "M19_S120",
+        "declared_width_nm": 120.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -60.0,
+                -60.0
+              ],
+              [
+                60.0,
+                -60.0
+              ],
+              [
+                60.0,
+                60.0
+              ],
+              [
+                -60.0,
+                60.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 120.0,
+        "width_y_nm": 120.0
+      },
+      {
+        "bounds_nm": [
+          -57.5,
+          -57.5,
+          57.5,
+          57.5
+        ],
+        "cell_name": "M20_S115",
+        "declared_width_nm": 115.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -57.5,
+                -57.5
+              ],
+              [
+                57.5,
+                -57.5
+              ],
+              [
+                57.5,
+                57.5
+              ],
+              [
+                -57.5,
+                57.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 115.0,
+        "width_y_nm": 115.0
+      },
+      {
+        "bounds_nm": [
+          -55.0,
+          -55.0,
+          55.0,
+          55.0
+        ],
+        "cell_name": "M21_S110",
+        "declared_width_nm": 110.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -55.0,
+                -55.0
+              ],
+              [
+                55.0,
+                -55.0
+              ],
+              [
+                55.0,
+                55.0
+              ],
+              [
+                -55.0,
+                55.0
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 110.0,
+        "width_y_nm": 110.0
+      },
+      {
+        "bounds_nm": [
+          -52.5,
+          -52.5,
+          52.5,
+          52.5
+        ],
+        "cell_name": "M22_S105",
+        "declared_width_nm": 105.0,
+        "polygons": [
+          {
+            "datatype": 0,
+            "layer": 1,
+            "vertices_nm": [
+              [
+                -52.5,
+                -52.5
+              ],
+              [
+                52.5,
+                -52.5
+              ],
+              [
+                52.5,
+                52.5
+              ],
+              [
+                -52.5,
+                52.5
+              ]
+            ]
+          }
+        ],
+        "width_x_nm": 105.0,
+        "width_y_nm": 105.0
+      }
+    ]
+  },
+  "gdsii": {
+    "cell_count": 28,
+    "database_unit_m": 5e-10,
+    "database_unit_nm": 0.5,
+    "expanded_leaf_counts": {
+      "CROSS_250x105": 81225,
+      "INVHOLE_105": 81225,
+      "INVHOLE_250": 81225,
+      "M00_S250": 90467,
+      "M01_S245": 9352,
+      "M02_S240": 10204,
+      "M03_S235": 10092,
+      "M04_S230": 11638,
+      "M05_S225": 17564,
+      "M06_S195": 20277,
+      "M07_S190": 16048,
+      "M08_S185": 18005,
+      "M09_S170": 15759,
+      "M10_S165": 13173,
+      "M11_S160": 12755,
+      "M12_S155": 11659,
+      "M13_S150": 10841,
+      "M14_S145": 9149,
+      "M15_S140": 9046,
+      "M16_S135": 7616,
+      "M17_S130": 6384,
+      "M18_S125": 6378,
+      "M19_S120": 5485,
+      "M20_S115": 5635,
+      "M21_S110": 4305,
+      "M22_S105": 84293,
+      "RECT_250x105": 81225
+    },
+    "expanded_leaf_instance_count": 731025,
+    "geometry_complete_for_boundary_sref_aref": true,
+    "library_name": "DOSE_TEST_700_ZEP",
+    "polygon_layer_counts": {
+      "1": 233
+    },
+    "top_aref_count": 16600,
+    "top_bounds_nm": [
+      -250000.0,
+      -249825.0,
+      249825.0,
+      295205.0
+    ],
+    "top_cell": "main",
+    "top_direct_polygon_count": 200,
+    "top_extent_um": [
+      499.825,
+      545.03
+    ],
+    "top_sref_count": 85693,
+    "uniform_285_by_285_arrays": [
+      {
+        "cell_name": "M22_S105",
+        "columns": 285,
+        "instance_count": 81225,
+        "origin_nm": [
+          -249700.0,
+          150300.0
+        ],
+        "rows": 285
+      },
+      {
+        "cell_name": "M00_S250",
+        "columns": 285,
+        "instance_count": 81225,
+        "origin_nm": [
+          -49700.0,
+          150300.0
+        ],
+        "rows": 285
+      },
+      {
+        "cell_name": "RECT_250x105",
+        "columns": 285,
+        "instance_count": 81225,
+        "origin_nm": [
+          150300.0,
+          150300.0
+        ],
+        "rows": 285
+      },
+      {
+        "cell_name": "INVHOLE_105",
+        "columns": 285,
+        "instance_count": 81225,
+        "origin_nm": [
+          -249700.0,
+          -49700.0
+        ],
+        "rows": 285
+      },
+      {
+        "cell_name": "INVHOLE_250",
+        "columns": 285,
+        "instance_count": 81225,
+        "origin_nm": [
+          -49700.0,
+          -49700.0
+        ],
+        "rows": 285
+      },
+      {
+        "cell_name": "CROSS_250x105",
+        "columns": 285,
+        "instance_count": 81225,
+        "origin_nm": [
+          150300.0,
+          -49700.0
+        ],
+        "rows": 285
+      }
+    ],
+    "unique_array_pitch_nm": {
+      "x": 350.0,
+      "y": 350.0
+    },
+    "user_unit_per_database_unit": 0.0005
+  },
+  "interpretation_limits": {
+    "gds_filename_450nm_is_not_array_pitch": true,
+    "gds_has_no_material_semantics": true,
+    "internal_array_pitch_nm": 350.0,
+    "library_name_indicates_700nm_zep_dose_test": true,
+    "mask_polarity_confirmed_by_operator": false,
+    "not_permitted": "claim that the GDS fixes self-bias, TiO2/Cr rates, or the final SEM",
+    "permitted": "exact geometry/density board conditional on polygons being Cr islands"
+  },
+  "schema": "petch.zhu-npg80-gds-geometry-audit.v1",
+  "simulation_board": {
+    "does_not_change_frozen_recipe": true,
+    "does_not_identify_surface_coefficients": true,
+    "pitch_nm": 350.0,
+    "replaces_same_group_geometry_prior": true,
+    "special_cells": [
+      "CROSS_250x105",
+      "INVHOLE_105",
+      "INVHOLE_250",
+      "RECT_250x105"
+    ],
+    "square_widths_nm": [
+      105.0,
+      110.0,
+      115.0,
+      120.0,
+      125.0,
+      130.0,
+      135.0,
+      140.0,
+      145.0,
+      150.0,
+      155.0,
+      160.0,
+      165.0,
+      170.0,
+      185.0,
+      190.0,
+      195.0,
+      225.0,
+      230.0,
+      235.0,
+      240.0,
+      245.0,
+      250.0
+    ]
+  },
+  "source": {
+    "path": "data/experimental/zhu_2026_tio2_npg80/layout/gds_sem_image_450nm.gds",
+    "received_filename": "GDS SEM Image 450nm.gds",
+    "sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+    "size_bytes": 3688096,
+    "target_sem_used": false
+  }
+}

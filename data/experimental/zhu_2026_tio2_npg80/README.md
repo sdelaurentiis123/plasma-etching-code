@@ -29,6 +29,27 @@ resist-hole ALD-fill route followed by BCl3/Ar excess-film clearing, not this
 blanket-TiO2/Cr-mask etch. The dimensions therefore define a square-pillar
 sensitivity board, not the unrevealed target layout.
 
+### Operator-supplied GDS geometry
+
+An operator-supplied GDSII file received after the original blind
+preregistration now replaces the public-paper geometry prior for prospective
+layout calculations. Its bytes are retained at
+`layout/gds_sem_image_450nm.gds` and decoded by
+`scripts/audit_zhu_npg80_gds_geometry.py`. The checksum-bound layout has a
+`0.5 nm` database unit and an internal `350 nm x 350 nm` array pitch. It
+contains 23 square-mask primitives from `105--250 nm` (with the exact discrete
+width list in `layout/gds_geometry_audit.json`) plus `250 x 105 nm`
+rectangles, crosses, and two inverse-hole families. The GDS filename's
+`450nm` label is therefore not the physical array pitch.
+
+This is materially stronger geometry evidence, but GDSII does not encode mask
+polarity, material identity, plasma self-bias, or surface coefficients. Until
+the operator confirms that positive layer-1 polygons become Cr mask islands,
+the file supports a conditional polarity board rather than a unique mask
+assignment. The original blind preregistration remains immutable as the
+chronological record; an exact-GDS forecast must cite the new audit and must
+not rewrite the earlier geometry guess after the fact.
+
 The same group has a 2026 Nature paper on TiO2/SRN metasurface optical-tweezer
 arrays. Zezheng Zhu is a coauthor and is credited with metasurface design and
 fabrication; Teng Qu is not an author on that paper. Its TiO2 example reports
