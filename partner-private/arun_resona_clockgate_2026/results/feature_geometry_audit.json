@@ -1,0 +1,62 @@
+{
+  "physical_geometry": {
+    "exact_mask_area_fraction": 0.4445447278166019,
+    "exact_mask_area_um2": 2758.240000000001,
+    "footprint_extent_um": [
+      98.80000000000001,
+      62.8
+    ],
+    "mask_height_um": 30.0,
+    "polygon_count": 10,
+    "working_polarity": "positive footprint protects silicon"
+  },
+  "pilot_layered_geometry": {
+    "contains_film_mask_and_base": true,
+    "contains_gas": true,
+    "dx_um": 0.4,
+    "finite": true,
+    "material_ids": [
+      1,
+      2,
+      3
+    ],
+    "shape": [
+      248,
+      158,
+      97
+    ],
+    "voxel_count": 3800848
+  },
+  "production_footprint": {
+    "dx_um": 0.2,
+    "finite": true,
+    "float64_bytes_per_scalar_field": 240748200,
+    "full_3d_shape_at_38p4_um": [
+      495,
+      315,
+      193
+    ],
+    "full_3d_voxel_count": 30093525,
+    "has_mask_and_opening": true,
+    "minimum_opening_cells": 13.0,
+    "periodic_x": true,
+    "periodic_y": true,
+    "shape_with_periodic_endpoints": [
+      495,
+      315
+    ]
+  },
+  "readiness": {
+    "absolute_surface_response_certified_for_target_tool": false,
+    "exact_layout_to_layered_3d_engine_ready": true,
+    "next_step": "run the evidence-bounded SF6/O2 boundary/surface ensemble on the exact layered geometry",
+    "target_sem_used": false
+  },
+  "reference_gds": {
+    "cell": "CLKGATE_X1",
+    "datatype": 0,
+    "layer": 11,
+    "sha256": "bbb1e254375c7a0deac00000359a16d039242b7bde79808255e76a9996d811ac"
+  },
+  "schema": "petch.partner.clockgate-feature-geometry-audit.v1"
+}

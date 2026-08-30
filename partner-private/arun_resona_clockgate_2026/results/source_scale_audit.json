@@ -1,0 +1,92 @@
+{
+  "exact_geometry_match": {
+    "axis_permutation": [
+      0,
+      1
+    ],
+    "axis_scale_file_units_per_source_um": [
+      0.040000025506072824,
+      0.03999995541401277
+    ],
+    "axis_sign": [
+      1.0,
+      1.0
+    ],
+    "file_units_per_source_um": 0.039999990460042795,
+    "match_grade": "exact within binary-STL float32 roundoff",
+    "maximum_bidirectional_vertex_residual_file_units": 1.9011682122981414e-07,
+    "maximum_bidirectional_vertex_residual_um": 0.00019011682122981415,
+    "physical_enlargement_from_source_gds": 39.999990460042795,
+    "rms_source_to_stl_vertex_residual_file_units": 1.0394246203997309e-07,
+    "stl_unique_planar_vertex_count": 104,
+    "translation_file_units": [
+      1.185599923,
+      0.6720000221891036
+    ]
+  },
+  "physical_geometry": {
+    "extent_um_in_stl_axis_order": [
+      29.999999329447746,
+      98.80006313323975,
+      62.799930572509766
+    ],
+    "extrusion_axis": 0,
+    "footprint_extent_um": [
+      98.80006313323975,
+      62.799930572509766
+    ],
+    "mask_height_um": 29.999999329447746,
+    "minimum_opening_mask_aspect_ratio": 11.538464032468163,
+    "minimum_physical_opening_um": 2.5999993799027794,
+    "minimum_physical_rectilinear_edge_um": 2.7999993322029892,
+    "minimum_source_polygon_gap_um": 0.06499999999999995,
+    "minimum_source_rectilinear_edge_um": 0.06999999999999984,
+    "planar_axes": [
+      1,
+      2
+    ],
+    "solid_component_count": 10,
+    "source_grid_after_enlargement_um": 0.19999995230021397
+  },
+  "process_interpretation": {
+    "alternate_polarity": "treat solids as openings only if the desired silicon result is trenches",
+    "stl_solids_are": "40x enlarged FreePDK45 Metal-1 polygons",
+    "working_mask_polarity": "printed solids protect silicon",
+    "working_target": "raised silicon replicas of the Metal-1 wiring"
+  },
+  "recovered_units": {
+    "declared_in_stl_standard": false,
+    "evidence_class": "strongly inferred by exact public-source match and print workflow",
+    "filename_25x_cannot_be_geometry_scale": "the geometry itself is exactly 40x the source Metal-1 polygons",
+    "filename_25x_interpretation": "Nanoscribe 25x objective or process preset; not geometry scale",
+    "micrometers_per_stl_file_unit": 1000.0,
+    "nanoscribe_import_convention_source": "https://www.nanoscribe.com/en/contact-support/support/cad-model-creation/",
+    "nanoscribe_import_note": "DeScribe interprets raw STL units as micrometers, so this millimeter-authored STL requires 1000x import scaling",
+    "stl_file_unit": "millimeter"
+  },
+  "reference_gds": {
+    "cell_name": "CLKGATE_X1",
+    "database_unit_m": 1e-10,
+    "datatype": 0,
+    "download_url": "https://raw.githubusercontent.com/mflowgen/freepdk-45nm/master/stdcells.gds",
+    "layer": 11,
+    "layer_map_source": "https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/master/flow/platforms/nangate45/FreePDK45.lyt",
+    "layer_semantics": "FreePDK45 Metal 1",
+    "library_name": "NangateOpenCellLibrary",
+    "local_sha256": "bbb1e254375c7a0deac00000359a16d039242b7bde79808255e76a9996d811ac",
+    "polygon_count": 10,
+    "source_footprint_extent_um": [
+      2.47,
+      1.57
+    ],
+    "source_grid_um": 0.005,
+    "unique_vertex_count": 104
+  },
+  "schema": "petch.partner.clockgate-source-scale-audit.v1",
+  "source_stl": {
+    "binary_header": "stlbn CLKGATE_X1_25x_reduced_L11_3D",
+    "path": "raw/CLKGATE X1 25x Reduced 3D.STL",
+    "repaired_degenerate_face_count": 9,
+    "sha256": "5df028e30436ca2313fd58a79a3240b4db7775ccf62301b87866612109f901fa"
+  }
+}

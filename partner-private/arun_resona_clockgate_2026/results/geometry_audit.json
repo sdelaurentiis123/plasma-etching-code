@@ -1,0 +1,487 @@
+{
+  "bounds_file_units": [
+    [
+      0.0,
+      1.18559992313385,
+      0.6686000227928162
+    ],
+    [
+      0.029999999329447746,
+      1.2843999862670898,
+      0.7313999533653259
+    ]
+  ],
+  "clean_diagnostics": {
+    "consistently_oriented": true,
+    "failure_reason": null,
+    "is_watertight": true,
+    "n_boundary_edges": 0,
+    "n_degenerate_faces": 0,
+    "n_faces": 376,
+    "n_nonmanifold_edges": 0,
+    "n_vertices": 208,
+    "outward_oriented": true,
+    "signed_volume_file_units_cubed": 8.27471196161129e-05
+  },
+  "components": [
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.18559992313385,
+          0.7075999975204468
+        ],
+        [
+          0.029999999329447746,
+          1.2843999862670898,
+          0.7313999533653259
+        ]
+      ],
+      "component": 0,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 76,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 40,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 2.6825893016088484e-05
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.09880006313323975,
+        0.02379995584487915
+      ],
+      "face_count": 76,
+      "signed_volume_file_units_cubed": 2.6825893016088484e-05,
+      "vertex_count": 40
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.18559992313385,
+          0.6686000227928162
+        ],
+        [
+          0.029999999329447746,
+          1.2843999862670898,
+          0.6847999691963196
+        ]
+      ],
+      "component": 1,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 76,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 40,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 2.2574409166700238e-05
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.09880006313323975,
+        0.016199946403503418
+      ],
+      "face_count": 76,
+      "signed_volume_file_units_cubed": 2.2574409166700238e-05,
+      "vertex_count": 40
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.1926000118255615,
+          0.6808000206947327
+        ],
+        [
+          0.029999999329447746,
+          1.2142000198364258,
+          0.7140000462532043
+        ]
+      ],
+      "component": 2,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 44,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 24,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 5.850007307923343e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.021600008010864258,
+        0.03320002555847168
+      ],
+      "face_count": 44,
+      "signed_volume_file_units_cubed": 5.850007307923343e-06,
+      "vertex_count": 24
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.2134000062942505,
+          0.6827999949455261
+        ],
+        [
+          0.029999999329447746,
+          1.2353999614715576,
+          0.7140000462532043
+        ]
+      ],
+      "component": 3,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 44,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 24,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 5.8463732114611366e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.02199995517730713,
+        0.031200051307678223
+      ],
+      "face_count": 44,
+      "signed_volume_file_units_cubed": 5.8463732114611366e-06,
+      "vertex_count": 24
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.2569999694824219,
+          0.6793999671936035
+        ],
+        [
+          0.029999999329447746,
+          1.2754000425338745,
+          0.7155999541282654
+        ]
+      ],
+      "component": 4,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 44,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 24,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 5.040024606410764e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.018400073051452637,
+        0.036199986934661865
+      ],
+      "face_count": 44,
+      "signed_volume_file_units_cubed": 5.040024606410764e-06,
+      "vertex_count": 24
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.2313998937606812,
+          0.6797999739646912
+        ],
+        [
+          0.029999999329447746,
+          1.2446000576019287,
+          0.7155999541282654
+        ]
+      ],
+      "component": 5,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 28,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 16,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 4.69203286016396e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.013200163841247559,
+        0.03579998016357422
+      ],
+      "face_count": 28,
+      "signed_volume_file_units_cubed": 4.69203286016396e-06,
+      "vertex_count": 16
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.277999997138977,
+          0.6789999604225159
+        ],
+        [
+          0.029999999329447746,
+          1.281999945640564,
+          0.7155999541282654
+        ]
+      ],
+      "component": 6,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 12,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 8,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 4.391942601273729e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.003999948501586914,
+        0.03659999370574951
+      ],
+      "face_count": 12,
+      "signed_volume_file_units_cubed": 4.391942601273729e-06,
+      "vertex_count": 8
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.1871999502182007,
+          0.6826000213623047
+        ],
+        [
+          0.029999999329447746,
+          1.2031999826431274,
+          0.7136000394821167
+        ]
+      ],
+      "component": 7,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 28,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 16,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 3.7127890016139596e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.016000032424926758,
+        0.03100001811981201
+      ],
+      "face_count": 28,
+      "signed_volume_file_units_cubed": 3.7127890016139596e-06,
+      "vertex_count": 16
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.2471998929977417,
+          0.6887999773025513
+        ],
+        [
+          0.029999999329447746,
+          1.2613999843597412,
+          0.6944000124931335
+        ]
+      ],
+      "component": 8,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 12,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 8,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 2.3856302867779363e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.014200091361999512,
+        0.005600035190582275
+      ],
+      "face_count": 12,
+      "signed_volume_file_units_cubed": 2.3856302867779363e-06,
+      "vertex_count": 8
+    },
+    {
+      "bounds_file_units": [
+        [
+          0.0,
+          1.222000002861023,
+          0.6929999589920044
+        ],
+        [
+          0.029999999329447746,
+          1.2288000583648682,
+          0.699999988079071
+        ]
+      ],
+      "component": 9,
+      "diagnostics": {
+        "consistently_oriented": true,
+        "failure_reason": null,
+        "is_watertight": true,
+        "n_boundary_edges": 0,
+        "n_degenerate_faces": 0,
+        "n_faces": 12,
+        "n_nonmanifold_edges": 0,
+        "n_vertices": 8,
+        "outward_oriented": true,
+        "signed_volume_file_units_cubed": 1.4280175576993498e-06
+      },
+      "extent_file_units": [
+        0.029999999329447746,
+        0.006800055503845215,
+        0.00700002908706665
+      ],
+      "face_count": 12,
+      "signed_volume_file_units_cubed": 1.4280175576993498e-06,
+      "vertex_count": 8
+    }
+  ],
+  "connected_component_count": 10,
+  "edge_length_file_units": {
+    "maximum": 0.10325430952216486,
+    "median": 0.017456225312858478,
+    "minimum": 0.00279998779296875,
+    "p01": 0.00279998779296875,
+    "p99": 0.09643946116559697
+  },
+  "extent_file_units": [
+    0.029999999329447746,
+    0.09880006313323975,
+    0.06279993057250977
+  ],
+  "planar_extrusion": {
+    "candidate_axes": [
+      0
+    ],
+    "candidate_axis": 0,
+    "component_projected_area_file_units_squared": [
+      0.0008941964538564643,
+      0.0007524803223759205,
+      0.00019500024795603997,
+      0.00019487911140459214,
+      0.00016800082396880317,
+      0.00015640109883463562,
+      0.0001463980899813766,
+      0.00012375963615337543,
+      7.952101133669765e-05,
+      4.760058632060101e-05
+    ],
+    "extrusion_thickness_file_units": 0.029999999329447746,
+    "projected_bounding_box_area_file_units_squared": 0.006204637105327038,
+    "projected_fill_fraction": 0.44454451329964184,
+    "projected_solid_area_file_units_squared": 0.0027582373821885067,
+    "unique_candidate": true,
+    "unique_coordinate_count_by_axis": [
+      2,
+      41,
+      35
+    ]
+  },
+  "raw_diagnostics": {
+    "consistently_oriented": true,
+    "failure_reason": "degenerate mesh: 9 zero-area facet(s); remove them with a topology-preserving repair",
+    "is_watertight": true,
+    "n_boundary_edges": 0,
+    "n_degenerate_faces": 9,
+    "n_faces": 385,
+    "n_nonmanifold_edges": 0,
+    "n_vertices": 208,
+    "outward_oriented": true,
+    "signed_volume_file_units_cubed": 8.274711961611272e-05
+  },
+  "repair": {
+    "absolute_area_tolerance_file_units_squared": 0.0,
+    "clean_diagnostics": {
+      "consistently_oriented": true,
+      "n_boundary_edges": 0,
+      "n_degenerate_faces": 0,
+      "n_faces": 376,
+      "n_nonmanifold_edges": 0,
+      "n_vertices": 208,
+      "signed_volume": 8.27471196161129e-05
+    },
+    "operation": "drop_degenerate_faces",
+    "relative_area_tolerance": 0.0,
+    "relative_volume_change": 2.1291720345826676e-15,
+    "removed_face_count": 9,
+    "removed_face_indices": [
+      28,
+      73,
+      118,
+      147,
+      192,
+      269,
+      346,
+      359,
+      372
+    ],
+    "signed_volume_after": 8.27471196161129e-05,
+    "signed_volume_before": 8.274711961611272e-05,
+    "topology_preserved": true
+  },
+  "repaired": {
+    "filename": "clkgate_x1_topology_repaired.stl",
+    "sha256": "4b2c46a5f58309a869b9c0296ab3c98643b56e9603cbd14834c41e76cc9b87f4",
+    "size_bytes": 18884
+  },
+  "schema": "petch.stl-geometry-audit.v2",
+  "simulation_readiness": {
+    "geometry_topology_ready": true,
+    "mask_or_void_polarity_ready": false,
+    "material_stack_ready": false,
+    "physical_scale_ready": false,
+    "reactor_boundary_ready": false,
+    "surface_mechanism_ready": false
+  },
+  "source": {
+    "filename": "CLKGATE X1 25x Reduced 3D.STL",
+    "sha256": "5df028e30436ca2313fd58a79a3240b4db7775ccf62301b87866612109f901fa",
+    "size_bytes": 19334
+  },
+  "surface_area_file_units_squared": 0.04568050823324876,
+  "units": {
+    "declared_by_stl": null,
+    "physical_scale_identified": false,
+    "warning": "STL stores coordinates but no units; no physical depth, CD, or etch time may be inferred until the sender identifies scale"
+  },
+  "volume_file_units_cubed": 8.27471196161129e-05
+}

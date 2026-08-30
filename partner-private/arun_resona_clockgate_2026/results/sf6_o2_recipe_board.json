@@ -1,0 +1,96 @@
+{
+  "schema": "petch.partner.clockgate-sf6-o2-recipe-board.v1",
+  "decision_status": "evidence-selected first recipe; not yet a tool-specific certified optimum",
+  "geometry_contract": {
+    "source_cell": "CLKGATE_X1",
+    "source_layer": "FreePDK45 Metal 1, layer 11 datatype 0",
+    "physical_footprint_um": [98.8, 62.8],
+    "printed_mask_height_um": 30.0,
+    "physical_enlargement": 40.0,
+    "minimum_opening_um": 2.6,
+    "common_track_width_um": 2.8,
+    "mask_entrance_aspect_ratio_at_minimum_opening": 11.538461538461538,
+    "working_polarity": "printed solids protect silicon",
+    "working_target": "raised silicon replicas of the Metal-1 wiring"
+  },
+  "selected_baseline": {
+    "id": "miao-2016-fidelity-baseline",
+    "tool_class": "Oxford Plasmalab 100 cryogenic ICP",
+    "substrate": "silicon",
+    "mask_transfer": "printed polymer; optional thin angled Cr cap",
+    "temperature_c": -110.0,
+    "temperature_tolerance_c": 2.0,
+    "pressure_mtorr": 8.0,
+    "icp_power_w": 1000.0,
+    "rf_platen_power_w": 10.0,
+    "gas_flow_sccm": {"SF6": 52.0, "O2": 8.0},
+    "duration_s": 120.0,
+    "published_depth_um": [3.5, 3.9],
+    "published_mask_selectivity": {
+      "polymer": 15.0,
+      "chromium_lower_bound": 500.0,
+      "silicon_dioxide": 60.0
+    },
+    "conditional_polymer_loss_um": [0.23333333333333334, 0.26],
+    "primary_source": {
+      "bibkey": "miao-2016-cryo-grating",
+      "doi": "10.1109/JMEMS.2016.2593339",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5084849/"
+    }
+  },
+  "selection_rationale": [
+    "Same SF6/O2-on-silicon chemistry and an Oxford ICP tool class.",
+    "Directly compared polymer, Cr, SiO2, and Cr-on-polymer masks.",
+    "Optimized the relevant failure mode: lateral undercut at high aspect ratio.",
+    "Published structures were much smaller than the 2.6 um minimum opening here.",
+    "High source power and low platen power separate radical generation from ion damage.",
+    "The higher-rate 92/8 branch is retained only as a throughput bound because its published high-rate profile bottled and had 40-60 nm sidewall undulation."
+  ],
+  "initial_prediction_contract": {
+    "target_silicon_depth_um": [3.5, 3.9],
+    "target_profile": "continuous raised Metal-1 replica without neck loss or grass",
+    "blind_outputs": [
+      "depth map",
+      "top/middle/bottom critical dimension",
+      "maximum lateral edge error",
+      "sidewall angle and bow",
+      "minimum surviving neck width",
+      "mask loss",
+      "local loading response"
+    ],
+    "claim_boundary": "The literature depth is a starting interval, not a prediction for an unspecified etcher. Tool-specific wafer flux, self-bias, thermal contact, and printed-polymer response remain propagated inputs until measured."
+  },
+  "minimal_derivative_board": [
+    {"id": "R0", "change_from_baseline": "none", "purpose": "center condition"},
+    {"id": "R0-repeat", "change_from_baseline": "none; run after the board", "purpose": "tool drift and repeatability"},
+    {"id": "R-time-low", "duration_s": 60.0, "purpose": "early-time rate and mask transient"},
+    {"id": "R-time-high", "duration_s": 180.0, "purpose": "depth linearity and onset of transport limitation"},
+    {"id": "R-o2-low", "gas_flow_sccm": {"SF6": 52.0, "O2": 7.0}, "purpose": "undercut-sensitive low-passivation side"},
+    {"id": "R-o2-high", "gas_flow_sccm": {"SF6": 52.0, "O2": 9.0}, "purpose": "closure/taper-sensitive high-passivation side"},
+    {"id": "R-pressure-low", "pressure_mtorr": 6.0, "purpose": "narrower ion angle and reduced scattering"},
+    {"id": "R-pressure-high", "pressure_mtorr": 10.0, "purpose": "collisional angular broadening and passivation sensitivity"},
+    {"id": "R-rf-high", "rf_platen_power_w": 20.0, "purpose": "ion-energy derivative and mask-damage bound"}
+  ],
+  "experimental_decision_rule": [
+    "Reject any condition with grass, mask collapse, disconnected tracks, or local neck loss.",
+    "Among survivors, minimize maximum absolute lateral edge error across all layout components.",
+    "Then minimize within-cell and across-sample depth nonuniformity.",
+    "Use etch rate only as the final tie-breaker."
+  ],
+  "literature_bounds": [
+    {
+      "id": "wu-2011-resolution-bound",
+      "recipe": {"temperature_c": -130.0, "pressure_mtorr": 6.0, "icp_power_w": 700.0, "rf_platen_power_w": 10.0, "gas_flow_sccm": {"SF6": 34.0, "O2": 16.0}},
+      "result": "controlled approximately 20 nm trenches at aspect ratio about 8",
+      "role": "oxygen-rich, extreme-resolution passivation bound; not the preferred transfer point",
+      "doi": "10.1016/j.mee.2010.11.055"
+    },
+    {
+      "id": "zhang-2023-throughput-bound",
+      "recipe": {"temperature_c": -100.0, "pressure_mtorr": 12.0, "icp_power_w": 600.0, "rf_platen_power_w": 8.0, "gas_flow_sccm": {"SF6": 92.0, "O2": 8.0}},
+      "result": "3.28 um/min over 10 min, but bottle profile and 40-60 nm sidewall undulation at the tabulated high-rate point",
+      "role": "throughput bound; rejected as first fidelity recipe",
+      "doi": "10.3390/mi14040846"
+    }
+  ]
+}
