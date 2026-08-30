@@ -245,7 +245,16 @@ class GdsLibrary:
 
 def _records(payload: bytes):
     offset = 0
+    endlib_seen = False
     while offset < len(payload):
+        if endlib_seen:
+            # Foundry and EDA exports commonly pad a complete stream to a
+            # fixed block boundary.  GDSII has already terminated at ENDLIB,
+            # so accept only inert NUL padding and fail closed on any other
+            # trailing byte or record.
+            if any(payload[offset:]):
+                raise ValueError("nonzero data after GDSII ENDLIB")
+            return
         if offset + 4 > len(payload):
             raise ValueError("truncated GDSII record header")
         length, record_type, data_type = struct.unpack(">HBB", payload[offset:offset + 4])
@@ -253,6 +262,7 @@ def _records(payload: bytes):
             raise ValueError(f"invalid GDSII record length {length} at byte {offset}")
         yield record_type, data_type, payload[offset + 4:offset + length]
         offset += length
+        endlib_seen = record_type == 0x04
 
 
 def read_gds(source) -> GdsLibrary:

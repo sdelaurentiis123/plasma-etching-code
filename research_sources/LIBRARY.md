@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 173 sources by topic
+## Index — 174 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -260,6 +260,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 |---|---|---|
 | [`belen-2005-jvsta`](library/belen-2005-jvsta.md) | Belen et al., JVST A 23, 99 (2005) | ABSTRACT (self-declares L3 profile-fitted) |
 | [`deboer-2002`](library/deboer-2002.md) | de Boer et al. (2002), cryo SF6/O2 Si | FULL TEXT: research_sources/thesis_extracts/deboer-2002.txt |
+| [`miao-2016-cryo-grating`](library/miao-2016-cryo-grating.md) | Miao et al., Oxford cryogenic SF6/O2 mask/undercut board | PRIMARY OPEN FULL TEXT READ ONLINE; RECIPE AND TABLE VALUES VERIFIED |
 | [`micromachines-2023`](library/micromachines-2023.md) | TU Wien/ViennaPS, Micromachines (2023) | FULL TEXT: research_sources/thesis_extracts/mask_geometry_micromachines_2023.txt |
 | [`yoshie-2023-apsusc`](library/yoshie-2023-apsusc.md) | Yoshie et al., cyclic C4F8/SF6 Si bias timing and ARDE | FULL TEXT ONLINE + PIL-AUDITED FIGURES |
 

@@ -97,3 +97,15 @@ def test_missing_reference_and_truncated_record_fail_closed():
         read_gds(payload)
     with pytest.raises(ValueError, match="truncated|invalid"):
         read_gds(_minimal_array_library()[:-1])
+
+
+def test_zero_block_padding_after_endlib_is_accepted_but_nonzero_tail_is_not():
+    payload = _minimal_array_library()
+
+    padded = read_gds(payload + b"\0" * 1220)
+    assert padded.name == "TEST"
+    assert padded.cells["S250"].polygons[0].bounds_db == (
+        -250, -250, 250, 250)
+
+    with pytest.raises(ValueError, match="nonzero data after GDSII ENDLIB"):
+        read_gds(payload + b"\0" * 31 + b"x")

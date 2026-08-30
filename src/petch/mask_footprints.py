@@ -4,6 +4,22 @@ from __future__ import annotations
 import numpy as np
 
 
+def _validated_periodic_cell(*, cell_width, cell_length, dx):
+    values = np.asarray([cell_width, cell_length, dx], dtype=float)
+    if np.any(~np.isfinite(values)) or np.any(values <= 0.0):
+        raise ValueError("mask-footprint cell dimensions must be positive")
+    intervals = np.rint(values[:2] / float(dx)).astype(int)
+    if (
+        np.any(intervals < 2)
+        or not np.allclose(
+            intervals * float(dx), values[:2], rtol=0.0,
+            atol=1e-12 * max(1.0, float(np.max(values[:2]))),
+        )
+    ):
+        raise ValueError("cell dimensions must be integer multiples of dx")
+    return int(intervals[0]), int(intervals[1])
+
+
 def _centered_grid(*, cell_width, cell_length, dx):
     values = np.asarray([cell_width, cell_length, dx], dtype=float)
     if np.any(~np.isfinite(values)) or np.any(values <= 0.0):
@@ -15,6 +31,108 @@ def _centered_grid(*, cell_width, cell_length, dx):
     x = np.arange(shape[0]) * dx - 0.5 * float(cell_width)
     y = np.arange(shape[1]) * dx - 0.5 * float(cell_length)
     return np.meshgrid(x, y, indexing="ij")
+
+
+def polygon_union_footprint_levelset(
+        *, cell_width, cell_length, dx, polygons):
+    """Positive-inside periodic field for a union of simple polygons.
+
+    Polygon coordinates use the same length unit as the cell and lie inside
+    ``[0, cell_width] x [0, cell_length]``.  The returned nodal field contains
+    duplicate periodic endpoints.  Distances include the eight neighboring
+    periodic images, so a feature beside one edge sees the correct image across
+    the opposite edge.  Polygon holes are represented by decomposing the mask
+    solid into simple positive polygons; oriented negative rings are not
+    accepted implicitly.
+    """
+    nx, ny = _validated_periodic_cell(
+        cell_width=cell_width, cell_length=cell_length, dx=dx)
+    cleaned = []
+    tolerance = 1e-12 * max(1.0, float(cell_width), float(cell_length))
+    for polygon in polygons:
+        vertices = np.asarray(polygon, dtype=float)
+        if (
+            vertices.ndim != 2
+            or vertices.shape[1] != 2
+            or len(vertices) < 3
+            or np.any(~np.isfinite(vertices))
+        ):
+            raise ValueError("each mask polygon needs at least three finite vertices")
+        if np.allclose(vertices[0], vertices[-1], rtol=0.0, atol=tolerance):
+            vertices = vertices[:-1]
+        if len(vertices) < 3 or len(np.unique(vertices, axis=0)) < 3:
+            raise ValueError("degenerate mask polygon")
+        if (
+            np.any(vertices[:, 0] < -tolerance)
+            or np.any(vertices[:, 0] > float(cell_width) + tolerance)
+            or np.any(vertices[:, 1] < -tolerance)
+            or np.any(vertices[:, 1] > float(cell_length) + tolerance)
+        ):
+            raise ValueError("mask polygon lies outside the periodic cell")
+        shifted = np.roll(vertices, -1, axis=0)
+        signed_twice_area = np.sum(
+            vertices[:, 0] * shifted[:, 1]
+            - shifted[:, 0] * vertices[:, 1])
+        if abs(signed_twice_area) <= tolerance ** 2:
+            raise ValueError("zero-area mask polygon")
+        cleaned.append(vertices)
+    if not cleaned:
+        raise ValueError("at least one mask polygon is required")
+
+    x = np.arange(nx, dtype=float) * float(dx)
+    y = np.arange(ny, dtype=float) * float(dx)
+    X, Y = np.meshgrid(x, y, indexing="ij")
+    inside_union = np.zeros((nx, ny), dtype=bool)
+    distance = np.full((nx, ny), np.inf, dtype=float)
+
+    shifts = tuple(
+        (ix * float(cell_width), iy * float(cell_length))
+        for ix in (-1, 0, 1) for iy in (-1, 0, 1)
+    )
+    for vertices in cleaned:
+        local_inside = np.zeros((nx, ny), dtype=bool)
+        for start, end in zip(vertices, np.roll(vertices, -1, axis=0)):
+            direction = end - start
+            length_squared = float(np.dot(direction, direction))
+            if length_squared <= tolerance ** 2:
+                raise ValueError("mask polygon contains a zero-length edge")
+
+            # Standard even/odd ray crossing in the base cell. Horizontal
+            # edges do not cross the ray and therefore need no division.
+            if start[1] != end[1]:
+                crosses_y = (start[1] > Y) != (end[1] > Y)
+                crossing_x = (
+                    start[0]
+                    + (Y - start[1]) * direction[0] / direction[1]
+                )
+                local_inside ^= crosses_y & (X < crossing_x)
+
+            for shift_x, shift_y in shifts:
+                shifted_start_x = start[0] + shift_x
+                shifted_start_y = start[1] + shift_y
+                offset_x = X - shifted_start_x
+                offset_y = Y - shifted_start_y
+                fraction = np.clip(
+                    (offset_x * direction[0] + offset_y * direction[1])
+                    / length_squared,
+                    0.0,
+                    1.0,
+                )
+                nearest_x = shifted_start_x + fraction * direction[0]
+                nearest_y = shifted_start_y + fraction * direction[1]
+                distance = np.minimum(
+                    distance,
+                    np.hypot(X - nearest_x, Y - nearest_y),
+                )
+        inside_union |= local_inside
+
+    unique = np.where(inside_union, distance, -distance)
+    output = np.empty((nx + 1, ny + 1), dtype=float)
+    output[:-1, :-1] = unique
+    output[-1, :-1] = unique[0, :]
+    output[:-1, -1] = unique[:, 0]
+    output[-1, -1] = unique[0, 0]
+    return output
 
 
 def centered_rectangle_footprint_levelset(
