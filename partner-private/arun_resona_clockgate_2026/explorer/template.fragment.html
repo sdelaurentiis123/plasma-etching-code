@@ -1,127 +1,146 @@
 <style>
-#arun-process-explorer{display:grid;gap:14px;color:var(--foreground);font-family:var(--font-sans,ui-sans-serif,system-ui,sans-serif)}
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Slab:wght@400;500&display=swap');
+#arun-process-explorer{display:grid;gap:28px;color:var(--foreground);font-family:'Roboto',var(--font-sans,ui-sans-serif,system-ui,sans-serif);line-height:1.6}
 #arun-process-explorer *{box-sizing:border-box}
-#arun-process-explorer .ape-head,#arun-process-explorer .ape-row,#arun-process-explorer .ape-actions,#arun-process-explorer .ape-legend,#arun-process-explorer .ape-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-#arun-process-explorer .ape-head{justify-content:space-between}
-#arun-process-explorer .ape-title{font-size:1.08rem;font-weight:680;letter-spacing:-.015em}
-#arun-process-explorer .ape-sub{color:var(--muted-foreground);font-size:.82rem;max-width:76ch}
-#arun-process-explorer .ape-badge{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:.72rem;color:var(--muted-foreground);background:var(--muted)}
-#arun-process-explorer .ape-badge.good{color:var(--viz-series-1);border-color:color-mix(in srgb,var(--viz-series-1) 45%,var(--border))}
-#arun-process-explorer .ape-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.8fr);gap:14px}
-#arun-process-explorer .ape-card{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:12px;min-width:0}
-#arun-process-explorer .ape-recipe-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-#arun-process-explorer button,#arun-process-explorer select{font:inherit;color:inherit}
-#arun-process-explorer button{border:1px solid var(--border);background:var(--background);border-radius:8px;padding:7px 9px;cursor:pointer;text-align:left}
-#arun-process-explorer button:hover{background:var(--muted)}
-#arun-process-explorer button[aria-pressed="true"]{border-color:var(--viz-series-1);box-shadow:inset 0 0 0 1px var(--viz-series-1);background:color-mix(in srgb,var(--viz-series-1) 10%,var(--card))}
-#arun-process-explorer .ape-recipe-name{font-size:.78rem;font-weight:650;display:block}
-#arun-process-explorer .ape-recipe-meta{font-size:.68rem;color:var(--muted-foreground);display:block;margin-top:3px;line-height:1.35}
-#arun-process-explorer .ape-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
-#arun-process-explorer label{display:grid;gap:3px;font-size:.74rem;color:var(--muted-foreground)}
-#arun-process-explorer label span{color:var(--foreground);font-variant-numeric:tabular-nums}
-#arun-process-explorer input[type="range"]{width:100%;accent-color:var(--viz-series-1)}
-#arun-process-explorer select{width:100%;border:1px solid var(--border);border-radius:7px;background:var(--background);padding:5px 7px}
-#arun-process-explorer .ape-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-#arun-process-explorer .ape-stat{border-left:2px solid var(--border);padding-left:8px;min-width:0}
-#arun-process-explorer .ape-stat strong{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-#arun-process-explorer .ape-stat small{display:block;color:var(--muted-foreground);font-size:.67rem;line-height:1.3}
-#arun-process-explorer .ape-map-wrap{position:relative;margin-top:8px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--background)}
+#arun-process-explorer h2,#arun-process-explorer h3{font-family:'Roboto Slab',serif;font-weight:500;margin:0;color:var(--foreground)}
+#arun-process-explorer .ape-kicker{color:var(--viz-series-1);font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+#arun-process-explorer .ape-muted{color:var(--muted-foreground)}
+#arun-process-explorer .ape-mast{display:grid;gap:12px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+#arun-process-explorer .ape-mast-line,#arun-process-explorer .ape-section-head,#arun-process-explorer .ape-toolbar,#arun-process-explorer .ape-legend,#arun-process-explorer .ape-statuses{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#arun-process-explorer .ape-intro{max-width:76ch;margin:0;color:var(--muted-foreground)}
+#arun-process-explorer .ape-recipe-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#arun-process-explorer .ape-recipe{display:grid;gap:2px;text-align:left;align-content:start}
+#arun-process-explorer .ape-recipe-name{font-weight:500;color:inherit}
+#arun-process-explorer .ape-recipe-meta{color:inherit;opacity:.72}
+#arun-process-explorer .ape-recipe[aria-pressed="true"] .ape-recipe-name,#arun-process-explorer .ape-recipe[aria-pressed="true"] .ape-recipe-meta{color:var(--primary-foreground);opacity:1;padding-left:10px}
+#arun-process-explorer .ape-note{padding-left:12px;border-left:2px solid var(--viz-series-1);color:var(--muted-foreground)}
+#arun-process-explorer .ape-hero{display:grid;grid-template-columns:minmax(0,1.72fr) minmax(230px,.68fr);gap:24px;align-items:start}
+#arun-process-explorer .ape-primary{min-width:0}
+#arun-process-explorer .ape-primary>.ape-section-head{display:grid;justify-content:stretch}
+#arun-process-explorer .ape-primary .ape-toolbar{justify-content:flex-start}
+#arun-process-explorer #ape-mode{flex:1;min-width:0}
+#arun-process-explorer .ape-parameters{display:grid;gap:14px;padding-left:24px;border-left:1px solid var(--border)}
+#arun-process-explorer .ape-controls{display:grid;gap:12px}
+#arun-process-explorer .ape-control{display:grid;gap:4px}
+#arun-process-explorer .ape-control-line{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+#arun-process-explorer .ape-control-line span{font-variant-numeric:tabular-nums;color:var(--foreground)}
+#arun-process-explorer .ape-map-wrap{position:relative;margin-top:12px;overflow:hidden;background:var(--background);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 #arun-process-explorer canvas{display:block;width:100%;height:auto;image-rendering:auto}
 #arun-process-explorer #ape-map{aspect-ratio:98.8/62.8;cursor:crosshair}
-#arun-process-explorer .ape-tooltip{position:absolute;display:none;pointer-events:none;background:color-mix(in srgb,var(--popover,var(--card)) 94%,transparent);border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.68rem;line-height:1.45;box-shadow:0 6px 22px color-mix(in srgb,var(--foreground) 12%,transparent);z-index:3}
-#arun-process-explorer .ape-colorbar{height:7px;border-radius:999px;background:linear-gradient(90deg,#16253b,#235f91,#2db7a3,#dce66b,#fff1a8);flex:1;min-width:110px}
-#arun-process-explorer .ape-scale{font-size:.66rem;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
-#arun-process-explorer .ape-cross{width:100%;height:auto;display:block;margin-top:8px}
+#arun-process-explorer .ape-tooltip{position:absolute;display:none;pointer-events:none;z-index:3}
+#arun-process-explorer .ape-colorbar{height:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--background) 82%,var(--viz-series-1)),var(--viz-series-1),var(--viz-series-2));flex:1;min-width:110px}
+#arun-process-explorer .ape-scale{color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+#arun-process-explorer .ape-measures{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+#arun-process-explorer .ape-measure{padding:11px 12px 11px 0;min-width:0}
+#arun-process-explorer .ape-measure+.ape-measure{padding-left:12px;border-left:1px solid var(--border)}
+#arun-process-explorer .ape-measure strong{display:block;font-family:'Roboto Slab',serif;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+#arun-process-explorer .ape-measure span{display:block;color:var(--muted-foreground)}
+#arun-process-explorer .ape-branch{padding-left:12px;border-left:2px solid var(--viz-series-2)}
+#arun-process-explorer .ape-branch strong{display:block;font-weight:500}
+#arun-process-explorer .ape-plots{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(240px,.65fr);gap:24px;padding-top:22px;border-top:2px solid var(--border)}
+#arun-process-explorer .ape-plot{min-width:0}
+#arun-process-explorer .ape-plot+.ape-plot{padding-left:24px;border-left:1px solid var(--border)}
+#arun-process-explorer .ape-cross,#arun-process-explorer .ape-sensitivity{width:100%;height:auto;display:block;margin-top:8px}
 #arun-process-explorer .ape-axis{stroke:var(--border);stroke-width:1}
 #arun-process-explorer .ape-ideal{fill:none;stroke:var(--muted-foreground);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
-#arun-process-explorer .ape-pred{fill:color-mix(in srgb,var(--viz-series-1) 20%,transparent);stroke:var(--viz-series-1);stroke-width:1.5;vector-effect:non-scaling-stroke}
-#arun-process-explorer .ape-mask{fill:var(--secondary);stroke:var(--secondary-foreground);stroke-width:.7}
-#arun-process-explorer .ape-text{fill:var(--muted-foreground);font-size:10px}
-#arun-process-explorer .ape-sensitivity{width:100%;height:auto;display:block;margin-top:8px}
+#arun-process-explorer .ape-pred{fill:color-mix(in srgb,var(--viz-series-1) 18%,transparent);stroke:var(--viz-series-1);stroke-width:1.5;vector-effect:non-scaling-stroke}
+#arun-process-explorer .ape-mask{fill:var(--muted);stroke:var(--muted-foreground);stroke-width:.7}
+#arun-process-explorer .ape-text{fill:var(--muted-foreground);font-family:'Roboto',sans-serif;font-size:11px}
 #arun-process-explorer .ape-sens-line{fill:none;stroke:var(--viz-series-2);stroke-width:2;vector-effect:non-scaling-stroke}
-#arun-process-explorer .ape-sens-point{fill:var(--viz-series-1);stroke:var(--card);stroke-width:2}
-#arun-process-explorer .ape-evidence{display:grid;gap:7px;font-size:.72rem;line-height:1.4}
-#arun-process-explorer .ape-evidence-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding-top:7px;border-top:1px solid var(--border)}
-#arun-process-explorer .ape-evidence-row:first-child{border-top:0;padding-top:0}
-#arun-process-explorer .ape-evidence-row strong{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-foreground)}
-#arun-process-explorer .ape-warning{border-left:3px solid var(--viz-series-3,var(--viz-series-2));padding:8px 10px;background:var(--muted);border-radius:6px;font-size:.73rem;line-height:1.42}
-#arun-process-explorer .ape-table{width:100%;border-collapse:collapse;font-size:.69rem;margin-top:7px}
-#arun-process-explorer .ape-table th,#arun-process-explorer .ape-table td{text-align:left;padding:5px 6px;border-top:1px solid var(--border);vertical-align:top}
-#arun-process-explorer .ape-table th{color:var(--muted-foreground);font-weight:600}
-@media(max-width:760px){#arun-process-explorer .ape-grid{grid-template-columns:1fr}#arun-process-explorer .ape-recipe-grid{grid-template-columns:1fr}#arun-process-explorer .ape-stats{grid-template-columns:repeat(2,1fr)}}
+#arun-process-explorer .ape-sens-point{fill:var(--viz-series-1);stroke:var(--background);stroke-width:2}
+#arun-process-explorer .ape-footer-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(250px,.9fr);gap:24px;padding-top:22px;border-top:2px solid var(--border)}
+#arun-process-explorer .ape-footer-grid>section+section{padding-left:24px;border-left:1px solid var(--border)}
+#arun-process-explorer .ape-evidence{display:grid;margin-top:8px}
+#arun-process-explorer .ape-evidence-row{display:grid;grid-template-columns:90px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+#arun-process-explorer .ape-evidence-row strong{font-weight:500;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em}
+#arun-process-explorer .ape-table{width:100%;border-collapse:collapse;margin-top:8px}
+#arun-process-explorer .ape-table th,#arun-process-explorer .ape-table td{text-align:left;padding:8px 6px 8px 0;border-bottom:1px solid var(--border);vertical-align:top}
+#arun-process-explorer .ape-table th{color:var(--muted-foreground);font-weight:500}
+@media(max-width:620px){#arun-process-explorer .ape-hero,#arun-process-explorer .ape-plots,#arun-process-explorer .ape-footer-grid{grid-template-columns:1fr}#arun-process-explorer .ape-parameters,#arun-process-explorer .ape-plot+.ape-plot,#arun-process-explorer .ape-footer-grid>section+section{padding-left:0;border-left:0;padding-top:20px;border-top:1px solid var(--border)}#arun-process-explorer .ape-recipe-strip{grid-template-columns:1fr}#arun-process-explorer .ape-measures{grid-template-columns:repeat(2,1fr)}#arun-process-explorer .ape-measure:nth-child(3){border-left:0;padding-left:0;border-top:1px solid var(--border)}#arun-process-explorer .ape-measure:nth-child(4){border-top:1px solid var(--border)}}
 </style>
 
 <div id="arun-process-explorer">
-  <div class="ape-head">
-    <div><div class="ape-title">Arun clock-gate · exact mask → conditional etch</div><div class="ape-sub">Exact 40× FreePDK45 Metal‑1 footprint. Deterministic entrance transport through the supplied 30 µm mask, then the common Belen SF₆/O₂ surface equations. No target SEM was used.</div></div>
-    <div class="ape-actions"><span class="ape-badge good">Exact topology</span><span class="ape-badge">Conditional absolute profile</span></div>
-  </div>
-
-  <div class="ape-card">
-    <div class="ape-recipe-grid" aria-label="Literature recipe anchors">
-      <button type="button" data-recipe="fidelity" aria-pressed="true"><span class="ape-recipe-name">Fidelity baseline</span><span class="ape-recipe-meta">52/8 sccm SF₆/O₂ · 8 mTorr · 1000/10 W · −110 °C</span></button>
-      <button type="button" data-recipe="resolution" aria-pressed="false"><span class="ape-recipe-name">Resolution bound</span><span class="ape-recipe-meta">34/16 · 6 mTorr · 700/10 W · −130 °C</span></button>
-      <button type="button" data-recipe="throughput" aria-pressed="false"><span class="ape-recipe-name">Throughput bound</span><span class="ape-recipe-meta">92/8 · 12 mTorr · 600/8 W · −100 °C</span></button>
+  <header class="ape-mast">
+    <div class="ape-mast-line">
+      <span class="ape-kicker text-small">Vibefab / mask transport</span>
+      <div class="ape-statuses"><span class="viz-badge">Exact topology</span><span class="viz-badge">Blind · no target SEM</span></div>
     </div>
-    <div id="ape-recipe-note" class="ape-warning" style="margin-top:9px">Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors open-feature depth; it does not identify Arun’s etcher boundary or printed-polymer wall return.</div>
-  </div>
+    <h2>Exact mask, conditional etch</h2>
+    <p class="ape-intro">The supplied clock-gate footprint is projected through a 30 µm printed mask with deterministic ion and radical transport, then coupled to the Belen SF₆/O₂ silicon surface equations.</p>
+  </header>
 
-  <div class="ape-grid">
-    <section class="ape-card">
-      <div class="ape-head"><strong>Top-down process field</strong><div class="ape-row"><select id="ape-mode" aria-label="Map field"><option value="depth">Conditional etched depth</option><option value="ion">Direct ion transmission</option><option value="neutral">Direct radical transmission</option></select><button id="ape-play" type="button">Play time</button></div></div>
-      <div class="ape-stats" style="margin-top:10px">
-        <div class="ape-stat"><strong id="ape-depth-stat">—</strong><small>mean etched depth in openings</small></div>
-        <div class="ape-stat"><strong id="ape-range-stat">—</strong><small>5–95% spatial interval</small></div>
-        <div class="ape-stat"><strong id="ape-ion-stat">—</strong><small>mean direct ion throughput</small></div>
-        <div class="ape-stat"><strong id="ape-mask-stat">—</strong><small>conditional polymer loss at 15:1</small></div>
+  <section aria-labelledby="ape-recipe-heading">
+    <div class="ape-section-head"><h3 id="ape-recipe-heading">Literature anchors</h3><span class="text-small text-muted">Choose the process regime</span></div>
+    <div class="ape-recipe-strip" aria-label="Literature recipe anchors">
+      <button class="btn ape-recipe" type="button" data-recipe="fidelity" aria-pressed="true"><span class="ape-recipe-name">Fidelity baseline</span><span class="ape-recipe-meta text-small">52/8 sccm SF₆/O₂ · 8 mTorr · 1000/10 W · −110 °C</span></button>
+      <button class="btn ape-recipe" type="button" data-recipe="resolution" aria-pressed="false"><span class="ape-recipe-name">Resolution bound</span><span class="ape-recipe-meta text-small">34/16 · 6 mTorr · 700/10 W · −130 °C</span></button>
+      <button class="btn ape-recipe" type="button" data-recipe="throughput" aria-pressed="false"><span class="ape-recipe-name">Throughput bound</span><span class="ape-recipe-meta text-small">92/8 · 12 mTorr · 600/8 W · −100 °C</span></button>
+    </div>
+    <p id="ape-recipe-note" class="ape-note text-small">Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors open-feature depth; it does not identify Arun’s etcher boundary or printed-polymer wall return.</p>
+  </section>
+
+  <section class="ape-hero" aria-label="Interactive transport field and boundary controls">
+    <div class="ape-primary">
+      <div class="ape-section-head">
+        <h3>Top-down process field</h3>
+        <div class="ape-toolbar">
+          <label class="sr-only" for="ape-mode">Map field</label>
+          <select id="ape-mode" class="form-select" aria-label="Map field"><option value="depth">Conditional etched depth</option><option value="ion">Direct ion transmission</option><option value="neutral">Direct radical transmission</option></select>
+          <button id="ape-play" class="btn btn-ghost" type="button">Play time</button>
+        </div>
       </div>
-      <div class="ape-map-wrap"><canvas id="ape-map" width="988" height="628"></canvas><div id="ape-tooltip" class="ape-tooltip"></div></div>
-      <div class="ape-legend" style="margin-top:7px"><span id="ape-scale-lo" class="ape-scale">0</span><span class="ape-colorbar"></span><span id="ape-scale-hi" class="ape-scale">1</span><span class="ape-scale">click to move the cross-section</span></div>
-    </section>
+      <div class="ape-map-wrap"><canvas id="ape-map" width="988" height="628" role="img" aria-label="Top-down clock-gate process field; click to move the line cut"></canvas><div id="ape-tooltip" class="tooltip ape-tooltip"></div></div>
+      <div class="ape-legend text-small"><span id="ape-scale-lo" class="ape-scale">0</span><span class="ape-colorbar" aria-hidden="true"></span><span id="ape-scale-hi" class="ape-scale">1</span><span class="ape-scale">Click the field to move the cross-section</span></div>
+      <div class="ape-measures" role="list" aria-label="Current process metrics">
+        <div class="ape-measure" role="listitem"><strong id="ape-depth-stat">—</strong><span class="text-small">mean depth</span></div>
+        <div class="ape-measure" role="listitem"><strong id="ape-range-stat">—</strong><span class="text-small">5–95% interval</span></div>
+        <div class="ape-measure" role="listitem"><strong id="ape-ion-stat">—</strong><span class="text-small">direct ion throughput</span></div>
+        <div class="ape-measure" role="listitem"><strong id="ape-mask-stat">—</strong><span class="text-small">polymer loss at 15:1</span></div>
+      </div>
+    </div>
 
-    <aside class="ape-card">
-      <strong>Wafer-boundary controls</strong>
-      <div class="ape-sub" style="margin:3px 0 10px">These are the physics inputs the feature solver actually consumes. RF/ICP power does not uniquely determine them.</div>
+    <aside class="ape-parameters">
+      <div><h3>Boundary conditions</h3><p class="ape-muted text-small">These are the quantities the feature solver consumes. RF/ICP power alone does not determine them.</p></div>
       <div class="ape-controls">
-        <label>Ion angular σ <span id="ape-sigma-v">1.5°</span><input id="ape-sigma" type="range" min="0.5" max="3" step="0.1" value="1.5"></label>
-        <label>Mean ion energy <span id="ape-energy-v">100 eV</span><input id="ape-energy" type="range" min="30" max="200" step="5" value="100"></label>
-        <label>F wall recovery <span id="ape-fr-v">0.50</span><input id="ape-fr" type="range" min="0" max="1" step="0.02" value="0.5"></label>
-        <label>O wall recovery <span id="ape-or-v">0.10</span><input id="ape-or" type="range" min="0" max="1" step="0.02" value="0.1"></label>
-        <label>Etch time <span id="ape-time-v">2.0 min</span><input id="ape-time" type="range" min="0.5" max="10" step="0.1" value="2"></label>
-        <label>Line cut <span id="ape-cut-v">y = 31.4 µm</span><input id="ape-cut" type="range" min="0" max="156" step="1" value="78"></label>
+        <label class="ape-control form-label" for="ape-sigma"><span class="ape-control-line">Ion angular σ <span id="ape-sigma-v">1.5°</span></span><input id="ape-sigma" class="form-range" type="range" min="0.5" max="3" step="0.1" value="1.5"></label>
+        <label class="ape-control form-label" for="ape-energy"><span class="ape-control-line">Mean ion energy <span id="ape-energy-v">100 eV</span></span><input id="ape-energy" class="form-range" type="range" min="30" max="200" step="5" value="100"></label>
+        <label class="ape-control form-label" for="ape-fr"><span class="ape-control-line">F wall recovery <span id="ape-fr-v">0.50</span></span><input id="ape-fr" class="form-range" type="range" min="0" max="1" step="0.02" value="0.5"></label>
+        <label class="ape-control form-label" for="ape-or"><span class="ape-control-line">O wall recovery <span id="ape-or-v">0.10</span></span><input id="ape-or" class="form-range" type="range" min="0" max="1" step="0.02" value="0.1"></label>
+        <label class="ape-control form-label" for="ape-time"><span class="ape-control-line">Etch time <span id="ape-time-v">2.0 min</span></span><input id="ape-time" class="form-range" type="range" min="0.5" max="10" step="0.1" value="2"></label>
+        <label class="ape-control form-label" for="ape-cut"><span class="ape-control-line">Line cut <span id="ape-cut-v">y = 31.4 µm</span></span><input id="ape-cut" class="form-range" type="range" min="0" max="156" step="1" value="78"></label>
       </div>
-      <div class="ape-warning" style="margin-top:11px"><strong id="ape-state-title">Current state: conditional transfer</strong><div id="ape-state-note">F/O return from the 30 µm polymer walls is not measured. Move those controls to see the physically unresolved depth interval instead of hiding it in a fit.</div></div>
+      <div class="ape-branch text-small"><strong id="ape-state-title">Current state: conditional transfer</strong><span id="ape-state-note">F/O return from the 30 µm polymer walls is not measured. Move those controls to see the physically unresolved depth interval instead of hiding it in a fit.</span></div>
     </aside>
-  </div>
+  </section>
 
-  <div class="ape-grid">
-    <section class="ape-card">
-      <div class="ape-head"><strong>Ideal vs etched cross-section</strong><span class="ape-badge">heightfield transfer</span></div>
-      <svg id="ape-cross" class="ape-cross" viewBox="0 0 720 270" role="img" aria-label="Selected clock-gate line cut showing ideal and conditional etched depths"><line x1="42" y1="50" x2="700" y2="50" class="ape-axis"></line><line x1="42" y1="238" x2="700" y2="238" class="ape-axis"></line><g id="ape-cross-mask"></g><g id="ape-cross-ideal"></g><g id="ape-cross-pred"></g><text x="42" y="20" class="ape-text">30 µm mask height compressed above Si surface</text><text x="42" y="258" class="ape-text">x = 0</text><text x="664" y="258" class="ape-text">98.8 µm</text><text id="ape-cross-depth-label" x="696" y="68" text-anchor="end" class="ape-text"></text></svg>
-    </section>
-    <section class="ape-card">
-      <div class="ape-head"><strong>What one missing wall measurement buys</strong><span class="ape-badge">sensitivity</span></div>
-      <div class="ape-sub">Mean depth versus F-radical recovery from the printed mask, holding the selected ion boundary and O return fixed.</div>
-      <svg id="ape-sensitivity" class="ape-sensitivity" viewBox="0 0 500 270" role="img" aria-label="Mean etched depth sensitivity to fluorine wall recovery"><line x1="45" y1="225" x2="480" y2="225" class="ape-axis"></line><line x1="45" y1="25" x2="45" y2="225" class="ape-axis"></line><path id="ape-sens-line" class="ape-sens-line"></path><circle id="ape-sens-point" class="ape-sens-point" r="5"></circle><text x="45" y="248" class="ape-text">0% F return</text><text x="430" y="248" class="ape-text">100%</text><text id="ape-sens-max" x="40" y="32" text-anchor="end" class="ape-text"></text><text id="ape-sens-current" x="475" y="18" text-anchor="end" class="ape-text"></text></svg>
-    </section>
-  </div>
+  <section class="ape-plots" aria-label="Profile and sensitivity comparison">
+    <div class="ape-plot">
+      <div class="ape-section-head"><h3>Ideal vs etched cross-section</h3><span class="viz-badge">Selected line cut</span></div>
+      <svg id="ape-cross" class="ape-cross" viewBox="0 0 720 270" role="img" aria-label="Selected clock-gate line cut showing ideal and conditional etched depths"><title>Ideal and conditional etched profile</title><desc>The dashed line is the open-feature anchor; the blue field is the conditional local depth under the exact mask.</desc><line x1="42" y1="50" x2="700" y2="50" class="ape-axis"></line><line x1="42" y1="238" x2="700" y2="238" class="ape-axis"></line><g id="ape-cross-mask"></g><g id="ape-cross-ideal"></g><g id="ape-cross-pred"></g><text x="42" y="20" class="ape-text">30 µm mask height compressed above Si surface</text><text x="42" y="258" class="ape-text">x = 0</text><text x="664" y="258" class="ape-text">98.8 µm</text><text id="ape-cross-depth-label" x="696" y="68" text-anchor="end" class="ape-text"></text></svg>
+    </div>
+    <div class="ape-plot">
+      <h3>One missing measurement</h3>
+      <p class="ape-muted text-small">Mean depth versus F-radical recovery from the printed mask, with the selected ion boundary and O return fixed.</p>
+      <svg id="ape-sensitivity" class="ape-sensitivity" viewBox="0 0 500 270" role="img" aria-label="Mean etched depth sensitivity to fluorine wall recovery"><title>Depth sensitivity to fluorine wall recovery</title><desc>The curve shows how the conditional mean etched depth changes from zero to complete fluorine return at the mask wall.</desc><line x1="45" y1="225" x2="480" y2="225" class="ape-axis"></line><line x1="45" y1="25" x2="45" y2="225" class="ape-axis"></line><path id="ape-sens-line" class="ape-sens-line"></path><circle id="ape-sens-point" class="ape-sens-point" r="5"></circle><text x="45" y="248" class="ape-text">0% F return</text><text x="430" y="248" class="ape-text">100%</text><text id="ape-sens-max" x="40" y="32" text-anchor="end" class="ape-text"></text><text id="ape-sens-current" x="475" y="18" text-anchor="end" class="ape-text"></text></svg>
+    </div>
+  </section>
 
-  <div class="ape-grid">
-    <section class="ape-card">
-      <strong>Evidence chain</strong>
-      <div class="ape-evidence" style="margin-top:9px">
+  <footer class="ape-footer-grid">
+    <section>
+      <h3>Evidence chain</h3>
+      <div class="ape-evidence text-small">
         <div class="ape-evidence-row"><strong>Verified</strong><span>10 polygons, 98.8 × 62.8 µm, 30 µm mask, 2.6 µm minimum opening; exact source-GDS/STL match within 0.19 nm.</span></div>
         <div class="ape-evidence-row"><strong>Computed</strong><span id="ape-computed-evidence">Deterministic direct ion and cosine-neutral characteristics through the exact periodic mask.</span></div>
         <div class="ape-evidence-row"><strong>Transferred</strong><span>Belen 2005 coupled F/O silicon equations, normalized to Miao’s independent thin-mask depth interval.</span></div>
-        <div class="ape-evidence-row"><strong>Not solved</strong><span>Target-tool flux/IED/IAD, diffuse reactive wall return, polymer erosion law, and moving lateral sidewalls.</span></div>
+        <div class="ape-evidence-row"><strong>Open</strong><span>Target-tool flux/IED/IAD, diffuse reactive wall return, polymer erosion law, and moving lateral sidewalls.</span></div>
       </div>
     </section>
-    <section class="ape-card">
-      <strong>Minimal experimental closure</strong>
-      <table class="ape-table"><thead><tr><th>Measurement</th><th>Closes</th></tr></thead><tbody><tr><td>Blanket Si depth + DC self-bias</td><td>absolute wafer dose and energy</td></tr><tr><td>Pre/post polymer height</td><td>mask law and wall consumption</td></tr><tr><td>One cross-section, held blind</td><td>depth, taper, local loading score</td></tr></tbody></table>
-      <div class="ape-sub" style="margin-top:8px">The current map is generalized to arbitrary extruded polygon masks. The missing quantities are material/tool boundary data, not geometry-specific code.</div>
+    <section>
+      <h3>Minimal experimental closure</h3>
+      <table class="ape-table text-small"><thead><tr><th>Measurement</th><th>Closes</th></tr></thead><tbody><tr><td>Blanket Si depth + DC self-bias</td><td>absolute wafer dose and energy</td></tr><tr><td>Pre/post polymer height</td><td>mask law and wall consumption</td></tr><tr><td>One cross-section, held blind</td><td>depth, taper, local loading score</td></tr></tbody></table>
+      <p class="ape-muted text-small">The transport operator generalizes to arbitrary extruded polygon masks. The remaining gaps are material and tool boundary measurements, not geometry-specific code.</p>
     </section>
-  </div>
+  </footer>
 </div>
 
 <script>
@@ -156,13 +175,17 @@
     return {sigma,energy,fr,or,time,ion,anchor,depth,profile:Number.isFinite(anchor)};
   }
   function quantiles(values){const a=[];for(let i=0;i<values.length;i++)if(opening[i]>.5&&Number.isFinite(values[i]))a.push(values[i]);a.sort((x,y)=>x-y);const q=p=>a[Math.min(a.length-1,Math.max(0,Math.round(p*(a.length-1))))]||0,mean=a.reduce((s,v)=>s+v,0)/Math.max(1,a.length);return {mean,p05:q(.05),p50:q(.5),p95:q(.95),max:a[a.length-1]||0}}
-  function color(t){t=clamp(0,1,t);const stops=[[22,37,59],[35,95,145],[45,183,163],[220,230,107],[255,241,168]],p=t*(stops.length-1),i=Math.min(stops.length-2,Math.floor(p)),f=p-i;return stops[i].map((v,k)=>Math.round(v*(1-f)+stops[i+1][k]*f))}
+  const colorProbe=document.createElement('canvas').getContext('2d');
+  function themeRgb(token,fallback){const value=getComputedStyle(root).getPropertyValue(token).trim()||fallback;colorProbe.canvas.width=1;colorProbe.canvas.height=1;colorProbe.clearRect(0,0,1,1);colorProbe.fillStyle=fallback;colorProbe.fillStyle=value;colorProbe.fillRect(0,0,1,1);return Array.from(colorProbe.getImageData(0,0,1,1).data.slice(0,3))}
+  const mix=(a,b,f)=>a.map((v,k)=>Math.round(v*(1-f)+b[k]*f));
+  function palette(){const bg=themeRgb('--background','#ffffff'),fg=themeRgb('--foreground','#333333'),s1=themeRgb('--viz-series-1','#1a6dd4'),s2=themeRgb('--viz-series-2','#50a7cc');return {stops:[mix(bg,s1,.08),mix(bg,s1,.34),s1,s2],mask:mix(bg,fg,.12),line:mix(bg,fg,.62),cut:mix(bg,fg,.88)}}
+  function color(t,colors){t=clamp(0,1,t);const stops=colors.stops,p=t*(stops.length-1),i=Math.min(stops.length-2,Math.floor(p)),f=p-i;return mix(stops[i],stops[i+1],f)}
   function drawMap(state){
-    const mode=controls.mode.value,field=mode==='ion'?state.ion:mode==='neutral'?neutral:state.depth,stats=quantiles(field),max=mode==='depth'?Math.max(state.anchor||0,stats.max,1e-9):1,img=ctx.createImageData(nx,ny);
-    for(let x=0;x<nx;x++)for(let y=0;y<ny;y++){const i=index(x,y),p=((ny-1-y)*nx+x)*4,c=opening[i]>.5?color((Number.isFinite(field[i])?field[i]:0)/max):[29,36,48];img.data[p]=c[0];img.data[p+1]=c[1];img.data[p+2]=c[2];img.data[p+3]=255}
+    const mode=controls.mode.value,field=mode==='ion'?state.ion:mode==='neutral'?neutral:state.depth,stats=quantiles(field),max=mode==='depth'?Math.max(state.anchor||0,stats.max,1e-9):1,img=ctx.createImageData(nx,ny),colors=palette();
+    for(let x=0;x<nx;x++)for(let y=0;y<ny;y++){const i=index(x,y),p=((ny-1-y)*nx+x)*4,c=opening[i]>.5?color((Number.isFinite(field[i])?field[i]:0)/max,colors):colors.mask;img.data[p]=c[0];img.data[p+1]=c[1];img.data[p+2]=c[2];img.data[p+3]=255}
     const temp=document.createElement('canvas');temp.width=nx;temp.height=ny;temp.getContext('2d').putImageData(img,0,0);ctx.imageSmoothingEnabled=true;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(temp,0,0,canvas.width,canvas.height);
-    ctx.strokeStyle='rgba(255,255,255,.48)';ctx.lineWidth=1;const sx=canvas.width/DATA.inputs.footprint_um[0],sy=canvas.height/DATA.inputs.footprint_um[1];for(const poly of DATA.geometry.polygons_um){ctx.beginPath();poly.forEach((v,k)=>{const X=v[0]*sx,Y=canvas.height-v[1]*sy;k?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath();ctx.stroke()}
-    ctx.strokeStyle='rgba(255,255,255,.8)';ctx.setLineDash([6,5]);const cy=canvas.height-(selectedY+.5)*dx*sy;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(canvas.width,cy);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle=`rgb(${colors.line.join(',')})`;ctx.lineWidth=1;const sx=canvas.width/DATA.inputs.footprint_um[0],sy=canvas.height/DATA.inputs.footprint_um[1];for(const poly of DATA.geometry.polygons_um){ctx.beginPath();poly.forEach((v,k)=>{const X=v[0]*sx,Y=canvas.height-v[1]*sy;k?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath();ctx.stroke()}
+    ctx.strokeStyle=`rgb(${colors.cut.join(',')})`;ctx.setLineDash([6,5]);const cy=canvas.height-(selectedY+.5)*dx*sy;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(canvas.width,cy);ctx.stroke();ctx.setLineDash([]);
     $('#ape-scale-lo').textContent='0';$('#ape-scale-hi').textContent=mode==='depth'?`${max.toFixed(1)} µm`:'100%';
   }
   function svgNode(tag,attrs){const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n}
