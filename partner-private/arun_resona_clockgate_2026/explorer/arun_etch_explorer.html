@@ -164,14 +164,20 @@
     <div class="ape-primary">
       <div class="ape-section-head">
         <h3>Top-down process field</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
         <div class="ape-modes" role="group" aria-label="Map field">
           <button type="button" data-mode="depth" aria-pressed="true">DEPTH</button>
           <button type="button" data-mode="ion" aria-pressed="false">IONS</button>
           <button type="button" data-mode="neutral" aria-pressed="false">RADICALS</button>
         </div>
+        <div class="ape-modes" role="group" aria-label="View">
+          <button type="button" data-view="2d" aria-pressed="true">TOP</button>
+          <button type="button" data-view="3d" aria-pressed="false">3-D</button>
+        </div>
+        </div>
       </div>
       <div class="ape-map-wrap"><canvas id="ape-map" width="988" height="628" role="img" aria-label="Top-down clock-gate process field; click or drag to move the line cut"></canvas><div id="ape-tooltip" class="ape-tooltip"></div></div>
-      <div class="ape-legend"><span id="ape-scale-lo" class="ape-scale">0</span><span class="ape-colorbar" aria-hidden="true"></span><span id="ape-scale-hi" class="ape-scale">1</span><span class="ape-hint">click or drag on the field to move the cross-section</span></div>
+      <div class="ape-legend"><span id="ape-scale-lo" class="ape-scale">0</span><span class="ape-colorbar" aria-hidden="true"></span><span id="ape-scale-hi" class="ape-scale">1</span><span class="ape-hint" id="ape-map-hint">click or drag on the field to move the cross-section</span></div>
       <div class="ape-measures" role="list" aria-label="Current process metrics">
         <div class="ape-measure" role="listitem"><strong id="ape-depth-stat">—</strong><span>mean conditional depth</span></div>
         <div class="ape-measure" role="listitem"><strong id="ape-range-stat">—</strong><span>5–95% spatial interval</span></div>
@@ -1068,7 +1074,7 @@
   const sigmas=DATA.transport.ion.component_sigma_deg,ionMaps=Object.fromEntries(sigmas.map(s=>[s,decode(DATA.transport.ion.transmission_maps[String(s)])]));
   const canvas=$('#ape-map'),ctx=canvas.getContext('2d'),tip=$('#ape-tooltip');
   const controls={sigma:$('#ape-sigma'),energy:$('#ape-energy'),fr:$('#ape-fr'),or:$('#ape-or'),time:$('#ape-time'),cut:$('#ape-cut')};
-  let mode='depth';
+  let mode='depth',view='2d',yaw=0.72,pitch=0.95,zoom=1.0;
   const recipeCopy={
     fidelity:{note:'Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors open-feature depth; it does not identify Arun’s etcher boundary or printed-polymer wall return.',time:2,depth:t=>t<=2?1.85*t:3.7+(10.6-3.7)*(t-2)/8,profile:true},
     resolution:{note:'Wu resolved approximately 20 nm trenches near aspect ratio 8. The source is a resolution/passivation bound, not an absolute-depth anchor for this layout.',time:2,depth:()=>NaN,profile:false},
@@ -1094,7 +1100,52 @@
   const PAL={stops:[[20,36,63],[31,138,140],[45,212,191],[245,176,74]],mask:[24,38,67],line:[91,107,133],cut:[232,236,244]};
   const mix=(a,b,f)=>a.map((v,k)=>Math.round(v*(1-f)+b[k]*f));
   function color(t){t=clamp(0,1,t);const stops=PAL.stops,p=t*(stops.length-1),i=Math.min(stops.length-2,Math.floor(p)),f=p-i;return mix(stops[i],stops[i+1],f)}
+  // --- self-contained 3-D relief renderer (no libraries) ---
+  const DS=2,nx3=Math.floor(nx/DS),ny3=Math.floor(ny/DS),CAP_UM=1.5;
+  function draw3D(state){
+    const field=mode==='ion'?state.ion:mode==='neutral'?neutral:state.depth;
+    const stats=quantiles(field),max=mode==='depth'?Math.max(state.anchor||0,stats.max,1e-9):1;
+    const H=new Float32Array(nx3*ny3),T=new Float32Array(nx3*ny3),M=new Uint8Array(nx3*ny3);
+    for(let X=0;X<nx3;X++)for(let Y=0;Y<ny3;Y++){
+      let hSum=0,tSum=0,open=0;
+      for(let a=0;a<DS;a++)for(let b=0;b<DS;b++){const i=index(Math.min(nx-1,X*DS+a),Math.min(ny-1,Y*DS+b));
+        if(opening[i]>.5){open++;tSum+=Number.isFinite(field[i])?field[i]:0;hSum+=(state.profile&&Number.isFinite(state.depth[i]))?state.depth[i]:0}}
+      const j=X*ny3+Y;
+      if(open<DS*DS/2){M[j]=1;H[j]=-CAP_UM;T[j]=0}
+      else{M[j]=0;H[j]=hSum/Math.max(open,1);T[j]=tSum/Math.max(open,1)}
+    }
+    const maxH=state.profile?Math.max(quantiles(state.depth).max,.5):1;
+    const W=canvas.width,Hc=canvas.height,cx3=nx3/2,cy3=ny3/2;
+    const sHoriz=zoom*Math.min(W/(nx3*1.45),Hc/(ny3*1.15)),zScale=sHoriz/(DS*dx)*2.2;
+    const ca=Math.cos(yaw),sa=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+    const proj=(X,Y,z)=>{const wx=(X-cx3)*sHoriz,wy=(Y-cy3)*sHoriz,xr=wx*ca-wy*sa,yr=wx*sa+wy*ca;return [W/2+xr,Hc*.46+yr*cp-z*zScale*sp]};
+    // painter order: farthest rotated-y first
+    const order=new Array(nx3*ny3);for(let j=0;j<order.length;j++)order[j]=j;
+    const key=j=>{const X=Math.floor(j/ny3),Y=j%ny3;return (X-cx3)*sa+(Y-cy3)*ca};
+    order.sort((a,b)=>key(a)-key(b));
+    ctx.fillStyle='#0e1626';ctx.fillRect(0,0,W,Hc);
+    const shade=(c,f)=>`rgb(${c.map(v=>Math.round(v*f)).join(',')})`;
+    const quad=(p1,p2,p3,p4,fill)=>{ctx.fillStyle=fill;ctx.strokeStyle=fill;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.lineTo(p3[0],p3[1]);ctx.lineTo(p4[0],p4[1]);ctx.closePath();ctx.fill();ctx.stroke()};
+    const fx=sa>=0?1:-1,fy=ca>=0?1:-1;   // viewer-facing column sides
+    const ztOf=j=>M[j]?CAP_UM:-H[j];
+    const zAt=(X,Y)=>{if(X<0||Y<0||X>=nx3||Y>=ny3)return -maxH-.1;return ztOf(X*ny3+Y)};
+    for(const j of order){
+      const X=Math.floor(j/ny3),Y=j%ny3;
+      const top=M[j]?[40,60,98]:color(T[j]/max);
+      const zt=ztOf(j);                   // mask cap rises above 0; etch carves down
+      const c00=proj(X,Y,zt),c10=proj(X+1,Y,zt),c11=proj(X+1,Y+1,zt),c01=proj(X,Y+1,zt);
+      // draw only exposed walls: down to the viewer-side neighbour's top
+      const zx=zAt(X+fx,Y),zy=zAt(X,Y+fy);
+      if(zx<zt){const b1=proj(X+(fx>0?1:0),Y,zx),b2=proj(X+(fx>0?1:0),Y+1,zx);
+        if(fx>0)quad(c10,c11,b2,b1,shade(top,.45));else quad(c00,c01,b2,b1,shade(top,.45))}
+      if(zy<zt){const b1=proj(X,Y+(fy>0?1:0),zy),b2=proj(X+1,Y+(fy>0?1:0),zy);
+        if(fy>0)quad(c01,c11,b2,b1,shade(top,.62));else quad(c00,c10,b2,b1,shade(top,.62))}
+      quad(c00,c10,c11,c01,shade(top,M[j]?1:.85+.3*(zt<0?Math.min(1,-zt/maxH):0)));
+    }
+    $('#ape-scale-lo').textContent='0';$('#ape-scale-hi').textContent=mode==='depth'?`${max.toFixed(1)} µm`:'100%';
+  }
   function drawMap(state){
+    if(view==='3d'){draw3D(state);return}
     const field=mode==='ion'?state.ion:mode==='neutral'?neutral:state.depth,stats=quantiles(field),max=mode==='depth'?Math.max(state.anchor||0,stats.max,1e-9):1,img=ctx.createImageData(nx,ny);
     for(let x=0;x<nx;x++)for(let y=0;y<ny;y++){const i=index(x,y),p=((ny-1-y)*nx+x)*4,c=opening[i]>.5?color((Number.isFinite(field[i])?field[i]:0)/max):PAL.mask;img.data[p]=c[0];img.data[p+1]=c[1];img.data[p+2]=c[2];img.data[p+3]=255}
     const temp=document.createElement('canvas');temp.width=nx;temp.height=ny;temp.getContext('2d').putImageData(img,0,0);ctx.imageSmoothingEnabled=true;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(temp,0,0,canvas.width,canvas.height);
@@ -1128,11 +1179,20 @@
   let raf=0;const schedule=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)};
   Object.values(controls).forEach(el=>el.addEventListener('input',()=>{if(el===controls.cut)selectedY=+el.value;schedule()}));
   root.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));schedule()}));
+  const hint=$('#ape-map-hint');
+  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));canvas.style.cursor=view==='3d'?'grab':'crosshair';hint.textContent=view==='3d'?'drag to orbit · scroll to zoom · mask caps shown 1.5 µm (true 30 µm) · vertical ×2.2':'click or drag on the field to move the cross-section';tip.style.display='none';schedule()}));
   root.querySelectorAll('[data-recipe]').forEach(button=>button.addEventListener('click',()=>{recipe=button.dataset.recipe;root.querySelectorAll('[data-recipe]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));controls.time.value=recipeCopy[recipe].time;$('#ape-recipe-note').textContent=recipeCopy[recipe].note;schedule()}));
   $('#ape-play').addEventListener('click',()=>{playing=!playing;$('#ape-play').textContent=playing?'⏸ Pause':'▶ Play etch time';if(playTimer)clearInterval(playTimer);if(playing)playTimer=setInterval(()=>{let t=+controls.time.value+.1;if(t>+controls.time.max)t=+controls.time.min;controls.time.value=t.toFixed(1);schedule()},90)});
   const moveCut=event=>{const rect=canvas.getBoundingClientRect();selectedY=clamp(0,ny-1,Math.floor((1-(event.clientY-rect.top)/rect.height)*ny));controls.cut.value=selectedY;schedule()};
-  canvas.addEventListener('click',moveCut);
+  canvas.addEventListener('click',event=>{if(view==='2d')moveCut(event)});
+  let dragging=false,lastPos=null;
+  canvas.addEventListener('mousedown',event=>{if(view==='3d'){dragging=true;lastPos=[event.clientX,event.clientY];canvas.style.cursor='grabbing'}});
+  window.addEventListener('mouseup',()=>{dragging=false;if(view==='3d')canvas.style.cursor='grab'});
+  canvas.addEventListener('wheel',event=>{if(view!=='3d')return;event.preventDefault();zoom=clamp(.5,2.6,zoom*(event.deltaY<0?1.08:.93));schedule()},{passive:false});
   canvas.addEventListener('mousemove',event=>{
+    if(view==='3d'){
+      if(dragging&&lastPos){yaw+=(event.clientX-lastPos[0])*.008;pitch=clamp(.25,1.45,pitch+(event.clientY-lastPos[1])*.006);lastPos=[event.clientX,event.clientY];schedule()}
+      return}
     if(event.buttons===1)moveCut(event);
     if(!last)return;const rect=canvas.getBoundingClientRect(),x=clamp(0,nx-1,Math.floor((event.clientX-rect.left)/rect.width*nx)),y=clamp(0,ny-1,Math.floor((1-(event.clientY-rect.top)/rect.height)*ny)),i=index(x,y);tip.style.display='block';tip.style.left=`${Math.min(event.clientX-rect.left+12,rect.width-190)}px`;tip.style.top=`${event.clientY-rect.top+12}px`;tip.innerHTML=opening[i]<.5?`x ${(x*dx).toFixed(1)}, y ${(y*dx).toFixed(1)} µm<br><strong>printed mask</strong>`:`x ${(x*dx).toFixed(1)}, y ${(y*dx).toFixed(1)} µm<br>ion ${(100*last.ion[i]).toFixed(1)}% · radical ${(100*neutral[i]).toFixed(1)}%<br>${last.profile?`depth <strong>${last.depth[i].toFixed(2)} µm</strong>`:'absolute depth refused'}`});
   canvas.addEventListener('mouseleave',()=>tip.style.display='none');
