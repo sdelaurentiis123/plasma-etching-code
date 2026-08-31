@@ -124,6 +124,12 @@ from .deterministic_exchange_2d import (
 from .extruded_exchange_3d import (
     ExtrudedTriangleExchange3D, build_extruded_triangle_exchange_3d,
 )
+from .extruded_mask_transport import (
+    AngularOrdinate, ExtrudedMaskTransmission,
+    cosine_flux_hemisphere_ordinates,
+    direct_extruded_mask_transmission,
+    gaussian_transverse_angle_ordinates,
+)
 from .surface_partitioned_overlap_3d import (
     PartitionedSurfaceOverlapTransfer3D,
     build_partitioned_surface_overlap_transfer_3d,
@@ -393,6 +399,9 @@ __all__ = [
     "DeterministicLineExchange2D", "build_deterministic_line_exchange_2d",
     "unobstructed_crossed_string_exchange_2d",
     "ExtrudedTriangleExchange3D", "build_extruded_triangle_exchange_3d",
+    "AngularOrdinate", "ExtrudedMaskTransmission",
+    "cosine_flux_hemisphere_ordinates", "direct_extruded_mask_transmission",
+    "gaussian_transverse_angle_ordinates",
     "PartitionedSurfaceOverlapTransfer3D",
     "build_partitioned_surface_overlap_transfer_3d",
     "SurfaceCommonRefinementTransfer3D",

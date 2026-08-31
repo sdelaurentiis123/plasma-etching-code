@@ -104,6 +104,26 @@ the production `0.2 um` mesh the minimum opening has 13 cells and the domain is
 periodic, and contains gas, silicon, mask, and base materials. The receipt is
 `results/feature_geometry_audit.json`.
 
+## Exact-mask entrance transport and explorer
+
+The exact footprint now also runs through a deterministic direct-transport
+operator for arbitrary extruded masks. At 1.5 degrees transverse ion-angle
+sigma, the 30 um mask passes 91.65% of the direct ion flux on average over its
+openings. The direct cosine-neutral component averages only 6.87%, making
+printed-polymer F/O return or consumption the dominant unresolved profile
+input. The result, numerical checks, and Belen-law conditional transfer are in
+`results/etch_explorer_data.json`.
+
+The interactive ideal-versus-etched explorer is
+`explorer/arun_etch_explorer.html`. It shows the exact top-down transport/depth
+map, movable cross-sections, time evolution, recipe evidence, and wall-return
+sensitivity. The page labels the current profile as conditional: no target SEM
+was used, and no target-tool wafer boundary or polymer wall coefficient is
+silently fitted.
+
+The detailed result note is
+`RESULTS_EXACT_MASK_ENTRANCE_TRANSPORT_2026-08-30.md`.
+
 ## Remaining confirmations and measurements
 
 1. Confirm raised-silicon versus trench polarity and the desired silicon depth.
