@@ -30,6 +30,7 @@ EXCLUDES=(
   # hardware; the case-insensitive path scan below backstops this entry.
   ':!partner-private'
   ':!partner-private/**'
+  ':!tests/test_arun_*'
   ':!*PARTNERSHIP*'
   ':!*_CHALLENGE_*'
   # Body-text mentions found by the 2026-08-06 content scan.  None is needed
