@@ -316,6 +316,7 @@
       if(zy<zt){const b1=proj(X,Y+(fy>0?1:0),zy),b2=proj(X+1,Y+(fy>0?1:0),zy);
         if(fy>0)quad(c01,c11,b2,b1,shade(top,.62));else quad(c00,c10,b2,b1,shade(top,.62))}
       quad(c00,c10,c11,c01,shade(top,M[j]?1:.85+.3*(zt<0?Math.min(1,-zt/maxH):0)));
+      if(!M[j]&&zt<-.02){ctx.strokeStyle='rgba(5,10,20,.25)';ctx.lineWidth=.5;ctx.strokeRect?0:0;ctx.beginPath();ctx.moveTo(c00[0],c00[1]);ctx.lineTo(c10[0],c10[1]);ctx.lineTo(c11[0],c11[1]);ctx.lineTo(c01[0],c01[1]);ctx.closePath();ctx.stroke()}
     }
     $('#ape-scale-lo').textContent='0';$('#ape-scale-hi').textContent=mode==='depth'?`${max.toFixed(1)} µm`:'100%';
   }
@@ -355,9 +356,9 @@
   Object.values(controls).forEach(el=>el.addEventListener('input',()=>{if(el===controls.cut)selectedY=+el.value;schedule()}));
   root.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));schedule()}));
   const hint=$('#ape-map-hint');
-  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));canvas.style.cursor=view==='3d'?'grab':'crosshair';hint.textContent=view==='3d'?'drag to orbit · scroll to zoom · mask caps shown 1.5 µm (true 30 µm) · vertical ×2.2':'click or drag on the field to move the cross-section';tip.style.display='none';schedule()}));
+  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));canvas.style.cursor=view==='3d'?'grab':'crosshair';hint.textContent=view==='3d'?'▶ Play etch time watches the carve · drag to orbit · scroll zooms · caps shown 1.5 µm (true 30) · vertical ×2.2':'click or drag on the field to move the cross-section';tip.style.display='none';schedule()}));
   root.querySelectorAll('[data-recipe]').forEach(button=>button.addEventListener('click',()=>{recipe=button.dataset.recipe;root.querySelectorAll('[data-recipe]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));controls.time.value=recipeCopy[recipe].time;$('#ape-recipe-note').textContent=recipeCopy[recipe].note;schedule()}));
-  $('#ape-play').addEventListener('click',()=>{playing=!playing;$('#ape-play').textContent=playing?'⏸ Pause':'▶ Play etch time';if(playTimer)clearInterval(playTimer);if(playing)playTimer=setInterval(()=>{let t=+controls.time.value+.1;if(t>+controls.time.max)t=+controls.time.min;controls.time.value=t.toFixed(1);schedule()},90)});
+  $('#ape-play').addEventListener('click',()=>{playing=!playing;$('#ape-play').textContent=playing?'⏸ Pause':'▶ Play etch time';if(playTimer)clearInterval(playTimer);if(playing){if(+controls.time.value>=+controls.time.max-.2)controls.time.value=controls.time.min;playTimer=setInterval(()=>{let t=+controls.time.value+.08;if(t>+controls.time.max)t=+controls.time.min;controls.time.value=t.toFixed(2);if(view==='3d')yaw+=.004;schedule()},80)}});
   const moveCut=event=>{const rect=canvas.getBoundingClientRect();selectedY=clamp(0,ny-1,Math.floor((1-(event.clientY-rect.top)/rect.height)*ny));controls.cut.value=selectedY;schedule()};
   canvas.addEventListener('click',event=>{if(view==='2d')moveCut(event)});
   let dragging=false,lastPos=null;
