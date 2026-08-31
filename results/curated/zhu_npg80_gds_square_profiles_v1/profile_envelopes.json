@@ -1,0 +1,961 @@
+{
+  "claim_boundary": {
+    "geometry_is_exact_for_listed_square_cells": true,
+    "mask_polarity_is_conditional": true,
+    "surface_response_is_cross_machine_conditional": true,
+    "unique_absolute_oxford_profile_predicted": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "gds_sha256": "1378b31c6b206a5b62c0254979c0fce36219dc625f716cbd00f858b53f36832b",
+  "mask_polarity_assumption": "positive layer-1 polygons become Cr islands after positive-ZEP lift-off",
+  "mask_polarity_confirmed_by_operator": false,
+  "rows": [
+    {
+      "bottom_cd_nm": [
+        100.21645142367088,
+        116.78984088553689
+      ],
+      "bow_nm": [
+        31.4278183656864,
+        47.31307105979358
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        683.6409626811694,
+        684.0206283923769
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1470997869113641e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        88.45517223002601,
+        99.03183160896839
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        85.11778698018793,
+        85.81025685605178
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 105.0
+    },
+    {
+      "bottom_cd_nm": [
+        113.2297039038367,
+        123.10844087444258
+      ],
+      "bow_nm": [
+        35.623200802866464,
+        49.86242843573587
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        682.6880769782069,
+        683.8607981917824
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.0464355070520908e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        95.35285154263313,
+        106.57337600013268
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.84788687668471,
+        85.26633664982926
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 110.0
+    },
+    {
+      "bottom_cd_nm": [
+        114.96391138224779,
+        126.7808636678074
+      ],
+      "bow_nm": [
+        36.89827709774129,
+        52.728578801196996
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        680.5336381100021,
+        683.1531449214201
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1597059070505441e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        100.17129551964297,
+        110.62555392055451
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.67836135968196,
+        85.18924909384268
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 115.0
+    },
+    {
+      "bottom_cd_nm": [
+        117.35209972735959,
+        131.7142392846135
+      ],
+      "bow_nm": [
+        39.46880110402796,
+        55.34006625740724
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        680.6687767917956,
+        683.4846424193762
+      ],
+      "maximum_state_remap_relative_conservation_residual": 9.510291322851198e-16,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        104.11689173187527,
+        114.53788939724795
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.47363173846234,
+        85.09042293440265
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 120.0
+    },
+    {
+      "bottom_cd_nm": [
+        119.69444650114194,
+        135.2913782780623
+      ],
+      "bow_nm": [
+        41.887810309154844,
+        58.038640951285494
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        679.8926095932784,
+        682.8365517301663
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.3299108222675004e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        108.28563299791527,
+        118.96068378359189
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        84.31807504545398,
+        84.9879985139084
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 125.0
+    },
+    {
+      "bottom_cd_nm": [
+        132.99366263158828,
+        143.00998495062123
+      ],
+      "bow_nm": [
+        45.53680992039524,
+        59.86789126700937
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        679.1503339235283,
+        681.3151148893809
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.2364448270706707e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        114.24879961578449,
+        126.46698332824974
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        83.98970210019657,
+        84.41788902007352
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 130.0
+    },
+    {
+      "bottom_cd_nm": [
+        134.46291908572758,
+        146.03348941170609
+      ],
+      "bow_nm": [
+        47.02581065988677,
+        63.044357848114075
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        678.5784217239816,
+        679.7199061264537
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.0590779023730603e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        120.04255536573982,
+        130.66837656109635
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        83.85846015652749,
+        84.3504066866106
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 135.0
+    },
+    {
+      "bottom_cd_nm": [
+        136.70894478757103,
+        151.24876199381134
+      ],
+      "bow_nm": [
+        49.669260382475684,
+        65.60884670832623
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        678.3848020808729,
+        679.8411956748923
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.233371745469224e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        124.34308241715253,
+        134.54663959620032
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        83.64310587457373,
+        84.2559676340692
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 140.0
+    },
+    {
+      "bottom_cd_nm": [
+        139.42854187818475,
+        155.15244377815443
+      ],
+      "bow_nm": [
+        51.90997871702224,
+        68.14328800683087
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        678.5148708712534,
+        679.2919279343024
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1041250947107485e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        128.22682062656938,
+        138.99514628546098
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        83.47975986697332,
+        84.13991727653524
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 145.0
+    },
+    {
+      "bottom_cd_nm": [
+        152.92326870205105,
+        162.94834038360707
+      ],
+      "bow_nm": [
+        55.588000813375274,
+        70.48571941604463
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        677.7637379865178,
+        679.1553218181314
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.0720374354066e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        134.6679602244851,
+        146.94735376707015
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        83.14534963419538,
+        83.57613112878346
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 150.0
+    },
+    {
+      "bottom_cd_nm": [
+        154.2844862771341,
+        165.6849217193854
+      ],
+      "bow_nm": [
+        57.11482587331648,
+        73.08906908234557
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        677.1340835289874,
+        678.5656261208354
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.295170351720418e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        139.95728673300917,
+        150.64539933178403
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        83.02493801845307,
+        83.51110487617
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 155.0
+    },
+    {
+      "bottom_cd_nm": [
+        156.61890395407434,
+        170.43784052201218
+      ],
+      "bow_nm": [
+        60.05993700620506,
+        75.65204231296991
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        676.5449938633175,
+        679.2731958406348
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.0991075439675833e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        144.23775470516082,
+        154.54452997293106
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        82.82072288582688,
+        83.42309284358515
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 160.0
+    },
+    {
+      "bottom_cd_nm": [
+        159.2175641221021,
+        174.10141090876027
+      ],
+      "bow_nm": [
+        62.37633031489091,
+        77.93322788245266
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        675.9852327492299,
+        678.4532099201452
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.6013993846181494e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        148.140102603357,
+        158.65843029760185
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        82.66206056981974,
+        83.3063700037717
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 165.0
+    },
+    {
+      "bottom_cd_nm": [
+        172.70016497123353,
+        182.5976942402494
+      ],
+      "bow_nm": [
+        65.69930661232833,
+        79.98307452108843
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        675.650353427522,
+        676.6091774185867
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.0671579379702719e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        154.6457654754998,
+        166.3331570067052
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        82.30438588997163,
+        82.72700284994103
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 170.0
+    },
+    {
+      "bottom_cd_nm": [
+        179.09464119388136,
+        193.238370287785
+      ],
+      "bow_nm": [
+        72.76179153589753,
+        88.32126954427143
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        673.1773571559922,
+        676.4068418378855
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.2308411476841541e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        168.11174931772044,
+        179.43815138716295
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        81.83228390358516,
+        82.45864968872382
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 185.0
+    },
+    {
+      "bottom_cd_nm": [
+        192.5837659289215,
+        201.2746979926028
+      ],
+      "bow_nm": [
+        76.27841954873124,
+        90.05206067513838
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        671.9064872377174,
+        674.6005701687818
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1082351302376912e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        173.70856969442136,
+        186.79195880402617
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        81.48162959677731,
+        81.87606579723038
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 190.0
+    },
+    {
+      "bottom_cd_nm": [
+        194.1396357170396,
+        204.4874220540768
+      ],
+      "bow_nm": [
+        77.75435676477754,
+        93.1411074673278
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        673.1240976786721,
+        675.7532936962189
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.2705075134869891e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        179.99806779181594,
+        190.63770757075818
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        81.36311713152993,
+        81.8253384559966
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 195.0
+    },
+    {
+      "bottom_cd_nm": [
+        218.91211898306096,
+        230.97391545608355
+      ],
+      "bow_nm": [
+        93.77215811029617,
+        108.47096355142817
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        665.6466642672792,
+        672.2137694339305
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1077457697858097e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        208.0689087338218,
+        218.67430926721306
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        80.15739436531605,
+        80.7511093502329
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 225.0
+    },
+    {
+      "bottom_cd_nm": [
+        232.34240998476966,
+        238.57520948513374
+      ],
+      "bow_nm": [
+        96.75932868649285,
+        110.45996068565917
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        662.1018657368184,
+        668.8949134023738
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.2796102656064562e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        213.00449361022493,
+        226.631165678044
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        79.78686757611626,
+        80.14718155839331
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 230.0
+    },
+    {
+      "bottom_cd_nm": [
+        233.77540943803294,
+        241.04252357590906
+      ],
+      "bow_nm": [
+        99.38152760391716,
+        113.28203985108489
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        659.5595255457018,
+        666.76151613667
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.30249562880648e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        219.5502234583997,
+        230.5939585302909
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        79.64459434157543,
+        80.05670963492648
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 235.0
+    },
+    {
+      "bottom_cd_nm": [
+        235.9390503650336,
+        245.03038742453563
+      ],
+      "bow_nm": [
+        102.41201419928277,
+        115.97409272158917
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        656.0626847071833,
+        666.0883300731238
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.2648906457087414e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        223.74356455510238,
+        234.5510949435827
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        79.42224359258385,
+        79.95350280785772
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 240.0
+    },
+    {
+      "bottom_cd_nm": [
+        238.41020804396396,
+        249.24129839783276
+      ],
+      "bow_nm": [
+        104.95046438842245,
+        118.62766274565881
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        654.046432804757,
+        665.6921989364187
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.1806380291786315e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        227.89786195590617,
+        238.64747895282844
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        79.2568681562015,
+        79.84013082632188
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 245.0
+    },
+    {
+      "bottom_cd_nm": [
+        250.2541803082779,
+        255.3181308447804
+      ],
+      "bow_nm": [
+        105.66737642743303,
+        120.22958624286944
+      ],
+      "cr_center_exhausted_fraction": 1.0,
+      "cr_center_remaining_nm": [
+        0.0,
+        0.0
+      ],
+      "cr_layer_retired_fraction": 1.0,
+      "etch_depth_nm": [
+        648.3029585023766,
+        663.3775680290844
+      ],
+      "maximum_state_remap_relative_conservation_residual": 1.093664533248532e-15,
+      "maximum_transport_relative_particle_balance_error": 0.0,
+      "middle_cd_nm": [
+        230.79446658157198,
+        246.25233518883223
+      ],
+      "pitch_nm": 350.0,
+      "profile_count": 16,
+      "sidewall_angle_from_wafer_deg": [
+        78.86025564313493,
+        79.24345070496439
+      ],
+      "terminal_reasons": [
+        "domain_gas_breakthrough",
+        "requested_duration"
+      ],
+      "top_cd_nm": [
+        0.0,
+        0.0
+      ],
+      "width_nm": 250.0
+    }
+  ],
+  "schema": "petch.zhu-npg80-gds-square-profile-envelopes.v1",
+  "source_profile_board_sha256": "8f842293cb1b5e800cafd993fe5652a6f80eb69acedb77c3daa417dd886f5fc1",
+  "target_depth_used": false,
+  "target_sem_used": false
+}
