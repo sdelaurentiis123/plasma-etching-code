@@ -26,6 +26,10 @@ REF="${2:-HEAD}"
 EXCLUDES=(
   ':!PARTNER_*'
   ':!RESONA_*'
+  # The tracked partner case directory (2026-08-30) must never reach rented
+  # hardware; the case-insensitive path scan below backstops this entry.
+  ':!partner-private'
+  ':!partner-private/**'
   ':!*PARTNERSHIP*'
   ':!*_CHALLENGE_*'
   # Body-text mentions found by the 2026-08-06 content scan.  None is needed
