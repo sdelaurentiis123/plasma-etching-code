@@ -131,24 +131,28 @@ function drawMesh() {
   const W = canvas.width, H = canvas.height;
   ctx.fillStyle = '#0e1626'; ctx.fillRect(0, 0, W, H);
   const pitch3 = D.pitch_nm, n = 3;
-  const s = zoom * Math.min(W, H) / (n * pitch3 * 1.35);
+  const s = zoom * Math.min(W, H) / (n * pitch3 * 1.55);
   const cx0 = (n - 1) * pitch3 / 2, cy0 = (n - 1) * pitch3 / 2;
   const ca = Math.cos(yaw), sa = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
-  const proj = (x, y, z) => { const X = (x - cx0) * s, Y = (y - cy0) * s, xr = X * ca - Y * sa, yr = X * sa + Y * ca; return [W / 2 + xr, H * 0.55 + yr * cp - z * s * sp]; };
+  const proj = (x, y, z) => { const X = (x - cx0) * s, Y = (y - cy0) * s, xr = X * ca - Y * sa, yr = X * sa + Y * ca; return [W / 2 + xr, H * 0.5 + yr * cp - z * s * sp]; };
   const light = [-0.4, -0.5, 0.75];
-  const faces = [];
-  const addQuad = (pts, normal, base) => {
+  const faces = [], base = [];
+  // true view-space depth: the camera looks along +(yr*sin(pitch) + z*cos(pitch))
+  const viewDepth = pts => pts.reduce((a, p) => { const yr = (p[0]-cx0)*sa + (p[1]-cy0)*ca; return a + yr * sp + p[2] * cp; }, 0) / pts.length;
+  let target = faces;
+  const addQuad = (pts, normal, col0) => {
     const nl = Math.max(0.25, (normal[0]*light[0]+normal[1]*light[1]+normal[2]*light[2]) / Math.hypot(...light));
-    const depthKey = pts.reduce((a, p) => a + ((p[0]-cx0)*sa + (p[1]-cy0)*ca), 0) / pts.length - pts.reduce((a,p)=>a+p[2],0)/pts.length*0.001;
-    faces.push({ pts, col: base.map(v => Math.round(v * nl)), key: depthKey });
+    target.push({ pts, col: col0.map(v => Math.round(v * nl)), key: viewDepth(pts) });
   };
   // floor (etched trench bottom) & film slab sides
   const ext = pitch3 * n, z0 = -prof.depth;
+  target = base;
   addQuad([[-pitch3/2,-pitch3/2,z0],[ext-pitch3/2,-pitch3/2,z0],[ext-pitch3/2,ext-pitch3/2,z0],[-pitch3/2,ext-pitch3/2,z0]], [0,0,1], [70,90,130]);
   const slabBot = -D.film_nm - 120;
   const c = [[-pitch3/2,-pitch3/2],[ext-pitch3/2,-pitch3/2],[ext-pitch3/2,ext-pitch3/2],[-pitch3/2,ext-pitch3/2]];
   for (let i = 0; i < 4; i++) { const a = c[i], bq = c[(i+1)%4]; const nx = (bq[1]-a[1]), ny = -(bq[0]-a[0]);
     addQuad([[a[0],a[1],slabBot],[bq[0],bq[1],slabBot],[bq[0],bq[1],z0],[a[0],a[1],z0]], [nx,ny,0].map(v=>v/Math.hypot(nx,ny)), [40,56,90]); }
+  target = faces;
   // pillars
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
     const px = i * pitch3, py = j * pitch3;
@@ -169,7 +173,8 @@ function drawMesh() {
     }
   }
   faces.sort((a, b) => a.key - b.key);
-  for (const f of faces) { ctx.fillStyle = `rgb(${f.col.join(',')})`; ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .6; ctx.beginPath(); f.pts.forEach((p, i) => { const [x, y] = proj(...p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  base.sort((a, b) => a.key - b.key);
+  for (const f of base.concat(faces)) { ctx.fillStyle = `rgb(${f.col.join(',')})`; ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .6; ctx.beginPath(); f.pts.forEach((p, i) => { const [x, y] = proj(...p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fill(); ctx.stroke(); }
   // overlay
   ctx.fillStyle = '#8fa0b8'; ctx.font = '600 22px ui-monospace,Menlo,monospace';
   ctx.fillText(`block ${b.dose} · design width ${b.width_model} nm · t = ${tmin.toFixed(1)} min`, 24, 40);
