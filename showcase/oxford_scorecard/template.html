@@ -1,0 +1,100 @@
+<meta charset="utf-8">
+<title>Oxford TiO₂ pillars — blind prediction vs SEM</title>
+<style>
+:root{--bg:#0b1220;--panel:#101a2d;--panel2:#0e1626;--line:#1e2a42;--ink:#e8ecf4;--muted:#8fa0b8;--dim:#5b6b85;--teal:#2dd4bf;--oxide:#1f8a8c;--mag:#e26ad0;--amber:#f5b04a;--pass:#34d399;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Helvetica,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:2.6rem 1.2rem 4rem;display:flex;flex-direction:column;gap:2.6rem}
+h1{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.12;margin:.4rem 0;font-weight:750;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:1.35rem;margin:0 0 .3rem;letter-spacing:-.01em}h3{font-size:1rem;margin:0 0 .2rem}
+p{margin:.4rem 0;color:var(--muted);max-width:76ch}p strong{color:var(--ink)}
+.kicker{font:600 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.badges{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.5rem}
+.badge{font:600 10.5px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;padding:.34rem .6rem;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.badge.ok{color:var(--teal);border-color:color-mix(in srgb,var(--teal) 45%,transparent)}
+.badge.warn{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 45%,transparent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.75rem 1rem}
+.card b{display:block;font:600 1.15rem/1.3 var(--mono);color:var(--teal)}
+.card span{font-size:.8rem;color:var(--dim);line-height:1.4;display:block}
+img.wide{width:100%;display:block;border-radius:10px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .6rem .5rem 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--muted)}
+th{font:600 10.5px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+td:first-child{color:var(--ink);font-family:var(--mono)}
+.mono{font-family:var(--mono);color:var(--ink)}.dim{color:var(--dim);font-size:.8rem}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
+.gallery figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gallery img{width:100%;display:block}.gallery figcaption{font-size:.82rem;color:var(--muted);padding:.6rem .8rem .8rem;line-height:1.5}
+.gallery figcaption b{color:var(--ink);font-family:var(--mono);font-weight:600}
+.verdict{font:600 10.5px/1 var(--mono);letter-spacing:.06em;padding:.25rem .5rem;border-radius:99px;white-space:nowrap}
+.v-hit{background:color-mix(in srgb,var(--pass) 16%,transparent);color:var(--pass)}
+.v-ok{background:color-mix(in srgb,var(--teal) 14%,transparent);color:var(--teal)}
+.v-part{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.v-open{background:color-mix(in srgb,var(--mag) 14%,transparent);color:var(--mag)}
+.v-miss{background:color-mix(in srgb,#f87171 16%,transparent);color:#f87171}
+ol,ul{color:var(--muted);padding-left:1.2rem}li{margin:.3rem 0}li b{color:var(--ink)}
+footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding-top:1rem;line-height:1.6}
+</style>
+<main>
+<header>
+  <div class="kicker">petch · Oxford PlasmaPro NPG80 · TiO₂ pillar etch</div>
+  <h1>Blind prediction vs. your SEMs</h1>
+  <p><strong>Recipe:</strong> 55/5/1 sccm CHF₃/SF₆/O₂ · 30 mTorr · 150 W forward · 20 °C · 20 min, on 700 nm ALD TiO₂ under a 45 nm Cr mask, square-pillar dose series. We froze the prediction on 31 Aug, then opened your 80 frames of 17 Aug on 1 Sep. Nothing below was tuned to the images.</p>
+  <div class="badges"><span class="badge ok">Prediction frozen 31 Aug</span><span class="badge ok">SEMs opened 1 Sep</span><span class="badge">No fit to target</span><span class="badge warn">Depth not yet scorable</span></div>
+</header>
+
+<section>
+  <h2>1 · What we predicted, before looking</h2>
+  <div class="cards">
+    <div class="card"><b>Cr cap runs out</b><span>The 45 nm Cr mask is consumed before 20 min in every solved cell: cap loss corner-first, then pillar tops attacked. The uncertainty interval straddled the boundary, so we said: expect spatial zones — some survive, some don’t.</span></div>
+    <div class="card"><b>Not capillary collapse</b><span>Intact 700 nm pillars have an 8–11× stiffness margin against drying forces. Any pillar loss must be etch-driven, not pillars toppling at rinse.</span></div>
+    <div class="card"><b>656–684 nm etch depth</b><span>Near-full film clearance, deeper at small CD, shallower at large CD (aspect-ratio slowdown in the gaps).</span></div>
+    <div class="card"><b>85–86.5° sidewalls · CD ≈ design</b><span>Bottom CD tracks the drawn CD with a small positive bias; waists narrow on the smallest pillars.</span></div>
+  </div>
+  <div class="panel" style="margin-top:1rem"><h3>Frozen exact-GDS board (368 endpoints, 105–250 nm design widths, 350 nm pitch)</h3><img class="wide" src="__ENVELOPES_PNG__" alt="frozen prediction envelopes"></div>
+</section>
+
+<section>
+  <h2>2 · What the SEMs show</h2>
+  <p>All 80 frames were reviewed; plan-view frames were measured on the lattice (pitch from the 2-D spectrum, CD from the lattice-averaged pillar image at half height, 10° stage tilt corrected). CD is the equivalent-square width of the pillar top; “tip-to-tip” is the 4-lobe extent.</p>
+  <div class="panel"><table><thead><tr><th>dose block</th><th>CD (nm)</th><th>tip-to-tip (nm)</th><th>pitch (nm)</th><th>pillar loss observed</th><th>frames</th></tr></thead><tbody>
+  __DOSE_ROWS__
+  </tbody></table></div>
+  <div class="gallery" style="margin-top:1rem">__GALLERY__</div>
+</section>
+
+<section>
+  <h2>3 · Scorecard</h2>
+  <div class="panel"><table><thead><tr><th>claim</th><th>predicted</th><th>observed</th><th>verdict</th></tr></thead><tbody>
+  <tr><td>Mask exhaustion drives pillar loss</td><td>Cr cap consumed; tops attacked; spatial survive/fail zones on the knife-edge</td><td>Loss zones in doses 3, 7, 8, 9 with sharp boundaries; inside them every site is a short stub (consumed from the top), outside them flat-topped pillars survive</td><td><span class="verdict v-hit">HIT</span></td></tr>
+  <tr><td>Loss is not capillary collapse</td><td>Healthy pillars stable at drying (8–11× margin)</td><td>No pillars lying down anywhere in 80 frames; loss appears as stubs and removal</td><td><span class="verdict v-hit">HIT</span></td></tr>
+  <tr><td>Loss favours small CD</td><td>Smallest pillars most fragile</td><td>Dose 8 (185 nm) catastrophic, dose 9 (181 nm) large zones; but dose 3 (236 nm) shows gaps and dose 2 (200 nm) is intact — CD is not the only variable (dose/Cr thickness per block)</td><td><span class="verdict v-part">PARTIAL</span></td></tr>
+  <tr><td>Pitch</td><td>350 nm (from your GDS)</td><td>334–346 nm measured (−2 to −4%, within SEM magnification calibration)</td><td><span class="verdict v-ok">CONSISTENT</span></td></tr>
+  <tr><td>Post-etch CD</td><td>≈ design CD + small bias, 105–250 nm ladder</td><td>181–236 nm across doses; inside the ladder. Strict transfer scoring needs the pre-etch (post-lift-off) CD per dose</td><td><span class="verdict v-ok">CONSISTENT</span></td></tr>
+  <tr><td>Exhaustion everywhere</td><td>Every cell exhausts within the witness interval</td><td>Doses 1, 2, 4, 5, 6 survive intact where imaged — the real process sits inside our interval, on the surviving side for most blocks</td><td><span class="verdict v-part">OVER-PREDICTED</span></td></tr>
+  <tr><td>Etch depth 656–684 nm · sidewall 85–86.5°</td><td>Near-full clearance</td><td>Plan view cannot measure depth; 15° tilt shows tall pillars but no height calibration</td><td><span class="verdict v-open">UNSCORED</span></td></tr>
+  <tr><td>Necking on small pillars</td><td>Waists 10–50% narrower than base at the smallest CDs</td><td>15° tilt frames show straight, cube-like walls; a waist is not resolvable at this tilt</td><td><span class="verdict v-open">UNSCORED</span></td></tr>
+  </tbody></table></div>
+  <p style="margin-top:.8rem">Net: the two mechanism claims that were genuinely falsifiable — <strong>mask-exhaustion-driven loss with spatial zoning</strong>, and <strong>no rinse collapse</strong> — both hold. The magnitude claim (exhaustion in every block) was too pessimistic: your process sits inside our predicted interval, mostly on the surviving side, which is exactly what a knife-edge looks like when the mask is a few nm thicker than our witness rates assumed.</p>
+</section>
+
+<section>
+  <h2>4 · What would close the remaining rows</h2>
+  <ol>
+    <li><b>One cross-section</b> (cleave + tilt, or FIB) through any intact block → etch depth and sidewall angle, the two biggest unscored predictions.</li>
+    <li><b>Pre-etch CD per dose</b> (post-lift-off Cr squares) or the dose→CD calibration → strict CD-transfer scoring.</li>
+    <li><b>Which block is which dose value</b>, and the lift-off Cr thickness if it varied — this is the leading candidate for why blocks 1/2/4/5/6 survived while 8/9 did not.</li>
+    <li><b>Achieved DC self-bias</b> and, if a witness piece exists, <b>blanket TiO₂ loss</b> → narrows the etch-rate interval that sets the knife-edge.</li>
+    <li><b>The rinse/dry step</b> you used — closes the mechanics story completely.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>5 · The whole set at a glance</h2>
+  <img class="wide" src="__CONTACT_1__" alt="contact sheet 1 of 4">
+  <p class="dim">Contact sheet 1 of 4 (doses 1–3); all four sheets, frame metadata, and per-frame measurements are in the repository under <span class="mono">data/experimental/zhu_2026_tio2_npg80/sem_0817/</span>.</p>
+</section>
+
+<footer>Prediction boards frozen at commit 378f3fa (FROZEN_OXFORD_PREDICTION_2026-08-31.md). SEM set ingested at 82fad37 with sha256 receipts per frame; Zeiss SmartSEM metadata read from TIFF tag 34118 (pixel size, magnification, stage tilt). Measurements: scripts/measure_zhu_npg80_sem_lattice.py. No model coefficient was selected from these images.</footer>
+</main>
