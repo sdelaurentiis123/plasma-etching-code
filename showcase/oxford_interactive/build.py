@@ -44,9 +44,9 @@ def crop64(fname, box, width=640):
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
-def profile(width):
+def profile(width, scenario="ion_low_tail_0p0", sel=14.0):
     ps = [p for p in AUD["profiles"] if p.get("width_nm") == float(width)
-          and p["transport_scenario"]["name"] == "ion_low_tail_0p0" and p["tio2_to_cr_selectivity"] == 14.0]
+          and p["transport_scenario"]["name"] == scenario and p["tio2_to_cr_selectivity"] == sel]
     p = ps[0]; cs = p["profile"]["cross_section"]; fl = p["profile"]["floor_height_nm"]
     h = [c["height_um"] * 1000 - fl for c in cs]; w = [c["mean_width_nm"] for c in cs]
     pairs = sorted(zip(h, w))
@@ -56,7 +56,10 @@ def profile(width):
     mids = [q["profile"]["middle_cd_nm"] for q in AUD["profiles"] if q.get("width_nm") == float(width)]
     return {"h": hs, "w": ws, "top_h": max(hs) if hs else 0, "depth": p["profile"]["etched_depth_nm"],
             "depth_range": [min(deps), max(deps)], "mid_cd_range": [min(mids), max(mids)],
-            "cr_gone": bool(p["cr_mask"]["mask_exhausted_at_center"]), "sidewall": p["profile"]["sidewall_angle_from_wafer_deg"]}
+            "cr_gone": bool(p["cr_mask"]["mask_exhausted_at_center"]), "sidewall": p["profile"]["sidewall_angle_from_wafer_deg"],
+            "rate": p["blanket_tio2_rate_nm_min"], "duration_s": p["duration_s"],
+            "impact_energy_eV": p["transport_scenario"]["impact_energy_eV"], "tail": p["transport_scenario"]["tail_fraction"],
+            "selectivity": sel, "terminal": p["terminal_reason"]}
 
 
 data = {"film_nm": FILM_NM, "pitch_nm": 350.0, "rates_nm_min": [34.125, 43.4667], "selectivity": [14.0, 18.0167],
@@ -67,8 +70,11 @@ for d, (wmodel, frames, loss) in BLOCKS.items():
                            "cd_meas": s["cd_equivalent_square_nm"], "tip_meas": s["cd_x_extent_nm"][0],
                            "pitch_meas": s["pitch_nm_median"],
                            "frames": [{"img": crop64(f, box), "caption": cap, "file": f[:-4]} for f, box, cap in frames]})
-    if str(wmodel) not in data["profiles"]:
-        data["profiles"][str(wmodel)] = profile(wmodel)
+    for sc in ("ion_low_tail_0p0", "ion_low_tail_0p65", "ion_high_tail_0p0", "ion_high_tail_0p65"):
+        for sel in (14.0, 18.016664028610727):
+            key = f"{wmodel}|{sc}|{'s14' if sel == 14.0 else 's18'}"
+            if key not in data["profiles"]:
+                data["profiles"][key] = profile(wmodel, sc, sel)
 t = (HERE / "template.html").read_text().replace("__DATA__", json.dumps(data))
 out = HERE / "oxford_tio2_interactive.html"; out.write_text(t)
 print(out.relative_to(ROOT), f"{out.stat().st_size/1e6:.2f} MB")

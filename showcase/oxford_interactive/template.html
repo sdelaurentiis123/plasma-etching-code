@@ -29,6 +29,11 @@ canvas{display:block;width:100%;height:auto;cursor:grab}
 input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:22px;background:transparent;margin:0}
 input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:3px;background:var(--line)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--teal);margin-top:-5.5px;border:2px solid var(--bg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:600 11.5px var(--mono);padding:.4rem .6rem;background:var(--panel2);color:var(--muted);border:0;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}.seg button[aria-pressed="true"]{background:var(--oxide);color:#03110f}
+.physics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;font:11.5px/1.4 var(--mono);color:var(--muted)}
+.physics div{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.4rem .6rem}.physics b{display:block;color:var(--ink);font-size:13px}
 .play{font:600 12px var(--mono);padding:.45rem .75rem;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer}
 .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}
 .num{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem}
@@ -64,8 +69,18 @@ footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding
     <canvas id="mesh" width="1200" height="900"></canvas>
     <div class="rates" id="rates"></div>
     <div class="controls">
-      <div class="ctl"><span style="min-width:6.5rem">etch time</span><input id="time" type="range" min="0" max="20" step="0.1" value="20"><output id="timev">20.0 min</output><button class="play" id="play">▶ replay</button></div>
-      <div class="hint">the shape between t=0 and the endpoint is interpolated for display; the endpoint is the frozen solution</div>
+      <div class="ctl" style="gap:.5rem;flex-wrap:wrap">
+        <span class="hint" style="min-width:6.5rem">ion energy</span>
+        <div class="seg" data-group="energy"><button data-v="low" aria-pressed="true">147 eV</button><button data-v="high" aria-pressed="false">296 eV</button></div>
+        <span class="hint" style="margin-left:.6rem">angular tail</span>
+        <div class="seg" data-group="tail"><button data-v="0p0" aria-pressed="true">0</button><button data-v="0p65" aria-pressed="false">0.65</button></div>
+        <span class="hint" style="margin-left:.6rem">TiO₂:Cr</span>
+        <div class="seg" data-group="sel"><button data-v="s14" aria-pressed="true">14</button><button data-v="s18" aria-pressed="false">18</button></div>
+        <label class="hint" style="margin-left:auto"><input id="rain" type="checkbox" checked> ion rain</label>
+      </div>
+      <div class="ctl"><span style="min-width:6.5rem">etch time</span><input id="time" type="range" min="0" max="20" step="0.05" value="0"><output id="timev">0.0 min</output><button class="play" id="play">▶ play</button></div>
+      <div class="physics" id="physics"></div>
+      <div class="hint">mesh follows the frozen endpoint for this scenario at the witness etch rate: trench sinks at the TiO₂ rate, the Cr cap thins until it is gone, then the pillar top is attacked. Ions are drawn from the declared angular distribution; impacts are tallied by surface.</div>
     </div>
   </div>
   <div class="card">
@@ -99,8 +114,7 @@ footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding
 const D = __DATA__;
 const $ = s => document.querySelector(s);
 const blocks = D.blocks; let sel = 8; let frame = 0;
-let yaw = 0.7, pitch = 0.95, zoom = 1.0, tmin = 20, playing = false, timer = null;
-const canvas = $('#mesh'), ctx = canvas.getContext('2d');
+let yaw = 0.7, pitch = 0.95, zoom = 1.0, tmin = 0, playing = false;
 const lossClass = l => /catastrophic|large/.test(l) ? 't-loss' : /patch|missing/.test(l) ? 't-part' : 't-ok';
 
 // ---------- block buttons ----------
@@ -112,22 +126,79 @@ blocks.forEach((b, i) => {
   bb.appendChild(el);
 });
 
-// ---------- 3-D mesh ----------
-function pillarProfile(P, t) {
-  // interpolate: floor sinks from 0 to -depth; top consumed from film top to final top
-  const depth = P.depth * t, film = D.film_nm;
-  const finalTop = P.top_h;            // final pillar height above final floor
-  const topNow = film - depth - t * (film - depth - finalTop);   // pillar top above current floor... simplified:
-  // heights above current floor: scale final profile to current pillar height
-  const hNow = Math.max(5, film * (1 - t) + finalTop * t - 0);
-  const scale = hNow / Math.max(finalTop, 1);
-  const hs = P.h.map(h => h * scale), ws = P.w.slice();
-  if (t < 0.02) { return { hs: [0, film], ws: [P.w[0], P.w[0]], depth: 0, cap: true }; }
-  return { hs, ws, depth, cap: t < 0.85 };
+// ---------- 3-D mesh + ion rain ----------
+let scen = { energy: 'low', tail: '0p0', sel: 's14' };
+const profKey = b => `${b.width_model}|ion_${scen.energy}_tail_${scen.tail}|${scen.sel}`;
+const T_MIN = 20, CAP_NM = 45, FILM = D.film_nm;
+function timeline(P) {
+  // Derived from the frozen endpoint and its witness rate: trench sinks at R; the
+  // pillar top is at the film surface until the cap is gone at t_c, then sinks at R.
+  const R = P.rate, zf = -P.depth, zp = zf + P.top_h, L = Math.max(0, -zp);
+  const tc = P.cr_gone ? Math.max(0.5, T_MIN - L / R) : Infinity;
+  return { R, zf, zp, tc };
 }
-function drawMesh() {
-  const b = blocks[sel], P = D.profiles[String(b.width_model)], t = tmin / 20;
-  const prof = pillarProfile(P, t);
+function state(P, t) {
+  const { R, zf, zp, tc } = timeline(P);
+  const floor = Math.max(zf, -R * t);
+  const cap = t < tc ? CAP_NM * (1 - t / tc) : 0;
+  const top = t < tc ? 0 : Math.max(zp, -R * (t - tc));
+  return { floor, cap, top, tc, R };
+}
+const canvas = $('#mesh'), ctx = canvas.getContext('2d');
+let cam = null;   // set each draw: proj + scene params
+function pillarFaces(P, st, px, py, addQuad) {
+  const hTot = st.top - st.floor; if (hTot <= 2) return;
+  const n = P.h.length; const hmax = P.top_h || 1;
+  for (let k = 0; k < n - 1; k++) {
+    const z0 = st.floor + P.h[k] / hmax * hTot, z1 = st.floor + P.h[k + 1] / hmax * hTot, a0 = P.w[k] / 2, a1 = P.w[k + 1] / 2;
+    for (const [sx, sy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const q = sx ? [[px+sx*a0,py-a0,z0],[px+sx*a0,py+a0,z0],[px+sx*a1,py+a1,z1],[px+sx*a1,py-a1,z1]] : [[px-a0,py+sy*a0,z0],[px+a0,py+sy*a0,z0],[px+a1,py+sy*a1,z1],[px-a1,py+sy*a1,z1]];
+      addQuad(q, [sx, sy, 0], [150,175,215]);
+    }
+  }
+  const at = P.w[n - 1] / 2;
+  addQuad([[px-at,py-at,st.top],[px+at,py-at,st.top],[px+at,py+at,st.top],[px-at,py+at,st.top]], [0,0,1], st.cap > 0 ? [232,236,244] : [190,205,230]);
+  if (st.cap > 0) { const cz = st.top + st.cap * 3, ac = at * 0.98;   // cap drawn 3x thick for visibility (stated)
+    addQuad([[px-ac,py-ac,cz],[px+ac,py-ac,cz],[px+ac,py+ac,cz],[px-ac,py+ac,cz]], [0,0,1], [245,176,74]);
+    for (const [sx, sy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const q = sx ? [[px+sx*ac,py-ac,st.top],[px+sx*ac,py+ac,st.top],[px+sx*ac,py+ac,cz],[px+sx*ac,py-ac,cz]] : [[px-ac,py+sy*ac,st.top],[px+ac,py+sy*ac,st.top],[px+ac,py+sy*ac,cz],[px-ac,py+sy*ac,cz]]; addQuad(q, [sx,sy,0], [200,140,60]); }
+  }
+}
+// ion rain state
+let ions = [], flashes = [], tally = { cap: 0, top: 0, floor: 0, wall: 0 }, lastT = performance.now(), raf = 0;
+function randn() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function spawnIon(n) {
+  const pitch3 = D.pitch_nm, ext = pitch3 * 3, tail = scen.tail === '0p65' ? 0.65 : 0;
+  if (ions.length > 220) return;
+  for (let i = 0; i < n; i++) {
+    const theta = (Math.random() < tail ? Math.abs(randn()) * 14 : Math.abs(randn()) * 2.5) * Math.PI / 180;   // core 2.5° / tail 14° (display widths)
+    const phi = Math.random() * 2 * Math.PI;
+    ions.push({ x: -pitch3/2 + Math.random() * ext, y: -pitch3/2 + Math.random() * ext, z: 900, dx: Math.sin(theta) * Math.cos(phi), dy: Math.sin(theta) * Math.sin(phi), dz: -Math.cos(theta), hot: scen.energy === 'high' });
+  }
+}
+function surfaceHit(P, st, x, y, z) {
+  // returns the surface type if point (x,y,z) is inside a pillar or below the floor
+  const pitch3 = D.pitch_nm;
+  const i = Math.round(x / pitch3), j = Math.round(y / pitch3);
+  if (i >= 0 && i < 3 && j >= 0 && j < 3) {
+    const px = i * pitch3, py = j * pitch3, hTot = st.top - st.floor;
+    if (z <= st.top + st.cap * 3 && z >= st.floor) {
+      // width at this height from the profile
+      const f = Math.max(0, Math.min(1, (z - st.floor) / Math.max(hTot, 1))) * (P.top_h || 1);
+      let w = P.w[P.w.length - 1]; for (let k = 0; k < P.h.length - 1; k++) if (f >= P.h[k] && f <= P.h[k + 1]) { w = P.w[k]; break; }
+      const a = w / 2;
+      if (Math.abs(x - px) <= a && Math.abs(y - py) <= a) { if (st.cap > 0 && z > st.top) return 'cap'; if (z > st.top - 3) return st.cap > 0 ? 'cap' : 'top'; return 'wall'; }
+    }
+  }
+  return z <= st.floor ? 'floor' : null;
+}
+function stepIons(P, st, dt) {
+  const speed = 2600 * dt;  // nm per second of wall-clock, display speed
+  for (const io of ions) { let s = 0; const ds = 12; while (s < speed && !io.dead) { io.x += io.dx * ds; io.y += io.dy * ds; io.z += io.dz * ds; s += ds; const hit = surfaceHit(P, st, io.x, io.y, io.z); if (hit) { io.dead = true; tally[hit]++; flashes.push({ x: io.x, y: io.y, z: Math.max(io.z, st.floor), t: 0, kind: hit }); } } }
+  ions = ions.filter(io => !io.dead && io.z > -2000);
+  for (const f of flashes) f.t += dt; flashes = flashes.filter(f => f.t < 0.45);
+}
+function drawMesh(dt) {
+  const b = blocks[sel], P = D.profiles[profKey(b)], st = state(P, tmin);
   const W = canvas.width, H = canvas.height;
   ctx.fillStyle = '#0e1626'; ctx.fillRect(0, 0, W, H);
   const pitch3 = D.pitch_nm, n = 3;
@@ -137,50 +208,35 @@ function drawMesh() {
   const proj = (x, y, z) => { const X = (x - cx0) * s, Y = (y - cy0) * s, xr = X * ca - Y * sa, yr = X * sa + Y * ca; return [W / 2 + xr, H * 0.5 + yr * cp - z * s * sp]; };
   const light = [-0.4, -0.5, 0.75];
   const faces = [], base = [];
-  // true view-space depth: the camera looks along +(yr*sin(pitch) + z*cos(pitch))
   const viewDepth = pts => pts.reduce((a, p) => { const yr = (p[0]-cx0)*sa + (p[1]-cy0)*ca; return a + yr * sp + p[2] * cp; }, 0) / pts.length;
-  let target = faces;
-  const addQuad = (pts, normal, col0) => {
-    const nl = Math.max(0.25, (normal[0]*light[0]+normal[1]*light[1]+normal[2]*light[2]) / Math.hypot(...light));
-    target.push({ pts, col: col0.map(v => Math.round(v * nl)), key: viewDepth(pts) });
-  };
-  // floor (etched trench bottom) & film slab sides
-  const ext = pitch3 * n, z0 = -prof.depth;
-  target = base;
+  let target = base;
+  const addQuad = (pts, normal, col0) => { const nl = Math.max(0.25, (normal[0]*light[0]+normal[1]*light[1]+normal[2]*light[2]) / Math.hypot(...light)); target.push({ pts, col: col0.map(v => Math.round(v * nl)), key: viewDepth(pts) }); };
+  const ext = pitch3 * n, z0 = st.floor;
   addQuad([[-pitch3/2,-pitch3/2,z0],[ext-pitch3/2,-pitch3/2,z0],[ext-pitch3/2,ext-pitch3/2,z0],[-pitch3/2,ext-pitch3/2,z0]], [0,0,1], [70,90,130]);
-  const slabBot = -D.film_nm - 120;
-  const c = [[-pitch3/2,-pitch3/2],[ext-pitch3/2,-pitch3/2],[ext-pitch3/2,ext-pitch3/2],[-pitch3/2,ext-pitch3/2]];
-  for (let i = 0; i < 4; i++) { const a = c[i], bq = c[(i+1)%4]; const nx = (bq[1]-a[1]), ny = -(bq[0]-a[0]);
-    addQuad([[a[0],a[1],slabBot],[bq[0],bq[1],slabBot],[bq[0],bq[1],z0],[a[0],a[1],z0]], [nx,ny,0].map(v=>v/Math.hypot(nx,ny)), [40,56,90]); }
+  const slabBot = -FILM - 120, c = [[-pitch3/2,-pitch3/2],[ext-pitch3/2,-pitch3/2],[ext-pitch3/2,ext-pitch3/2],[-pitch3/2,ext-pitch3/2]];
+  for (let i = 0; i < 4; i++) { const a = c[i], bq = c[(i+1)%4]; const nx = (bq[1]-a[1]), ny = -(bq[0]-a[0]); addQuad([[a[0],a[1],slabBot],[bq[0],bq[1],slabBot],[bq[0],bq[1],z0],[a[0],a[1],z0]], [nx,ny,0].map(v=>v/Math.hypot(nx,ny)), [40,56,90]); }
   target = faces;
-  // pillars
-  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
-    const px = i * pitch3, py = j * pitch3;
-    for (let k = 0; k < prof.hs.length - 1; k++) {
-      const h0 = z0 + prof.hs[k], h1 = z0 + prof.hs[k+1], a0 = prof.ws[k]/2, a1 = prof.ws[k+1]/2;
-      const sides = [[1,0],[-1,0],[0,1],[0,-1]];
-      for (const [sx, sy] of sides) {
-        const q = sx ? [[px+sx*a0,py-a0,h0],[px+sx*a0,py+a0,h0],[px+sx*a1,py+a1,h1],[px+sx*a1,py-a1,h1]]
-                     : [[px-a0,py+sy*a0,h0],[px+a0,py+sy*a0,h0],[px+a1,py+sy*a1,h1],[px-a1,py+sy*a1,h1]];
-        addQuad(q, [sx, sy, 0], [150,175,215]);
-      }
-    }
-    const kt = prof.hs.length - 1, at = prof.ws[kt]/2, zt = z0 + prof.hs[kt];
-    addQuad([[px-at,py-at,zt],[px+at,py-at,zt],[px+at,py+at,zt],[px-at,py+at,zt]], [0,0,1], prof.cap ? [232,236,244] : [190,205,230]);
-    if (prof.cap) { const cz = zt + 45 * (1 - t), ac = at * 0.98;
-      addQuad([[px-ac,py-ac,cz],[px+ac,py-ac,cz],[px+ac,py+ac,cz],[px-ac,py+ac,cz]], [0,0,1], [245,176,74]);
-      for (const [sx, sy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const q = sx ? [[px+sx*ac,py-ac,zt],[px+sx*ac,py+ac,zt],[px+sx*ac,py+ac,cz],[px+sx*ac,py-ac,cz]] : [[px-ac,py+sy*ac,zt],[px+ac,py+sy*ac,zt],[px+ac,py+sy*ac,cz],[px-ac,py+sy*ac,cz]]; addQuad(q, [sx,sy,0], [200,140,60]); }
-    }
-  }
-  faces.sort((a, b) => a.key - b.key);
-  base.sort((a, b) => a.key - b.key);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) pillarFaces(P, st, i * pitch3, j * pitch3, addQuad);
+  faces.sort((a, b) => a.key - b.key); base.sort((a, b) => a.key - b.key);
   for (const f of base.concat(faces)) { ctx.fillStyle = `rgb(${f.col.join(',')})`; ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .6; ctx.beginPath(); f.pts.forEach((p, i) => { const [x, y] = proj(...p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fill(); ctx.stroke(); }
-  // overlay
+  // ions + impacts
+  if ($('#rain').checked) {
+    if (playing || tmin < T_MIN) spawnIon(7); else spawnIon(2);
+    stepIons(P, st, dt);
+    for (const io of ions) { const [x1, y1] = proj(io.x, io.y, io.z), [x2, y2] = proj(io.x - io.dx * 70, io.y - io.dy * 70, io.z - io.dz * 70); ctx.strokeStyle = io.hot ? 'rgba(245,176,74,.9)' : 'rgba(245,200,120,.75)'; ctx.lineWidth = io.hot ? 2 : 1.4; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+    for (const f of flashes) { const [x, y] = proj(f.x, f.y, f.z); const a = 1 - f.t / 0.45; ctx.strokeStyle = f.kind === 'cap' ? `rgba(245,176,74,${a})` : f.kind === 'floor' ? `rgba(45,212,191,${a})` : f.kind === 'top' ? `rgba(226,106,208,${a})` : `rgba(110,168,254,${a})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 3 + f.t * 26, 0, 6.283); ctx.stroke(); }
+  }
   ctx.fillStyle = '#8fa0b8'; ctx.font = '600 22px ui-monospace,Menlo,monospace';
-  ctx.fillText(`block ${b.dose} · design width ${b.width_model} nm · t = ${tmin.toFixed(1)} min`, 24, 40);
+  ctx.fillText(`block ${b.dose} · w${b.width_model} · ${P.impact_energy_eV.toFixed(0)} eV · tail ${P.tail} · TiO₂:Cr ${P.selectivity.toFixed(0)} · t = ${tmin.toFixed(1)} min`, 24, 40);
   ctx.fillStyle = '#5b6b85'; ctx.font = '19px ui-monospace,Menlo,monospace';
-  ctx.fillText(`trench ${prof.depth.toFixed(0)} nm · pillar ${(prof.hs[prof.hs.length-1]).toFixed(0)} nm tall · Cr cap ${prof.cap ? 'present' : 'consumed'}`, 24, 68);
+  ctx.fillText(`trench ${(-st.floor).toFixed(0)} nm · pillar ${(st.top - st.floor).toFixed(0)} nm · Cr cap ${st.cap > 0 ? st.cap.toFixed(0) + ' nm' : 'consumed'}${isFinite(st.tc) ? ` (gone at ${st.tc.toFixed(1)} min)` : ''}`, 24, 68);
+  const tot = tally.cap + tally.top + tally.floor + tally.wall || 1;
+  $('#physics').innerHTML = [['on Cr cap', tally.cap, 'amber'], ['on pillar top', tally.top, 'bare TiO₂ after cap'], ['on trench floor', tally.floor, 'teal'], ['on sidewalls', tally.wall, 'blue · tail ions']]
+    .map(([k, v, s]) => `<div><b>${(100 * v / tot).toFixed(0)}%</b>${k}<br><span style="color:var(--dim)">${v} · ${s}</span></div>`).join('');
 }
+function loop(now) { if (now - lastT < 30) { raf = requestAnimationFrame(loop); return; } const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  if (playing) { tmin = Math.min(T_MIN, tmin + dt * (T_MIN / 24)); $('#time').value = tmin; $('#timev').textContent = tmin.toFixed(1) + ' min'; yaw += .0015; if (tmin >= T_MIN) { playing = false; $('#play').textContent = '▶ play'; } }
+  drawMesh(dt); raf = requestAnimationFrame(loop); }
 // ---------- SEM side ----------
 function drawSEM() {
   const b = blocks[sel], f = b.frames[frame];
@@ -189,7 +245,7 @@ function drawSEM() {
   b.frames.forEach((fr, i) => { const el = document.createElement('button'); el.textContent = fr.file; el.setAttribute('aria-pressed', String(i === frame)); el.onclick = () => { frame = i; drawSEM(); }; th.appendChild(el); });
 }
 function drawNums() {
-  const b = blocks[sel], P = D.profiles[String(b.width_model)];
+  const b = blocks[sel], P = D.profiles[profKey(b)];
   $('#nums').innerHTML = [
     ['predicted CD', `${P.mid_cd_range[0].toFixed(0)}–${P.mid_cd_range[1].toFixed(0)} nm`, 'mid-height, over the ion energy/angle interval', ''],
     ['measured CD', `${b.cd_meas[0].toFixed(0)} nm`, `range ${b.cd_meas[1].toFixed(0)}–${b.cd_meas[2].toFixed(0)} across frames`, 'm'],
@@ -199,7 +255,7 @@ function drawNums() {
     ['measured pitch', `${b.pitch_meas.toFixed(0)} nm`, 'design 350 nm', 'm'],
     ['your SEM shows', b.loss, '', 'm'],
   ].map(([k, v, s, m]) => `<div class="num"><b class="${m}">${v}</b><small>${k}${s ? ' · ' + s : ''}</small></div>`).join('');
-  $('#rates').innerHTML = `<span>TiO₂ rate <b>${D.rates_nm_min[0].toFixed(1)}–${D.rates_nm_min[1].toFixed(1)} nm/min</b></span><span>Cr rate <b>${(D.rates_nm_min[0]/D.selectivity[1]).toFixed(1)}–${(D.rates_nm_min[1]/D.selectivity[0]).toFixed(1)} nm/min</b></span><span>cap gone at <b>${(45/(D.rates_nm_min[1]/D.selectivity[0])).toFixed(1)}–${(45/(D.rates_nm_min[0]/D.selectivity[1])).toFixed(1)} min</b> of 20</span>`;
+  $('#rates').innerHTML = `<span>TiO₂ rate <b>${D.rates_nm_min[0].toFixed(1)}–${D.rates_nm_min[1].toFixed(1)} nm/min</b></span><span>Cr rate <b>${(D.rates_nm_min[0]/D.selectivity[1]).toFixed(1)}–${(D.rates_nm_min[1]/D.selectivity[0]).toFixed(1)} nm/min</b></span><span>Cr cap gone: blanket rate <b>${(45/(D.rates_nm_min[1]/D.selectivity[0])).toFixed(1)}–${(45/(D.rates_nm_min[0]/D.selectivity[1])).toFixed(1)} min</b> · frozen endpoint <b>${(() => { const Pn = D.profiles[profKey(b)]; const tc = timeline(Pn).tc; return isFinite(tc) ? tc.toFixed(1) + ' min' : 'not consumed'; })()}</b> (ion-enhanced, what the mesh shows)</span>`;
   document.querySelectorAll('#blocks button').forEach((el, i) => el.setAttribute('aria-pressed', String(i === sel)));
 }
 // ---------- board chart & table ----------
@@ -211,7 +267,7 @@ function drawBoard() {
   el('rect', { x: L, y: T, width: R - L, height: B - T, fill: 'none', stroke: '#1e2a42' });
   [160, 200, 240].forEach(v => { el('line', { x1: L, x2: R, y1: Y(v), y2: Y(v), stroke: '#1e2a42' }); el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', fill: '#5b6b85', 'font-size': 11 }, v + ' nm'); });
   blocks.forEach((b, i) => {
-    const P = D.profiles[String(b.width_model)];
+    const P = D.profiles[`${b.width_model}|ion_low_tail_0p0|s14`];
     el('line', { x1: X(i), x2: X(i), y1: Y(P.mid_cd_range[0]), y2: Y(P.mid_cd_range[1]), stroke: '#2dd4bf', 'stroke-width': 8, opacity: .55 });
     el('line', { x1: X(i), x2: X(i), y1: Y(b.cd_meas[1]), y2: Y(b.cd_meas[2]), stroke: '#e8ecf4', 'stroke-width': 1.5 });
     el('circle', { cx: X(i), cy: Y(b.cd_meas[0]), r: 5, fill: '#e8ecf4' });
@@ -220,17 +276,21 @@ function drawBoard() {
   });
   el('text', { x: L + 6, y: T + 16, fill: '#2dd4bf', 'font-size': 11 }, '■ predicted CD interval (mapped design width)');
   el('text', { x: L + 300, y: T + 16, fill: '#e8ecf4', 'font-size': 11 }, '● measured CD (bar = frame spread)   bar below: intact / partial / loss');
-  $('#rows').innerHTML = blocks.map(b => { const P = D.profiles[String(b.width_model)]; return `<tr><td>${b.dose}</td><td class="n">${b.cd_meas[0].toFixed(0)} nm</td><td class="n">${P.mid_cd_range[0].toFixed(0)}–${P.mid_cd_range[1].toFixed(0)} nm (w${b.width_model})</td><td class="n">${P.top_h.toFixed(0)} nm</td><td><span class="tag ${lossClass(b.loss)}">${b.loss}</span></td></tr>`; }).join('');
+  $('#rows').innerHTML = blocks.map(b => { const P = D.profiles[`${b.width_model}|ion_low_tail_0p0|s14`]; return `<tr><td>${b.dose}</td><td class="n">${b.cd_meas[0].toFixed(0)} nm</td><td class="n">${P.mid_cd_range[0].toFixed(0)}–${P.mid_cd_range[1].toFixed(0)} nm (w${b.width_model})</td><td class="n">${P.top_h.toFixed(0)} nm</td><td><span class="tag ${lossClass(b.loss)}">${b.loss}</span></td></tr>`; }).join('');
 }
-function render() { drawMesh(); drawSEM(); drawNums(); }
+function render() { drawSEM(); drawNums(); }
 // ---------- interaction ----------
 let drag = false, last = null;
 canvas.addEventListener('mousedown', e => { drag = true; last = [e.clientX, e.clientY]; canvas.style.cursor = 'grabbing'; });
 window.addEventListener('mouseup', () => { drag = false; canvas.style.cursor = 'grab'; });
-canvas.addEventListener('mousemove', e => { if (!drag) return; yaw += (e.clientX - last[0]) * .008; pitch = Math.max(.2, Math.min(1.45, pitch + (e.clientY - last[1]) * .006)); last = [e.clientX, e.clientY]; drawMesh(); });
-canvas.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(.5, Math.min(2.5, zoom * (e.deltaY < 0 ? 1.08 : .93))); drawMesh(); }, { passive: false });
-$('#time').addEventListener('input', e => { tmin = +e.target.value; $('#timev').textContent = tmin.toFixed(1) + ' min'; drawMesh(); });
-$('#play').addEventListener('click', () => { playing = !playing; $('#play').textContent = playing ? '⏸ pause' : '▶ replay'; if (timer) clearInterval(timer); if (playing) { if (tmin >= 19.9) tmin = 0; timer = setInterval(() => { tmin = Math.min(20, tmin + .15); $('#time').value = tmin; $('#timev').textContent = tmin.toFixed(1) + ' min'; yaw += .003; drawMesh(); if (tmin >= 20) { playing = false; $('#play').textContent = '▶ replay'; clearInterval(timer); } }, 60); } });
-drawBoard(); render();
+canvas.addEventListener('mousemove', e => { if (!drag) return; yaw += (e.clientX - last[0]) * .008; pitch = Math.max(.2, Math.min(1.45, pitch + (e.clientY - last[1]) * .006)); last = [e.clientX, e.clientY]; });
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(.5, Math.min(2.5, zoom * (e.deltaY < 0 ? 1.08 : .93))); }, { passive: false });
+$('#time').addEventListener('input', e => { tmin = +e.target.value; $('#timev').textContent = tmin.toFixed(1) + ' min'; });
+$('#play').addEventListener('click', () => { playing = !playing; $('#play').textContent = playing ? '⏸ pause' : '▶ play'; if (playing && tmin >= T_MIN - .05) { tmin = 0; tally = { cap: 0, top: 0, floor: 0, wall: 0 }; } });
+document.querySelectorAll('.seg').forEach(g => g.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => { scen[g.dataset.group] = btn.dataset.v; g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === btn))); tally = { cap: 0, top: 0, floor: 0, wall: 0 }; ions = []; drawNums(); })));
+drawBoard(); render(); tmin = 0;
+window.__ox = { draw: dt => drawMesh(dt), ions: () => ions.length, flashes: () => flashes.length, seek: t => { tmin = t; $('#time').value = t; $('#timev').textContent = t.toFixed(1) + ' min'; playing = true; }, rain: v => { $('#rain').checked = v; } };
+if (location.hash === '#norain') $('#rain').checked = false;
+if (location.hash !== '#static') { playing = true; $('#play').textContent = '⏸ pause'; raf = requestAnimationFrame(loop); } else { tmin = 20; drawMesh(0); }
 })();
 </script>
