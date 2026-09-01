@@ -1,0 +1,1162 @@
+[
+ {
+  "file": "dose1_05.tif",
+  "dose_index": 1,
+  "pixel_size_nm": 288.8,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose1_06.tif",
+  "dose_index": 1,
+  "pixel_size_nm": 9.442,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 342,
+  "compact_count": 307,
+  "elongated_fraction": 0.1023391812865497,
+  "equivalent_square_width_nm": {
+   "median": 239.61109827384874,
+   "p10": 69.3842464540763,
+   "p90": 250.3465775520009
+  },
+  "bbox_width_nm_median": 283.26,
+  "nearest_neighbour_pitch_nm": 276.09805746629274,
+  "otsu_threshold": 83.35121564769386
+ },
+ {
+  "file": "dose1_07.tif",
+  "dose_index": 1,
+  "pixel_size_nm": 3.639,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 86,
+  "compact_count": 83,
+  "elongated_fraction": 0.03488372093023256,
+  "equivalent_square_width_nm": {
+   "median": 236.64694274171384,
+   "p10": 24.079560450119864,
+   "p90": 249.98966616613293
+  },
+  "bbox_width_nm_median": 276.56399999999996,
+  "nearest_neighbour_pitch_nm": 327.13514909067754,
+  "otsu_threshold": 82.13835890429726
+ },
+ {
+  "file": "dose1_08.tif",
+  "dose_index": 1,
+  "pixel_size_nm": 6.146,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 251,
+  "compact_count": 235,
+  "elongated_fraction": 0.06374501992031872,
+  "equivalent_square_width_nm": {
+   "median": 76.51708292923875,
+   "p10": 41.22862136914112,
+   "p90": 231.58268434240898
+  },
+  "bbox_width_nm_median": 116.774,
+  "nearest_neighbour_pitch_nm": 145.36418790661338,
+  "otsu_threshold": 81.80848885974441
+ },
+ {
+  "file": "dose1_09.tif",
+  "dose_index": 1,
+  "pixel_size_nm": 3.359,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 234,
+  "compact_count": 215,
+  "elongated_fraction": 0.0811965811965812,
+  "equivalent_square_width_nm": {
+   "median": 29.089793313119298,
+   "p10": 22.3817940086707,
+   "p90": 223.43710292296694
+  },
+  "bbox_width_nm_median": 40.308,
+  "nearest_neighbour_pitch_nm": 50.97741786348737,
+  "otsu_threshold": 88.74034769047479
+ },
+ {
+  "file": "dose1_10.tif",
+  "dose_index": 1,
+  "pixel_size_nm": 3.747,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 272,
+  "compact_count": 263,
+  "elongated_fraction": 0.03308823529411765,
+  "equivalent_square_width_nm": {
+   "median": 30.898553558378747,
+   "p10": 24.854786178923366,
+   "p90": 65.52259223724006
+  },
+  "bbox_width_nm_median": 44.964,
+  "nearest_neighbour_pitch_nm": 60.31681163632091,
+  "otsu_threshold": 86.73597433641646
+ },
+ {
+  "file": "dose2_01.tif",
+  "dose_index": 2,
+  "pixel_size_nm": 163.7,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose2_02.tif",
+  "dose_index": 2,
+  "pixel_size_nm": 5.275,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 345,
+  "compact_count": 321,
+  "elongated_fraction": 0.06956521739130435,
+  "equivalent_square_width_nm": {
+   "median": 53.27488854985996,
+   "p10": 36.54627203970331,
+   "p90": 243.56566363098065
+  },
+  "bbox_width_nm_median": 79.125,
+  "nearest_neighbour_pitch_nm": 89.43324761477919,
+  "otsu_threshold": 81.90969387065968
+ },
+ {
+  "file": "dose2_03.tif",
+  "dose_index": 2,
+  "pixel_size_nm": 5.551,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 302,
+  "compact_count": 282,
+  "elongated_fraction": 0.06622516556291391,
+  "equivalent_square_width_nm": {
+   "median": 54.103706012896886,
+   "p10": 37.237240029304,
+   "p90": 234.78170806358264
+  },
+  "bbox_width_nm_median": 77.714,
+  "nearest_neighbour_pitch_nm": 93.19159817953229,
+  "otsu_threshold": 84.41521542365413
+ },
+ {
+  "file": "dose2_04.tif",
+  "dose_index": 2,
+  "pixel_size_nm": 4.627,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 162,
+  "compact_count": 154,
+  "elongated_fraction": 0.04938271604938271,
+  "equivalent_square_width_nm": {
+   "median": 55.039137385567,
+   "p10": 31.483622733161116,
+   "p90": 247.28678273691628
+  },
+  "bbox_width_nm_median": 85.5995,
+  "nearest_neighbour_pitch_nm": 98.38409636588989,
+  "otsu_threshold": 84.7626967140658
+ },
+ {
+  "file": "dose3_01.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 190.8,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose3_02.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 5.757,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 194,
+  "compact_count": 188,
+  "elongated_fraction": 0.030927835051546393,
+  "equivalent_square_width_nm": {
+   "median": 148.72123488499437,
+   "p10": 40.299,
+   "p90": 238.15477895066903
+  },
+  "bbox_width_nm_median": 264.822,
+  "nearest_neighbour_pitch_nm": 232.2000367783718,
+  "otsu_threshold": 98.5106001353156
+ },
+ {
+  "file": "dose3_03.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 2.76,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 169,
+  "compact_count": 158,
+  "elongated_fraction": 0.0650887573964497,
+  "equivalent_square_width_nm": {
+   "median": 22.251831385303994,
+   "p10": 18.09853032707352,
+   "p90": 236.15339879226082
+  },
+  "bbox_width_nm_median": 33.12,
+  "nearest_neighbour_pitch_nm": 48.354880933114124,
+  "otsu_threshold": 83.2386291634456
+ },
+ {
+  "file": "dose3_04.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 3.943,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 78,
+  "compact_count": 78,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 228.4899581699853,
+   "p10": 223.81168230037665,
+   "p90": 263.39417045521566
+  },
+  "bbox_width_nm_median": 279.95300000000003,
+  "nearest_neighbour_pitch_nm": 333.39879829568673,
+  "otsu_threshold": 85.72688046353505
+ },
+ {
+  "file": "dose3_05.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 4.334,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 359,
+  "compact_count": 329,
+  "elongated_fraction": 0.08356545961002786,
+  "equivalent_square_width_nm": {
+   "median": 37.53354100001757,
+   "p10": 29.073355843452266,
+   "p90": 235.22083296053188
+  },
+  "bbox_width_nm_median": 52.007999999999996,
+  "nearest_neighbour_pitch_nm": 69.74113683004045,
+  "otsu_threshold": 83.72308621297768
+ },
+ {
+  "file": "dose3_06.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 3.943,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 188,
+  "compact_count": 173,
+  "elongated_fraction": 0.0797872340425532,
+  "equivalent_square_width_nm": {
+   "median": 42.4674096690627,
+   "p10": 26.450448105845012,
+   "p90": 249.34604218034022
+  },
+  "bbox_width_nm_median": 59.145,
+  "nearest_neighbour_pitch_nm": 79.35558154745186,
+  "otsu_threshold": 82.45465104138543
+ },
+ {
+  "file": "dose3_07.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 7.591,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 255,
+  "compact_count": 203,
+  "elongated_fraction": 0.20392156862745098,
+  "equivalent_square_width_nm": {
+   "median": 243.8590289327012,
+   "p10": 237.90246794056984,
+   "p90": 249.78888393508055
+  },
+  "bbox_width_nm_median": 280.867,
+  "nearest_neighbour_pitch_nm": 333.50779164751987,
+  "otsu_threshold": 82.17074877282937
+ },
+ {
+  "file": "dose3_08.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 4.528,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 74,
+  "compact_count": 58,
+  "elongated_fraction": 0.21621621621621623,
+  "equivalent_square_width_nm": {
+   "median": 241.83504154060086,
+   "p10": 235.390662089431,
+   "p90": 251.333968424535
+  },
+  "bbox_width_nm_median": 280.736,
+  "nearest_neighbour_pitch_nm": 330.4385959571617,
+  "otsu_threshold": 81.48154145133917
+ },
+ {
+  "file": "dose3_09.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 2.623,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 30,
+  "compact_count": 28,
+  "elongated_fraction": 0.06666666666666667,
+  "equivalent_square_width_nm": {
+   "median": 235.23059115046354,
+   "p10": 225.91533548176625,
+   "p90": 244.4684350517042
+  },
+  "bbox_width_nm_median": 279.34950000000003,
+  "nearest_neighbour_pitch_nm": 328.20899501392483,
+  "otsu_threshold": 84.17760300824878
+ },
+ {
+  "file": "dose3_10.tif",
+  "dose_index": 3,
+  "pixel_size_nm": 3.263,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 35,
+  "compact_count": 31,
+  "elongated_fraction": 0.11428571428571428,
+  "equivalent_square_width_nm": {
+   "median": 241.41790137850177,
+   "p10": 235.99860389205696,
+   "p90": 248.03093049456555
+  },
+  "bbox_width_nm_median": 280.618,
+  "nearest_neighbour_pitch_nm": 332.18421804323964,
+  "otsu_threshold": 84.41759429261003
+ },
+ {
+  "file": "dose4_01.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 156.7,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose4_02.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 4.366,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 91,
+  "compact_count": 91,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 193.6359146749383,
+   "p10": 187.4839909538945,
+   "p90": 215.9736241581365
+  },
+  "bbox_width_nm_median": 261.96,
+  "nearest_neighbour_pitch_nm": 332.7265309807075,
+  "otsu_threshold": 96.68416724202929
+ },
+ {
+  "file": "dose4_03.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 5.275,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 129,
+  "compact_count": 129,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 201.35028091611895,
+   "p10": 193.85893280204476,
+   "p90": 223.1517392920289
+  },
+  "bbox_width_nm_median": 263.75,
+  "nearest_neighbour_pitch_nm": 332.84520067911745,
+  "otsu_threshold": 79.67689088046308
+ },
+ {
+  "file": "dose4_04.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 3.409,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 50,
+  "compact_count": 49,
+  "elongated_fraction": 0.02,
+  "equivalent_square_width_nm": {
+   "median": 240.54595839256993,
+   "p10": 232.78253574334138,
+   "p90": 244.82218785322442
+  },
+  "bbox_width_nm_median": 282.947,
+  "nearest_neighbour_pitch_nm": 335.2930514819939,
+  "otsu_threshold": 89.33735542247118
+ },
+ {
+  "file": "dose4_05.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 10.3,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 589,
+  "compact_count": 589,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 239.12864738462437,
+   "p10": 235.552690496203,
+   "p90": 243.30684330696496
+  },
+  "bbox_width_nm_median": 278.1,
+  "nearest_neighbour_pitch_nm": 334.4910981820984,
+  "otsu_threshold": 97.74319833781932
+ },
+ {
+  "file": "dose4_06.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 3.802,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 166,
+  "compact_count": 158,
+  "elongated_fraction": 0.04819277108433735,
+  "equivalent_square_width_nm": {
+   "median": 40.234981960826104,
+   "p10": 25.78641859584227,
+   "p90": 236.9045101329597
+  },
+  "bbox_width_nm_median": 58.931,
+  "nearest_neighbour_pitch_nm": 76.93471374229817,
+  "otsu_threshold": 93.73508768674515
+ },
+ {
+  "file": "dose4_07.tif",
+  "dose_index": 4,
+  "pixel_size_nm": 4.089,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 232,
+  "compact_count": 217,
+  "elongated_fraction": 0.06465517241379311,
+  "equivalent_square_width_nm": {
+   "median": 49.2380802326817,
+   "p10": 27.611706732595504,
+   "p90": 239.8886869782294
+  },
+  "bbox_width_nm_median": 69.513,
+  "nearest_neighbour_pitch_nm": 73.32723572940233,
+  "otsu_threshold": 94.8076916095406
+ },
+ {
+  "file": "dose5_01.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 214.3,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose5_02.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 13.1,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose5_03.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 2.862,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 228,
+  "compact_count": 212,
+  "elongated_fraction": 0.07017543859649122,
+  "equivalent_square_width_nm": {
+   "median": 25.276499599430302,
+   "p10": 19.241080035966657,
+   "p90": 196.7902420553544
+  },
+  "bbox_width_nm_median": 37.206,
+  "nearest_neighbour_pitch_nm": 46.96773320879091,
+  "otsu_threshold": 92.81005559044974
+ },
+ {
+  "file": "dose5_04.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 2.76,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 184,
+  "compact_count": 172,
+  "elongated_fraction": 0.06521739130434782,
+  "equivalent_square_width_nm": {
+   "median": 26.1107234753352,
+   "p10": 18.307768842761806,
+   "p90": 192.59694450618957
+  },
+  "bbox_width_nm_median": 38.64,
+  "nearest_neighbour_pitch_nm": 45.47372518685149,
+  "otsu_threshold": 91.64021634666177
+ },
+ {
+  "file": "dose5_05.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 5.884,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 239,
+  "compact_count": 218,
+  "elongated_fraction": 0.08786610878661087,
+  "equivalent_square_width_nm": {
+   "median": 68.61817815096381,
+   "p10": 40.338671668759744,
+   "p90": 247.1768598771831
+  },
+  "bbox_width_nm_median": 111.796,
+  "nearest_neighbour_pitch_nm": 102.84088173725299,
+  "otsu_threshold": 97.19997984472924
+ },
+ {
+  "file": "dose5_06.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 3.943,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 194,
+  "compact_count": 181,
+  "elongated_fraction": 0.06701030927835051,
+  "equivalent_square_width_nm": {
+   "median": 34.59968457948714,
+   "p10": 26.154903096742682,
+   "p90": 240.16722047356922
+  },
+  "bbox_width_nm_median": 47.316,
+  "nearest_neighbour_pitch_nm": 65.92172533942619,
+  "otsu_threshold": 96.02475745774365
+ },
+ {
+  "file": "dose5_07.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 2.862,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 290,
+  "compact_count": 270,
+  "elongated_fraction": 0.06896551724137931,
+  "equivalent_square_width_nm": {
+   "median": 23.68710704835351,
+   "p10": 18.98436029999431,
+   "p90": 51.05989635612753
+  },
+  "bbox_width_nm_median": 34.344,
+  "nearest_neighbour_pitch_nm": 44.213912672251006,
+  "otsu_threshold": 96.0835844235541
+ },
+ {
+  "file": "dose5_08.tif",
+  "dose_index": 5,
+  "pixel_size_nm": 4.24,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 243,
+  "compact_count": 232,
+  "elongated_fraction": 0.04526748971193416,
+  "equivalent_square_width_nm": {
+   "median": 45.07181824599492,
+   "p10": 29.0987361247672,
+   "p90": 238.59178863359202
+  },
+  "bbox_width_nm_median": 63.6,
+  "nearest_neighbour_pitch_nm": 71.13884055900515,
+  "otsu_threshold": 95.73834930160399
+ },
+ {
+  "file": "dose6_01.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 606.9,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose6_02.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 6.058,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 218,
+  "compact_count": 204,
+  "elongated_fraction": 0.06422018348623854,
+  "equivalent_square_width_nm": {
+   "median": 220.80554688486077,
+   "p10": 42.964402189030515,
+   "p90": 227.7759634459216
+  },
+  "bbox_width_nm_median": 272.61,
+  "nearest_neighbour_pitch_nm": 330.22930828683985,
+  "otsu_threshold": 95.60381437696478
+ },
+ {
+  "file": "dose6_03.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 4.059,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 186,
+  "compact_count": 182,
+  "elongated_fraction": 0.021505376344086023,
+  "equivalent_square_width_nm": {
+   "median": 37.96831335736705,
+   "p10": 27.258687525963992,
+   "p90": 224.67215716172225
+  },
+  "bbox_width_nm_median": 56.826,
+  "nearest_neighbour_pitch_nm": 75.7760872253937,
+  "otsu_threshold": 94.59973938797572
+ },
+ {
+  "file": "dose6_04.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 4.059,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 177,
+  "compact_count": 172,
+  "elongated_fraction": 0.02824858757062147,
+  "equivalent_square_width_nm": {
+   "median": 38.719807687061504,
+   "p10": 26.924360048105136,
+   "p90": 220.27250101417653
+  },
+  "bbox_width_nm_median": 56.826,
+  "nearest_neighbour_pitch_nm": 89.30832847806073,
+  "otsu_threshold": 97.28697675605812
+ },
+ {
+  "file": "dose6_05.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 4.119,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 126,
+  "compact_count": 123,
+  "elongated_fraction": 0.023809523809523808,
+  "equivalent_square_width_nm": {
+   "median": 241.5855828479837,
+   "p10": 29.759379652607166,
+   "p90": 248.61841197662062
+  },
+  "bbox_width_nm_median": 280.092,
+  "nearest_neighbour_pitch_nm": 326.31039735669924,
+  "otsu_threshold": 91.16771848211462
+ },
+ {
+  "file": "dose6_06.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 5.353,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 214,
+  "compact_count": 196,
+  "elongated_fraction": 0.08411214953271028,
+  "equivalent_square_width_nm": {
+   "median": 86.29520840270382,
+   "p10": 37.0866718916648,
+   "p90": 244.3396754355102
+  },
+  "bbox_width_nm_median": 144.531,
+  "nearest_neighbour_pitch_nm": 125.07344108919379,
+  "otsu_threshold": 95.42358084849234
+ },
+ {
+  "file": "dose6_07.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 6.515,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 268,
+  "compact_count": 260,
+  "elongated_fraction": 0.029850746268656716,
+  "equivalent_square_width_nm": {
+   "median": 232.08401609115606,
+   "p10": 45.605,
+   "p90": 244.22126740524104
+  },
+  "bbox_width_nm_median": 273.63,
+  "nearest_neighbour_pitch_nm": 330.8818834407817,
+  "otsu_threshold": 96.47822551529416
+ },
+ {
+  "file": "dose6_08.tif",
+  "dose_index": 6,
+  "pixel_size_nm": 3.263,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 111,
+  "compact_count": 100,
+  "elongated_fraction": 0.0990990990990991,
+  "equivalent_square_width_nm": {
+   "median": 28.539441650803468,
+   "p10": 21.371895404208168,
+   "p90": 240.21070412362747
+  },
+  "bbox_width_nm_median": 39.156,
+  "nearest_neighbour_pitch_nm": 66.09791668170257,
+  "otsu_threshold": 95.53876223040503
+ },
+ {
+  "file": "dose7_01.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 171.0,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose7_02.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 5.927,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 178,
+  "compact_count": 176,
+  "elongated_fraction": 0.011235955056179775,
+  "equivalent_square_width_nm": {
+   "median": 177.31539542577795,
+   "p10": 46.291349829098735,
+   "p90": 201.21163740993228
+  },
+  "bbox_width_nm_median": 254.861,
+  "nearest_neighbour_pitch_nm": 327.4634499009257,
+  "otsu_threshold": 74.63431862841458
+ },
+ {
+  "file": "dose7_03.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 5.927,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 144,
+  "compact_count": 144,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 181.42817111187554,
+   "p10": 55.24987762687197,
+   "p90": 215.246482897427
+  },
+  "bbox_width_nm_median": 254.861,
+  "nearest_neighbour_pitch_nm": 331.74652119868665,
+  "otsu_threshold": 81.84758593787775
+ },
+ {
+  "file": "dose7_04.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 3.587,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 47,
+  "compact_count": 46,
+  "elongated_fraction": 0.02127659574468085,
+  "equivalent_square_width_nm": {
+   "median": 133.80502215065627,
+   "p10": 28.357498051223217,
+   "p90": 220.73897119774142
+  },
+  "bbox_width_nm_median": 245.70950000000002,
+  "nearest_neighbour_pitch_nm": 161.57086536624,
+  "otsu_threshold": 91.27277720909308
+ },
+ {
+  "file": "dose7_05.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 3.587,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 51,
+  "compact_count": 50,
+  "elongated_fraction": 0.0196078431372549,
+  "equivalent_square_width_nm": {
+   "median": 127.93070644988462,
+   "p10": 43.62019439692076,
+   "p90": 214.7208107172301
+  },
+  "bbox_width_nm_median": 240.329,
+  "nearest_neighbour_pitch_nm": 312.7900124791314,
+  "otsu_threshold": 84.56228825195457
+ },
+ {
+  "file": "dose7_06.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 3.802,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 75,
+  "compact_count": 75,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 214.7372831159042,
+   "p10": 211.24887647845432,
+   "p90": 217.57939493435495
+  },
+  "bbox_width_nm_median": 258.536,
+  "nearest_neighbour_pitch_nm": 332.0550626134429,
+  "otsu_threshold": 66.37164642210416
+ },
+ {
+  "file": "dose7_07.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 4.561,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 115,
+  "compact_count": 115,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 215.8659191257388,
+   "p10": 212.03498633038888,
+   "p90": 219.02300022143794
+  },
+  "bbox_width_nm_median": 259.977,
+  "nearest_neighbour_pitch_nm": 333.48055991552064,
+  "otsu_threshold": 94.46543398716189
+ },
+ {
+  "file": "dose7_08.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 2.475,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 29,
+  "compact_count": 27,
+  "elongated_fraction": 0.06896551724137931,
+  "equivalent_square_width_nm": {
+   "median": 205.49953467100602,
+   "p10": 128.8193127470002,
+   "p90": 211.38291507604197
+  },
+  "bbox_width_nm_median": 254.925,
+  "nearest_neighbour_pitch_nm": 332.2470764765609,
+  "otsu_threshold": 87.72441392968958
+ },
+ {
+  "file": "dose7_15d_01.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 9.512,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose7_15d_02.tif",
+  "dose_index": 7,
+  "pixel_size_nm": 4.179,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose8_01.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 152.2,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose8_02.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 13.79,
+  "stage_tilt_deg": 10.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose8_03.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 3.802,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 18,
+  "compact_count": 18,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 168.5685971992994,
+   "p10": 120.99043887511513,
+   "p90": 178.4278975641339
+  },
+  "bbox_width_nm_median": 228.12,
+  "nearest_neighbour_pitch_nm": 319.48564963502236,
+  "otsu_threshold": 119.81118244518386
+ },
+ {
+  "file": "dose8_04.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 3.802,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 21,
+  "compact_count": 21,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 167.84871937551387,
+   "p10": 127.40955259320236,
+   "p90": 176.4963586593219
+  },
+  "bbox_width_nm_median": 231.922,
+  "nearest_neighbour_pitch_nm": 323.5416140782501,
+  "otsu_threshold": 85.35378515297877
+ },
+ {
+  "file": "dose8_05.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 6.61,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 38,
+  "compact_count": 38,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 169.10482518084626,
+   "p10": 126.11191600941264,
+   "p90": 180.62292998699968
+  },
+  "bbox_width_nm_median": 244.57000000000002,
+  "nearest_neighbour_pitch_nm": 322.9838990889857,
+  "otsu_threshold": 83.61794673439314
+ },
+ {
+  "file": "dose8_06.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 4.869,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 86,
+  "compact_count": 86,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 162.0722081669228,
+   "p10": 91.16752578292663,
+   "p90": 189.8909589591646
+  },
+  "bbox_width_nm_median": 253.188,
+  "nearest_neighbour_pitch_nm": 327.0529342001302,
+  "otsu_threshold": 68.1677034526993
+ },
+ {
+  "file": "dose8_07.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 4.001,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 108,
+  "compact_count": 108,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 167.34988333593134,
+   "p10": 29.778887301063506,
+   "p90": 192.31868661402754
+  },
+  "bbox_width_nm_median": 240.06000000000003,
+  "nearest_neighbour_pitch_nm": 160.53031566683188,
+  "otsu_threshold": 55.80978167191235
+ },
+ {
+  "file": "dose8_08.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 4.528,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 102,
+  "compact_count": 99,
+  "elongated_fraction": 0.029411764705882353,
+  "equivalent_square_width_nm": {
+   "median": 154.2181229298295,
+   "p10": 33.51921113284867,
+   "p90": 184.08420209739478
+  },
+  "bbox_width_nm_median": 253.56799999999998,
+  "nearest_neighbour_pitch_nm": 330.25962419912645,
+  "otsu_threshold": 79.11425503038917
+ },
+ {
+  "file": "dose8_09.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 5.314,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 165,
+  "compact_count": 165,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 176.08514533599933,
+   "p10": 36.81647196568405,
+   "p90": 191.00639990584406
+  },
+  "bbox_width_nm_median": 260.386,
+  "nearest_neighbour_pitch_nm": 178.51645626396626,
+  "otsu_threshold": 63.0319696426226
+ },
+ {
+  "file": "dose8_10.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 3.587,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 70,
+  "compact_count": 68,
+  "elongated_fraction": 0.02857142857142857,
+  "equivalent_square_width_nm": {
+   "median": 204.4432614897479,
+   "p10": 25.540588713576682,
+   "p90": 218.2345464341075
+  },
+  "bbox_width_nm_median": 269.02500000000003,
+  "nearest_neighbour_pitch_nm": 329.02545929316466,
+  "otsu_threshold": 61.06065440178999
+ },
+ {
+  "file": "dose8_11.tif",
+  "dose_index": 8,
+  "pixel_size_nm": 3.587,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 127,
+  "compact_count": 121,
+  "elongated_fraction": 0.047244094488188976,
+  "equivalent_square_width_nm": {
+   "median": 35.69019936901446,
+   "p10": 24.32821764947034,
+   "p90": 214.50140033109344
+  },
+  "bbox_width_nm_median": 53.805,
+  "nearest_neighbour_pitch_nm": 108.65990646758264,
+  "otsu_threshold": 61.33495060383249
+ },
+ {
+  "file": "dose9_01.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 3.239,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 40,
+  "compact_count": 40,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 170.85521460482323,
+   "p10": 166.24622081042472,
+   "p90": 178.72607505665383
+  },
+  "bbox_width_nm_median": 259.12,
+  "nearest_neighbour_pitch_nm": 332.70240201110823,
+  "otsu_threshold": 102.65315642192613
+ },
+ {
+  "file": "dose9_02.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 6.058,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 226,
+  "compact_count": 225,
+  "elongated_fraction": 0.004424778761061947,
+  "equivalent_square_width_nm": {
+   "median": 183.24824162867156,
+   "p10": 163.69924344215153,
+   "p90": 186.09007909229607
+  },
+  "bbox_width_nm_median": 266.552,
+  "nearest_neighbour_pitch_nm": 330.9879653808552,
+  "otsu_threshold": 98.54091754787959
+ },
+ {
+  "file": "dose9_03.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 2.883,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 73,
+  "compact_count": 72,
+  "elongated_fraction": 0.0136986301369863,
+  "equivalent_square_width_nm": {
+   "median": 175.63345101881094,
+   "p10": 26.276272332319426,
+   "p90": 191.80936254949015
+  },
+  "bbox_width_nm_median": 219.108,
+  "nearest_neighbour_pitch_nm": 149.59403603734125,
+  "otsu_threshold": 93.50042635342973
+ },
+ {
+  "file": "dose9_04.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 2.642,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 47,
+  "compact_count": 46,
+  "elongated_fraction": 0.02127659574468085,
+  "equivalent_square_width_nm": {
+   "median": 195.9079150676409,
+   "p10": 42.59813360654911,
+   "p90": 209.23562923949282
+  },
+  "bbox_width_nm_median": 266.842,
+  "nearest_neighbour_pitch_nm": 309.4371421486329,
+  "otsu_threshold": 84.38342983916361
+ },
+ {
+  "file": "dose9_05.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 3.409,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 48,
+  "compact_count": 47,
+  "elongated_fraction": 0.020833333333333332,
+  "equivalent_square_width_nm": {
+   "median": 133.474431158181,
+   "p10": 23.61824481200921,
+   "p90": 169.12589842156805
+  },
+  "bbox_width_nm_median": 248.857,
+  "nearest_neighbour_pitch_nm": 325.79242709595275,
+  "otsu_threshold": 105.97651750999404
+ },
+ {
+  "file": "dose9_06.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 3.886,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 46,
+  "compact_count": 45,
+  "elongated_fraction": 0.021739130434782608,
+  "equivalent_square_width_nm": {
+   "median": 144.98478000121256,
+   "p10": 30.495695940034427,
+   "p90": 261.73683359495493
+  },
+  "bbox_width_nm_median": 256.476,
+  "nearest_neighbour_pitch_nm": 331.8419040804271,
+  "otsu_threshold": 106.67319010470155
+ },
+ {
+  "file": "dose9_07.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 3.886,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 46,
+  "compact_count": 45,
+  "elongated_fraction": 0.021739130434782608,
+  "equivalent_square_width_nm": {
+   "median": 144.98478000121256,
+   "p10": 30.495695940034427,
+   "p90": 261.73683359495493
+  },
+  "bbox_width_nm_median": 256.476,
+  "nearest_neighbour_pitch_nm": 331.8419040804271,
+  "otsu_threshold": 106.67319010470155
+ },
+ {
+  "file": "dose9_08.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 2.661,
+  "stage_tilt_deg": 10.0,
+  "pillar_count": 55,
+  "compact_count": 55,
+  "elongated_fraction": 0.0,
+  "equivalent_square_width_nm": {
+   "median": 183.53185335793893,
+   "p10": 20.64481128214519,
+   "p90": 211.54179560608628
+  },
+  "bbox_width_nm_median": 260.778,
+  "nearest_neighbour_pitch_nm": 136.43743570053655,
+  "otsu_threshold": 75.0881969137171
+ },
+ {
+  "file": "dose9_15d_01.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 27.73,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_02.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 5.632,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_03.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 7.591,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_04.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 11.25,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_05.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 9.306,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_06.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 6.806,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_07.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 5.841,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ },
+ {
+  "file": "dose9_15d_08.tif",
+  "dose_index": 9,
+  "pixel_size_nm": 5.841,
+  "stage_tilt_deg": 15.0,
+  "skipped": "tilted or low magnification"
+ }
+]

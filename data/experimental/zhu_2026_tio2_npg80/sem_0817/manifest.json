@@ -1,0 +1,1296 @@
+{
+ "source_folder": "/Users/stanislavdelaurentiis/Downloads/0817",
+ "frame_count": 80,
+ "instrument": "Zeiss SEM, Columbia University (from frame metadata)",
+ "acquired": [
+  "17 Aug 2026"
+ ],
+ "contact_sheets": [
+  "contact_sheet_1.png",
+  "contact_sheet_2.png",
+  "contact_sheet_3.png",
+  "contact_sheet_4.png"
+ ],
+ "frames": [
+  {
+   "file": "dose1_05.tif",
+   "sha256": "fbe60e5c3acd0511491df374a563c7b881c1e03a4344b29f05f80a97c7207e58",
+   "dose_index": 1,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 288.8,
+    "magnification": 387.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:46:52"
+   }
+  },
+  {
+   "file": "dose1_06.tif",
+   "sha256": "02757ecce6a92b4b208d8dfc130a30f65549bcab32fed526743fa93dff5be75a",
+   "dose_index": 1,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 9.442,
+    "magnification": 11820.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:47:16"
+   }
+  },
+  {
+   "file": "dose1_07.tif",
+   "sha256": "719a40b2f626283dbab7c558f5ba81fcfe0dc36fe0992d155c5c0a19b22c9db6",
+   "dose_index": 1,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 3.639,
+    "magnification": 30680.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:47:49"
+   }
+  },
+  {
+   "file": "dose1_08.tif",
+   "sha256": "158b5ae5ee4448f3455452061d8561d31803732d070a84fda3636c22226c9f2a",
+   "dose_index": 1,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 6.146,
+    "magnification": 18170.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:48:40"
+   }
+  },
+  {
+   "file": "dose1_09.tif",
+   "sha256": "ebca5aa9a2edc8a4d6e057c48082ade992ce868c47b299e45dbf40c4d46cc587",
+   "dose_index": 1,
+   "series_tilt_label_deg": 0,
+   "frame_index": 9,
+   "meta": {
+    "pixel_size_nm": 3.359,
+    "magnification": 33240.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:49:30"
+   }
+  },
+  {
+   "file": "dose1_10.tif",
+   "sha256": "8e7492d2e1c714926df887d1d72aec82f498d92467047172f7a50a7c1b6c3d51",
+   "dose_index": 1,
+   "series_tilt_label_deg": 0,
+   "frame_index": 10,
+   "meta": {
+    "pixel_size_nm": 3.747,
+    "magnification": 29800.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:50:38"
+   }
+  },
+  {
+   "file": "dose2_01.tif",
+   "sha256": "f62fd0dc2eb113eab1bfbbf7ffbbb4cbfd0336ce2951b8f2a074e9f63c332398",
+   "dose_index": 2,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 163.7,
+    "magnification": 682.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.9,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:43:19"
+   }
+  },
+  {
+   "file": "dose2_02.tif",
+   "sha256": "612fc470ce93b74ab9d3cbe1fc427501834e678185426b4ec0cc473c658a784b",
+   "dose_index": 2,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 5.275,
+    "magnification": 21170.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.9,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:43:57"
+   }
+  },
+  {
+   "file": "dose2_03.tif",
+   "sha256": "0fefe3cf54a030c5d9851213b065c1a91b7a7b7a933ce5ec6f3ea2c629beb040",
+   "dose_index": 2,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 5.551,
+    "magnification": 20110.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.0,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:44:38"
+   }
+  },
+  {
+   "file": "dose2_04.tif",
+   "sha256": "b6142065e3c9db1762d7dc2f121f986a6849e53688803c8a23b8777a067c72bc",
+   "dose_index": 2,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 4.627,
+    "magnification": 24130.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.0,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:45:39"
+   }
+  },
+  {
+   "file": "dose3_01.tif",
+   "sha256": "a8ffeaa937b1daa1beef5504858863161a67a96857de802a8ef0288381698d77",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 190.8,
+    "magnification": 585.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:37:13"
+   }
+  },
+  {
+   "file": "dose3_02.tif",
+   "sha256": "8917b18d10406a8155f322339d5446b893bd23a48f8a65033f7286545a4b1853",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 5.757,
+    "magnification": 19390.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:38:11"
+   }
+  },
+  {
+   "file": "dose3_03.tif",
+   "sha256": "e7b1c3eaac739df37863eb5ea3d8604fac1b8f0b5114795c5cf33d273a06eded",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 2.76,
+    "magnification": 40450.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:38:59"
+   }
+  },
+  {
+   "file": "dose3_04.tif",
+   "sha256": "99b5dfc4a5f6bad380657f396793df49e2ffa59e83e408990dfd4c79fc10aa14",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 3.943,
+    "magnification": 28320.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:39:22"
+   }
+  },
+  {
+   "file": "dose3_05.tif",
+   "sha256": "0c9710dc07ac504943dbe7d4eb9c220452963397da31dc4f958d4d8d1b86a855",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 4.334,
+    "magnification": 25760.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:39:56"
+   }
+  },
+  {
+   "file": "dose3_06.tif",
+   "sha256": "d4017835297d6e4c8df6ee01c0e6e5558cc40d27d44da98b2a333ffb7628d97e",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 3.943,
+    "magnification": 28320.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:40:39"
+   }
+  },
+  {
+   "file": "dose3_07.tif",
+   "sha256": "37196d4a3cbd98d8bfca0a7eaf11b91966fd547a4f775f85f3e407bd75b29476",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 7.591,
+    "magnification": 14710.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:41:21"
+   }
+  },
+  {
+   "file": "dose3_08.tif",
+   "sha256": "e08ed714513b82b6a57984563c010dad2045b0046df337bd0fa7c54e50424482",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 4.528,
+    "magnification": 24660.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:41:37"
+   }
+  },
+  {
+   "file": "dose3_09.tif",
+   "sha256": "c19e59e0e98ac2b98fd73650a55d2bed75e41cdc29412a0641804d2d9156055e",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 9,
+   "meta": {
+    "pixel_size_nm": 2.623,
+    "magnification": 42570.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:41:51"
+   }
+  },
+  {
+   "file": "dose3_10.tif",
+   "sha256": "038bdc35514b61a4afe721f171beab336264c13449f7628479a0923cbc930547",
+   "dose_index": 3,
+   "series_tilt_label_deg": 0,
+   "frame_index": 10,
+   "meta": {
+    "pixel_size_nm": 3.263,
+    "magnification": 34220.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 6.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:42:31"
+   }
+  },
+  {
+   "file": "dose4_01.tif",
+   "sha256": "7e3748cf85cf1b8adc387b57c3111f0ae8dee00796b4c21be3ea64b948ffc52c",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 156.7,
+    "magnification": 712.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:25:15"
+   }
+  },
+  {
+   "file": "dose4_02.tif",
+   "sha256": "ebb49f1e9ad27224c2fe6eb6b290bc963cfb03ade87cbc54d5ed46f70500632b",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 4.366,
+    "magnification": 25570.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:26:14"
+   }
+  },
+  {
+   "file": "dose4_03.tif",
+   "sha256": "4f40314037a5234d9da70ab8c514906f6415a1cb229b6916e80e0ff36d0cbfbc",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 5.275,
+    "magnification": 21160.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:26:38"
+   }
+  },
+  {
+   "file": "dose4_04.tif",
+   "sha256": "25ffa20db1c25a02bed0f55148895a493c8d0e8b3f7db245029a052bca52e4b1",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 3.409,
+    "magnification": 32750.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:27:37"
+   }
+  },
+  {
+   "file": "dose4_05.tif",
+   "sha256": "b1b247dd111ee5ef26a197138da709e6905f7d7a596ad40aa8921d2aed3cd77b",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 10.3,
+    "magnification": 10830.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:27:53"
+   }
+  },
+  {
+   "file": "dose4_06.tif",
+   "sha256": "58bb86ee1cf8222eae0f9b84f59291dec6da36960283edcfc86c5b75d14fc90c",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 3.802,
+    "magnification": 29370.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:28:23"
+   }
+  },
+  {
+   "file": "dose4_07.tif",
+   "sha256": "37f884d24bf003c8f05f25023c2f5b0d59217e19352c1de975b1b248b9654d4a",
+   "dose_index": 4,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 4.089,
+    "magnification": 27310.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:29:00"
+   }
+  },
+  {
+   "file": "dose5_01.tif",
+   "sha256": "9aacd745358cadb7f0e52dc30c20f1f2c2d801779f5cde570d0f056c553257d2",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 214.3,
+    "magnification": 521.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:29:26"
+   }
+  },
+  {
+   "file": "dose5_02.tif",
+   "sha256": "4d05248dcd149ed1dd30818d792c8d3bcbbf5344b180bbe7b3c36cf54f59a11b",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 13.1,
+    "magnification": 8520.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:29:58"
+   }
+  },
+  {
+   "file": "dose5_03.tif",
+   "sha256": "01debb43496ad92ad0de2949cbca8f0d79edeabb4348ff2afcb4d567c064ac54",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 2.862,
+    "magnification": 39010.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:30:16"
+   }
+  },
+  {
+   "file": "dose5_04.tif",
+   "sha256": "fd529ce7b7736e5af4f8e4a72256da7cf7ae4a26efed1c11b30ec8cdf1e7e5c4",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 2.76,
+    "magnification": 40450.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:30:41"
+   }
+  },
+  {
+   "file": "dose5_05.tif",
+   "sha256": "0730ad6f369c86167152c17b8a5f8ce63d6cf6bcd70242e67c145e080fe34300",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 5.884,
+    "magnification": 18980.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:31:39"
+   }
+  },
+  {
+   "file": "dose5_06.tif",
+   "sha256": "4cc0f078392bfb9ca083ca4ec1823e79553a7bcc97b451299c9ffa48cb954b75",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 3.943,
+    "magnification": 28320.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:32:05"
+   }
+  },
+  {
+   "file": "dose5_07.tif",
+   "sha256": "14b505cf212216886bf4f863ad7e5a6613320ad01afc16716445e45ea6745da9",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 2.862,
+    "magnification": 39010.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:32:23"
+   }
+  },
+  {
+   "file": "dose5_08.tif",
+   "sha256": "fe0d43d51f3bef2281e4c3adc59cd7430a9352b56173626235cb533ccdfaf851",
+   "dose_index": 5,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 4.24,
+    "magnification": 26330.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:32:37"
+   }
+  },
+  {
+   "file": "dose6_01.tif",
+   "sha256": "80f13cd8a5e0ae4230142eb8587caf50d06764a53660d625119fdc6da0061dcb",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 606.9,
+    "magnification": 184.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.3,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:33:10"
+   }
+  },
+  {
+   "file": "dose6_02.tif",
+   "sha256": "8de07b2de87b79ee4e3eb83053be51d18bfa40db735ea6e3a52ca954488a0052",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 6.058,
+    "magnification": 18430.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:33:54"
+   }
+  },
+  {
+   "file": "dose6_03.tif",
+   "sha256": "644767087322b8237a370b25669243f3328a2280d6c1f970b96f52ced04cc3da",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 4.059,
+    "magnification": 27500.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:34:13"
+   }
+  },
+  {
+   "file": "dose6_04.tif",
+   "sha256": "a3b2f7aea7dce98e16b5eafd31a3cdd1aca9028b68589c8fa696164e0a633932",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 4.059,
+    "magnification": 27500.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:34:33"
+   }
+  },
+  {
+   "file": "dose6_05.tif",
+   "sha256": "1ed25e23796fd318237641286e0f5923ecf4a641d66943076899b5fd7b6b8464",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 4.119,
+    "magnification": 27110.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:34:58"
+   }
+  },
+  {
+   "file": "dose6_06.tif",
+   "sha256": "39f0d984f9110f51b94bbb12cbd9f5906d6e5c822717cc78ca41ad6260429d21",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 5.353,
+    "magnification": 20860.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:35:38"
+   }
+  },
+  {
+   "file": "dose6_07.tif",
+   "sha256": "f293a2b4512a4183daa8b6ea6ff3a974c1ecefe5d9410b874da23ddfaf2c49f2",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 6.515,
+    "magnification": 17140.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:36:00"
+   }
+  },
+  {
+   "file": "dose6_08.tif",
+   "sha256": "2249ab6519615c20d60f47199cd5281404945e49963c95629c82d243f02304d3",
+   "dose_index": 6,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 3.263,
+    "magnification": 34220.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.1,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:36:42"
+   }
+  },
+  {
+   "file": "dose7_01.tif",
+   "sha256": "8aa04a4de26153e666c6c6bf1c37fe18899848871a6bfe7ab6fca6f8d6d0cff3",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 171.0,
+    "magnification": 653.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:20:51"
+   }
+  },
+  {
+   "file": "dose7_02.tif",
+   "sha256": "becde088c429ace530acf1ede5c6f34190b3496a19641641188f71d62b3c9840",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 5.927,
+    "magnification": 18840.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:21:51"
+   }
+  },
+  {
+   "file": "dose7_03.tif",
+   "sha256": "a3598cd26844d2a349b5f20af11763b9e32877fed7ab338693baadb6167778a6",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 5.927,
+    "magnification": 18840.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:22:02"
+   }
+  },
+  {
+   "file": "dose7_04.tif",
+   "sha256": "5f347fa3c895808bd0d98e1d809047bb3415222eb7c125d1f586313fe4dd400d",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 3.587,
+    "magnification": 31130.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:22:23"
+   }
+  },
+  {
+   "file": "dose7_05.tif",
+   "sha256": "f9e8016ab57f2f73f8aef085b6ac8afa130d14fce3b746e4149a0b68e961a237",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 3.587,
+    "magnification": 31130.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:22:46"
+   }
+  },
+  {
+   "file": "dose7_06.tif",
+   "sha256": "21db83b5dd33e6c01cd86ad5a8da4d916be471833db86182ee8d08434d2c8348",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 3.802,
+    "magnification": 29370.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:23:46"
+   }
+  },
+  {
+   "file": "dose7_07.tif",
+   "sha256": "a553d8ab727a7552813764b49896b47d3da79a773ad57d2a7d0fbf49f47eaafc",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 4.561,
+    "magnification": 24480.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:24:06"
+   }
+  },
+  {
+   "file": "dose7_08.tif",
+   "sha256": "455f8acadee7af3cbe7e9e24a18cbb3c08c7f09a7e77518c8d530fe79684f2f0",
+   "dose_index": 7,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 2.475,
+    "magnification": 45120.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.7,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:24:36"
+   }
+  },
+  {
+   "file": "dose7_15d_01.tif",
+   "sha256": "b818fb32158d91d9b06529a4f2c95d4ad40869c73831eb21ad7da9be4144ffcf",
+   "dose_index": 7,
+   "series_tilt_label_deg": 15,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 9.512,
+    "magnification": 11740.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:07:08"
+   }
+  },
+  {
+   "file": "dose7_15d_02.tif",
+   "sha256": "205b4bbe64d3fb1df0cc40395e3d224d5329e31c7be2e7a998e1428c51f8c381",
+   "dose_index": 7,
+   "series_tilt_label_deg": 15,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 4.179,
+    "magnification": 26720.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.8,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:08:18"
+   }
+  },
+  {
+   "file": "dose8_01.tif",
+   "sha256": "c6dd9a17d027190cbdb419abf96adcc2734c3f3e4d4791802f53f741363ce593",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 152.2,
+    "magnification": 733.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:14:54"
+   }
+  },
+  {
+   "file": "dose8_02.tif",
+   "sha256": "e84f359ecab80d3189ef288d8534f2569aa2657bdd6e631ad9d7012e0f0cf1ed",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 13.79,
+    "magnification": 8100.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:15:36"
+   }
+  },
+  {
+   "file": "dose8_03.tif",
+   "sha256": "942ae414cfb640490ef35f10663541be8091f9c8741ca8fc5d2f4deb01e919cb",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 3.802,
+    "magnification": 29370.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:16:07"
+   }
+  },
+  {
+   "file": "dose8_04.tif",
+   "sha256": "1cfb7ed90a0c377b8f01e94350d12908c18f78968c0d11a7d102510b71ec865d",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 3.802,
+    "magnification": 29370.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:16:39"
+   }
+  },
+  {
+   "file": "dose8_05.tif",
+   "sha256": "5990a5e03e59f3122d49763366756df366b5625d5ce265c613011d2111557b98",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 6.61,
+    "magnification": 16890.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:16:49"
+   }
+  },
+  {
+   "file": "dose8_06.tif",
+   "sha256": "dc578267997ebe4bed91cc15c52a17bb730b80fa1ad08b28d67aa2019fd9e48c",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 4.869,
+    "magnification": 22930.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:17:07"
+   }
+  },
+  {
+   "file": "dose8_07.tif",
+   "sha256": "812d1df27a52b83a653b16f51500e291a5ccd8c2f80f33526fad5ba53bcb7903",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 4.001,
+    "magnification": 27910.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:17:29"
+   }
+  },
+  {
+   "file": "dose8_08.tif",
+   "sha256": "fe6ae84e94813a725f3d70efee82a11689daf0dcc7aa1ef0c6c8ebe04883cefc",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 4.528,
+    "magnification": 24660.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:18:04"
+   }
+  },
+  {
+   "file": "dose8_09.tif",
+   "sha256": "bf57a497fd1849497fa85bb6495b5fde5af4c4fd97a4417a73b5e7deedbe3cd8",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 9,
+   "meta": {
+    "pixel_size_nm": 5.314,
+    "magnification": 21010.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:18:27"
+   }
+  },
+  {
+   "file": "dose8_10.tif",
+   "sha256": "5efeeafc94703cf5939791606b870ce7f95842ba23623d807fa4fcb291935dba",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 10,
+   "meta": {
+    "pixel_size_nm": 3.587,
+    "magnification": 31130.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:19:42"
+   }
+  },
+  {
+   "file": "dose8_11.tif",
+   "sha256": "d2b50e5a7ce5e09b168801cf00aaee9901303ec5f4da767796341af63556da35",
+   "dose_index": 8,
+   "series_tilt_label_deg": 0,
+   "frame_index": 11,
+   "meta": {
+    "pixel_size_nm": 3.587,
+    "magnification": 31130.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.6,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:19:55"
+   }
+  },
+  {
+   "file": "dose9_01.tif",
+   "sha256": "2a90ea9769c573932f8e226e5110cda64640cf85a119592d45f22fff6d73f924",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 3.239,
+    "magnification": 34470.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:06:01"
+   }
+  },
+  {
+   "file": "dose9_02.tif",
+   "sha256": "e1ae6c5905ac08b50e59d484075c0d0811122449bb31b729a3d36917e8d1d5e9",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 6.058,
+    "magnification": 18430.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:07:53"
+   }
+  },
+  {
+   "file": "dose9_03.tif",
+   "sha256": "9fad67fd13f760aad22d0319670892d47ba651e1916c2bf5a4680c10086ae5a0",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 2.883,
+    "magnification": 38720.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:08:39"
+   }
+  },
+  {
+   "file": "dose9_04.tif",
+   "sha256": "1db937088efaec28f69b7457c943fc5eb5801a87f05c53afedf8ba56bb16d85f",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 2.642,
+    "magnification": 42260.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:09:46"
+   }
+  },
+  {
+   "file": "dose9_05.tif",
+   "sha256": "4f94f9dcf1a3126f4a3f0f46448830b0260d348ebf15eeaf87d08bd37f97b8d7",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 3.409,
+    "magnification": 32750.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:11:05"
+   }
+  },
+  {
+   "file": "dose9_06.tif",
+   "sha256": "75ec72d984f2bc5ded094f19f0d776ca2c989d750fd20891ee7c366a6ec096b8",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 3.886,
+    "magnification": 28730.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:12:30"
+   }
+  },
+  {
+   "file": "dose9_07.tif",
+   "sha256": "a8edf710a3877169f15b758b70b5d1937b964692fb3a335720e4b18beba8636c",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 3.886,
+    "magnification": 28730.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:12:30"
+   }
+  },
+  {
+   "file": "dose9_08.tif",
+   "sha256": "c256644392c23eab3e20fbafbd31816074d4d0114f0230dd922b6ac435cfbc19",
+   "dose_index": 9,
+   "series_tilt_label_deg": 0,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 2.661,
+    "magnification": 41950.0,
+    "stage_tilt_deg": 10.0,
+    "working_distance_mm": 7.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "11:14:09"
+   }
+  },
+  {
+   "file": "dose9_15d_01.tif",
+   "sha256": "70e9c7111754121d9f4b7412239f5c5f2914daa90d99c57f11fb58908c427d96",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 1,
+   "meta": {
+    "pixel_size_nm": 27.73,
+    "magnification": 4030.0000000000005,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:02:17"
+   }
+  },
+  {
+   "file": "dose9_15d_02.tif",
+   "sha256": "5fc4b5be1ba58f048f25fdb1fd225e9cf2d3cdfe008b290d37b095529134ab46",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 2,
+   "meta": {
+    "pixel_size_nm": 5.632,
+    "magnification": 19820.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.4,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:03:15"
+   }
+  },
+  {
+   "file": "dose9_15d_03.tif",
+   "sha256": "3548257464409c1fdc2e66dcbafea58badd657f0327153647307ad81b8c580ef",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 3,
+   "meta": {
+    "pixel_size_nm": 7.591,
+    "magnification": 14710.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:04:27"
+   }
+  },
+  {
+   "file": "dose9_15d_04.tif",
+   "sha256": "50f2553ba07d64a2deb2d3fc1ffae2d68933c3c54db55980fd37ce80e0b5bcf8",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 4,
+   "meta": {
+    "pixel_size_nm": 11.25,
+    "magnification": 9930.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:12:01"
+   }
+  },
+  {
+   "file": "dose9_15d_05.tif",
+   "sha256": "448684c8e0c010c13c465c80937b1228ed1dede01c8f123c5f99dfdc03d4c607",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 5,
+   "meta": {
+    "pixel_size_nm": 9.306,
+    "magnification": 12000.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:13:09"
+   }
+  },
+  {
+   "file": "dose9_15d_06.tif",
+   "sha256": "0451745d2b04ee84a88d7e890244e661b4f330876b28c82b632df6df9c1a7881",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 6,
+   "meta": {
+    "pixel_size_nm": 6.806,
+    "magnification": 16410.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:13:45"
+   }
+  },
+  {
+   "file": "dose9_15d_07.tif",
+   "sha256": "8391b8e60b796480ea056049f278d4d8565ae2c32cc6569fef1bf98d0e5a2593",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 7,
+   "meta": {
+    "pixel_size_nm": 5.841,
+    "magnification": 19110.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:13:59"
+   }
+  },
+  {
+   "file": "dose9_15d_08.tif",
+   "sha256": "0032c89dfb8a3ac23f023e80352efd38d113a98dbc278f5d7c7cb9469023e037",
+   "dose_index": 9,
+   "series_tilt_label_deg": 15,
+   "frame_index": 8,
+   "meta": {
+    "pixel_size_nm": 5.841,
+    "magnification": 19110.0,
+    "stage_tilt_deg": 15.0,
+    "working_distance_mm": 8.5,
+    "eht_kv": 0.0,
+    "date": "17 Aug 2026",
+    "time": "12:13:59"
+   }
+  }
+ ]
+}
