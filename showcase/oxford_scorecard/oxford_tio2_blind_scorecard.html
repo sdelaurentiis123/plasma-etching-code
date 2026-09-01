@@ -81,7 +81,7 @@ footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding
   <tr><td>Pitch</td><td>350 nm (from your GDS)</td><td>334–346 nm measured (−2 to −4%, within SEM magnification calibration)</td><td><span class="verdict v-ok">CONSISTENT</span></td></tr>
   <tr><td>Post-etch CD</td><td>≈ design CD + small bias, 105–250 nm ladder</td><td>181–236 nm across doses; inside the ladder. Strict transfer scoring needs the pre-etch (post-lift-off) CD per dose</td><td><span class="verdict v-ok">CONSISTENT</span></td></tr>
   <tr><td>Exhaustion everywhere</td><td>Every cell exhausts within the witness interval</td><td>Doses 1, 2, 4, 5, 6 survive intact where imaged — the real process sits inside our interval, on the surviving side for most blocks</td><td><span class="verdict v-part">OVER-PREDICTED</span></td></tr>
-  <tr><td>Etch depth 656–684 nm · sidewall 85–86.5°</td><td>Near-full clearance</td><td>Plan view cannot measure depth; 15° tilt shows tall pillars but no height calibration</td><td><span class="verdict v-open">UNSCORED</span></td></tr>
+  <tr><td>Etch depth 656–684 nm · sidewall 85–86.5°</td><td>Near-full trench clearance; pillar tops attacked once the Cr is gone</td><td><b>Pillar height from tilt geometry</b> (floor occlusion at 10° and 15°, dose 7 and 9 intact regions): <span class="mono">≈ 0.25–0.55 µm</span> — the standing pillars are <b>shorter than the 700 nm film</b>, i.e. ≥150 nm of top has been removed even where they survive. That is the predicted cap-exhaustion signature; the trench depth beside them still needs one cross-section</td><td><span class="verdict v-part">GEOMETRY ESTIMATE</span></td></tr>
   <tr><td>Necking on small pillars</td><td>Waists 10–50% narrower than base at the smallest CDs</td><td>15° tilt frames show straight, cube-like walls; a waist is not resolvable at this tilt</td><td><span class="verdict v-open">UNSCORED</span></td></tr>
   </tbody></table></div>
   <p style="margin-top:.8rem">Net: the two mechanism claims that were genuinely falsifiable — <strong>mask-exhaustion-driven loss with spatial zoning</strong>, and <strong>no rinse collapse</strong> — both hold. The magnitude claim (exhaustion in every block) was too pessimistic: your process sits inside our predicted interval, mostly on the surviving side, which is exactly what a knife-edge looks like when the mask is a few nm thicker than our witness rates assumed.</p>
@@ -90,7 +90,7 @@ footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding
 <section>
   <h2>4 · What would close the remaining rows</h2>
   <ol>
-    <li><b>One cross-section</b> (cleave + tilt, or FIB) through any intact block → etch depth and sidewall angle, the two biggest unscored predictions.</li>
+    <li><b>One cross-section</b> (cleave + tilt, or FIB) through any intact block → trench depth, pillar height and sidewall angle. Our tilt-geometry estimate (0.25–0.55 µm pillars) has ±150 nm slack because the near sidewall's brightness is ambiguous in InLens; a cross-section removes it.</li>
     <li><b>Pre-etch CD per dose</b> (post-lift-off Cr squares) or the dose→CD calibration → strict CD-transfer scoring.</li>
     <li><b>Which block is which dose value</b>, and the lift-off Cr thickness if it varied — this is the leading candidate for why blocks 1/2/4/5/6 survived while 8/9 did not.</li>
     <li><b>Achieved DC self-bias</b> and, if a witness piece exists, <b>blanket TiO₂ loss</b> → narrows the etch-rate interval that sets the knife-edge.</li>
