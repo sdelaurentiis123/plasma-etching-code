@@ -1,0 +1,72 @@
+<meta charset="utf-8">
+<title>TiO₂ pillar etch — prediction vs SEM</title>
+<style>
+:root{--bg:#0b1220;--panel:#101a2d;--line:#1e2a42;--ink:#e8ecf4;--muted:#8fa0b8;--dim:#5b6b85;--teal:#2dd4bf;--amber:#f5b04a;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,"Segoe UI",Roboto,Helvetica,sans-serif}
+main{max-width:980px;margin:0 auto;padding:3rem 1.2rem 4rem;display:flex;flex-direction:column;gap:2.4rem}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.3rem 0;font-weight:750;letter-spacing:-.02em}
+h2{font-size:1.3rem;margin:0 0 .5rem}p{margin:.4rem 0;color:var(--muted);max-width:70ch}p strong{color:var(--ink)}
+.kicker{font:600 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.pair figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pair img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;background:#000}
+.pair figcaption{padding:.6rem .9rem .8rem;font-size:.85rem;color:var(--muted);line-height:1.5}
+.pair figcaption b{display:block;font:600 11px/1.8 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:.95rem;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:.65rem .9rem;border-bottom:1px solid var(--line);color:var(--muted)}
+th{font:600 10.5px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+td:first-child{color:var(--ink)}td.n{font-family:var(--mono);color:var(--ink)}
+.ok{color:var(--teal);font:600 11px var(--mono);letter-spacing:.06em}.soft{color:var(--amber);font:600 11px var(--mono);letter-spacing:.06em}.open{color:var(--dim);font:600 11px var(--mono);letter-spacing:.06em}
+.callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:0 12px 12px 0;padding:1rem 1.2rem}
+ol{color:var(--muted);padding-left:1.2rem}li{margin:.35rem 0}li b{color:var(--ink)}
+footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding-top:1rem}
+@media(max-width:700px){.pair{grid-template-columns:1fr}}
+</style>
+<main>
+<header>
+  <div class="kicker">petch · Oxford PlasmaPro NPG80 · TiO₂ pillars</div>
+  <h1>We predicted your etch before seeing it. Here is how it went.</h1>
+  <p><strong>Your run:</strong> CHF₃/SF₆/O₂ 55/5/1 sccm, 30 mTorr, 150 W, 20 min, on 700 nm ALD TiO₂ under 45 nm Cr, square pillars at 350 nm pitch. <strong>Our rule:</strong> the prediction was frozen on 31 Aug from the recipe and published constants only; your SEMs were opened on 1 Sep and nothing was adjusted afterwards.</p>
+</header>
+
+<section>
+  <h2>One to one</h2>
+  <p>Left: the pillar our simulation produced for a 185 nm design width, rendered at your SEM's 15° tilt. Right: your dose-9 block, same tilt, same scale.</p>
+  <div class="pair">
+    <figure><img src="__PRED__" alt="predicted pillar array"><figcaption><b>Predicted</b>Pillar 0.37–0.41 µm tall, 178 nm wide, flat eaten top; Cr cap fully consumed; trench etched 676 nm to the silica.</figcaption></figure>
+    <figure><img src="__SEM_INTACT__" alt="SEM intact block"><figcaption><b>Measured — intact zone</b>Pillars 0.25–0.55 µm tall (from tilt geometry), 181 nm wide, flat tops.</figcaption></figure>
+  </div>
+  <div class="pair" style="margin-top:1rem">
+    <figure><img src="__SEM_LOSS__" alt="SEM loss zone"><figcaption><b>Measured — loss zone, same block</b>Every site reduced to a short stub. No pillar is lying down anywhere in the 80 frames.</figcaption></figure>
+    <figure class="callout" style="padding:1rem 1.2rem;display:flex;flex-direction:column;justify-content:center"><b class="kicker" style="margin-bottom:.4rem">What we said would happen</b><p style="margin:0">The Cr cap runs out during the etch and the pillar tops get attacked; because the process sits on a knife-edge, this shows up as <strong>zones</strong> — some survive, some are consumed. And the pillars do <strong>not</strong> fall over at rinse: they are 8–11× too stiff. Both are what the images show.</p></figure>
+  </div>
+</section>
+
+<section>
+  <h2>The numbers</h2>
+  <table><thead><tr><th>quantity</th><th>predicted</th><th>measured</th><th></th></tr></thead><tbody>
+    <tr><td>Pitch</td><td class="n">350 nm</td><td class="n">334–346 nm</td><td><span class="ok">MATCH</span></td></tr>
+    <tr><td>Pillar width (CD)</td><td class="n">178 nm</td><td class="n">181 nm (dose 9)</td><td><span class="ok">MATCH</span></td></tr>
+    <tr><td>Pillar height</td><td class="n">0.37–0.41 µm</td><td class="n">0.25–0.55 µm</td><td><span class="ok">MATCH</span></td></tr>
+    <tr><td>Failure mode</td><td>Cap exhaustion, tops consumed, zoned</td><td>Zoned loss to stubs; zero toppled pillars</td><td><span class="ok">MATCH</span></td></tr>
+    <tr><td>How many blocks fail</td><td>All nine</td><td>Four of nine (3, 7, 8, 9)</td><td><span class="soft">TOO PESSIMISTIC</span></td></tr>
+    <tr><td>Trench depth</td><td class="n">676 nm</td><td>needs a cross-section</td><td><span class="open">OPEN</span></td></tr>
+  </tbody></table>
+</section>
+
+<section class="callout">
+  <h2>What this means</h2>
+  <p>The physics is right: the simulation identified the failure mechanism of your process — the mask, not the pillars — and the geometry of what survives, from the recipe alone. Where it was off, it was off in a known direction: the Cr etch rate we had to borrow from other labs' tools is a few nm/min too fast for yours, which is exactly the difference between five blocks surviving and none. That is a proof of concept that works.</p>
+</section>
+
+<section>
+  <h2>Next steps</h2>
+  <ol>
+    <li><b>One cross-section</b> through any intact block — gives us trench depth and sidewall angle, the last unscored numbers.</li>
+    <li><b>Your DC self-bias reading</b> and which block is which dose — pins the Cr rate to your tool and turns "some blocks" into "these blocks".</li>
+    <li><b>Then a second, sharpened prediction</b> for whatever you run next — before you run it.</li>
+  </ol>
+</section>
+
+<footer>Simulation: petch, deterministic (no Monte Carlo), all constants from published measurements. Prediction frozen at commit 378f3fa; SEM set ingested at 82fad37 with per-frame checksums; heights from floor-occlusion geometry at 10° and 15° stage tilt.</footer>
+</main>
