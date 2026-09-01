@@ -1,0 +1,231 @@
+<meta charset="utf-8">
+<title>TiO₂ pillar etch — interactive prediction vs SEM</title>
+<style>
+:root{--bg:#0b1220;--panel:#101a2d;--panel2:#0e1626;--line:#1e2a42;--ink:#e8ecf4;--muted:#8fa0b8;--dim:#5b6b85;--teal:#2dd4bf;--oxide:#1f8a8c;--amber:#f5b04a;--mag:#e26ad0;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,"Segoe UI",Roboto,Helvetica,sans-serif}
+main{max-width:1120px;margin:0 auto;padding:2.6rem 1.2rem 4rem;display:flex;flex-direction:column;gap:2.2rem}
+h1{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.1;margin:.3rem 0;font-weight:750;letter-spacing:-.02em}
+h2{font-size:1.25rem;margin:0 0 .4rem}p{margin:.35rem 0;color:var(--muted);max-width:74ch}p strong{color:var(--ink)}
+.kicker{font:600 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.hint{font:11.5px/1.4 var(--mono);color:var(--dim)}
+.blocks{display:grid;grid-template-columns:repeat(9,1fr);gap:.4rem}
+.blocks button{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.55rem .3rem;color:var(--muted);cursor:pointer;font:inherit;display:grid;gap:2px;text-align:center}
+.blocks button b{font:600 1rem var(--mono);color:var(--ink)}.blocks button span{font:10.5px/1.3 var(--mono);color:var(--dim)}
+.blocks button i{display:block;height:4px;border-radius:2px;margin-top:3px}
+.blocks button[aria-pressed="true"]{border-color:var(--teal);background:color-mix(in srgb,var(--oxide) 22%,var(--panel))}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.card .head{display:flex;justify-content:space-between;align-items:baseline;padding:.6rem .9rem .3rem}
+.card .head b{font:600 11px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+canvas{display:block;width:100%;height:auto;cursor:grab}
+.card img{width:100%;display:block;background:#000}
+.card figcaption,.card .cap{padding:.5rem .9rem .8rem;font-size:.84rem;color:var(--muted);line-height:1.5}
+.thumbs{display:flex;gap:.4rem;padding:0 .9rem .7rem;flex-wrap:wrap}
+.thumbs button{border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--muted);font:11px var(--mono);padding:.35rem .55rem;cursor:pointer}
+.thumbs button[aria-pressed="true"]{border-color:var(--teal);color:var(--teal)}
+.controls{display:grid;gap:.5rem;padding:.6rem .9rem .9rem;border-top:1px solid var(--line)}
+.ctl{display:flex;align-items:center;gap:.7rem;font-size:.85rem;color:var(--muted)}
+.ctl output{font:600 .85rem var(--mono);color:var(--ink);min-width:6ch;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:22px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--teal);margin-top:-5.5px;border:2px solid var(--bg)}
+.play{font:600 12px var(--mono);padding:.45rem .75rem;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}
+.num{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem}
+.num b{display:block;font:600 1.05rem/1.35 var(--mono);color:var(--teal)}.num small{display:block;color:var(--dim);font-size:.72rem;line-height:1.35}
+.num b.m{color:var(--ink)}
+.rates{display:flex;gap:1rem;flex-wrap:wrap;font:12px var(--mono);color:var(--muted);padding:0 .9rem .8rem}
+.rates span b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:.55rem .8rem;border-bottom:1px solid var(--line);color:var(--muted)}
+th{font:600 10.5px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+td:first-child{color:var(--ink);font-family:var(--mono)}td.n{font-family:var(--mono);color:var(--ink)}
+.tag{font:600 10px var(--mono);letter-spacing:.06em;padding:.2rem .45rem;border-radius:99px}
+.t-ok{background:color-mix(in srgb,var(--teal) 16%,transparent);color:var(--teal)}.t-loss{background:color-mix(in srgb,var(--mag) 16%,transparent);color:var(--mag)}.t-part{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:0 12px 12px 0;padding:.9rem 1.1rem}
+svg text{font-family:var(--mono)}
+footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding-top:1rem}
+@media(max-width:820px){.pair{grid-template-columns:1fr}.blocks{grid-template-columns:repeat(3,1fr)}}
+</style>
+<main>
+<header>
+  <div class="kicker">petch · Oxford PlasmaPro NPG80 · TiO₂ pillars · interactive</div>
+  <h1>Your nine blocks, predicted before we saw them.</h1>
+  <p><strong>Your run:</strong> CHF₃/SF₆/O₂ 55/5/1 sccm, 30 mTorr, 150 W, 20 min on 700 nm ALD TiO₂ under 45 nm Cr, square pillars at 350 nm pitch, nine dose blocks. <strong>Our rule:</strong> prediction frozen 31 Aug from the recipe and published constants; your 80 SEM frames opened 1 Sep; nothing adjusted afterwards. Pick a block.</p>
+</header>
+
+<section>
+  <div class="blocks" id="blocks"></div>
+</section>
+
+<section class="pair">
+  <div class="card">
+    <div class="head"><b>Predicted · rotatable</b><span class="hint">drag to orbit · scroll to zoom</span></div>
+    <canvas id="mesh" width="1200" height="900"></canvas>
+    <div class="rates" id="rates"></div>
+    <div class="controls">
+      <div class="ctl"><span style="min-width:6.5rem">etch time</span><input id="time" type="range" min="0" max="20" step="0.1" value="20"><output id="timev">20.0 min</output><button class="play" id="play">▶ replay</button></div>
+      <div class="hint">the shape between t=0 and the endpoint is interpolated for display; the endpoint is the frozen solution</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><b>Measured · your SEM</b><span class="hint" id="semfile"></span></div>
+    <img id="sem" alt="SEM frame">
+    <div class="cap" id="semcap"></div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+</section>
+
+<section>
+  <div class="nums" id="nums"></div>
+</section>
+
+<section>
+  <h2>The whole board</h2>
+  <p>Predicted versus measured pillar width per block, and what happened to each block. Height is our prediction for the mapped design width; loss is our whole-set review of your frames.</p>
+  <div class="card" style="padding:.6rem .9rem"><svg id="chart" viewBox="0 0 900 260" width="100%"></svg></div>
+  <table style="margin-top:1rem"><thead><tr><th>block</th><th>measured CD</th><th>predicted CD (design)</th><th>predicted height</th><th>what your SEM shows</th></tr></thead><tbody id="rows"></tbody></table>
+</section>
+
+<section class="callout">
+  <h2>What this means</h2>
+  <p>We said the Cr cap would run out during the etch and the pillar tops would be attacked — as zones, because the process sits on a knife-edge — and that the pillars would not fall over at rinse. Your frames show exactly that: zoned loss to stubs, flat-topped survivors 0.25–0.55 µm tall, zero toppled pillars. We were too pessimistic on how many blocks fail (we said nine, you lost four) because the Cr etch rate we borrowed from other labs' tools is a few nm/min faster than yours. One cross-section and your DC self-bias reading close the last two numbers.</p>
+</section>
+<footer>petch, deterministic, no Monte Carlo, published constants only. Prediction frozen at commit 378f3fa; SEMs ingested at 82fad37 with per-frame checksums; CDs from lattice-averaged pillar images; heights from floor-occlusion geometry at 10° and 15° tilt.</footer>
+</main>
+
+<script>
+(() => {
+const D = __DATA__;
+const $ = s => document.querySelector(s);
+const blocks = D.blocks; let sel = 8; let frame = 0;
+let yaw = 0.7, pitch = 0.95, zoom = 1.0, tmin = 20, playing = false, timer = null;
+const canvas = $('#mesh'), ctx = canvas.getContext('2d');
+const lossClass = l => /catastrophic|large/.test(l) ? 't-loss' : /patch|missing/.test(l) ? 't-part' : 't-ok';
+
+// ---------- block buttons ----------
+const bb = $('#blocks');
+blocks.forEach((b, i) => {
+  const el = document.createElement('button');
+  el.innerHTML = `<b>${b.dose}</b><span>${b.cd_meas[0].toFixed(0)} nm</span><i style="background:${lossClass(b.loss)==='t-ok'?'#2dd4bf':lossClass(b.loss)==='t-part'?'#f5b04a':'#e26ad0'}"></i>`;
+  el.onclick = () => { sel = i; frame = 0; render(); };
+  bb.appendChild(el);
+});
+
+// ---------- 3-D mesh ----------
+function pillarProfile(P, t) {
+  // interpolate: floor sinks from 0 to -depth; top consumed from film top to final top
+  const depth = P.depth * t, film = D.film_nm;
+  const finalTop = P.top_h;            // final pillar height above final floor
+  const topNow = film - depth - t * (film - depth - finalTop);   // pillar top above current floor... simplified:
+  // heights above current floor: scale final profile to current pillar height
+  const hNow = Math.max(5, film * (1 - t) + finalTop * t - 0);
+  const scale = hNow / Math.max(finalTop, 1);
+  const hs = P.h.map(h => h * scale), ws = P.w.slice();
+  if (t < 0.02) { return { hs: [0, film], ws: [P.w[0], P.w[0]], depth: 0, cap: true }; }
+  return { hs, ws, depth, cap: t < 0.85 };
+}
+function drawMesh() {
+  const b = blocks[sel], P = D.profiles[String(b.width_model)], t = tmin / 20;
+  const prof = pillarProfile(P, t);
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = '#0e1626'; ctx.fillRect(0, 0, W, H);
+  const pitch3 = D.pitch_nm, n = 3;
+  const s = zoom * Math.min(W, H) / (n * pitch3 * 1.35);
+  const cx0 = (n - 1) * pitch3 / 2, cy0 = (n - 1) * pitch3 / 2;
+  const ca = Math.cos(yaw), sa = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const proj = (x, y, z) => { const X = (x - cx0) * s, Y = (y - cy0) * s, xr = X * ca - Y * sa, yr = X * sa + Y * ca; return [W / 2 + xr, H * 0.55 + yr * cp - z * s * sp]; };
+  const light = [-0.4, -0.5, 0.75];
+  const faces = [];
+  const addQuad = (pts, normal, base) => {
+    const nl = Math.max(0.25, (normal[0]*light[0]+normal[1]*light[1]+normal[2]*light[2]) / Math.hypot(...light));
+    const depthKey = pts.reduce((a, p) => a + ((p[0]-cx0)*sa + (p[1]-cy0)*ca), 0) / pts.length - pts.reduce((a,p)=>a+p[2],0)/pts.length*0.001;
+    faces.push({ pts, col: base.map(v => Math.round(v * nl)), key: depthKey });
+  };
+  // floor (etched trench bottom) & film slab sides
+  const ext = pitch3 * n, z0 = -prof.depth;
+  addQuad([[-pitch3/2,-pitch3/2,z0],[ext-pitch3/2,-pitch3/2,z0],[ext-pitch3/2,ext-pitch3/2,z0],[-pitch3/2,ext-pitch3/2,z0]], [0,0,1], [70,90,130]);
+  const slabBot = -D.film_nm - 120;
+  const c = [[-pitch3/2,-pitch3/2],[ext-pitch3/2,-pitch3/2],[ext-pitch3/2,ext-pitch3/2],[-pitch3/2,ext-pitch3/2]];
+  for (let i = 0; i < 4; i++) { const a = c[i], bq = c[(i+1)%4]; const nx = (bq[1]-a[1]), ny = -(bq[0]-a[0]);
+    addQuad([[a[0],a[1],slabBot],[bq[0],bq[1],slabBot],[bq[0],bq[1],z0],[a[0],a[1],z0]], [nx,ny,0].map(v=>v/Math.hypot(nx,ny)), [40,56,90]); }
+  // pillars
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const px = i * pitch3, py = j * pitch3;
+    for (let k = 0; k < prof.hs.length - 1; k++) {
+      const h0 = z0 + prof.hs[k], h1 = z0 + prof.hs[k+1], a0 = prof.ws[k]/2, a1 = prof.ws[k+1]/2;
+      const sides = [[1,0],[-1,0],[0,1],[0,-1]];
+      for (const [sx, sy] of sides) {
+        const q = sx ? [[px+sx*a0,py-a0,h0],[px+sx*a0,py+a0,h0],[px+sx*a1,py+a1,h1],[px+sx*a1,py-a1,h1]]
+                     : [[px-a0,py+sy*a0,h0],[px+a0,py+sy*a0,h0],[px+a1,py+sy*a1,h1],[px-a1,py+sy*a1,h1]];
+        addQuad(q, [sx, sy, 0], [150,175,215]);
+      }
+    }
+    const kt = prof.hs.length - 1, at = prof.ws[kt]/2, zt = z0 + prof.hs[kt];
+    addQuad([[px-at,py-at,zt],[px+at,py-at,zt],[px+at,py+at,zt],[px-at,py+at,zt]], [0,0,1], prof.cap ? [232,236,244] : [190,205,230]);
+    if (prof.cap) { const cz = zt + 45 * (1 - t), ac = at * 0.98;
+      addQuad([[px-ac,py-ac,cz],[px+ac,py-ac,cz],[px+ac,py+ac,cz],[px-ac,py+ac,cz]], [0,0,1], [245,176,74]);
+      for (const [sx, sy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const q = sx ? [[px+sx*ac,py-ac,zt],[px+sx*ac,py+ac,zt],[px+sx*ac,py+ac,cz],[px+sx*ac,py-ac,cz]] : [[px-ac,py+sy*ac,zt],[px+ac,py+sy*ac,zt],[px+ac,py+sy*ac,cz],[px-ac,py+sy*ac,cz]]; addQuad(q, [sx,sy,0], [200,140,60]); }
+    }
+  }
+  faces.sort((a, b) => a.key - b.key);
+  for (const f of faces) { ctx.fillStyle = `rgb(${f.col.join(',')})`; ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .6; ctx.beginPath(); f.pts.forEach((p, i) => { const [x, y] = proj(...p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  // overlay
+  ctx.fillStyle = '#8fa0b8'; ctx.font = '600 22px ui-monospace,Menlo,monospace';
+  ctx.fillText(`block ${b.dose} · design width ${b.width_model} nm · t = ${tmin.toFixed(1)} min`, 24, 40);
+  ctx.fillStyle = '#5b6b85'; ctx.font = '19px ui-monospace,Menlo,monospace';
+  ctx.fillText(`trench ${prof.depth.toFixed(0)} nm · pillar ${(prof.hs[prof.hs.length-1]).toFixed(0)} nm tall · Cr cap ${prof.cap ? 'present' : 'consumed'}`, 24, 68);
+}
+// ---------- SEM side ----------
+function drawSEM() {
+  const b = blocks[sel], f = b.frames[frame];
+  $('#sem').src = f.img; $('#semcap').textContent = f.caption; $('#semfile').textContent = f.file;
+  const th = $('#thumbs'); th.innerHTML = '';
+  b.frames.forEach((fr, i) => { const el = document.createElement('button'); el.textContent = fr.file; el.setAttribute('aria-pressed', String(i === frame)); el.onclick = () => { frame = i; drawSEM(); }; th.appendChild(el); });
+}
+function drawNums() {
+  const b = blocks[sel], P = D.profiles[String(b.width_model)];
+  $('#nums').innerHTML = [
+    ['predicted CD', `${P.mid_cd_range[0].toFixed(0)}–${P.mid_cd_range[1].toFixed(0)} nm`, 'mid-height, over the ion energy/angle interval', ''],
+    ['measured CD', `${b.cd_meas[0].toFixed(0)} nm`, `range ${b.cd_meas[1].toFixed(0)}–${b.cd_meas[2].toFixed(0)} across frames`, 'm'],
+    ['predicted height', `${P.top_h.toFixed(0)} nm`, 'flat top; Cr cap consumed', ''],
+    ['measured height', '250–550 nm', 'from tilt geometry, block-wide', 'm'],
+    ['predicted trench', `${P.depth_range[0].toFixed(0)}–${P.depth_range[1].toFixed(0)} nm`, 'needs your cross-section', ''],
+    ['measured pitch', `${b.pitch_meas.toFixed(0)} nm`, 'design 350 nm', 'm'],
+    ['your SEM shows', b.loss, '', 'm'],
+  ].map(([k, v, s, m]) => `<div class="num"><b class="${m}">${v}</b><small>${k}${s ? ' · ' + s : ''}</small></div>`).join('');
+  $('#rates').innerHTML = `<span>TiO₂ rate <b>${D.rates_nm_min[0].toFixed(1)}–${D.rates_nm_min[1].toFixed(1)} nm/min</b></span><span>Cr rate <b>${(D.rates_nm_min[0]/D.selectivity[1]).toFixed(1)}–${(D.rates_nm_min[1]/D.selectivity[0]).toFixed(1)} nm/min</b></span><span>cap gone at <b>${(45/(D.rates_nm_min[1]/D.selectivity[0])).toFixed(1)}–${(45/(D.rates_nm_min[0]/D.selectivity[1])).toFixed(1)} min</b> of 20</span>`;
+  document.querySelectorAll('#blocks button').forEach((el, i) => el.setAttribute('aria-pressed', String(i === sel)));
+}
+// ---------- board chart & table ----------
+function drawBoard() {
+  const svg = $('#chart'); const NS = 'http://www.w3.org/2000/svg'; svg.innerHTML = '';
+  const el = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; svg.appendChild(e); return e; };
+  const L = 60, R = 880, T = 20, B = 220, lo = 150, hi = 260;
+  const X = i => L + (R - L) * (i + 0.5) / blocks.length, Y = v => B - (B - T) * (v - lo) / (hi - lo);
+  el('rect', { x: L, y: T, width: R - L, height: B - T, fill: 'none', stroke: '#1e2a42' });
+  [160, 200, 240].forEach(v => { el('line', { x1: L, x2: R, y1: Y(v), y2: Y(v), stroke: '#1e2a42' }); el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', fill: '#5b6b85', 'font-size': 11 }, v + ' nm'); });
+  blocks.forEach((b, i) => {
+    const P = D.profiles[String(b.width_model)];
+    el('line', { x1: X(i), x2: X(i), y1: Y(P.mid_cd_range[0]), y2: Y(P.mid_cd_range[1]), stroke: '#2dd4bf', 'stroke-width': 8, opacity: .55 });
+    el('line', { x1: X(i), x2: X(i), y1: Y(b.cd_meas[1]), y2: Y(b.cd_meas[2]), stroke: '#e8ecf4', 'stroke-width': 1.5 });
+    el('circle', { cx: X(i), cy: Y(b.cd_meas[0]), r: 5, fill: '#e8ecf4' });
+    el('text', { x: X(i), y: B + 18, 'text-anchor': 'middle', fill: '#8fa0b8', 'font-size': 12 }, 'block ' + b.dose);
+    el('rect', { x: X(i) - 22, y: B + 26, width: 44, height: 6, rx: 3, fill: lossClass(b.loss) === 't-ok' ? '#2dd4bf' : lossClass(b.loss) === 't-part' ? '#f5b04a' : '#e26ad0' });
+  });
+  el('text', { x: L + 6, y: T + 16, fill: '#2dd4bf', 'font-size': 11 }, '■ predicted CD interval (mapped design width)');
+  el('text', { x: L + 300, y: T + 16, fill: '#e8ecf4', 'font-size': 11 }, '● measured CD (bar = frame spread)   bar below: intact / partial / loss');
+  $('#rows').innerHTML = blocks.map(b => { const P = D.profiles[String(b.width_model)]; return `<tr><td>${b.dose}</td><td class="n">${b.cd_meas[0].toFixed(0)} nm</td><td class="n">${P.mid_cd_range[0].toFixed(0)}–${P.mid_cd_range[1].toFixed(0)} nm (w${b.width_model})</td><td class="n">${P.top_h.toFixed(0)} nm</td><td><span class="tag ${lossClass(b.loss)}">${b.loss}</span></td></tr>`; }).join('');
+}
+function render() { drawMesh(); drawSEM(); drawNums(); }
+// ---------- interaction ----------
+let drag = false, last = null;
+canvas.addEventListener('mousedown', e => { drag = true; last = [e.clientX, e.clientY]; canvas.style.cursor = 'grabbing'; });
+window.addEventListener('mouseup', () => { drag = false; canvas.style.cursor = 'grab'; });
+canvas.addEventListener('mousemove', e => { if (!drag) return; yaw += (e.clientX - last[0]) * .008; pitch = Math.max(.2, Math.min(1.45, pitch + (e.clientY - last[1]) * .006)); last = [e.clientX, e.clientY]; drawMesh(); });
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(.5, Math.min(2.5, zoom * (e.deltaY < 0 ? 1.08 : .93))); drawMesh(); }, { passive: false });
+$('#time').addEventListener('input', e => { tmin = +e.target.value; $('#timev').textContent = tmin.toFixed(1) + ' min'; drawMesh(); });
+$('#play').addEventListener('click', () => { playing = !playing; $('#play').textContent = playing ? '⏸ pause' : '▶ replay'; if (timer) clearInterval(timer); if (playing) { if (tmin >= 19.9) tmin = 0; timer = setInterval(() => { tmin = Math.min(20, tmin + .15); $('#time').value = tmin; $('#timev').textContent = tmin.toFixed(1) + ' min'; yaw += .003; drawMesh(); if (tmin >= 20) { playing = false; $('#play').textContent = '▶ replay'; clearInterval(timer); } }, 60); } });
+drawBoard(); render();
+})();
+</script>
