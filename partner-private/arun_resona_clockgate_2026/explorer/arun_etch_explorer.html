@@ -145,6 +145,15 @@
     is projected through its 30&nbsp;µm mask with deterministic ion and radical transport, then coupled
     to the Belen SF₆/O₂ silicon surface equations. Everything measured is fixed; everything unmeasured
     is a slider you can move.</p>
+    <div class="ape-explain" style="margin-top:.6rem;border-color:color-mix(in srgb,var(--ape-teal) 40%,var(--ape-line))">
+      <h3 style="color:var(--ape-teal)">TL;DR</h3>
+      <ul>
+        <li><b>Your 30 µm printed mask is a radical filter, not an ion filter.</b> Through the exact clock-gate layout, ions arrive ~92% intact; thermal radicals only ~7% (direct line of sight). Every deep, enclosed part of the pattern is fluorine-starved.</li>
+        <li><b>So the etch depth is set by how much F and O survive bouncing off your polymer walls</b> — which nobody has measured. Everything else in this page is computed from your geometry and published chemistry; that one quantity is the amber slider.</li>
+        <li><b>Outcome at the central scenario:</b> ~2.8 µm mean depth with a 2.5–3.0 µm spread across the layout, shallowest in the radical-starved zones. A conditional interval, not a certified forecast of your tool.</li>
+        <li><b>What we need from you to make it a forecast:</b> (1) one blanket Si etch on your tool with the same recipe, (2) the achieved DC self-bias, (3) pre/post polymer mask height. One sacrificial run covers all three.</li>
+      </ul>
+    </div>
     <div class="ape-pipe" aria-label="Computation pipeline">
       <div class="step"><b>Exact GDS footprint</b><span>10 polygons · 98.8 × 62.8 µm · 2.6 µm min opening</span></div>
       <div class="arr">▸</div>

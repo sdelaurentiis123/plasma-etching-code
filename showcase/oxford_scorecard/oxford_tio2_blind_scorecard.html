@@ -41,7 +41,16 @@ footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);padding
   <div class="kicker">petch · Oxford PlasmaPro NPG80 · TiO₂ pillar etch</div>
   <h1>Blind prediction vs. your SEMs</h1>
   <p><strong>Recipe:</strong> 55/5/1 sccm CHF₃/SF₆/O₂ · 30 mTorr · 150 W forward · 20 °C · 20 min, on 700 nm ALD TiO₂ under a 45 nm Cr mask, square-pillar dose series. We froze the prediction on 31 Aug, then opened your 80 frames of 17 Aug on 1 Sep. Nothing below was tuned to the images.</p>
-  <div class="badges"><span class="badge ok">Prediction frozen 31 Aug</span><span class="badge ok">SEMs opened 1 Sep</span><span class="badge">No fit to target</span><span class="badge warn">Depth not yet scorable</span></div>
+  <div class="badges"><span class="badge ok">Prediction frozen 31 Aug</span><span class="badge ok">SEMs opened 1 Sep</span><span class="badge">No fit to target</span><span class="badge warn">Trench depth needs a cross-section</span></div>
+  <div class="panel" style="margin-top:1.1rem;border-color:color-mix(in srgb,var(--teal) 40%,var(--line))">
+    <h3 style="color:var(--teal)">TL;DR</h3>
+    <ul style="margin:.3rem 0 0">
+      <li><b>We predicted, before seeing any image, that your 45 nm Cr cap would run out during the 20-minute etch and the pillar tops would be attacked, in spatial zones.</b> Your SEMs show exactly that: sharp-bounded zones of pillars chewed to stubs next to intact zones, and even the survivors are ~0.25–0.55 µm tall against a 0.70 µm film.</li>
+      <li><b>We predicted the pillars would not topple at rinse.</b> Zero fallen pillars in 80 frames — the loss is etching, not mechanics.</li>
+      <li><b>We over-called the severity:</b> we said every block would lose its cap; five of nine survived. Your process sits inside our interval, on the surviving side — a few nm/min of Cr rate decides it, and that number came from other labs' tools, not yours.</li>
+      <li><b>Three things from you close it:</b> one cross-section, the dose→CD map (which block is which dose), and the DC self-bias reading. Details in §4.</li>
+    </ul>
+  </div>
 </header>
 
 <section>
