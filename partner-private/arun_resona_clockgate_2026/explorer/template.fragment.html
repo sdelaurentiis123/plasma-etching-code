@@ -64,6 +64,12 @@
 #arun-process-explorer .ape-measure{background:var(--ape-panel);border:1px solid var(--ape-line);border-radius:10px;padding:.6rem .85rem;min-width:0}
 #arun-process-explorer .ape-measure strong{display:block;font:600 1.25rem/1.3 var(--ape-mono);color:var(--ape-teal);white-space:nowrap}
 #arun-process-explorer .ape-measure span{display:block;font-size:.74rem;color:var(--ape-dim);line-height:1.35}
+#arun-process-explorer .ape-explain{margin-top:1rem;background:var(--ape-panel);border:1px solid var(--ape-line);border-radius:12px;padding:1rem 1.2rem}
+#arun-process-explorer .ape-explain ul{margin:.5rem 0 0;padding-left:1.1rem;color:var(--ape-muted);font-size:.9rem;line-height:1.55}
+#arun-process-explorer .ape-explain li{margin:.35rem 0}
+#arun-process-explorer .ape-explain b{color:var(--ape-ink);font-weight:650}
+#arun-process-explorer .ape-outcome{margin:.8rem 0 0;padding:.6rem .9rem;border-left:3px solid var(--ape-teal);background:var(--ape-panel2);border-radius:0 8px 8px 0;font-size:.9rem;color:var(--ape-muted)}
+#arun-process-explorer .ape-outcome span{font-family:var(--ape-mono);color:var(--ape-teal)}
 /* control panel */
 #arun-process-explorer .ape-parameters{display:grid;gap:1rem;background:var(--ape-panel);border:1px solid var(--ape-line);border-radius:12px;padding:1rem 1.1rem}
 #arun-process-explorer .ape-group{display:grid;gap:.55rem;padding-top:.8rem;border-top:1px solid var(--ape-line)}
@@ -184,6 +190,17 @@
         <div class="ape-measure" role="listitem"><strong id="ape-ion-stat">—</strong><span>direct ion throughput</span></div>
         <div class="ape-measure" role="listitem"><strong id="ape-mask-stat">—</strong><span>polymer loss at 15:1</span></div>
       </div>
+      <div class="ape-explain">
+        <h3>What you are looking at</h3>
+        <ul>
+          <li><b>The mask is Arun&rsquo;s exact printed clock-gate layout</b> &mdash; all ten polygons, 30&nbsp;µm tall, sitting on a thin silicon film. Nothing is redrawn or idealised.</li>
+          <li><b>Ions come straight down and mostly clear the mask</b>: about <span id="ape-x-ion">92%</span> of the beam reaches the floor at 1.5&deg; spread.</li>
+          <li><b>Thermal radicals come from every direction and are mostly blocked</b>: only about <span id="ape-x-neu">7%</span> reach the floor directly. The deep mask is a <em>radical filter</em>, not an ion filter &mdash; that is the central finding.</li>
+          <li><b>The depth pattern is chemistry, not a fit.</b> Each point&rsquo;s local ion, F and O fluxes feed the coupled Belen SF₆/O₂ silicon equations; the open-feature rate is pinned to Miao&rsquo;s independently measured 3.5&ndash;3.9&nbsp;µm at two minutes.</li>
+          <li><b>One thing is unmeasured</b>: how much F and O survive bouncing off the polymer walls. That is the amber slider, and it is what moves the depth interval. A single blanket-etch measurement on Arun&rsquo;s tool pins it.</li>
+        </ul>
+        <p class="ape-outcome"><b>Outcome at the central scenario:</b> the layout etches to about <span id="ape-x-mean">2.80</span>&nbsp;µm mean depth with a <span id="ape-x-lo">2.53</span>&ndash;<span id="ape-x-hi">2.95</span>&nbsp;µm spread across the pattern; the radical-starved corners and narrow tracks etch least.</p>
+      </div>
     </div>
 
     <aside class="ape-parameters">
@@ -249,7 +266,7 @@
   const sigmas=DATA.transport.ion.component_sigma_deg,ionMaps=Object.fromEntries(sigmas.map(s=>[s,decode(DATA.transport.ion.transmission_maps[String(s)])]));
   const canvas=$('#ape-map'),ctx=canvas.getContext('2d'),tip=$('#ape-tooltip');
   const controls={sigma:$('#ape-sigma'),energy:$('#ape-energy'),fr:$('#ape-fr'),or:$('#ape-or'),time:$('#ape-time'),cut:$('#ape-cut')};
-  let mode='depth',view='2d',yaw=0.72,pitch=0.95,zoom=1.0;
+  let mode='depth',view='2d',yaw=0.62,pitch=1.0,zoom=1.0;
   const recipeCopy={
     fidelity:{note:'Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors open-feature depth; it does not identify Arun’s etcher boundary or printed-polymer wall return.',time:2,depth:t=>t<=2?1.85*t:3.7+(10.6-3.7)*(t-2)/8,profile:true},
     resolution:{note:'Wu resolved approximately 20 nm trenches near aspect ratio 8. The source is a resolution/passivation bound, not an absolute-depth anchor for this layout.',time:2,depth:()=>NaN,profile:false},
@@ -275,48 +292,72 @@
   const PAL={stops:[[20,36,63],[31,138,140],[45,212,191],[245,176,74]],mask:[24,38,67],line:[91,107,133],cut:[232,236,244]};
   const mix=(a,b,f)=>a.map((v,k)=>Math.round(v*(1-f)+b[k]*f));
   function color(t){t=clamp(0,1,t);const stops=PAL.stops,p=t*(stops.length-1),i=Math.min(stops.length-2,Math.floor(p)),f=p-i;return mix(stops[i],stops[i+1],f)}
-  // --- self-contained 3-D relief renderer (no libraries) ---
-  const DS=2,nx3=Math.floor(nx/DS),ny3=Math.floor(ny/DS),CAP_UM=1.5;
+  // --- self-contained 3-D thin-film renderer (no libraries) ---
+  // A smooth heightfield of the silicon surface (node heights averaged from
+  // cells, shaded by surface normal) sits in a slab; the printed mask is a thin
+  // translucent cap on top; etched openings sink into the slab as time runs.
+  const DS=2,nx3=Math.floor(nx/DS),ny3=Math.floor(ny/DS),CAP_UM=1.0,SLAB_UM=1.2;
+  const L3=[-0.45,-0.35,0.82];{const n=Math.hypot(...L3);L3[0]/=n;L3[1]/=n;L3[2]/=n}
   function draw3D(state){
     const field=mode==='ion'?state.ion:mode==='neutral'?neutral:state.depth;
     const stats=quantiles(field),max=mode==='depth'?Math.max(state.anchor||0,stats.max,1e-9):1;
-    const H=new Float32Array(nx3*ny3),T=new Float32Array(nx3*ny3),M=new Uint8Array(nx3*ny3);
+    // cell arrays
+    const Hc_=new Float32Array(nx3*ny3),T=new Float32Array(nx3*ny3),M=new Uint8Array(nx3*ny3);
     for(let X=0;X<nx3;X++)for(let Y=0;Y<ny3;Y++){
       let hSum=0,tSum=0,open=0;
       for(let a=0;a<DS;a++)for(let b=0;b<DS;b++){const i=index(Math.min(nx-1,X*DS+a),Math.min(ny-1,Y*DS+b));
         if(opening[i]>.5){open++;tSum+=Number.isFinite(field[i])?field[i]:0;hSum+=(state.profile&&Number.isFinite(state.depth[i]))?state.depth[i]:0}}
       const j=X*ny3+Y;
-      if(open<DS*DS/2){M[j]=1;H[j]=-CAP_UM;T[j]=0}
-      else{M[j]=0;H[j]=hSum/Math.max(open,1);T[j]=tSum/Math.max(open,1)}
+      if(open<DS*DS/2){M[j]=1;Hc_[j]=0;T[j]=0}else{M[j]=0;Hc_[j]=-hSum/Math.max(open,1);T[j]=tSum/Math.max(open,1)}
     }
+    // node heights (silicon surface): average of surrounding cells -> smooth
+    const NX=nx3+1,NY=ny3+1,HN=new Float32Array(NX*NY);
+    for(let X=0;X<NX;X++)for(let Y=0;Y<NY;Y++){let s=0,n=0;
+      for(let a=-1;a<=0;a++)for(let b=-1;b<=0;b++){const cx=X+a,cy=Y+b;if(cx<0||cy<0||cx>=nx3||cy>=ny3)continue;s+=Hc_[cx*ny3+cy];n++}
+      HN[X*NY+Y]=n?s/n:0}
     const maxH=state.profile?Math.max(quantiles(state.depth).max,.5):1;
     const W=canvas.width,Hc=canvas.height,cx3=nx3/2,cy3=ny3/2;
-    const sHoriz=zoom*Math.min(W/(nx3*1.45),Hc/(ny3*1.15)),zScale=sHoriz/(DS*dx)*2.2;
+    const sHoriz=zoom*Math.min(W/(nx3*1.42),Hc/(ny3*1.05)),zScale=sHoriz/(DS*dx)*2.0;
     const ca=Math.cos(yaw),sa=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
-    const proj=(X,Y,z)=>{const wx=(X-cx3)*sHoriz,wy=(Y-cy3)*sHoriz,xr=wx*ca-wy*sa,yr=wx*sa+wy*ca;return [W/2+xr,Hc*.46+yr*cp-z*zScale*sp]};
-    // painter order: farthest rotated-y first
+    const proj=(X,Y,z)=>{const wx=(X-cx3)*sHoriz,wy=(Y-cy3)*sHoriz,xr=wx*ca-wy*sa,yr=wx*sa+wy*ca;return [W/2+xr,Hc*.47+yr*cp-z*zScale*sp]};
     const order=new Array(nx3*ny3);for(let j=0;j<order.length;j++)order[j]=j;
-    const key=j=>{const X=Math.floor(j/ny3),Y=j%ny3;return (X-cx3)*sa+(Y-cy3)*ca};
+    const key=j=>{const X=Math.floor(j/ny3)+.5,Y=j%ny3+.5;return (X-cx3)*sa+(Y-cy3)*ca};
     order.sort((a,b)=>key(a)-key(b));
     ctx.fillStyle='#0e1626';ctx.fillRect(0,0,W,Hc);
-    const shade=(c,f)=>`rgb(${c.map(v=>Math.round(v*f)).join(',')})`;
-    const quad=(p1,p2,p3,p4,fill)=>{ctx.fillStyle=fill;ctx.strokeStyle=fill;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.lineTo(p3[0],p3[1]);ctx.lineTo(p4[0],p4[1]);ctx.closePath();ctx.fill();ctx.stroke()};
-    const fx=sa>=0?1:-1,fy=ca>=0?1:-1;   // viewer-facing column sides
-    const ztOf=j=>M[j]?CAP_UM:-H[j];
-    const zAt=(X,Y)=>{if(X<0||Y<0||X>=nx3||Y>=ny3)return -maxH-.1;return ztOf(X*ny3+Y)};
+    const rgb=(c,f)=>`rgb(${c.map(v=>Math.round(Math.min(255,v*f))).join(',')})`;
+    const poly=(pts,fill,alpha)=>{ctx.globalAlpha=alpha===undefined?1:alpha;ctx.fillStyle=fill;ctx.strokeStyle=fill;ctx.lineWidth=.7;ctx.beginPath();pts.forEach((q,k)=>k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fill();ctx.stroke();ctx.globalAlpha=1};
+    // lighting: normal from the two diagonals of the quad in world units
+    const hx=DS*dx,hz=1.0; // world: cell = hx µm, z in µm
+    const lightOf=(z00,z10,z11,z01)=>{const ax=hx,ay=hx,az=(z11-z00)*hz,bx=-hx,by=hx,bz=(z01-z10)*hz;let nx_=ay*bz-az*by,ny_=az*bx-ax*bz,nz_=ax*by-ay*bx;const n=Math.hypot(nx_,ny_,nz_)||1;nx_/=n;ny_/=n;nz_/=n;const d=nx_*L3[0]+ny_*L3[1]+nz_*L3[2];return .6+.4*Math.max(0,d)};
+    const slabZ=-(maxH+SLAB_UM);
+    const fx=sa>=0?1:-1,fy=ca>=0?1:-1;
+    // slab back faces first (the two faces away from the viewer are hidden; draw side walls that face the viewer last)
+    // silicon surface, painter order
     for(const j of order){
       const X=Math.floor(j/ny3),Y=j%ny3;
-      const top=M[j]?[40,60,98]:color(T[j]/max);
-      const zt=ztOf(j);                   // mask cap rises above 0; etch carves down
-      const c00=proj(X,Y,zt),c10=proj(X+1,Y,zt),c11=proj(X+1,Y+1,zt),c01=proj(X,Y+1,zt);
-      // draw only exposed walls: down to the viewer-side neighbour's top
-      const zx=zAt(X+fx,Y),zy=zAt(X,Y+fy);
-      if(zx<zt){const b1=proj(X+(fx>0?1:0),Y,zx),b2=proj(X+(fx>0?1:0),Y+1,zx);
-        if(fx>0)quad(c10,c11,b2,b1,shade(top,.45));else quad(c00,c01,b2,b1,shade(top,.45))}
-      if(zy<zt){const b1=proj(X,Y+(fy>0?1:0),zy),b2=proj(X+1,Y+(fy>0?1:0),zy);
-        if(fy>0)quad(c01,c11,b2,b1,shade(top,.62));else quad(c00,c10,b2,b1,shade(top,.62))}
-      quad(c00,c10,c11,c01,shade(top,M[j]?1:.85+.3*(zt<0?Math.min(1,-zt/maxH):0)));
-      if(!M[j]&&zt<-.02){ctx.strokeStyle='rgba(5,10,20,.25)';ctx.lineWidth=.5;ctx.strokeRect?0:0;ctx.beginPath();ctx.moveTo(c00[0],c00[1]);ctx.lineTo(c10[0],c10[1]);ctx.lineTo(c11[0],c11[1]);ctx.lineTo(c01[0],c01[1]);ctx.closePath();ctx.stroke()}
+      const z00=HN[X*NY+Y],z10=HN[(X+1)*NY+Y],z11=HN[(X+1)*NY+Y+1],z01=HN[X*NY+Y+1];
+      const base=M[j]?[58,84,130]:color(T[j]/max);
+      const lit=lightOf(z00,z10,z11,z01)*(M[j]?.9:1);
+      poly([proj(X,Y,z00),proj(X+1,Y,z10),proj(X+1,Y+1,z11),proj(X,Y+1,z01)],rgb(base,lit));
+    }
+    // slab cut faces (viewer-facing): bottom flat, top follows the surface profile along the edge
+    const edgeFace=(pts,fill)=>poly(pts,fill);
+    {
+      const Xe=fx>0?nx3:0;const pts=[];for(let Y=0;Y<=ny3;Y++)pts.push(proj(Xe,Y,HN[Xe*NY+Y]));
+      pts.push(proj(Xe,ny3,slabZ));pts.push(proj(Xe,0,slabZ));
+      edgeFace(pts,'rgb(26,42,72)');
+      const Ye=fy>0?ny3:0;const q=[];for(let X=0;X<=nx3;X++)q.push(proj(X,Ye,HN[X*NY+Ye]));
+      q.push(proj(nx3,Ye,slabZ));q.push(proj(0,Ye,slabZ));
+      edgeFace(q,'rgb(20,34,60)');
+    }
+    // thin mask cap: translucent plate over mask cells, with short viewer-facing sides
+    const capTop=[128,168,240];
+    for(const j of order){
+      if(!M[j])continue;const X=Math.floor(j/ny3),Y=j%ny3;
+      const nxm=(X+fx>=0&&X+fx<nx3)?M[(X+fx)*ny3+Y]:0,nym=(Y+fy>=0&&Y+fy<ny3)?M[X*ny3+Y+fy]:0;
+      if(!nxm){const xe=X+(fx>0?1:0);poly([proj(xe,Y,CAP_UM),proj(xe,Y+1,CAP_UM),proj(xe,Y+1,0),proj(xe,Y,0)],rgb(capTop,.55),.85)}
+      if(!nym){const ye=Y+(fy>0?1:0);poly([proj(X,ye,CAP_UM),proj(X+1,ye,CAP_UM),proj(X+1,ye,0),proj(X,ye,0)],rgb(capTop,.7),.85)}
+      poly([proj(X,Y,CAP_UM),proj(X+1,Y,CAP_UM),proj(X+1,Y+1,CAP_UM),proj(X,Y+1,CAP_UM)],rgb(capTop,1),.72);
     }
     $('#ape-scale-lo').textContent='0';$('#ape-scale-hi').textContent=mode==='depth'?`${max.toFixed(1)} µm`:'100%';
   }
@@ -356,7 +397,7 @@
   Object.values(controls).forEach(el=>el.addEventListener('input',()=>{if(el===controls.cut)selectedY=+el.value;schedule()}));
   root.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));schedule()}));
   const hint=$('#ape-map-hint');
-  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));canvas.style.cursor=view==='3d'?'grab':'crosshair';hint.textContent=view==='3d'?'▶ Play etch time watches the carve · drag to orbit · scroll zooms · caps shown 1.5 µm (true 30) · vertical ×2.2':'click or drag on the field to move the cross-section';tip.style.display='none';schedule()}));
+  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.view;root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));canvas.style.cursor=view==='3d'?'grab':'crosshair';hint.textContent=view==='3d'?'▶ Play etch time watches the carve · drag to orbit · scroll zooms · mask cap shown 1 µm thin (true 30 µm) · vertical ×2':'click or drag on the field to move the cross-section';tip.style.display='none';schedule()}));
   root.querySelectorAll('[data-recipe]').forEach(button=>button.addEventListener('click',()=>{recipe=button.dataset.recipe;root.querySelectorAll('[data-recipe]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));controls.time.value=recipeCopy[recipe].time;$('#ape-recipe-note').textContent=recipeCopy[recipe].note;schedule()}));
   $('#ape-play').addEventListener('click',()=>{playing=!playing;$('#ape-play').textContent=playing?'⏸ Pause':'▶ Play etch time';if(playTimer)clearInterval(playTimer);if(playing){if(+controls.time.value>=+controls.time.max-.2)controls.time.value=controls.time.min;playTimer=setInterval(()=>{let t=+controls.time.value+.08;if(t>+controls.time.max)t=+controls.time.min;controls.time.value=t.toFixed(2);if(view==='3d')yaw+=.004;schedule()},80)}});
   const moveCut=event=>{const rect=canvas.getBoundingClientRect();selectedY=clamp(0,ny-1,Math.floor((1-(event.clientY-rect.top)/rect.height)*ny));controls.cut.value=selectedY;schedule()};
@@ -372,6 +413,12 @@
     if(event.buttons===1)moveCut(event);
     if(!last)return;const rect=canvas.getBoundingClientRect(),x=clamp(0,nx-1,Math.floor((event.clientX-rect.left)/rect.width*nx)),y=clamp(0,ny-1,Math.floor((1-(event.clientY-rect.top)/rect.height)*ny)),i=index(x,y);tip.style.display='block';tip.style.left=`${Math.min(event.clientX-rect.left+12,rect.width-190)}px`;tip.style.top=`${event.clientY-rect.top+12}px`;tip.innerHTML=opening[i]<.5?`x ${(x*dx).toFixed(1)}, y ${(y*dx).toFixed(1)} µm<br><strong>printed mask</strong>`:`x ${(x*dx).toFixed(1)}, y ${(y*dx).toFixed(1)} µm<br>ion ${(100*last.ion[i]).toFixed(1)}% · radical ${(100*neutral[i]).toFixed(1)}%<br>${last.profile?`depth <strong>${last.depth[i].toFixed(2)} µm</strong>`:'absolute depth refused'}`});
   canvas.addEventListener('mouseleave',()=>tip.style.display='none');
+  {const cs=DATA.surface_transfer.central_scenario_for_ui_only.depth_statistics_over_opening_um||{};
+   $('#ape-x-ion').textContent=(100*DATA.transport.ion.statistics_over_opening['1.5'].mean).toFixed(0)+'%';
+   $('#ape-x-neu').textContent=(100*DATA.transport.neutral_direct.statistics_over_opening.mean).toFixed(0)+'%';
+   if(cs.mean!==undefined){$('#ape-x-mean').textContent=cs.mean.toFixed(2)}
+   if(cs.p05!==undefined){$('#ape-x-lo').textContent=cs.p05.toFixed(2)}
+   if(cs.p95!==undefined){$('#ape-x-hi').textContent=cs.p95.toFixed(2)}}
   const chk=DATA.transport.numerical_checks.ion_sigma_1p5_deg;$('#ape-computed-evidence').textContent=`Deterministic direct characteristics through the exact periodic mask. At σ=1.5°, mean ion transmission is ${(100*DATA.transport.ion.statistics_over_opening['1.5'].mean).toFixed(1)}%; direct cosine-neutral transmission is ${(100*DATA.transport.neutral_direct.statistics_over_opening.mean).toFixed(1)}%. The 0.4→0.2 µm mean-grid change is ${(100*chk.absolute_dx_0p4_to_0p2_mean_change_q5).toFixed(1)} percentage points.`;
   update();
 })();
