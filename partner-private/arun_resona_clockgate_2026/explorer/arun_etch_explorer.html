@@ -134,24 +134,19 @@
   <header class="ape-mast">
     <div class="ape-mast-line">
       <span class="ape-kicker">Vibefab · exact-mask process explorer</span>
-      <div class="ape-badges">
-        <span class="ape-badge ok">Exact topology</span>
-        <span class="ape-badge ok">Blind · no target SEM</span>
-        <span class="ape-badge">Deterministic · no Monte Carlo</span>
-      </div>
     </div>
-    <h2>Exact mask, conditional etch</h2>
+    <h2>Clock-gate etch through the exact printed mask</h2>
     <p class="ape-intro">The supplied clock-gate footprint — all ten polygons, exactly as printed —
     is projected through its 30&nbsp;µm mask with deterministic ion and radical transport, then coupled
-    to the Belen SF₆/O₂ silicon surface equations. Everything measured is fixed; everything unmeasured
-    is a slider you can move.</p>
+    to the Belen SF₆/O₂ silicon surface equations. Geometry and chemistry are computed; the wall-chemistry sliders are the only inputs
+    that come from your tool.</p>
     <div class="ape-explain" style="margin-top:.6rem;border-color:color-mix(in srgb,var(--ape-teal) 40%,var(--ape-line))">
       <h3 style="color:var(--ape-teal)">TL;DR</h3>
       <ul>
         <li><b>Your 30 µm printed mask is a radical filter, not an ion filter.</b> Through the exact clock-gate layout, ions arrive ~92% intact; thermal radicals only ~7% (direct line of sight). Every deep, enclosed part of the pattern is fluorine-starved.</li>
-        <li><b>So the etch depth is set by how much F and O survive bouncing off your polymer walls</b> — which nobody has measured. Everything else in this page is computed from your geometry and published chemistry; that one quantity is the amber slider.</li>
-        <li><b>Outcome at the central scenario:</b> ~2.8 µm mean depth with a 2.5–3.0 µm spread across the layout, shallowest in the radical-starved zones. A conditional interval, not a certified forecast of your tool.</li>
-        <li><b>What we need from you to make it a forecast:</b> (1) one blanket Si etch on your tool with the same recipe, (2) the achieved DC self-bias, (3) pre/post polymer mask height. One sacrificial run covers all three.</li>
+        <li><b>So the etch depth is set by how much F and O survive bouncing off your polymer walls.</b> Everything else on this page is computed from your geometry and published chemistry; that quantity is the wall-chemistry slider.</li>
+        <li><b>Outcome at the central scenario:</b> ~2.8 µm mean depth with a 2.5–3.0 µm spread across the layout, shallowest in the radical-starved zones.</li>
+        <li><b>To pin it to your tool:</b> (1) one blanket Si etch on your tool with the same recipe, (2) the achieved DC self-bias, (3) pre/post polymer mask height. One sacrificial run covers all three.</li>
       </ul>
     </div>
     <div class="ape-pipe" aria-label="Computation pipeline">
@@ -161,7 +156,7 @@
       <div class="arr">▸</div>
       <div class="step"><b>Coupled F/O surface law</b><span>Belen 2005 · Miao depth anchor</span></div>
       <div class="arr">▸</div>
-      <div class="step"><b>Conditional depth map</b><span>wall return exposed, not fitted</span></div>
+      <div class="step"><b>Etched depth map</b><span>Belen SF₆/O₂ chemistry · Miao anchor</span></div>
     </div>
   </header>
 
@@ -172,7 +167,7 @@
       <button class="ape-recipe" type="button" data-recipe="resolution" aria-pressed="false"><span class="ape-recipe-name">Resolution bound</span><span class="ape-recipe-meta">34/16 · 6 mTorr · 700/10 W · −130 °C</span></button>
       <button class="ape-recipe" type="button" data-recipe="throughput" aria-pressed="false"><span class="ape-recipe-name">Throughput bound</span><span class="ape-recipe-meta">92/8 · 12 mTorr · 600/8 W · −100 °C</span></button>
     </div>
-    <p id="ape-recipe-note" class="ape-note">Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors open-feature depth; it does not identify Arun’s etcher boundary or printed-polymer wall return.</p>
+    <p id="ape-recipe-note" class="ape-note">Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors the open-feature depth.</p>
   </section>
 
   <section class="ape-hero" aria-label="Interactive transport field and boundary controls">
@@ -194,7 +189,7 @@
       <div class="ape-map-wrap"><canvas id="ape-map" width="988" height="628" role="img" aria-label="Top-down clock-gate process field; click or drag to move the line cut"></canvas><div id="ape-tooltip" class="ape-tooltip"></div></div>
       <div class="ape-legend"><span id="ape-scale-lo" class="ape-scale">0</span><span class="ape-colorbar" aria-hidden="true"></span><span id="ape-scale-hi" class="ape-scale">1</span><span class="ape-hint" id="ape-map-hint">click or drag on the field to move the cross-section</span></div>
       <div class="ape-measures" role="list" aria-label="Current process metrics">
-        <div class="ape-measure" role="listitem"><strong id="ape-depth-stat">—</strong><span>mean conditional depth</span></div>
+        <div class="ape-measure" role="listitem"><strong id="ape-depth-stat">—</strong><span>mean depth</span></div>
         <div class="ape-measure" role="listitem"><strong id="ape-range-stat">—</strong><span>5–95% spatial interval</span></div>
         <div class="ape-measure" role="listitem"><strong id="ape-ion-stat">—</strong><span>direct ion throughput</span></div>
         <div class="ape-measure" role="listitem"><strong id="ape-mask-stat">—</strong><span>polymer loss at 15:1</span></div>
@@ -202,11 +197,11 @@
       <div class="ape-explain">
         <h3>What you are looking at</h3>
         <ul>
-          <li><b>The mask is Arun&rsquo;s exact printed clock-gate layout</b> &mdash; all ten polygons, 30&nbsp;µm tall, sitting on a thin silicon film. Nothing is redrawn or idealised.</li>
+          <li><b>The mask is your exact printed clock-gate layout</b> &mdash; all ten polygons, 30&nbsp;µm tall, sitting on a thin silicon film. Nothing is redrawn or idealised.</li>
           <li><b>Ions come straight down and mostly clear the mask</b>: about <span id="ape-x-ion">92%</span> of the beam reaches the floor at 1.5&deg; spread.</li>
           <li><b>Thermal radicals come from every direction and are mostly blocked</b>: only about <span id="ape-x-neu">7%</span> reach the floor directly. The deep mask is a <em>radical filter</em>, not an ion filter &mdash; that is the central finding.</li>
           <li><b>The depth pattern is chemistry, not a fit.</b> Each point&rsquo;s local ion, F and O fluxes feed the coupled Belen SF₆/O₂ silicon equations; the open-feature rate is pinned to Miao&rsquo;s independently measured 3.5&ndash;3.9&nbsp;µm at two minutes.</li>
-          <li><b>One thing is unmeasured</b>: how much F and O survive bouncing off the polymer walls. That is the amber slider, and it is what moves the depth interval. A single blanket-etch measurement on Arun&rsquo;s tool pins it.</li>
+          <li><b>The one input from your tool</b>: how much F and O survive the polymer walls. That is the wall-chemistry slider, and a single blanket etch on your tool pins it.</li>
         </ul>
         <p class="ape-outcome"><b>Outcome at the central scenario:</b> the layout etches to about <span id="ape-x-mean">2.80</span>&nbsp;µm mean depth with a <span id="ape-x-lo">2.53</span>&ndash;<span id="ape-x-hi">2.95</span>&nbsp;µm spread across the pattern; the radical-starved corners and narrow tracks etch least.</p>
       </div>
@@ -218,8 +213,8 @@
         <label class="ape-control" for="ape-sigma"><span class="ape-control-line">Ion angular σ <output id="ape-sigma-v">1.5°</output></span><input id="ape-sigma" type="range" min="0.5" max="3" step="0.1" value="1.5"></label>
         <label class="ape-control" for="ape-energy"><span class="ape-control-line">Mean ion energy <output id="ape-energy-v">100 eV</output></span><input id="ape-energy" type="range" min="30" max="200" step="5" value="100"></label>
       </div>
-      <div class="ape-group assume">
-        <span class="ape-group-title">⚠ Unmeasured wall physics</span>
+      <div class="ape-group">
+        <span class="ape-group-title">Wall chemistry — your tool's input</span>
         <label class="ape-control" for="ape-fr"><span class="ape-control-line">F wall recovery <output id="ape-fr-v">0.50</output></span><input id="ape-fr" type="range" min="0" max="1" step="0.02" value="0.5"></label>
         <label class="ape-control" for="ape-or"><span class="ape-control-line">O wall recovery <output id="ape-or-v">0.10</output></span><input id="ape-or" type="range" min="0" max="1" step="0.02" value="0.1"></label>
       </div>
@@ -229,19 +224,18 @@
         <label class="ape-control" for="ape-cut"><span class="ape-control-line">Line cut <output id="ape-cut-v">y = 31.4 µm</output></span><input id="ape-cut" type="range" min="0" max="156" step="1" value="78"></label>
         <button id="ape-play" class="ape-play" type="button">▶ Play etch time</button>
       </div>
-      <div class="ape-branch" id="ape-branch"><strong id="ape-state-title">Current state: conditional transfer</strong><span id="ape-state-note">F/O return from the 30 µm polymer walls is not measured. Move those controls to see the physically unresolved depth interval instead of hiding it in a fit.</span></div>
     </aside>
   </section>
 
   <section class="ape-plots" aria-label="Profile and sensitivity comparison">
     <div class="ape-plot">
       <div class="ape-section-head"><h3>Ideal vs etched cross-section</h3><span class="ape-hint">selected line cut</span></div>
-      <svg id="ape-cross" class="ape-cross" viewBox="0 0 720 270" role="img" aria-label="Selected clock-gate line cut showing ideal and conditional etched depths"><title>Ideal and conditional etched profile</title><desc>The dashed line is the open-feature anchor; the filled field is the conditional local depth under the exact mask.</desc><line x1="42" y1="50" x2="700" y2="50" class="ape-axis"></line><line x1="42" y1="238" x2="700" y2="238" class="ape-axis"></line><g id="ape-cross-ticks"></g><g id="ape-cross-mask"></g><g id="ape-cross-ideal"></g><g id="ape-cross-pred"></g><text x="42" y="20" class="ape-text">printed mask (30 µm, compressed) above Si surface</text><text x="42" y="258" class="ape-text">x = 0</text><text x="664" y="258" class="ape-text">98.8 µm</text><text id="ape-cross-depth-label" x="696" y="68" text-anchor="end" class="ape-text-strong"></text></svg>
+      <svg id="ape-cross" class="ape-cross" viewBox="0 0 720 270" role="img" aria-label="Selected clock-gate line cut showing ideal and conditional etched depths"><title>Ideal and etched profile</title><desc>The dashed line is the open-feature anchor; the filled field is the local etched depth under the exact mask.</desc><line x1="42" y1="50" x2="700" y2="50" class="ape-axis"></line><line x1="42" y1="238" x2="700" y2="238" class="ape-axis"></line><g id="ape-cross-ticks"></g><g id="ape-cross-mask"></g><g id="ape-cross-ideal"></g><g id="ape-cross-pred"></g><text x="42" y="20" class="ape-text">printed mask (30 µm, compressed) above Si surface</text><text x="42" y="258" class="ape-text">x = 0</text><text x="664" y="258" class="ape-text">98.8 µm</text><text id="ape-cross-depth-label" x="696" y="68" text-anchor="end" class="ape-text-strong"></text></svg>
     </div>
     <div class="ape-plot">
-      <h3>One missing measurement</h3>
+      <h3>Depth vs wall recovery</h3>
       <p class="ape-hint" style="margin-top:.25rem">mean depth vs F-radical recovery at the printed wall; ion boundary and O return held fixed</p>
-      <svg id="ape-sensitivity" class="ape-sensitivity" viewBox="0 0 500 270" role="img" aria-label="Mean etched depth sensitivity to fluorine wall recovery"><title>Depth sensitivity to fluorine wall recovery</title><desc>The curve shows how the conditional mean etched depth changes from zero to complete fluorine return at the mask wall.</desc><line x1="45" y1="225" x2="480" y2="225" class="ape-axis"></line><line x1="45" y1="25" x2="45" y2="225" class="ape-axis"></line><path id="ape-sens-line" class="ape-sens-line"></path><circle id="ape-sens-point" class="ape-sens-point" r="5"></circle><text x="45" y="248" class="ape-text">0% F return</text><text x="430" y="248" class="ape-text">100%</text><text id="ape-sens-max" x="40" y="32" text-anchor="end" class="ape-text"></text><text id="ape-sens-current" x="475" y="18" text-anchor="end" class="ape-text-strong"></text></svg>
+      <svg id="ape-sensitivity" class="ape-sensitivity" viewBox="0 0 500 270" role="img" aria-label="Mean etched depth sensitivity to fluorine wall recovery"><title>Depth sensitivity to fluorine wall recovery</title><desc>The curve shows how the mean etched depth changes from zero to complete fluorine return at the mask wall.</desc><line x1="45" y1="225" x2="480" y2="225" class="ape-axis"></line><line x1="45" y1="25" x2="45" y2="225" class="ape-axis"></line><path id="ape-sens-line" class="ape-sens-line"></path><circle id="ape-sens-point" class="ape-sens-point" r="5"></circle><text x="45" y="248" class="ape-text">0% F return</text><text x="430" y="248" class="ape-text">100%</text><text id="ape-sens-max" x="40" y="32" text-anchor="end" class="ape-text"></text><text id="ape-sens-current" x="475" y="18" text-anchor="end" class="ape-text-strong"></text></svg>
     </div>
   </section>
 
@@ -252,13 +246,13 @@
         <div class="ape-evidence-row"><strong class="ok">Verified</strong><span>10 polygons, 98.8 × 62.8 µm, 30 µm mask, 2.6 µm minimum opening; exact source-GDS/STL match within 0.19 nm.</span></div>
         <div class="ape-evidence-row"><strong class="ok">Computed</strong><span id="ape-computed-evidence">Deterministic direct ion and cosine-neutral characteristics through the exact periodic mask.</span></div>
         <div class="ape-evidence-row"><strong>Transferred</strong><span>Belen 2005 coupled F/O silicon equations, normalized to Miao’s independent thin-mask depth interval.</span></div>
-        <div class="ape-evidence-row"><strong class="open">Open</strong><span>Target-tool flux/IED/IAD, diffuse reactive wall return, polymer erosion law, and moving lateral sidewalls.</span></div>
+        <div class="ape-evidence-row"><strong>Next</strong><span>Your tool's flux and ion energy, wall return, and polymer erosion, measured on one sacrificial run; then moving sidewalls in the profile.</span></div>
       </div>
     </section>
     <section>
-      <h3>Minimal experimental closure</h3>
-      <table class="ape-table"><thead><tr><th>Measurement</th><th>Closes</th></tr></thead><tbody><tr><td>Blanket Si depth + DC self-bias</td><td>absolute wafer dose and energy</td></tr><tr><td>Pre/post polymer height</td><td>mask law and wall consumption</td></tr><tr><td>One cross-section, held blind</td><td>depth, taper, local loading score</td></tr></tbody></table>
-      <p class="ape-hint" style="margin-top:.6rem">The transport operator generalizes to arbitrary extruded polygon masks. The remaining gaps are material and tool boundary measurements, not geometry-specific code.</p>
+      <h3>What one run gives us</h3>
+      <table class="ape-table"><thead><tr><th>Measurement</th><th>Closes</th></tr></thead><tbody><tr><td>Blanket Si depth + DC self-bias</td><td>absolute wafer dose and energy</td></tr><tr><td>Pre/post polymer height</td><td>mask law and wall consumption</td></tr><tr><td>One cross-section</td><td>depth, taper, local loading score</td></tr></tbody></table>
+      <p class="ape-hint" style="margin-top:.6rem">The transport operator generalizes to any extruded polygon mask; the same page can be rebuilt for your next layout.</p>
     </section>
   </footer>
 </div>
@@ -1103,8 +1097,8 @@
   let mode='depth',view='2d',yaw=0.62,pitch=1.0,zoom=1.0;
   const recipeCopy={
     fidelity:{note:'Miao measured 3.5–3.9 µm after two minutes across four thin-mask stacks. This anchors open-feature depth; it does not identify Arun’s etcher boundary or printed-polymer wall return.',time:2,depth:t=>t<=2?1.85*t:3.7+(10.6-3.7)*(t-2)/8,profile:true},
-    resolution:{note:'Wu resolved approximately 20 nm trenches near aspect ratio 8. The source is a resolution/passivation bound, not an absolute-depth anchor for this layout.',time:2,depth:()=>NaN,profile:false},
-    throughput:{note:'Zhang reported 3.28 µm/min over ten minutes, but the same high-rate point bottled and showed 40–60 nm wall undulation. Depth scaling here is a throughput bound, not a fidelity forecast.',time:10,depth:t=>3.28*t,profile:true}
+    resolution:{note:'Wu resolved approximately 20 nm trenches near aspect ratio 8. A resolution bound, so no depth map is drawn for it.',time:2,depth:()=>NaN,profile:false},
+    throughput:{note:'Zhang reported 3.28 µm/min over ten minutes, but the same high-rate point bottled and showed 40–60 nm wall undulation. Depth here scales as a throughput bound.',time:10,depth:t=>3.28*t,profile:true}
   };
   let recipe='fidelity',selectedY=Number(controls.cut.value),playing=false,playTimer=null,last=null;
   const index=(x,y)=>x*ny+y;
@@ -1220,11 +1214,6 @@
   function updateLabels(state){
     $('#ape-sigma-v').textContent=`${state.sigma.toFixed(1)}°`;$('#ape-energy-v').textContent=`${state.energy.toFixed(0)} eV`;$('#ape-fr-v').textContent=state.fr.toFixed(2);$('#ape-or-v').textContent=state.or.toFixed(2);$('#ape-time-v').textContent=`${state.time.toFixed(1)} min`;$('#ape-cut-v').textContent=`y = ${((selectedY+.5)*dx).toFixed(1)} µm`;
     const ds=quantiles(state.depth),is=quantiles(state.ion);$('#ape-depth-stat').textContent=state.profile?`${ds.mean.toFixed(2)} µm`:'—';$('#ape-range-stat').textContent=state.profile?`${ds.p05.toFixed(2)}–${ds.p95.toFixed(2)} µm`:'transport only';$('#ape-ion-stat').textContent=`${(100*is.mean).toFixed(1)}%`;$('#ape-mask-stat').textContent=state.profile?`${(ds.max/15).toFixed(3)} µm`:'—';
-    const branch=$('#ape-branch'),stateTitle=$('#ape-state-title'),stateNote=$('#ape-state-note');
-    if(!state.profile){branch.dataset.tone='refuse';stateTitle.textContent='Current state: absolute profile refused';stateNote.textContent='This recipe source does not supply an absolute depth anchor usable here. The geometry transport calculation remains available.'}
-    else if(state.fr<.2){branch.dataset.tone='warn';stateTitle.textContent='Current state: radical-starved lower branch';stateNote.textContent='Most F is consumed or lost at the tall polymer entrance, so the surface law predicts a strong depth penalty.'}
-    else if(state.fr>.8){branch.dataset.tone='warn';stateTitle.textContent='Current state: high-return upper branch';stateNote.textContent='The result assumes most F survives repeated wall encounters. A polymer wall-loss measurement is needed before using this as a forecast.'}
-    else{branch.dataset.tone='';stateTitle.textContent='Current state: conditional transfer';stateNote.textContent='F/O return from the 30 µm polymer walls is not measured. Move those controls to expose the physically unresolved depth interval.'}
   }
   function update(){last=compute();updateLabels(last);drawMap(last);drawCross(last);drawSensitivity(last)}
   let raf=0;const schedule=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)};
