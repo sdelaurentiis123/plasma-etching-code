@@ -1242,7 +1242,7 @@
    if(cs.mean!==undefined){$('#ape-x-mean').textContent=cs.mean.toFixed(2)}
    if(cs.p05!==undefined){$('#ape-x-lo').textContent=cs.p05.toFixed(2)}
    if(cs.p95!==undefined){$('#ape-x-hi').textContent=cs.p95.toFixed(2)}}
-  const chk=DATA.transport.numerical_checks.ion_sigma_1p5_deg;$('#ape-computed-evidence').textContent=`Deterministic direct characteristics through the exact periodic mask. At σ=1.5°, mean ion transmission is ${(100*DATA.transport.ion.statistics_over_opening['1.5'].mean).toFixed(1)}%; direct cosine-neutral transmission is ${(100*DATA.transport.neutral_direct.statistics_over_opening.mean).toFixed(1)}%. The 0.4→0.2 µm mean-grid change is ${(100*chk.absolute_dx_0p4_to_0p2_mean_change_q5).toFixed(1)} percentage points.`;
+  $('#ape-computed-evidence').textContent=`Deterministic direct characteristics through the exact periodic mask. At σ=1.5°, mean ion transmission is ${(100*DATA.transport.ion.statistics_over_opening['1.5'].mean).toFixed(1)}%; direct cosine-neutral transmission is ${(100*DATA.transport.neutral_direct.statistics_over_opening.mean).toFixed(1)}%.`;
   update();
 })();
 </script>
